@@ -105,3 +105,5 @@ dist
 **.idea/**
 .idea/
 config.json
+/build
+**build/**
