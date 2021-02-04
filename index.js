@@ -1,22 +1,56 @@
 // require the discord.js module
 const Discord = require('discord.js');
+const { Client, Intents } = require('discord.js');
+const fs = require('fs');
 const fetch = require("node-fetch");
-const {prefix, token} = require('./config.json');
+const {prefix, token, loveSenseToken, uid, toyId} = require('./config.json');
 // create a new Discord client
-const client = new Discord.Client();
+const client = new Client({ ws: { intents: Intents.ALL } });
 
-// when the client is ready, run this code
-// this event will only trigger one time after logging in
+client.commands = new Discord.Collection();
+
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+for (const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+}
 client.once('ready', () => {
+    client.user.setActivity('Anime', { type: 'WATCHING' });
     console.log('Ready!');
 });
-
+client.on("guildMemberUpdate", (oldUser, newUser) => {
+    let isNickChange = oldUser.nickname !== newUser.nickname;
+    if(isNickChange){
+        if(newUser.id === "697417252320051291"){
+            newUser.setNickname("Mistress Victorique");
+        }
+    }
+});
 client.on('message', async message => {
+    async function handleCommand(message) {
+        let args = message.content.slice(prefix.length).trim().split(/ +/);
+        let command = args.shift().toLowerCase();
+        switch (command) {
+            case "status":
+                await client.commands.get('status').execute(message, args);
+                break;
+        }
+    }
+
+    if (message.author.bot) {
+        return;
+    }
+    if (message.content.startsWith(prefix)) {
+        await handleCommand(message);
+        return;
+    }
     let hasPingedRole = message.mentions.roles.has("765298257915936798");
-    let didBotSend = message.author.bot;
-    if (hasPingedRole && !didBotSend) {
+    if (hasPingedRole) {
         console.log(`user: ${message.author.username} pinged your role`);
-        await fetch("https://192-168-50-58.lovense.club:34568/AVibrate?v=20&t=e75537563257&sec=1", {
+        let command = "AVibrate";
+        let v = 20;
+        let sec = 1;
+        await fetch(`https://api.lovense.com/api/lan/command?token=${loveSenseToken}&uid=${uid}&command=${command}&v=${v}&t=${toyId}&sec=${sec}`, {
             method: 'post'
         });
     }
