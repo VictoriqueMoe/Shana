@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "no-var-keyword": true,
+    "typedef": [true,
+      "call-signature",
+      "parameter",
+      "member-variable-declaration",
+      "property-declaration"],
+    "no-default-export": true,
+    "semicolon": [true, "always"]
+  }
+}
