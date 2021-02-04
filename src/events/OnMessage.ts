@@ -8,7 +8,7 @@ import {PremiumChannelOnlyCommand} from "../guards/PremiumChannelOnlyCommand";
 export abstract class OnMessage {
     @On("message")
     @Guard(NotBot, PremiumChannelOnlyCommand)
-    public onMessage(
+    private onMessage(
         [message]: ArgsOf<"message">,
         client: Client
     ): void {

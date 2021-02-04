@@ -1,7 +1,7 @@
 import {Role} from "discord.js";
 import {Main} from "../Main";
+import {GuildUtils} from "../utils/GuildUtils";
 
-const {token} = require('../../config.json');
 export module Roles {
     export enum RolesEnum {
         "ADVISOR" = "767409384723709972",
@@ -15,7 +15,7 @@ export module Roles {
 
     export function getRole(role: RolesEnum): Promise<Role> {
         let client = Main.client;
-        let guild = client.guilds.cache.get(token);
+        let guild = client.guilds.cache.get(GuildUtils.getGuildID());
         let roles = guild.roles;
         return roles.fetch(role);
     }

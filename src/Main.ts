@@ -8,7 +8,7 @@ export class Main {
         return this._client;
     }
 
-    static start(): void {
+    public static start(): void {
         this._client = new Client();
 
         this._client.login(

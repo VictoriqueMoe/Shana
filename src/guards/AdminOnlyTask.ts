@@ -1,0 +1,13 @@
+import {GuardFunction} from "@typeit/discord";
+import {GuildUtils} from "../utils/GuildUtils";
+
+//TODO: get someone who is NOT an admin to test this guard
+export const AdminOnlyTask: GuardFunction<"message"> = async (
+    [message],
+    client,
+    next
+) => {
+    if(GuildUtils.isMemberAdmin(message.member)){
+        await next();
+    }
+};

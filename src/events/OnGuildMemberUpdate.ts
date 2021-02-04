@@ -2,7 +2,7 @@ import {ArgsOf, Client, On} from "@typeit/discord";
 
 export abstract class OnGuildMemberUpdate {
     @On("guildMemberUpdate")
-    public onMemberUpdate(
+    private onMemberUpdate(
         [oldUser, newUser]: ArgsOf<"guildMemberUpdate">,
         client: Client
     ): void {
