@@ -13,8 +13,8 @@ export class Main {
 
         this._client.login(
             token,
-            `${__dirname}/*.ts`,
-            `${__dirname}/*.js`,
+            `${__dirname}/discord/*.ts`,
+            `${__dirname}/discord/*.js`,
         );
     }
 }

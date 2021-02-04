@@ -8,10 +8,19 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es2020", "esnext.asynciterable"],
+    "lib": [
+      "es2020",
+      "esnext.asynciterable"
+    ],
     "moduleResolution": "node",
     "outDir": "./build"
   },
-  "exclude": ["node_modules"],
-  "indent": [true, "spaces", 2]
+  "exclude": [
+    "node_modules"
+  ],
+  "indent": [
+    true,
+    "spaces",
+    2
+  ]
 }
