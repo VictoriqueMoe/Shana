@@ -25,7 +25,7 @@ export abstract class SlutBot {
     onMessage(
         [message]: ArgsOf<"message">,
         client: Client
-    ) {
+    ):void {
         let hasPingedRole = message.mentions.roles.has("765298257915936798"); // whore role
         if (hasPingedRole) {
             console.log(`user: ${message.author.username} pinged your role`);
@@ -42,7 +42,7 @@ export abstract class SlutBot {
     onMemberUpdate(
         [oldUser, newUser]: ArgsOf<"guildMemberUpdate">,
         client: Client
-    ){
+    ):void {
         let isNickChange = oldUser.nickname !== newUser.nickname;
         if(isNickChange){
             if(newUser.id === "697417252320051291"){
@@ -52,7 +52,7 @@ export abstract class SlutBot {
     }
 
     @CommandNotFound()
-    notFoundA(command: CommandMessage) {
+    notFoundA(command: CommandMessage):void {
         command.reply("Command not found");
     }
 
