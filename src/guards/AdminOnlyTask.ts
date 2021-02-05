@@ -1,5 +1,5 @@
 import {GuardFunction} from "@typeit/discord";
-import {GuildUtils} from "../utils/GuildUtils";
+import {GuildUtils} from "../utils/Utils";
 
 //TODO: get someone who is NOT an admin to test this guard
 export const AdminOnlyTask: GuardFunction<"message"> = async (

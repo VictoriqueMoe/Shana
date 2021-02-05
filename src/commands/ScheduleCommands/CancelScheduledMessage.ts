@@ -1,6 +1,6 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
-import {StringUtils} from "../../utils/StringUtils";
-import {Scheduler} from "../../model/scheduler";
+import {StringUtils} from "../../utils/Utils";
+import {Scheduler} from "../../model/Scheduler";
 import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 
 export abstract class CancelScheduledMessage {
@@ -8,8 +8,11 @@ export abstract class CancelScheduledMessage {
     @Guard(AdminOnlyTask)
     @Command("cancelScheduledMessage")
     private cancelScheduledMessage(command: CommandMessage): void {
-        let [name] = StringUtils.splitCommandLine(command.content);
-        let didCancel = Scheduler.getInstance().cancelJob(name);
-        command.reply(didCancel ? `Job with name "${name}" was cancelled` : `Job with name "${name}" does not exist`);
+        let names = StringUtils.splitCommandLine(command.content);
+        for(let name of names){
+            Scheduler.getInstance().cancelJob(name);
+        }
+
+        command.reply( `Job(s) cancelled`);
     }
 }

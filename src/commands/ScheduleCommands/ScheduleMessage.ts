@@ -1,11 +1,10 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
-import {StringUtils} from "../../utils/StringUtils";
-import {Scheduler} from "../../model/scheduler";
+import {ChronException, ChronUtils, DiscordUtils, GuildUtils, StringUtils} from "../../utils/Utils";
+import {Scheduler} from "../../model/Scheduler";
 import {Main} from "../../Main";
-import {GuildUtils} from "../../utils/GuildUtils";
 import {TextChannel} from "discord.js";
-import {ChronException} from "../../utils/ChronException";
 import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
+import {MessageScheduler} from "../../model/MessageScheduler";
 
 export abstract class ScheduleMessage {
 
@@ -14,17 +13,22 @@ export abstract class ScheduleMessage {
     //TODO: add help description ~help
     private scheduleMessage(command: CommandMessage): void {
         let argumentArray = StringUtils.splitCommandLine(command.content);
-        if(argumentArray.length !== 4){
+        if (argumentArray.length !== 4) {
             command.reply("Arguments invalid, please make sure you supply: Name, Message, Chron and channelID each in quotes");
             return;
         }
-        //TODO: change channelID to more human friendly like channel name or something
-        let [name, message, chron, channelID] = StringUtils.splitCommandLine(command.content);
+        let [name, message, chron, channelName] = StringUtils.splitCommandLine(command.content);
+        let channel = DiscordUtils.findChannelById(channelName);
+        if (channel == null) {
+            command.reply("Invalid channel name");
+            return;
+        }
+        if (!(channel instanceof TextChannel)) {
+            command.reply("This command only works on test channels");
+            return;
+        }
         try {
-            Scheduler.getInstance().register(name, chron, () => {
-                let memeChannel = Main.client.guilds.cache.get(GuildUtils.getGuildID()).channels.cache.get(channelID) as TextChannel;
-                memeChannel.send(message);
-            });
+            MessageScheduler.getInstance().register(name, chron, () => (channel as TextChannel).send(message), channel);
         } catch (e) {
             if (e instanceof ChronException) {
                 command.reply("Chron format is invalid");
@@ -33,6 +37,6 @@ export abstract class ScheduleMessage {
             throw e;
         }
 
-        command.reply(`job ${name} has been scheduled to post according to the chron ${chron} \n any jobs with this name have been replaced`);
+        command.reply(`job "${name}" has been scheduled to post ${ChronUtils.chronToString(chron)} on channel "<#${channel.id}>" \n any jobs with this name have been replaced`);
     }
 }

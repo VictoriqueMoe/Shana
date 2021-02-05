@@ -1,6 +1,6 @@
 import {Role} from "discord.js";
 import {Main} from "../Main";
-import {GuildUtils} from "../utils/GuildUtils";
+import {GuildUtils} from "../utils/Utils";
 
 export module Roles {
     export enum RolesEnum {

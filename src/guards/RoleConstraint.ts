@@ -1,5 +1,5 @@
 import {Roles} from "../enums/Roles";
-import {GuildUtils} from "../utils/GuildUtils";
+import {GuildUtils} from "../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
 export const roleConstraints = (...roles: RolesEnum[]) => async ([message], client, next) => {
