@@ -18,7 +18,7 @@ export abstract class ScheduleMessage {
             return;
         }
         let [name, message, chron, channelName] = StringUtils.splitCommandLine(command.content);
-        let channel = DiscordUtils.findChannelById(channelName);
+        let channel = DiscordUtils.findChannelByName(channelName);
         if (channel == null) {
             command.reply("Invalid channel name");
             return;

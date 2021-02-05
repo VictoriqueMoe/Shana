@@ -53,7 +53,7 @@ export module ChronUtils {
 }
 
 export module DiscordUtils {
-    export function findChannelById(channelName: string): GuildChannel {
+    export function findChannelByName(channelName: string): GuildChannel {
         let channels = Main.client.guilds.cache.get(GuildUtils.getGuildID()).channels;
         for (let [, channel] of channels.cache) {
             if (channel.name === channelName) {

@@ -52,6 +52,7 @@ export class Scheduler {
         if (j == null) {
             return false;
         }
+        console.log(`job ${name} has been cancelled`);
         let jobObj = j.job;
         let b = jobObj.cancel();
         ObjectUtil.removeObjectFromArray(j, this._jobs);
