@@ -5,8 +5,8 @@ import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 
 export abstract class CancelScheduledMessage {
 
-    @Guard(AdminOnlyTask)
     @Command("cancelScheduledMessage")
+    @Guard(AdminOnlyTask)
     private cancelScheduledMessage(command: CommandMessage): void {
         let names = StringUtils.splitCommandLine(command.content);
         for(let name of names){

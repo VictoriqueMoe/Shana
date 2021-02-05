@@ -3,8 +3,9 @@ import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {Scheduler} from "../../model/Scheduler";
 
 export abstract class CancelAllScheduledMessages{
-    @Guard(AdminOnlyTask)
+
     @Command("cancelAllScheduledMessages")
+    @Guard(AdminOnlyTask)
     private cancelAllScheduledMessages(command: CommandMessage): void {
         Scheduler.getInstance().cancelAllJobs();
         command.reply("All scheduled posts have been cancelled");

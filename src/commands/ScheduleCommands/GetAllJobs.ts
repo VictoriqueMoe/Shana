@@ -3,8 +3,9 @@ import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {MessageScheduler} from "../../model/MessageScheduler";
 
 export abstract class GetAllJobs {
-    @Guard(AdminOnlyTask)
+
     @Command("getAllScheduledMessages")
+    @Guard(AdminOnlyTask)
     private getAllScheduledMessages(command: CommandMessage): void {
         let allJobs = MessageScheduler.getInstance().jobs;
         if (allJobs.length === 0) {

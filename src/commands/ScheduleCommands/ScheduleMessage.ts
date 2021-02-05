@@ -1,15 +1,13 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
-import {ChronException, ChronUtils, DiscordUtils, GuildUtils, StringUtils} from "../../utils/Utils";
-import {Scheduler} from "../../model/Scheduler";
-import {Main} from "../../Main";
+import {ChronException, ChronUtils, DiscordUtils, StringUtils} from "../../utils/Utils";
 import {TextChannel} from "discord.js";
 import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {MessageScheduler} from "../../model/MessageScheduler";
 
 export abstract class ScheduleMessage {
 
-    @Guard(AdminOnlyTask)
     @Command("scheduleMessage")
+    @Guard(AdminOnlyTask)
     //TODO: add help description ~help
     private scheduleMessage(command: CommandMessage): void {
         let argumentArray = StringUtils.splitCommandLine(command.content);
