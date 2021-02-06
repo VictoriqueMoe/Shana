@@ -34,7 +34,9 @@ export module GuildUtils {
 export module StringUtils {
     export function splitCommandLine(commandLine): string[] {
         let spaceMarker = '<SP>';
-        while (commandLine.indexOf(spaceMarker) > -1) spaceMarker += '@';
+        while (commandLine.indexOf(spaceMarker) > -1) {
+            spaceMarker += '@';
+        }
         let noSpacesInQuotes = commandLine.replace(/"([^"]*)"?/g, (fullMatch, capture) => capture.replace(/ /g, spaceMarker));
         let mangledParamArray = noSpacesInQuotes.split(/ +/);
         let paramArray = mangledParamArray.map((mangledParam) => mangledParam.replace(RegExp(spaceMarker, 'g'), ' '));
@@ -45,7 +47,10 @@ export module StringUtils {
 
 export module ChronUtils {
     export function chronToString(chron: string): string {
-        if (!isValidCron(chron, {seconds: true})) {
+        if (!isValidCron(chron, {
+            seconds: true,
+            allowBlankDay: true
+        })) {
             throw new ChronException("Chron is not valid");
         }
         return cronstrue.toString(chron);
@@ -62,6 +67,7 @@ export module DiscordUtils {
         }
         return null;
     }
+
 }
 
 export class ObjectUtil {

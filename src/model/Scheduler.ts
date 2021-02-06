@@ -26,7 +26,10 @@ export class Scheduler {
         if (this._jobs.find(j => j.name === name) != null) {
             this.cancelJob(name);
         }
-        if (!isValidCron(chron, {seconds: true})) {
+        if (!isValidCron(chron, {
+            seconds: true,
+            allowBlankDay: true
+        })) {
             throw new ChronException("Chron is not valid");
         }
         console.log(`Register function ${name}`);

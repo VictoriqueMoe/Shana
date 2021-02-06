@@ -6,12 +6,10 @@ import fetch from "node-fetch";
 import {PremiumChannelOnlyCommand} from "../guards/PremiumChannelOnlyCommand";
 
 export abstract class OnMessage {
+
     @On("message")
     @Guard(NotBot, PremiumChannelOnlyCommand)
-    private onMessage(
-        [message]: ArgsOf<"message">,
-        client: Client
-    ): void {
+    private onMessage([message]: ArgsOf<"message">, client: Client): void {
         let hasPingedRole = message.mentions.roles.has("765298257915936798"); // whore role
         if (hasPingedRole) {
             console.log(`user: ${message.author.username} pinged your role`);

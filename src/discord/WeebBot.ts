@@ -7,6 +7,7 @@ const {prefix} = require('../../config.json');
     import: [
         Path.join(__dirname, "..", "commands", "*.ts"),
         Path.join(__dirname, "..",  "commands", "ScheduleCommands" ,"*.ts"),
+        Path.join(__dirname, "..",  "commands", "Tags" ,"*.ts"),
         Path.join(__dirname, "..",  "events", "*.ts")
     ]
 })
@@ -14,7 +15,6 @@ export abstract class WeebBot {
 
     @CommandNotFound()
     private notFoundA(command: CommandMessage):void {
-        command.reply("Command not found");
     }
 
 }
