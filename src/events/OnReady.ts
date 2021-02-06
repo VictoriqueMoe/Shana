@@ -14,7 +14,7 @@ export abstract class OnReady {
             dialect: 'sqlite',
             logging: false,
             storage: 'database.sqlite',
-            models: [__dirname + '/../dao/**/*.model.ts'],
+            models: [__dirname + '/../model/DB/**/*.model.ts'],
             modelMatch: (filename, member) => {
                 return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
             }

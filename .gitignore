@@ -107,4 +107,4 @@ dist
 config.json
 /build
 **build/**
-database.sqlite
+*.sqlite

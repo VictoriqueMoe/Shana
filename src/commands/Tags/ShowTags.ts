@@ -1,6 +1,6 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {roleConstraints} from "../../guards/RoleConstraint";
-import {TagModel} from "../../dao/Tag.model";
+import {TagModel} from "../../model/DB/Tag.model";
 import {Roles} from "../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
 import {Message} from "discord.js";

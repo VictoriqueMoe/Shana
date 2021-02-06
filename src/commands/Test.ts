@@ -1,7 +1,7 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {Roles} from "../enums/Roles";
 import {AdminOnlyTask} from "../guards/AdminOnlyTask";
-import {TagModel} from "../dao/Tag.model";
+import {TagModel} from "../model/DB/Tag.model";
 
 export class Test {
 

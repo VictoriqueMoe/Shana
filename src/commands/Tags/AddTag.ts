@@ -3,7 +3,7 @@ import {ObjectUtil, StringUtils} from "../../utils/Utils";
 import {roleConstraints} from "../../guards/RoleConstraint";
 import {Roles} from "../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
-import {TagModel} from "../../dao/Tag.model";
+import {TagModel} from "../../model/DB/Tag.model";
 import {ValidationError, UniqueConstraintError} from 'sequelize';
 
 export abstract class AddTag {
