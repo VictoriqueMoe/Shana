@@ -1,18 +1,10 @@
 import {CommandMessage, CommandNotFound, Discord} from "@typeit/discord";
-import * as Path from "path";
-
-const {prefix, dropboxToken} = require('../../config.json');
 import {Dropbox} from 'dropbox';
 
+const {prefix, dropboxToken} = require('../../config.json');
+
 @Discord(prefix, {
-    //TODO: make dynamic
-    import: [
-        Path.join(__dirname, "..", "commands", "*.ts"),
-        Path.join(__dirname, "..", "commands", "ScheduleCommands", "*.ts"),
-        Path.join(__dirname, "..", "commands", "Tags", "*.ts"),
-        Path.join(__dirname, "..", "commands", "vicImageCommands", "*.ts"),
-        Path.join(__dirname, "..", "events", "*.ts")
-    ]
+    import: `${__dirname}/../{commands,events}/**/*.ts`
 })
 export abstract class WeebBot {
 

@@ -1,4 +1,4 @@
-import {GuildChannel, GuildChannelManager, GuildMember, Permissions} from "discord.js";
+import {GuildChannel, GuildMember, Permissions} from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {Main} from "../Main";
@@ -67,7 +67,6 @@ export module DiscordUtils {
         }
         return null;
     }
-
 }
 
 export class ObjectUtil {
