@@ -10,6 +10,7 @@ import {Dropbox} from 'dropbox';
         Path.join(__dirname, "..", "commands", "*.ts"),
         Path.join(__dirname, "..", "commands", "ScheduleCommands", "*.ts"),
         Path.join(__dirname, "..", "commands", "Tags", "*.ts"),
+        Path.join(__dirname, "..", "commands", "vicImageCommands", "*.ts"),
         Path.join(__dirname, "..", "events", "*.ts")
     ]
 })

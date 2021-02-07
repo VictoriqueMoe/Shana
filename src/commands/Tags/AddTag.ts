@@ -34,7 +34,7 @@ export abstract class AddTag {
         }).catch(err => {
             // catch all other errors
         }).then(() => {
-            ObjectUtil.validString(errorStr) ? command.reply(`An error occurred: ${errorStr}`) : command.reply(`Tag ${tag.name} added.`);
+            ObjectUtil.validString(errorStr) ? command.reply(`An error occurred: ${errorStr}`) : command.reply(`Tag "${tag.name}" added.`);
         });
     }
 

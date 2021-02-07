@@ -13,7 +13,7 @@ export abstract class ShowTags {
     private async showTags(command: CommandMessage): Promise<Message> {
         let allTags = await TagModel.findAll({attributes: ['_name']});
         let replyString = allTags.map(t => t.name).join('\n ') || 'No tags set.';
-        return command.channel.send(`List of tags: ${replyString}`);
+        return command.channel.send(`List of tags: \n ${replyString}`);
     }
 
     public static getDescription(): string {
