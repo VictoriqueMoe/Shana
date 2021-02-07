@@ -7,5 +7,6 @@ export const NotBot: GuardFunction<"message"> = async (
 ) => {
     if (!message.author.bot) {
         await next();
+        return;
     }
 };

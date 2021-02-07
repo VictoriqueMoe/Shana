@@ -1,6 +1,8 @@
-import {On} from "@typeit/discord";
+import {Client, On} from "@typeit/discord";
 import {Main} from "../Main";
 import {Sequelize} from "sequelize-typescript";
+import {WeebBot} from "../discord/WeebBot";
+import {VicDropbox} from "../model/dropbox/VicDropbox";
 
 
 export abstract class OnReady {
@@ -21,6 +23,7 @@ export abstract class OnReady {
         });
         await Main.client.user.setActivity('Anime', {type: 'WATCHING'});
         await OnReady._dao.sync({force: false});
+        await VicDropbox.instance.index();
         console.log("Bot logged in.");
     }
 

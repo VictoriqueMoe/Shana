@@ -3,7 +3,8 @@ import {GuildUtils} from "../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
 export const roleConstraints = (...roles: RolesEnum[]) => async ([message], client, next) => {
-    let memberRoles = message.member.roles.cache;
+    let member = await message.member.fetch();
+    let memberRoles = member.roles.cache;
     if(GuildUtils.isMemberAdmin(message.member)){
         await next();
         return;
@@ -15,4 +16,5 @@ export const roleConstraints = (...roles: RolesEnum[]) => async ([message], clie
             return;
         }
     }
+    message.reply("you do not have permissions to use this command");
 };

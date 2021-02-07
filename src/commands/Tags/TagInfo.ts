@@ -16,7 +16,6 @@ export abstract class TagInfo {
         }
         let [_name] = argumentArray;
         let tag = await TagModel.findOne({where: {_name: _name}});
-        let b = new Date();
         if (tag) {
             command.channel.send(`${_name} was created by ${tag.username} at ${tag.createdAt} and has been used ${tag.usage_count} times.`);
             return;

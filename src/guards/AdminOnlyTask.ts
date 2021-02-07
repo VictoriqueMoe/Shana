@@ -9,5 +9,7 @@ export const AdminOnlyTask: GuardFunction<"message"> = async (
 ) => {
     if(GuildUtils.isMemberAdmin(message.member)){
         await next();
+        return;
     }
+    message.reply("you do not have permissions to use this command");
 };
