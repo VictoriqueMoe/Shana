@@ -34,9 +34,12 @@ export abstract class ViewAllBlocks {
             }
             replyStr += `\n "${userObject.username}" has been muted by "${creator.username}" for the reason "${block.reason}"`;
             if (timeout > -1) {
-                replyStr += `, for "${ObjectUtil.secondsToHuman(timeout)}"`;
+                let now = Date.now();
+                let dateCreated = (block.createdAt as Date).getTime();
+                let timeLeft = timeout - (now - dateCreated);
+                replyStr += `, for ${ObjectUtil.secondsToHuman(Math.round(timeout / 1000))} and has ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))} left`;
             }
-            if(block.violationRules > 0){
+            if (block.violationRules > 0) {
                 replyStr += `, This user has also attempted to post ${block.violationRules} times while blocked`;
             }
         }

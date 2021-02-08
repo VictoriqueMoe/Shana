@@ -17,5 +17,9 @@ export class MuteModel extends Model {
     @Column(DataType.INTEGER)
     public violationRules: number;
 
+    @AllowNull(true)
+    @Column(DataType.INTEGER)
+    public timeout: number;
+
 
 }

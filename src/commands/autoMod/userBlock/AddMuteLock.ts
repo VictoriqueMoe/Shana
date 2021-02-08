@@ -6,7 +6,7 @@ import {NotBot} from "../../../guards/NotABot";
 import {roleConstraints} from "../../../guards/RoleConstraint";
 import {Roles} from "../../../enums/Roles";
 import {BlockGuard} from "../../../guards/BlockGuard";
-import {TextChannel, User} from "discord.js";
+import {Guild, TextChannel, User} from "discord.js";
 import RolesEnum = Roles.RolesEnum;
 import Timeout = NodeJS.Timeout;
 
@@ -59,37 +59,45 @@ export abstract class AddMuteLock extends BaseDAO<MuteModel> {
             reason,
             creatorID
         };
-
+        let hasTimeout = ObjectUtil.validString(timeout) && !Number.isNaN(Number.parseInt(timeout));
+        if (hasTimeout) {
+            obj["timeout"] = (Number.parseInt(timeout) * 1000);
+        }
         let model = new MuteModel(obj);
         let savedModel = await super.commitToDatabase(model, command);
         let userObject = await command.guild.members.fetch(savedModel.userId);
-        let replyMessage = `User ${userObject.user.username} has been muted from this guild with reason ${savedModel.reason}`;
-        if (ObjectUtil.validString(timeout) && !Number.isNaN(Number.parseInt(timeout))) {
+        let replyMessage = `User "${userObject.user.username}" has been muted from this server with reason "${savedModel.reason}"`;
+        if (hasTimeout) {
             let timeOutSec = Number.parseInt(timeout);
             let millis = timeOutSec * 1000;
-            let timeOut: Timeout = setTimeout(async (member: User) => {
-                await MuteModel.destroy({
-                    where: {
-                        userId: blockUserObject.id
-                    }
-                });
-                let channel = await command.guild.channels.resolve("327484813336641536") as TextChannel; // logs channel
-                //let channel = await command.guild.channels.resolve("793994947241312296") as TextChannel; // test channel
-                channel.send(`User ${member.username} has been unblocked after timeout`);
-                AddMuteLock._timeOutMap.delete(member);
-            }, millis, blockUserObject);
-            AddMuteLock._timeOutMap.set(blockUserObject, new Map([[timeOutSec, timeOut]]));
+            AddMuteLock.createTimeout(blockUserObject, millis, command.guild);
             replyMessage += ` for ${ObjectUtil.secondsToHuman(timeOutSec)}`;
         }
         command.reply(replyMessage);
         return savedModel;
     }
 
-    private static getDescription() {
-        return `\n Block a user from sending any messages with reason \n usage: ~mute <"username"> <"reason"> [timeout in seconds] \n example: ~mute "@SomeUser" "annoying" 20 \n make sure that the @ is blue before sending`;
-    }
-
     public static get timeOutMap(): Map<User, Map<number, Timeout>> {
         return AddMuteLock._timeOutMap;
+    }
+
+
+    public static createTimeout(user: User, millis: number, guild: Guild): void {
+        let timeOut: Timeout = setTimeout(async (member: User) => {
+            await MuteModel.destroy({
+                where: {
+                    userId: user.id
+                }
+            });
+            let channel = await guild.channels.resolve("327484813336641536") as TextChannel; // logs channel
+            //let channel = await guild.channels.resolve("793994947241312296") as TextChannel; // test channel
+            channel.send(`User ${member.username} has been unblocked after timeout`);
+            AddMuteLock._timeOutMap.delete(member);
+        }, millis, user);
+        AddMuteLock._timeOutMap.set(user, new Map([[millis, timeOut]]));
+    }
+
+    private static getDescription() {
+        return `\n Block a user from sending any messages with reason \n usage: ~mute <"username"> <"reason"> [timeout in seconds] \n example: ~mute "@SomeUser" "annoying" 20 \n make sure that the @ is blue before sending`;
     }
 }
