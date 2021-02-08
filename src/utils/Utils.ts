@@ -85,7 +85,7 @@ export module DiscordUtils {
         userPreformingCommand = await userPreformingCommand.fetch(true);
         let userPreformingActionHigestRole = userPreformingCommand.roles.highest;
 
-        return userPreformingActionHigestRole.position >= userToBlockHighestRole.position;
+        return userPreformingActionHigestRole.position > userToBlockHighestRole.position;
     }
 
     export async function getUserBlocked(message: Message): Promise<MuteModel> {

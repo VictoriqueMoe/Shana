@@ -9,13 +9,13 @@ import RolesEnum = Roles.RolesEnum;
 import {ObjectUtil} from "../../../utils/Utils";
 
 export abstract class ViewAllBlocks {
-    @Command("viewAllBlocks")
+    @Command("viewAllMutes")
     @Description(ViewAllBlocks.getDescription())
     @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
-    private async viewAllBlocks(command: CommandMessage): Promise<MuteModel[]> {
+    private async viewAllMutes(command: CommandMessage): Promise<MuteModel[]> {
         let currentBlocks = await MuteModel.findAll();
         if (currentBlocks.length === 0) {
-            command.reply("No members are blocked");
+            command.reply("No members are muted");
             return;
         }
         let replyStr = `\n`;
@@ -32,12 +32,12 @@ export abstract class ViewAllBlocks {
                     break;
                 }
             }
-            replyStr += `\n ${userObject.username} has been blocked by ${creator.username} for the reason ${block.reason}`;
+            replyStr += `\n "${userObject.username}" has been muted by "${creator.username}" for the reason "${block.reason}"`;
             if (timeout > -1) {
-                replyStr += ` for ${ObjectUtil.secondsToHuman(timeout)}`;
+                replyStr += `, for "${ObjectUtil.secondsToHuman(timeout)}"`;
             }
             if(block.violationRules > 0){
-                replyStr += ` This user has also attempted to post ${block.violationRules} times while blocked`;
+                replyStr += `, This user has also attempted to post ${block.violationRules} times while blocked`;
             }
         }
         command.reply(replyStr);
@@ -45,6 +45,6 @@ export abstract class ViewAllBlocks {
     }
 
     private static getDescription() {
-        return "View all the currently active blocks";
+        return "View all the currently active mutes";
     }
 }

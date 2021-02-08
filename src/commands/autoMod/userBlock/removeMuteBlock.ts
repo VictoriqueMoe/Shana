@@ -11,10 +11,10 @@ import {User} from "discord.js";
 
 export abstract class RemoveMuteBlock {
 
-    @Command("removeMuteBlock")
+    @Command("unMute")
     @Description(RemoveMuteBlock.getDescription())
     @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
-    private async removeMuteBlock(command: CommandMessage): Promise<MuteModel> {
+    private async unMute(command: CommandMessage): Promise<MuteModel> {
         let argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 1) {
             command.reply("Invalid arguments, please supply username");
@@ -32,7 +32,7 @@ export abstract class RemoveMuteBlock {
             }
         });
         if (rowCount != 1) {
-            command.reply('That user is not currently blocked.');
+            command.reply('That user is not currently muted.');
             return;
         }
         let timeoutMap = AddMuteLock.timeOutMap;
@@ -49,10 +49,10 @@ export abstract class RemoveMuteBlock {
             AddMuteLock.timeOutMap.delete(userToDelete);
         }
 
-        command.reply("User has been unblocked");
+        command.reply("User has been un-Muted");
     }
 
     private static getDescription() {
-        return `Remove a blocked user from the database and allow them to post again \n usage: ~removeMuteBlock <"username"> \n example: ~removeMuteBlock "@SomeUser" \n make sure that the @ is blue before sending `;
+        return `Remove a blocked user from the database and allow them to post again \n usage: ~unMute <"username"> \n example: ~unMute "@SomeUser" \n make sure that the @ is blue before sending `;
     }
 }
