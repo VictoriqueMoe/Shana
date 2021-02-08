@@ -2,11 +2,12 @@ import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {DiscordUtils} from "../utils/Utils";
 import {TextChannel} from "discord.js";
 import {AdminOnlyTask} from "../guards/AdminOnlyTask";
+import {BlockGuard} from "../guards/BlockGuard";
 
 export abstract class ChannelTruncator{
 
     @Command("ChannelTruncator :channel")
-    @Guard(AdminOnlyTask)
+    @Guard(AdminOnlyTask, BlockGuard)
     private async channelTruncator(command: CommandMessage): Promise<void> {
        /* let channelNameToWipe = command.args.channel;
         let channel = DiscordUtils.findChannelByName(channelNameToWipe);

@@ -5,12 +5,13 @@ import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {WeebBot} from "../../discord/WeebBot";
 import RolesEnum = Roles.RolesEnum;
 import {NotBot} from "../../guards/NotABot";
+import {BlockGuard} from "../../guards/BlockGuard";
 
 export abstract class VicImage {
 
     @Command("vicImage")
     @Description(VicImage.getDescription())
-    @Guard(NotBot, roleConstraints(RolesEnum.ZOMBIES, RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE))
+    @Guard(NotBot, roleConstraints(RolesEnum.ZOMBIES, RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async vicImage(command: CommandMessage): Promise<void> {
         let findingMessage = await command.channel.send("Finding image...");
         let randomImageMetadata = VicDropbox.instance.randomImage;

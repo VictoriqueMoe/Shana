@@ -1,11 +1,12 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {MessageScheduler} from "../../model/MessageScheduler";
+import {BlockGuard} from "../../guards/BlockGuard";
 
 export abstract class GetAllJobs {
 
     @Command("getAllScheduledMessages")
-    @Guard(AdminOnlyTask)
+    @Guard(AdminOnlyTask, BlockGuard)
     private getAllScheduledMessages(command: CommandMessage): void {
         let allJobs = MessageScheduler.getInstance().jobs;
         if (allJobs.length === 0) {

@@ -3,11 +3,12 @@ import {ChronException, ChronUtils, DiscordUtils, StringUtils} from "../../utils
 import {TextChannel} from "discord.js";
 import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {MessageScheduler} from "../../model/MessageScheduler";
+import {BlockGuard} from "../../guards/BlockGuard";
 
 export abstract class ScheduleMessage {
 
     @Command("scheduleMessage")
-    @Guard(AdminOnlyTask)
+    @Guard(AdminOnlyTask, BlockGuard)
     //TODO: add help description ~help
     private scheduleMessage(command: CommandMessage): void {
         let argumentArray = StringUtils.splitCommandLine(command.content);

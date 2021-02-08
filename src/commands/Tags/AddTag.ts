@@ -5,12 +5,14 @@ import {Roles} from "../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
 import {TagModel} from "../../model/DB/Tag.model";
 import {ValidationError, UniqueConstraintError} from 'sequelize';
+import {BaseDAO} from "../../DAO/BaseDAO";
+import {BlockGuard} from "../../guards/BlockGuard";
 
-export abstract class AddTag {
+export abstract class AddTag extends BaseDAO<TagModel>{
 
     @Command("addTag")
-    @Guard(roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE))
-    private addTag(command: CommandMessage): Promise<void | TagModel> {
+    @Guard(roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    private addTag(command: CommandMessage): Promise<TagModel> {
         let argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 2) {
             command.reply("Invalid arguments, please supply tag; name, description");
@@ -23,18 +25,9 @@ export abstract class AddTag {
             _description,
             _username
         });
-        let errorStr = "";
-        return tag.save({validate: true}).catch((validationError: ValidationError) => {
-            let errors = validationError.errors;
-            //TODO parse constraint errors, resulting error is shitty
-            errorStr = errors.map(error => `${error.message}`).join("\n");
-        }).catch((uniqueConstraintError: UniqueConstraintError) => {
-            //TODO do this when i actually know what it means
-            console.dir(`ERROR: ${uniqueConstraintError}`);
-        }).catch(err => {
-            // catch all other errors
-        }).then(() => {
-            ObjectUtil.validString(errorStr) ? command.reply(`An error occurred: ${errorStr}`) : command.reply(`Tag "${tag.name}" added.`);
+        return super.commitToDatabase(tag, command).then(tag => {
+            command.reply(`Tag "${tag.name}" added.`);
+            return tag;
         });
     }
 

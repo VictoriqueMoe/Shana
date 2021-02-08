@@ -4,11 +4,12 @@ import {TagModel} from "../../model/DB/Tag.model";
 import {Roles} from "../../enums/Roles";
 import {ObjectUtil, StringUtils} from "../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
+import {BlockGuard} from "../../guards/BlockGuard";
 
 export abstract class Tag {
 
     @Command("tag")
-    @Guard(roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE))
+    @Guard(roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async tag(command: CommandMessage): Promise<TagModel> {
         let argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 1) {

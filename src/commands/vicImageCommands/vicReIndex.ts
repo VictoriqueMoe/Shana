@@ -2,11 +2,12 @@ import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
 import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
+import {BlockGuard} from "../../guards/BlockGuard";
 
 export abstract class VicReIndex{
     @Command("vicReIndex")
     @Description(VicReIndex.getDescription())
-    @Guard(NotBot, AdminOnlyTask)
+    @Guard(NotBot, AdminOnlyTask, BlockGuard)
     private async vicReIndex(command: CommandMessage): Promise<void> {
         await VicDropbox.instance.index();
         command.channel.send(`Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`);

@@ -4,11 +4,12 @@ import {TagModel} from "../../model/DB/Tag.model";
 import {Roles} from "../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
 import {StringUtils} from "../../utils/Utils";
+import {BlockGuard} from "../../guards/BlockGuard";
 
 export abstract class RemoveTag{
 
     @Command("removeTag")
-    @Guard(roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE))
+    @Guard(roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async removeTag(command: CommandMessage): Promise<TagModel> {
         let argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 1) {

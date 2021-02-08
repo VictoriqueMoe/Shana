@@ -4,10 +4,11 @@ import {TagModel} from "../../model/DB/Tag.model";
 import {Roles} from "../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
 import {StringUtils} from "../../utils/Utils";
+import {BlockGuard} from "../../guards/BlockGuard";
 
 export abstract class UpdateTag {
     @Command("updateTag")
-    @Guard(roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE))
+    @Guard(roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async updateTag(command: CommandMessage): Promise<TagModel | null> {
         let argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 2) {

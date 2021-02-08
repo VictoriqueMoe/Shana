@@ -4,12 +4,13 @@ import {NotBot} from "../guards/NotABot";
 const {loveSenseToken, uid, toyId} = require('../../config.json');
 import fetch from "node-fetch";
 import {PremiumChannelOnlyCommand} from "../guards/PremiumChannelOnlyCommand";
+import {BlockGuard} from "../guards/BlockGuard";
 
-export abstract class OnMessage {
+export abstract class ActivateVibrator {
 
     @On("message")
-    @Guard(NotBot, PremiumChannelOnlyCommand)
-    private onMessage([message]: ArgsOf<"message">, client: Client): void {
+    @Guard(NotBot, PremiumChannelOnlyCommand, BlockGuard)
+    private activateVibrator([message]: ArgsOf<"message">, client: Client): void {
         let hasPingedRole = message.mentions.roles.has("765298257915936798"); // whore role
         if (hasPingedRole) {
             console.log(`user: ${message.author.username} pinged your role`);

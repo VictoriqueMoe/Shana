@@ -1,7 +1,9 @@
-import {GuildChannel, GuildMember, Permissions} from "discord.js";
+import {GuildChannel, GuildMember, Message, Permissions} from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {Main} from "../Main";
+import {CommandMessage} from "@typeit/discord";
+import {MuteModel} from "../model/DB/autoMod/Mute.model";
 
 const {GuildID} = require('../../config.json');
 
@@ -67,6 +69,33 @@ export module DiscordUtils {
         }
         return null;
     }
+
+    /**
+     * Prevent CP from blocking OE, etc...
+     * @param command
+     * @private
+     */
+    export async function canUserPreformBlock(command: CommandMessage): Promise<boolean> {
+        let userToBlockCollection = command.mentions.members;
+        let userToBlock = userToBlockCollection.values().next().value as GuildMember;
+        userToBlock = await userToBlock.fetch(true);
+        let userToBlockHighestRole = userToBlock.roles.highest;
+
+        let userPreformingCommand = await command.member.fetch(true);
+        userPreformingCommand = await userPreformingCommand.fetch(true);
+        let userPreformingActionHigestRole = userPreformingCommand.roles.highest;
+
+        return userPreformingActionHigestRole.position >= userToBlockHighestRole.position;
+    }
+
+    export async function getUserBlocked(message: Message): Promise<MuteModel> {
+        let userWhoPosted = message.member.id;
+        return await MuteModel.findOne({
+            where: {
+                userId: userWhoPosted
+            }
+        });
+    }
 }
 
 export class ObjectUtil {
@@ -76,6 +105,26 @@ export class ObjectUtil {
         }
 
         return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    }
+
+    public static secondsToHuman(seconds: number): string {
+        let levels = [
+            [Math.floor(seconds / 31536000), 'years'],
+            [Math.floor((seconds % 31536000) / 86400), 'days'],
+            [Math.floor(((seconds % 31536000) % 86400) / 3600), 'hours'],
+            [Math.floor((((seconds % 31536000) % 86400) % 3600) / 60), 'minutes'],
+            [(((seconds % 31536000) % 86400) % 3600) % 60, 'seconds'],
+        ];
+        let returntext = '';
+
+        for (let i = 0, max = levels.length; i < max; i++) {
+            if (levels[i][0] === 0){
+                continue;
+            }
+            // @ts-ignore
+            returntext += ' ' + levels[i][0] + ' ' + (levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]);
+        }
+        return returntext.trim();
     }
 
     public static validString(...strings: Array<unknown>): boolean {
