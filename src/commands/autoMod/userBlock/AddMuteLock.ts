@@ -64,7 +64,7 @@ export abstract class AddMuteLock extends BaseDAO<MuteModel> {
             obj["timeout"] = (Number.parseInt(timeout) * 1000);
         }
         let model = new MuteModel(obj);
-        let savedModel = await super.commitToDatabase(model, command);
+        let savedModel = await super.commitToDatabase(model);
         let userObject = await command.guild.members.fetch(savedModel.userId);
         let replyMessage = `User "${userObject.user.username}" has been muted from this server with reason "${savedModel.reason}"`;
         if (hasTimeout) {

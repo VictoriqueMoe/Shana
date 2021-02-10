@@ -7,6 +7,7 @@ import {TagModel} from "../../model/DB/Tag.model";
 import {ValidationError, UniqueConstraintError} from 'sequelize';
 import {BaseDAO} from "../../DAO/BaseDAO";
 import {BlockGuard} from "../../guards/BlockGuard";
+import {TextChannel} from "discord.js";
 
 export abstract class AddTag extends BaseDAO<TagModel>{
 
@@ -25,7 +26,7 @@ export abstract class AddTag extends BaseDAO<TagModel>{
             _description,
             _username
         });
-        return super.commitToDatabase(tag, command).then(tag => {
+        return super.commitToDatabase(tag).then(tag => {
             command.reply(`Tag "${tag.name}" added.`);
             return tag;
         });

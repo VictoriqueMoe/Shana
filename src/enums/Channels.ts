@@ -1,0 +1,4 @@
+export enum Channels{
+    LOG_CHANNEL = "327484813336641536",
+    TEST_CHANNEL = "793994947241312296"
+}

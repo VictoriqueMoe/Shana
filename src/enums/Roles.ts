@@ -10,7 +10,9 @@ export module Roles {
         "CIVIL_PROTECTION" = "264431066767425546",
         "OUR_BENEFACTORS" = "629353729984036869",
         "ZOMBIES" = "343035318032662549",
-        "HEADCRABS" = "264431811570958337"
+        "HEADCRABS" = "264431811570958337",
+        "SPECIAL" = "264436175501000704",
+        "EVERYONE" = "264429768219426819"
     }
 
     export function getRole(role: RolesEnum): Promise<Role> {
