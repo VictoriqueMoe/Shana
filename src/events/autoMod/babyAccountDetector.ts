@@ -1,7 +1,7 @@
 import {ArgsOf, Client, On} from "@typeit/discord";
 import {Channels} from "../../enums/Channels";
 import {TextChannel} from "discord.js";
-import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
+import {ObjectUtil} from "../../utils/Utils";
 
 export abstract class BabyAccountDetector {
     @On("guildMemberAdd")

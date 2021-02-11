@@ -1,4 +1,5 @@
-import { Client } from "@typeit/discord";
+import {Client} from "@typeit/discord";
+
 const {token} = require('../config.json');
 
 export class Main {

@@ -1,4 +1,4 @@
-import {Table, Column, Model, Unique, DataType, Default, AllowNull} from 'sequelize-typescript';
+import {AllowNull, Column, DataType, Default, Model, Table} from 'sequelize-typescript';
 
 @Table
 export class TagModel extends Model{

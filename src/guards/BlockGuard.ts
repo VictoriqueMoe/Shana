@@ -1,5 +1,5 @@
 import {GuardFunction} from "@typeit/discord";
-import {DiscordUtils, GuildUtils} from "../utils/Utils";
+import {DiscordUtils} from "../utils/Utils";
 
 export const BlockGuard: GuardFunction<"message"> = async (
     [message],

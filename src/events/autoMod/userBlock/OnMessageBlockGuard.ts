@@ -4,8 +4,8 @@ import {Message} from "discord.js";
 import {DiscordUtils} from "../../../utils/Utils";
 import {MuteAllModel} from "../../../model/DB/autoMod/MuteAll.model";
 import {Roles} from "../../../enums/Roles";
-import RolesEnum = Roles.RolesEnum;
 import {MuteModel} from "../../../model/DB/autoMod/Mute.model";
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class OnMessageBlockGuard {
 

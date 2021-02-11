@@ -1,7 +1,6 @@
-import {Client, On} from "@typeit/discord";
+import {On} from "@typeit/discord";
 import {Main} from "../Main";
 import {Sequelize} from "sequelize-typescript";
-import {WeebBot} from "../discord/WeebBot";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {MuteModel} from "../model/DB/autoMod/Mute.model";
 import {Op} from "sequelize";

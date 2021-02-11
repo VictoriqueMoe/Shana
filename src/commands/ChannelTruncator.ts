@@ -1,6 +1,4 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
-import {DiscordUtils} from "../utils/Utils";
-import {TextChannel} from "discord.js";
 import {AdminOnlyTask} from "../guards/AdminOnlyTask";
 import {BlockGuard} from "../guards/BlockGuard";
 

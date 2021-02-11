@@ -3,9 +3,9 @@ import {Roles} from "../../enums/Roles";
 import {roleConstraints} from "../../guards/RoleConstraint";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {WeebBot} from "../../discord/WeebBot";
-import RolesEnum = Roles.RolesEnum;
 import {NotBot} from "../../guards/NotABot";
 import {BlockGuard} from "../../guards/BlockGuard";
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class VicImage {
 

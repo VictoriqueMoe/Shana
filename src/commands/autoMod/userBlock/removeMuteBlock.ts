@@ -3,11 +3,11 @@ import {NotBot} from "../../../guards/NotABot";
 import {roleConstraints} from "../../../guards/RoleConstraint";
 import {MuteModel} from "../../../model/DB/autoMod/Mute.model";
 import {Roles} from "../../../enums/Roles";
-import RolesEnum = Roles.RolesEnum;
 import {StringUtils} from "../../../utils/Utils";
 import {BlockGuard} from "../../../guards/BlockGuard";
 import {AddMuteLock} from "./AddMuteLock";
 import {User} from "discord.js";
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class RemoveMuteBlock {
 

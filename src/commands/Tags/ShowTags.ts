@@ -1,10 +1,10 @@
-import {Command, CommandMessage, Description, Guard, Infos} from "@typeit/discord";
+import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {roleConstraints} from "../../guards/RoleConstraint";
 import {TagModel} from "../../model/DB/Tag.model";
 import {Roles} from "../../enums/Roles";
-import RolesEnum = Roles.RolesEnum;
 import {Message} from "discord.js";
 import {BlockGuard} from "../../guards/BlockGuard";
+import RolesEnum = Roles.RolesEnum;
 
 
 export abstract class ShowTags {

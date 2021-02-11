@@ -1,7 +1,7 @@
 import {ArgsOf, Client, On} from "@typeit/discord";
 import {Roles} from "../../../enums/Roles";
-import RolesEnum = Roles.RolesEnum;
 import {SpecialKickModel} from "../../../model/DB/autoMod/specialDestoryer/specialKick.model";
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class roleListener {
 

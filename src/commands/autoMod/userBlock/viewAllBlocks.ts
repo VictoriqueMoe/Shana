@@ -5,8 +5,8 @@ import {BlockGuard} from "../../../guards/BlockGuard";
 import {MuteModel} from "../../../model/DB/autoMod/Mute.model";
 import {Roles} from "../../../enums/Roles";
 import {AddMuteLock} from "./AddMuteLock";
-import RolesEnum = Roles.RolesEnum;
 import {ObjectUtil} from "../../../utils/Utils";
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class ViewAllBlocks {
     @Command("viewAllMutes")

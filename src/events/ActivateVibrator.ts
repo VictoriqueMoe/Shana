@@ -1,10 +1,10 @@
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {NotBot} from "../guards/NotABot";
-
-const {loveSenseToken, uid, toyId} = require('../../config.json');
 import fetch from "node-fetch";
 import {PremiumChannelOnlyCommand} from "../guards/PremiumChannelOnlyCommand";
 import {BlockGuard} from "../guards/BlockGuard";
+
+const {loveSenseToken, uid, toyId} = require('../../config.json');
 
 export abstract class ActivateVibrator {
 
