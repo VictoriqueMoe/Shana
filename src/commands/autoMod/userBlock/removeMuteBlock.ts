@@ -3,7 +3,7 @@ import {Roles} from "../../../enums/Roles";
 import {AddMuteLock} from "./AddMuteLock";
 import {User} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
-import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
+import {GuildUtils} from "../../../utils/Utils";
 import {Main} from "../../../Main";
 import RolesEnum = Roles.RolesEnum;
 

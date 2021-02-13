@@ -6,13 +6,12 @@ import {NotBot} from "../../../guards/NotABot";
 import {roleConstraints} from "../../../guards/RoleConstraint";
 import {Roles} from "../../../enums/Roles";
 import {BlockGuard} from "../../../guards/BlockGuard";
-import {Guild, GuildMember, TextChannel, User} from "discord.js";
-import RolesEnum = Roles.RolesEnum;
-import Timeout = NodeJS.Timeout;
+import {Guild, GuildMember, User} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
-import {WeebBot} from "../../../discord/WeebBot";
 import {OnReady} from "../../../events/OnReady";
 import {RemoveMuteBlock} from "./removeMuteBlock";
+import Timeout = NodeJS.Timeout;
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceModel> {
 
@@ -45,6 +44,12 @@ export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceMod
         let didYouBlockABot = blockUserObject.bot;
         let canBlock = await DiscordUtils.canUserPreformBlock(command);
 
+        let botRole = await Roles.getRole(RolesEnum.VIC_BOT);
+        if (botRole.position <= mentionedMember.roles.highest.position) {
+            command.reply("You can not block a member whose role is above or on the same level as this bot!");
+            return;
+        }
+
         if (creatorID == blockedUserId) {
             command.reply("You can not block yourself!");
             return;
@@ -58,6 +63,8 @@ export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceMod
             command.reply("You can not block a bot");
             return;
         }
+
+
         let prevRolesArr = Array.from(mentionedMember.roles.cache.values());
         let prevRolesIdStr = prevRolesArr.map(r => r.id).join(",");
 
@@ -84,7 +91,11 @@ export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceMod
         } catch {
             return;
         }
-        await userObject.roles.remove([...userObject.roles.cache.keys()]);
+        try {
+            await userObject.roles.remove([...userObject.roles.cache.keys()]);
+        } catch {
+            return;
+        }
         await userObject.roles.add(RolesEnum.MUTED);
         let replyMessage = `User "${userObject.user.username}" has been muted from this server with reason "${savedModel.reason}"`;
         if (hasTimeout) {
