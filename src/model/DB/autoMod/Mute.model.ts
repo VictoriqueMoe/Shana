@@ -1,7 +1,7 @@
 import {AllowNull, Column, DataType, Default, Model, Table} from "sequelize-typescript";
 import {Roles} from "../../../enums/Roles";
-import RolesEnum = Roles.RolesEnum;
 import {EnumEx} from "../../../utils/Utils";
+import RolesEnum = Roles.RolesEnum;
 
 @Table
 export class MuteModel extends Model {

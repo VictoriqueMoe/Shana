@@ -3,9 +3,9 @@ import {ArgsOf, Client, On} from "@typeit/discord";
 import {Roles} from "../../../enums/Roles";
 import {UserChange} from "../../../modules/automod/UserChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
-import RolesEnum = Roles.RolesEnum;
 import {RemoveMuteBlock} from "../../../commands/autoMod/userBlock/removeMuteBlock";
 import {DiscordUtils} from "../../../utils/Utils";
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class MuteRoleListener extends AbstractRoleApplier<RolesEnum.MUTED> {
 
