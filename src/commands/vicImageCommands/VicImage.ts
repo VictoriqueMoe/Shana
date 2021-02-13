@@ -17,12 +17,18 @@ export abstract class VicImage {
         let randomImageMetadata = VicDropbox.instance.randomImage;
         let randomImage = (await WeebBot.dropBox.filesDownload({"path": randomImageMetadata.path_lower})).result;
         let buffer: Buffer = (randomImage as any).fileBinary;
-        await command.channel.send("Found one!", {
-            files: [{
-                attachment: buffer,
-                name: `${randomImage.name}`
-            }]
-        });
+        try {
+            await command.channel.send("Found one!", {
+                files: [{
+                    attachment: buffer,
+                    name: `${randomImage.name}`
+                }]
+            });
+        } catch(e) {
+            command.channel.send("Failed to send, maybe image is too large?");
+            console.error(e);
+            console.log(`Failed to send ${randomImage.name}`);
+        }
         findingMessage.delete();
     }
 

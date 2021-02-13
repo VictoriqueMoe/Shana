@@ -20,7 +20,8 @@ export abstract class BaseDAO<T extends Model> {
                 }
             }
             if(isOnlyUniqueError){
-                return "";
+                errorStr = "User is already in the database";
+                return;
             }
             //TODO parse constraint errors, resulting error is shitty
             errorStr = errors.map(error => `${error.message}`).join("\n");

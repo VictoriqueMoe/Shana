@@ -1,16 +1,6 @@
-import {ArgsOf, Client, Guard, On} from "@typeit/discord";
-import {NotBot} from "../../../guards/NotABot";
-import {Message} from "discord.js";
-import {DiscordUtils} from "../../../utils/Utils";
-import {MuteAllModel} from "../../../model/DB/autoMod/MuteAll.model";
-import {Roles} from "../../../enums/Roles";
-import {MuteModel} from "../../../model/DB/autoMod/Mute.model";
-import RolesEnum = Roles.RolesEnum;
-
 export abstract class OnMessageBlockGuard {
 
-
-    @On("message")
+    /*@On("message")
     @Guard(NotBot)
     private async onMessageBlockGuard([message]: ArgsOf<"message">, client: Client): Promise<Message | undefined> {
         if (message.member.id === "784102705253580800" || message.member.id === "595455886420475926") {
@@ -60,5 +50,5 @@ export abstract class OnMessageBlockGuard {
                 return reply.delete({timeout: 5000});
             }
         }
-    }
+    }*/
 }

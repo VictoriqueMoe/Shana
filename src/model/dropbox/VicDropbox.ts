@@ -1,5 +1,6 @@
 import {WeebBot} from "../../discord/WeebBot";
 import {files} from "dropbox";
+import * as _ from "lodash";
 
 export class VicDropbox {
     private static _instance: VicDropbox;
@@ -48,7 +49,7 @@ export class VicDropbox {
      * Return a random image from Dropbox
      */
     public get randomImage(): files.FolderMetadataReference {
-        return this.imageCache[Math.floor(Math.random() * this.imageCache.length)];
+        return _.sampleSize(this.imageCache)[0];
     }
 
     public async index(): Promise<void> {

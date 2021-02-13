@@ -5,6 +5,8 @@ const {token} = require('../config.json');
 export class Main {
     private static _client: Client;
 
+    public static testMode = true;
+
     static get client(): Client {
         return this._client;
     }

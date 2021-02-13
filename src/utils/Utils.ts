@@ -1,4 +1,4 @@
-import {GuildChannel, GuildMember, Message, Permissions} from "discord.js";
+import {GuildChannel, GuildMember, Message, Permissions, TextChannel} from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {Main} from "../Main";
@@ -70,6 +70,17 @@ export module DiscordUtils {
         return null;
     }
 
+    export async function postToLog(text: string): Promise<Message> {
+        let guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        let channel: TextChannel = null;
+        if (Main.testMode) {
+            channel = await guild.channels.resolve("793994947241312296") as TextChannel; // test channel
+        } else {
+            channel = await guild.channels.resolve("327484813336641536") as TextChannel;
+        }
+        return await channel.send(text);
+    }
+
     /**
      * Prevent CP from blocking OE, etc...
      * @param command
@@ -118,7 +129,7 @@ export class ObjectUtil {
         let returntext = '';
 
         for (let i = 0, max = levels.length; i < max; i++) {
-            if (levels[i][0] === 0){
+            if (levels[i][0] === 0) {
                 continue;
             }
             // @ts-ignore
@@ -153,5 +164,43 @@ export class ObjectUtil {
                 arr.splice(arrLen, 1);
             }
         }
+    }
+}
+
+
+export class EnumEx {
+    public static getNamesAndValues<T extends number>(e: any): Array<object> {
+        return EnumEx.getNames(e).map(n => ({name: n, value: e[n] as T}));
+    }
+
+    /**
+     * get the numValue associated with it's own key. if you want to get a TypeScript Enum based on an index you can use this
+     * @param e
+     * @param aName
+     * @returns {string|null}
+     */
+    public static loopBack<T>(e: any, aName: any, asValue: boolean = false): T {
+        let keyValuePair: Array<{ name: T, value: any }> = EnumEx.getNamesAndValues(e) as Array<{ name: T, value: any }>;
+        for (let i: number = 0; i < keyValuePair.length; i++) {
+            let obj: { name: T, value: any } = keyValuePair[i];
+            if (asValue) {
+                if (obj.value === aName) {
+                    return obj.value;
+                }
+            } else if (obj.name === aName) {
+                return obj.name;
+            }
+
+        }
+        return null;
+    }
+
+    public static getNames(e: any): Array<string> {
+        return Object.keys(e);
+    }
+
+    private static getObjValues(e: any): Array<number | string> {
+
+        return Object.keys(e).map(k => e[k]);
     }
 }

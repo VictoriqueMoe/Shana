@@ -4,7 +4,6 @@ import {roleConstraints} from "../../../guards/RoleConstraint";
 import {BlockGuard} from "../../../guards/BlockGuard";
 import {MuteModel} from "../../../model/DB/autoMod/Mute.model";
 import {Roles} from "../../../enums/Roles";
-import {AddMuteLock} from "./AddMuteLock";
 import {ObjectUtil} from "../../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
@@ -20,24 +19,16 @@ export abstract class ViewAllBlocks {
         }
         let replyStr = `\n`;
         for (let block of currentBlocks) {
-            let timeout: number = -1;
             let id = block.userId;
             let userObject = (await command.guild.members.fetch(id)).user;
             let creator = (await command.guild.members.fetch(block.creatorID)).user;
-            let hasTimeoutMap = AddMuteLock.timeOutMap;
-            for (let [user, timeOutMap] of hasTimeoutMap) {
-                let _timeOut = timeOutMap.keys().next().value;
-                if (user.id === id) {
-                    timeout = _timeOut;
-                    break;
-                }
-            }
+            let timeOutOrigValue = block.timeout;
             replyStr += `\n "${userObject.username}" has been muted by "${creator.username}" for the reason "${block.reason}"`;
-            if (timeout > -1) {
+            if (timeOutOrigValue > -1) {
                 let now = Date.now();
                 let dateCreated = (block.createdAt as Date).getTime();
-                let timeLeft = timeout - (now - dateCreated);
-                replyStr += `, for ${ObjectUtil.secondsToHuman(Math.round(timeout / 1000))} and has ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))} left`;
+                let timeLeft = timeOutOrigValue - (now - dateCreated);
+                replyStr += `, for ${ObjectUtil.secondsToHuman(Math.round(timeOutOrigValue / 1000))} and has ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))} left`;
             }
             if (block.violationRules > 0) {
                 replyStr += `, This user has also attempted to post ${block.violationRules} times while blocked`;
