@@ -64,7 +64,8 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         if (isRoleRemoved) {
             let rowCount = await model.destroy({
                 where: {
-                    userId
+                    userId,
+                    roleId: role
                 }
             });
             return rowCount > 0;
