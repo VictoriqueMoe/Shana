@@ -6,26 +6,34 @@ import {ScheduledMessageJob} from "./Impl/ScheduledMessageJob";
 
 export class MessageScheduler extends Scheduler {
 
-    constructor() {
+    protected _jobs: IScheduledMessageJob[] = [];
+    private channel: GuildChannel = null;
+
+    protected constructor() {
         super();
     }
-
-    private channel: GuildChannel = null;
 
     public static getInstance(): MessageScheduler {
         return super.getInstance() as MessageScheduler;
     }
 
+    // @ts-ignore
     public get jobs(): IScheduledMessageJob[] {
-        return this._jobs as IScheduledMessageJob[];
+        return this._jobs;
     }
 
-    public register(name: string, chron: string, callBack: () => void, channel?: GuildChannel): schedule.Job {
+    // @ts-ignore
+    protected set jobs(jobs: IScheduledMessageJob[]) {
+        this._jobs = jobs;
+    }
+
+    public register(name: string, chron: string, callBack: () => void, channel?: GuildChannel): IScheduledMessageJob {
         this.channel = channel;
-        return super.register(name, chron, callBack);
+        return super.register(name, chron, callBack) as IScheduledMessageJob;
     }
 
     protected registerJob(name: string, job: schedule.Job): IScheduledMessageJob {
         return new ScheduledMessageJob(name, job, this.channel);
     }
+
 }

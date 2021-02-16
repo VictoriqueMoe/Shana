@@ -116,7 +116,6 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         if (!hasRole) {
             return;
         }
-
         // at this point we KNOW the member is special AND they left, but we do not know if they left voluntary or was kicked
         // we need to look at the audit logs
         const fetchedLogs = await member.guild.fetchAuditLogs({
@@ -145,7 +144,9 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         }
 
         if (!wasKicked) {
+            let roleObj = member.roles.cache.get(role);
             // they where in special, but left on choice, this is now logged into the DB if they return
+            console.log(`member ${member.user.username} left the guild while having the role of ${roleObj.name}`);
             return new model({
                 "userId": member.user.id,
                 "roleId": role

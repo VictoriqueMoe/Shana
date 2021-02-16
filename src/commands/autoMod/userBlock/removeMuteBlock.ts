@@ -6,6 +6,7 @@ import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.mo
 import {GuildUtils} from "../../../utils/Utils";
 import {Main} from "../../../Main";
 import RolesEnum = Roles.RolesEnum;
+import {Scheduler} from "../../../model/Scheduler";
 
 export abstract class RemoveMuteBlock {
 
@@ -16,7 +17,7 @@ export abstract class RemoveMuteBlock {
             }
         };
         let muteModel = await MuteModel.findOne(whereClaus);
-        if(!muteModel){
+        if (!muteModel) {
             throw new Error('That user is not currently muted.');
         }
         let prevRoles = muteModel.getPrevRoles();
@@ -24,7 +25,7 @@ export abstract class RemoveMuteBlock {
         if (rowCount != 1) {
             throw new Error('That user is not currently muted.');
         }
-        if(!skipPersistence){
+        if (!skipPersistence) {
             let persistenceModelRowCount = await RolePersistenceModel.destroy(whereClaus);
             if (persistenceModelRowCount != 1) {
                 //the application has SHIT itself, if one table has an entry but the other not, fuck knows what to do here...
@@ -36,7 +37,7 @@ export abstract class RemoveMuteBlock {
         for (let [user, timeOutFunction] of timeoutMap) {
             if (user.id === userId) {
                 console.log(`cleared timeout for ${user.id}`);
-                clearTimeout(timeOutFunction);
+                Scheduler.getInstance().cancelJob(timeOutFunction.name);
                 userToDelete = user;
             }
         }
@@ -46,7 +47,7 @@ export abstract class RemoveMuteBlock {
         let guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
         let member = await guild.members.fetch(userId);
         await member.roles.remove(RolesEnum.MUTED);
-        for(let roleEnum of prevRoles){
+        for (let roleEnum of prevRoles) {
             let role = await Roles.getRole(roleEnum);
             console.log(`re-applying role ${role.name} to ${member.user.username}`);
             await member.roles.add(role.id);

@@ -10,12 +10,13 @@ import {Guild, GuildMember, User} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
 import {OnReady} from "../../../events/OnReady";
 import {RemoveMuteBlock} from "./removeMuteBlock";
-import Timeout = NodeJS.Timeout;
+import {Scheduler} from "../../../model/Scheduler";
+import {IScheduledJob} from "../../../model/IScheduledJob";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceModel> {
 
-    private static _timeOutMap: Map<User, Timeout> = new Map<User, Timeout>();
+    private static _timeOutMap: Map<User, IScheduledJob> = new Map();
 
     private constructor() {
         super();
@@ -115,19 +116,22 @@ export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceMod
         })) as Promise<RolePersistenceModel>;
     }
 
-    public static get timeOutMap(): Map<User, Timeout> {
+    public static get timeOutMap(): Map<User, IScheduledJob> {
         return AddMuteLock._timeOutMap;
     }
 
 
     public static createTimeout(user: User, millis: number, guild: Guild): void {
-        let timeOut: Timeout = setTimeout(async (member: User) => {
+        let now = Date.now();
+        let future = now + millis;
+        let newDate = new Date(future);
+        let job = Scheduler.getInstance().register(user.id, newDate, async () => {
             await OnReady.dao.transaction(async t => {
                 await RemoveMuteBlock.doRemove(user.id);
             });
-            DiscordUtils.postToLog(`User ${member.username} has been unblocked after timeout`);
-        }, millis, user);
-        AddMuteLock._timeOutMap.set(user, timeOut);
+            DiscordUtils.postToLog(`User ${user.username} has been unblocked after timeout`);
+        });
+        AddMuteLock._timeOutMap.set(user, job);
     }
 
     private static getDescription() {
