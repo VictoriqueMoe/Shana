@@ -82,6 +82,10 @@ export abstract class Username extends BaseDAO<UsernameModel> {
             command.reply("You can not use this command against a member who's highest role is above this bots highest role");
             return;
         }
+        if(roleOfMember.position >= command.member.roles.highest.position){
+            command.reply("You can not use this command against a member who's role is higher than yours!");
+            return;
+        }
         let userId = mentionMember.id;
         let obj = {
             userId,
