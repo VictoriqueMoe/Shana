@@ -1,5 +1,5 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
-import {DiscordUtils, ObjectUtil, StringUtils} from "../../../utils/Utils";
+import {DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/Mute.model";
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {NotBot} from "../../../guards/NotABot";
@@ -9,22 +9,21 @@ import {BlockGuard} from "../../../guards/BlockGuard";
 import {Guild, GuildMember, User} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
 import {OnReady} from "../../../events/OnReady";
-import {RemoveMuteBlock} from "./removeMuteBlock";
 import {Scheduler} from "../../../model/Scheduler";
 import {IScheduledJob} from "../../../model/IScheduledJob";
+import {Main} from "../../../Main";
 import RolesEnum = Roles.RolesEnum;
 
-export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceModel> {
-
+export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel>{
     private static _timeOutMap: Map<User, IScheduledJob> = new Map();
 
     private constructor() {
         super();
-        AddMuteLock._timeOutMap = new Map();
+        Mute._timeOutMap = new Map();
     }
 
     @Command("mute")
-    @Description(AddMuteLock.getDescription())
+    @Description(Mute.getMuteDescription())
     @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async mute(command: CommandMessage): Promise<void> {
         let argumentArray = StringUtils.splitCommandLine(command.content);
@@ -102,11 +101,41 @@ export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceMod
         if (hasTimeout) {
             let timeOutSec = Number.parseInt(timeout);
             let millis = timeOutSec * 1000;
-            AddMuteLock.createTimeout(blockUserObject, millis, command.guild);
+            Mute.createTimeout(blockUserObject, millis, command.guild);
             replyMessage += ` for ${ObjectUtil.secondsToHuman(timeOutSec)}`;
         }
         command.reply(replyMessage);
 
+    }
+
+    @Command("viewAllMutes")
+    @Description(Mute.getViewAllMuteDescription())
+    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    private async viewAllMutes(command: CommandMessage): Promise<MuteModel[]> {
+        let currentBlocks = await MuteModel.findAll();
+        if (currentBlocks.length === 0) {
+            command.reply("No members are muted");
+            return;
+        }
+        let replyStr = `\n`;
+        for (let block of currentBlocks) {
+            let id = block.userId;
+            let userObject = (await command.guild.members.fetch(id)).user;
+            let creator = (await command.guild.members.fetch(block.creatorID)).user;
+            let timeOutOrigValue = block.timeout;
+            replyStr += `\n "${userObject.username}" has been muted by "${creator.username}" for the reason "${block.reason}"`;
+            if (timeOutOrigValue > -1) {
+                let now = Date.now();
+                let dateCreated = (block.createdAt as Date).getTime();
+                let timeLeft = timeOutOrigValue - (now - dateCreated);
+                replyStr += `, for ${ObjectUtil.secondsToHuman(Math.round(timeOutOrigValue / 1000))} and has ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))} left`;
+            }
+            if (block.violationRules > 0) {
+                replyStr += `, This user has also attempted to post ${block.violationRules} times while blocked`;
+            }
+        }
+        command.reply(replyStr);
+        return currentBlocks;
     }
 
     private addRolePersist(user: GuildMember): Promise<RolePersistenceModel> {
@@ -117,7 +146,7 @@ export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceMod
     }
 
     public static get timeOutMap(): Map<User, IScheduledJob> {
-        return AddMuteLock._timeOutMap;
+        return Mute._timeOutMap;
     }
 
 
@@ -127,14 +156,65 @@ export abstract class AddMuteLock extends BaseDAO<MuteModel | RolePersistenceMod
         let newDate = new Date(future);
         let job = Scheduler.getInstance().register(user.id, newDate, async () => {
             await OnReady.dao.transaction(async t => {
-                await RemoveMuteBlock.doRemove(user.id);
+                await Mute.doRemove(user.id);
             });
             DiscordUtils.postToLog(`User ${user.username} has been unblocked after timeout`);
         });
-        AddMuteLock._timeOutMap.set(user, job);
+        Mute._timeOutMap.set(user, job);
     }
 
-    private static getDescription() {
+    public static async doRemove(userId: string, skipPersistence = false): Promise<void> {
+        let whereClaus = {
+            where: {
+                userId
+            }
+        };
+        let muteModel = await MuteModel.findOne(whereClaus);
+        if (!muteModel) {
+            throw new Error('That user is not currently muted.');
+        }
+        let prevRoles = muteModel.getPrevRoles();
+        let rowCount = await MuteModel.destroy(whereClaus);
+        if (rowCount != 1) {
+            throw new Error('That user is not currently muted.');
+        }
+        if (!skipPersistence) {
+            let persistenceModelRowCount = await RolePersistenceModel.destroy(whereClaus);
+            if (persistenceModelRowCount != 1) {
+                //the application has SHIT itself, if one table has an entry but the other not, fuck knows what to do here...
+                throw new Error("Unknown error occurred, error is a synchronisation issue between the Persistence model and the Mute Model ");
+            }
+        }
+        let timeoutMap = Mute.timeOutMap;
+        let userToDelete: User = null;
+        for (let [user, timeOutFunction] of timeoutMap) {
+            if (user.id === userId) {
+                console.log(`cleared timeout for ${user.id}`);
+                Scheduler.getInstance().cancelJob(timeOutFunction.name);
+                userToDelete = user;
+            }
+        }
+        if (userToDelete) {
+            Mute.timeOutMap.delete(userToDelete);
+        }
+        let guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        let member = await guild.members.fetch(userId);
+        await member.roles.remove(RolesEnum.MUTED);
+        for (let roleEnum of prevRoles) {
+            let role = await Roles.getRole(roleEnum);
+            console.log(`re-applying role ${role.name} to ${member.user.username}`);
+            await member.roles.add(role.id);
+        }
+    }
+
+
+
+    private static getViewAllMuteDescription() {
+        return "View all the currently active mutes";
+    }
+
+
+    private static getMuteDescription() {
         return `\n Block a user from sending any messages with reason \n usage: ~mute <"username"> <"reason"> [timeout in seconds] \n example: ~mute "@SomeUser" "annoying" 20 \n make sure that the @ is blue before sending`;
     }
 }

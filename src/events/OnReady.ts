@@ -4,11 +4,14 @@ import {Sequelize} from "sequelize-typescript";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {MuteModel} from "../model/DB/autoMod/Mute.model";
 import {Op} from "sequelize";
-import {AddMuteLock} from "../commands/autoMod/userBlock/AddMuteLock";
-import {ObjectUtil} from "../utils/Utils";
+import {GuildUtils, ObjectUtil} from "../utils/Utils";
 import {Guild, User} from "discord.js";
+import {Mute} from "../commands/autoMod/userBlock/Mute";
+import {UsernameModel} from "../model/DB/autoMod/Username.model";
 
-
+/**
+ * TODO: couple this class to appropriate classes
+ */
 export abstract class OnReady {
 
     private static _dao: Sequelize;
@@ -29,11 +32,26 @@ export abstract class OnReady {
         await OnReady._dao.sync({force: false});
         await VicDropbox.instance.index();
         await OnReady.initiateMuteTimers();
+        await this.initUsernames();
         console.log("Bot logged in.");
     }
 
     public static get dao(): Sequelize {
         return OnReady._dao;
+    }
+
+    private async initUsernames(): Promise<void> {
+        let allModels = await UsernameModel.findAll();
+        let guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        let pArr = allModels.map(model => {
+            return guild.members.fetch(model.userId).then(member => {
+                return member.setNickname(model.usernameToPersist);
+            }).then(member => {
+                console.log(`Set username for "${member.user.username}" to "${model.usernameToPersist}"`);
+            });
+        });
+        await Promise.all(pArr);
+        console.log("set all Usernames");
     }
 
     private static async initiateMuteTimers(): Promise<void> {
@@ -69,7 +87,7 @@ export abstract class OnReady {
                 });
             } else {
                 console.log(`Re-creating timed mute for ${blockedUser.username}, time reamining is: ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))}`);
-                AddMuteLock.createTimeout(blockedUser, timeLeft, guild);
+                Mute.createTimeout(blockedUser, timeLeft, guild);
             }
         }
     }

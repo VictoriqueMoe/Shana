@@ -1,9 +1,10 @@
-import {Role} from "discord.js";
+import {GuildMember, Role} from "discord.js";
 import {Main} from "../Main";
 import {GuildUtils} from "../utils/Utils";
 
 export module Roles {
     export enum RolesEnum {
+        "OWNER" = "595455886420475926",
         "ADVISOR" = "767409384723709972",
         "WEEB_OVERLORD" = "765298257915936798",
         "VIC_BOT" = "809098050651291748",
@@ -22,5 +23,16 @@ export module Roles {
         let guild = client.guilds.cache.get(GuildUtils.getGuildID());
         let roles = guild.roles;
         return roles.fetch(role);
+    }
+
+    export function isMemberStaff(member: GuildMember): boolean {
+        let highestRole = member.roles.highest;
+        let id = highestRole.id;
+        return id === RolesEnum.CIVIL_PROTECTION ||
+            id === RolesEnum.OVERWATCH_ELITE ||
+            id === RolesEnum.WEEB_OVERLORD ||
+            id === RolesEnum.ADVISOR ||
+            id === RolesEnum.OWNER
+
     }
 }

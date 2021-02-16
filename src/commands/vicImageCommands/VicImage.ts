@@ -5,12 +5,13 @@ import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {WeebBot} from "../../discord/WeebBot";
 import {NotBot} from "../../guards/NotABot";
 import {BlockGuard} from "../../guards/BlockGuard";
+import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class VicImage {
 
     @Command("vicImage")
-    @Description(VicImage.getDescription())
+    @Description(VicImage.getVicImageDescription())
     @Guard(NotBot, roleConstraints(RolesEnum.ZOMBIES, RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async vicImage(command: CommandMessage): Promise<void> {
         let findingMessage = await command.channel.send("Finding image...");
@@ -24,7 +25,7 @@ export abstract class VicImage {
                     name: `${randomImage.name}`
                 }]
             });
-        } catch(e) {
+        } catch (e) {
             command.channel.send("Failed to send, maybe image is too large?");
             console.error(e);
             console.log(`Failed to send ${randomImage.name}`);
@@ -32,7 +33,19 @@ export abstract class VicImage {
         findingMessage.delete();
     }
 
-    public static getDescription(): string {
+    @Command("vicReIndex")
+    @Description(VicImage.getIndexDescription())
+    @Guard(NotBot, AdminOnlyTask, BlockGuard)
+    private async vicReIndex(command: CommandMessage): Promise<void> {
+        await VicDropbox.instance.index();
+        command.channel.send(`Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`);
+    }
+
+    private static getIndexDescription() {
+        return "Reindex the bot to add new images";
+    }
+
+    public static getVicImageDescription(): string {
         return "Get random vic image";
     }
 }

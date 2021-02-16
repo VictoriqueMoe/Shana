@@ -5,8 +5,7 @@ import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {MessageScheduler} from "../../model/MessageScheduler";
 import {BlockGuard} from "../../guards/BlockGuard";
 
-export abstract class ScheduleMessage {
-
+export abstract class AMessageScheduler {
     @Command("scheduleMessage")
     @Guard(AdminOnlyTask, BlockGuard)
     //TODO: add help description ~help
@@ -37,5 +36,39 @@ export abstract class ScheduleMessage {
         }
 
         command.reply(`job "${name}" has been scheduled to post ${ChronUtils.chronToString(chron)} on channel "<#${channel.id}>" \n any jobs with this name have been replaced`);
+    }
+
+    @Command("cancelAllScheduledMessages")
+    @Guard(AdminOnlyTask, BlockGuard)
+    private cancelAllScheduledMessages(command: CommandMessage): void {
+        MessageScheduler.getInstance().cancelAllJobs();
+        command.reply("All scheduled posts have been cancelled");
+    }
+
+    @Command("cancelScheduledMessage")
+    @Guard(AdminOnlyTask, BlockGuard)
+    private cancelScheduledMessage(command: CommandMessage): void {
+        let names = StringUtils.splitCommandLine(command.content);
+        for(let name of names){
+            MessageScheduler.getInstance().cancelJob(name);
+        }
+
+        command.reply( `Job(s) cancelled`);
+    }
+
+    @Command("getAllScheduledMessages")
+    @Guard(AdminOnlyTask, BlockGuard)
+    private getAllScheduledMessages(command: CommandMessage): void {
+        let allJobs = MessageScheduler.getInstance().jobs;
+        if (allJobs.length === 0) {
+            command.reply("There are no pending scheduled messages");
+            return;
+        }
+        let str = `there are ${allJobs.length} scheduled posts active \n` + allJobs.map(job => {
+            let channelThisJobBelongsTo = job.channel;
+            let nameOfJob = job.name;
+            return `${nameOfJob} posts to "<#${channelThisJobBelongsTo.id}>"`;
+        }).join("\n");
+        command.reply(str);
     }
 }

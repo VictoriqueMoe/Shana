@@ -1,7 +1,7 @@
 import {ArgsOf, Client, On} from "@typeit/discord";
 import {GuildMember} from "discord.js";
 import {Roles} from "../../../enums/Roles";
-import {BaseDAO} from "../../../DAO/BaseDAO";
+import {BaseDAO, UniqueViolationError} from "../../../DAO/BaseDAO";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
 import {AbstractRoleApplier} from "../RoleApplier/AbstractRoleApplier";
 import RolesEnum = Roles.RolesEnum;
@@ -13,7 +13,13 @@ export abstract class SpecialLeave extends BaseDAO<RolePersistenceModel> {
     private async specialLeave([member]: ArgsOf<"guildMemberRemove">, client: Client): Promise<void> {
         let model = await new SpecialProxy().roleLeaves(RolesEnum.SPECIAL, member as GuildMember, RolePersistenceModel);
         if (model) {
-            super.commitToDatabase(model);
+            try {
+                await super.commitToDatabase(model);
+            } catch (e) {
+                if (e instanceof UniqueViolationError) {
+                    return;
+                }
+            }
         }
     }
 }

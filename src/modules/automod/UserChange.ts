@@ -1,7 +1,7 @@
-import {GuildMember, PartialGuildMember, User} from "discord.js";
+import {GuildMember, PartialGuildMember} from "discord.js";
 import {Roles} from "../../enums/Roles";
-import RolesEnum = Roles.RolesEnum;
 import {EnumEx} from "../../utils/Utils";
+import RolesEnum = Roles.RolesEnum;
 
 export type RoleChangeType = {
     remove: RolesEnum[],

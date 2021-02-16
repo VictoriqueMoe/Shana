@@ -8,34 +8,73 @@ import {Main} from "../Main";
 
 export abstract class BaseDAO<T extends Model> {
 
-    protected commitToDatabase(model: T, options?: SaveOptions): Promise<T> {
+    /*protected async saveOrUpdate(model: T): Promise<T> {
+        let b = model.get();
+        // @ts-ignore
+        let staticCLass: typeof ModelStatic = model.constructor as typeof ModelStatic;
+        try {
+            return await this.commitToDatabase(model);
+        } catch (e) {
+            if (e instanceof UniqueViolationError) {
+                // @ts-ignore
+                let persistenceObject: T = await staticCLass.findOne({where: {id: model.id}}) as T;
+                return staticCLass.update(
+                    b,
+                    {
+                        where: {
+                            id: model.id
+                        }
+                    }
+                )[1] as T;
+            }
+        }
+    }*/
+
+    protected async commitToDatabase(model: T, options?: SaveOptions, silentOnDupe = false): Promise<T> {
         let channel: TextChannel = Main.client.channels.cache.get(Channels.TEST_CHANNEL) as TextChannel;
         let errorStr = "";
-        return model.save(options).catch((validationError: ValidationError) => {
-            let errors = validationError.errors;
-            let isOnlyUniqueError = true;
-            for(let error of errors){
-                if(error.type !== "unique violation"){
-                    isOnlyUniqueError = false;
+        // hacky 'mc hack
+        try {
+            try {
+                return await model.save(options);
+            } catch (e) {
+                if (e instanceof UniqueConstraintError) {
+                    throw new UniqueViolationError(e.message);
+                } else if (e instanceof ValidationError) {
+                    let errors = e.errors;
+                    let isOnlyUniqueError = true;
+                    for (let error of errors) {
+                        if (error.type !== "unique violation") {
+                            isOnlyUniqueError = false;
+                        }
+                    }
+                    if (isOnlyUniqueError) {
+                        throw new UniqueViolationError(e.message);
+                        return;
+                    }
+                    errorStr = errors.map(error => `${error.message}`).join("\n");
+                } else {
+                    throw e;
                 }
             }
-            if(isOnlyUniqueError){
-                errorStr = "User is already in the database";
-                return;
+        } catch (e) {
+            if (e instanceof UniqueViolationError) {
+                if(!silentOnDupe){
+                    channel.send(`Entry already exists in database`);
+                    console.log(`Entry already exists in database: ${model}`);
+                }
+                throw e;
             }
-            //TODO parse constraint errors, resulting error is shitty
-            errorStr = errors.map(error => `${error.message}`).join("\n");
-        }).catch((uniqueConstraintError: UniqueConstraintError) => {
-            //TODO do this when i actually know what it means
-            console.dir(`ERROR: ${uniqueConstraintError}`);
-        }).catch(err => {
-            // catch all other errors
-        }).then(model => {
+        } finally {
             if (model == null || ObjectUtil.validString(errorStr)) {
                 channel.send(`An error occurred: ${errorStr}`);
-                throw errorStr;
             }
-            return model as T;
-        });
+        }
+    }
+}
+
+export class UniqueViolationError extends Error {
+    constructor(message?: string) {
+        super(message);
     }
 }
