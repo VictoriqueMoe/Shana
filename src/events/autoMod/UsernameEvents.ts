@@ -62,7 +62,7 @@ export abstract class UsernameEvents {
                         );
                     }
                     if(newUser.nickname == null){
-                        DiscordUtils.postToLog(`User "${newUser.user.username}" has been reset and all resistance removed`);
+                        DiscordUtils.postToLog(`User "${newUser.user.username}" has been reset and removed from database`);
                     }else{
                         DiscordUtils.postToLog(`User "${newUser.user.username}" has a persisted nickname of "${modelObj.usernameToPersist}", howerver, this has been updated to "${newUser.nickname === null ? newUser.user.username : newUser.nickname}"`);
                     }

@@ -14,7 +14,7 @@ import {IScheduledJob} from "../../../model/IScheduledJob";
 import {Main} from "../../../Main";
 import RolesEnum = Roles.RolesEnum;
 
-export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel>{
+export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
     private static _timeOutMap: Map<User, IScheduledJob> = new Map();
 
     private constructor() {
@@ -75,8 +75,16 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel>{
             prevRole: prevRolesIdStr
         };
         let hasTimeout = ObjectUtil.validString(timeout) && !Number.isNaN(Number.parseInt(timeout));
+        let millis = -1;
+        let seconds = -1;
         if (hasTimeout) {
             obj["timeout"] = (Number.parseInt(timeout) * 1000);
+            seconds = Number.parseInt(timeout);
+            millis = seconds * 1000;
+            if (Number.isNaN(millis) || millis <= 0 || millis > Number.MAX_SAFE_INTEGER) {
+                command.reply(`Timout is invalid, it can not be below 0 and can not be more than: "${(Number.MAX_SAFE_INTEGER - Date.now()) / 1000}"`);
+                return;
+            }
         }
         let model = new MuteModel(obj);
         let userObject: GuildMember = null;
@@ -99,10 +107,8 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel>{
         await userObject.roles.add(RolesEnum.MUTED);
         let replyMessage = `User "${userObject.user.username}" has been muted from this server with reason "${savedModel.reason}"`;
         if (hasTimeout) {
-            let timeOutSec = Number.parseInt(timeout);
-            let millis = timeOutSec * 1000;
             Mute.createTimeout(blockUserObject, millis, command.guild);
-            replyMessage += ` for ${ObjectUtil.secondsToHuman(timeOutSec)}`;
+            replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
         }
         command.reply(replyMessage);
 
@@ -206,7 +212,6 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel>{
             await member.roles.add(role.id);
         }
     }
-
 
 
     private static getViewAllMuteDescription() {

@@ -12,6 +12,6 @@ export const PremiumChannelOnlyCommand: GuardFunction<"message"> = async (
     }
     let cat = channel.parent;
     if (cat.id === "769353703761117194") {
-        await next();
+        return await next();
     }
 };
