@@ -77,12 +77,13 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
         let hasTimeout = ObjectUtil.validString(timeout) && !Number.isNaN(Number.parseInt(timeout));
         let millis = -1;
         let seconds = -1;
+        let maxMillis = 8640000000000000 - Date.now();
         if (hasTimeout) {
             obj["timeout"] = (Number.parseInt(timeout) * 1000);
             seconds = Number.parseInt(timeout);
             millis = seconds * 1000;
-            if (Number.isNaN(millis) || millis <= 0 || millis > Number.MAX_SAFE_INTEGER) {
-                command.reply(`Timout is invalid, it can not be below 0 and can not be more than: "${(Number.MAX_SAFE_INTEGER - Date.now()) / 1000}"`);
+            if (Number.isNaN(millis) || millis <= 0 || millis > maxMillis) {
+                command.reply(`Timout is invalid, it can not be below 0 and can not be more than: "${maxMillis / 1000}"`);
                 return;
             }
         }
