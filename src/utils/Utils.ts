@@ -3,7 +3,10 @@ import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {Main} from "../Main";
 import {CommandMessage} from "@typeit/discord";
-import {MuteModel} from "../model/DB/autoMod/Mute.model";
+import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
+import {CloseableModule} from "../model/CloseableModule";
+import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
+import {Sequelize} from "sequelize-typescript";
 
 const {GuildID} = require('../../config.json');
 
@@ -32,7 +35,7 @@ export module GuildUtils {
         return false;
     }
 
-    export function getAutoBotIds():string[]{
+    export function getAutoBotIds(): string[] {
         return ["159985870458322944", "155149108183695360"];
     }
 }
@@ -110,6 +113,24 @@ export module DiscordUtils {
                 userId: userWhoPosted
             }
         });
+    }
+
+    export async function getAllClosableModules(): Promise<string[]> {
+        let allModules = await CloseOptionModel.findAll({
+            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('moduleId')), 'moduleId']],
+            where: {}
+        });
+        return allModules.map(m => m.moduleId);
+    }
+
+    export function getModule(moduleId: string): CloseableModule {
+        let modules = Main.closeableModules;
+        for (let module of modules) {
+            if (module.moduleId === moduleId) {
+                return module;
+            }
+        }
+        return null;
     }
 }
 

@@ -2,7 +2,7 @@ import {ArgsOf, Client, On} from "@typeit/discord";
 import {GuildMember} from "discord.js";
 import {Roles} from "../../../enums/Roles";
 import {BaseDAO, UniqueViolationError} from "../../../DAO/BaseDAO";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
+import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {AbstractRoleApplier} from "../RoleApplier/AbstractRoleApplier";
 import RolesEnum = Roles.RolesEnum;
 

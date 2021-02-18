@@ -1,5 +1,5 @@
 import {Column, Model, Table} from "sequelize-typescript";
-import {Identifiable} from "../Identifiable";
+import {Identifiable} from "../../Identifiable";
 
 @Table
 export class RolePersistenceModel extends Model implements Identifiable{

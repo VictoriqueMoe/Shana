@@ -2,42 +2,29 @@ import {On} from "@typeit/discord";
 import {Main} from "../Main";
 import {Sequelize} from "sequelize-typescript";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
-import {MuteModel} from "../model/DB/autoMod/Mute.model";
+import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {Op} from "sequelize";
 import {GuildUtils, ObjectUtil} from "../utils/Utils";
 import {Guild, User} from "discord.js";
 import {Mute} from "../commands/autoMod/userBlock/Mute";
-import {UsernameModel} from "../model/DB/autoMod/Username.model";
+import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
+import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
+import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
 
 /**
  * TODO: couple this class to appropriate classes
  */
-export abstract class OnReady {
-
-    private static _dao: Sequelize;
+export abstract class OnReady extends BaseDAO<any> {
 
     @On("ready")
     private async initialize(): Promise<void> {
-        OnReady._dao = new Sequelize('database', 'username', 'password', {
-            host: 'localhost',
-            dialect: 'sqlite',
-            logging: false,
-            storage: 'database.sqlite',
-            models: [__dirname + '/../model/DB/**/*.model.ts'],
-            modelMatch: (filename, member) => {
-                return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
-            }
-        });
         await Main.client.user.setActivity('Anime', {type: 'WATCHING'});
-        await OnReady._dao.sync({force: false});
+        await Main.dao.sync({force: false});
         await VicDropbox.instance.index();
         await OnReady.initiateMuteTimers();
         await this.initUsernames();
+        await this.populateClosableEvents();
         console.log("Bot logged in.");
-    }
-
-    public static get dao(): Sequelize {
-        return OnReady._dao;
     }
 
     private async initUsernames(): Promise<void> {
@@ -78,6 +65,31 @@ export abstract class OnReady {
             } else {
                 console.log(`Re-creating timed mute for ${mute.username}, time reamining is: ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))}`);
                 Mute.createTimeout(mute.userId, mute.username, timeLeft, guild);
+            }
+        }
+    }
+
+    private async populateClosableEvents(): Promise<void> {
+        let allModules = Main.closeableModules;
+        for (let module of allModules) {
+            let moduleId = module.moduleId;
+            let exists = await CloseOptionModel.findOne({
+                where: {
+                    moduleId
+                }
+            });
+            if (!exists) {
+                let m = new CloseOptionModel({
+                    moduleId
+                });
+                try {
+                    await super.commitToDatabase(m);
+                } catch (e) {
+                    if (!(e instanceof UniqueViolationError)) {
+                        throw e;
+                    }
+                }
+
             }
         }
     }

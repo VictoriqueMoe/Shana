@@ -1,13 +1,13 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../utils/Utils";
-import {MuteModel} from "../../../model/DB/autoMod/Mute.model";
+import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {NotBot} from "../../../guards/NotABot";
 import {roleConstraints} from "../../../guards/RoleConstraint";
 import {Roles} from "../../../enums/Roles";
 import {BlockGuard} from "../../../guards/BlockGuard";
 import {Guild, GuildMember, User} from "discord.js";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
+import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {OnReady} from "../../../events/OnReady";
 import {Scheduler} from "../../../model/Scheduler";
 import {IScheduledJob} from "../../../model/IScheduledJob";
@@ -92,7 +92,7 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
         let userObject: GuildMember = null;
         let savedModel: MuteModel = null;
         try {
-            savedModel = await OnReady.dao.transaction(async t => {
+            savedModel = await Main.dao.transaction(async t => {
                 let m = await super.commitToDatabase(model) as MuteModel;
                 userObject = await command.guild.members.fetch(m.userId);
                 await this.addRolePersist(userObject);
@@ -161,7 +161,7 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
         let future = now + millis;
         let newDate = new Date(future);
         let job = Scheduler.getInstance().register(userId, newDate, async () => {
-            await OnReady.dao.transaction(async t => {
+            await Main.dao.transaction(async t => {
                 await Mute.doRemove(userId);
             });
             DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`);

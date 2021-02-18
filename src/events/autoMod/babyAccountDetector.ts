@@ -4,6 +4,7 @@ import {TextChannel} from "discord.js";
 import {ObjectUtil} from "../../utils/Utils";
 
 export abstract class BabyAccountDetector {
+
     @On("guildMemberAdd")
     private async babyAccountDetector([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         let user = member.user;

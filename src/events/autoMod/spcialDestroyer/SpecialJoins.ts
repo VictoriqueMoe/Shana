@@ -1,7 +1,7 @@
 import {ArgsOf, Client, On} from "@typeit/discord";
 import {Roles} from "../../../enums/Roles";
 import {AbstractRoleApplier} from "../RoleApplier/AbstractRoleApplier";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
+import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils} from "../../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 

@@ -1,5 +1,5 @@
 import {BaseDAO, UniqueViolationError} from "../../DAO/BaseDAO";
-import {UsernameModel} from "../../model/DB/autoMod/Username.model";
+import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
 import {roleConstraints} from "../../guards/RoleConstraint";

@@ -1,5 +1,5 @@
 import {ArgsOf, Client, On} from "@typeit/discord";
-import {UsernameModel} from "../../model/DB/autoMod/Username.model";
+import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
 import {DiscordUtils, GuildUtils} from "../../utils/Utils";
 import {Roles} from "../../enums/Roles";
 

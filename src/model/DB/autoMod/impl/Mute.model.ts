@@ -1,6 +1,6 @@
 import {AllowNull, Column, DataType, Default, Model, Table} from "sequelize-typescript";
-import {Roles} from "../../../enums/Roles";
-import {EnumEx} from "../../../utils/Utils";
+import {Roles} from "../../../../enums/Roles";
+import {EnumEx} from "../../../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
 @Table

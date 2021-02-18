@@ -1,7 +1,7 @@
 import {Roles} from "../../../enums/Roles";
 import {GuildMember, User} from "discord.js";
 import {UserChange} from "../../../modules/automod/UserChange";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
+import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import RolesEnum = Roles.RolesEnum;
 import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
 

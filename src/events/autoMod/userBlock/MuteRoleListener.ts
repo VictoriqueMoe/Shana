@@ -2,7 +2,7 @@ import {AbstractRoleApplier} from "../RoleApplier/AbstractRoleApplier";
 import {ArgsOf, Client, On} from "@typeit/discord";
 import {Roles} from "../../../enums/Roles";
 import {UserChange} from "../../../modules/automod/UserChange";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
+import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils} from "../../../utils/Utils";
 import {Mute} from "../../../commands/autoMod/userBlock/Mute";
 import RolesEnum = Roles.RolesEnum;
