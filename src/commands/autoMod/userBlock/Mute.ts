@@ -15,7 +15,7 @@ import {Main} from "../../../Main";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
-    private static _timeOutMap: Map<User, IScheduledJob> = new Map();
+    private static _timeOutMap: Map<string, IScheduledJob> = new Map();
 
     private constructor() {
         super();
@@ -70,6 +70,7 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
 
         let obj = {
             userId: blockedUserId,
+            username: blockUserObject.username,
             reason,
             creatorID,
             prevRole: prevRolesIdStr
@@ -108,7 +109,7 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
         await userObject.roles.add(RolesEnum.MUTED);
         let replyMessage = `User "${userObject.user.username}" has been muted from this server with reason "${savedModel.reason}"`;
         if (hasTimeout) {
-            Mute.createTimeout(blockUserObject, millis, command.guild);
+            Mute.createTimeout(blockUserObject.id, blockUserObject.username, millis, command.guild);
             replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
         }
         command.reply(replyMessage);
@@ -127,10 +128,8 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
         let replyStr = `\n`;
         for (let block of currentBlocks) {
             let id = block.userId;
-            let userObject = (await command.guild.members.fetch(id)).user;
-            let creator = (await command.guild.members.fetch(block.creatorID)).user;
             let timeOutOrigValue = block.timeout;
-            replyStr += `\n "${userObject.username}" has been muted by "${creator.username}" for the reason "${block.reason}"`;
+            replyStr += `\n "<@${id}>" has been muted by "<@${block.creatorID}>" for the reason "${block.reason}"`;
             if (timeOutOrigValue > -1) {
                 let now = Date.now();
                 let dateCreated = (block.createdAt as Date).getTime();
@@ -152,22 +151,22 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
         })) as Promise<RolePersistenceModel>;
     }
 
-    public static get timeOutMap(): Map<User, IScheduledJob> {
+    public static get timeOutMap(): Map<string, IScheduledJob> {
         return Mute._timeOutMap;
     }
 
 
-    public static createTimeout(user: User, millis: number, guild: Guild): void {
+    public static createTimeout(userId: string, username: string, millis: number, guild: Guild): void {
         let now = Date.now();
         let future = now + millis;
         let newDate = new Date(future);
-        let job = Scheduler.getInstance().register(user.id, newDate, async () => {
+        let job = Scheduler.getInstance().register(userId, newDate, async () => {
             await OnReady.dao.transaction(async t => {
-                await Mute.doRemove(user.id);
+                await Mute.doRemove(userId);
             });
-            DiscordUtils.postToLog(`User ${user.username} has been unblocked after timeout`);
+            DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`);
         });
-        Mute._timeOutMap.set(user, job);
+        Mute._timeOutMap.set(userId, job);
     }
 
     public static async doRemove(userId: string, skipPersistence = false): Promise<void> {
@@ -193,16 +192,16 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
             }
         }
         let timeoutMap = Mute.timeOutMap;
-        let userToDelete: User = null;
-        for (let [user, timeOutFunction] of timeoutMap) {
-            if (user.id === userId) {
-                console.log(`cleared timeout for ${user.id}`);
+        let hasTimer: boolean = false;
+        for (let [_userId, timeOutFunction] of timeoutMap) {
+            if (userId === _userId) {
+                console.log(`cleared timeout for ${_userId}`);
                 Scheduler.getInstance().cancelJob(timeOutFunction.name);
-                userToDelete = user;
+                hasTimer = true;
             }
         }
-        if (userToDelete) {
-            Mute.timeOutMap.delete(userToDelete);
+        if (hasTimer) {
+            Mute.timeOutMap.delete(userId);
         }
         let guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
         let member = await guild.members.fetch(userId);

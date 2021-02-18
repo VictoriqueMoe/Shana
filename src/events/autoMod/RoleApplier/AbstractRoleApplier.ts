@@ -3,6 +3,7 @@ import {GuildMember, User} from "discord.js";
 import {UserChange} from "../../../modules/automod/UserChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/RolePersistence.model";
 import RolesEnum = Roles.RolesEnum;
+import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
 
 export abstract class AbstractRoleApplier<T extends RolesEnum> {
 
@@ -35,7 +36,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         let executor = roleLog.executor;
 
         // is the executor dyno AND was it headcrab?
-        let wasDyno = executor.id === "155149108183695360";
+        let wasDyno = GuildUtils.getAutoBotIds().includes(executor.id);
         if (wasDyno) {
             let wasHeadCrab = member.roles.cache.has(RolesEnum.HEADCRABS);
             if (wasHeadCrab) {
@@ -73,7 +74,8 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
 
         let dbEntry = await model.findOne({
             where: {
-                userId
+                userId,
+                roleId: role
             }
         });
         if (dbEntry) {

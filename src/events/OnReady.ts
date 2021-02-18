@@ -67,27 +67,17 @@ export abstract class OnReady {
             let muteCreated = (mute.createdAt as Date).getTime();
             let timerLength = mute.timeout;
             let timeLeft = timerLength - (now - muteCreated);
-            let guilds = Main.client.guilds;
-            let blockedUser: User = null;
-            let guild: Guild = null;
-            for (let [, _guild] of guilds.cache) {
-                let localBlockedUser = (await _guild.members.fetch(mute.userId)).user;
-                if (localBlockedUser != null) {
-                    blockedUser = localBlockedUser;
-                    guild = _guild;
-                    break;
-                }
-            }
+            let guild: Guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
             if (timeLeft <= 0) {
-                console.log(`Timer has expired for user ${blockedUser.username}, removing from database`);
+                console.log(`Timer has expired for user ${mute.username}, removing from database`);
                 await MuteModel.destroy({
                     where: {
                         id: mute.id
                     }
                 });
             } else {
-                console.log(`Re-creating timed mute for ${blockedUser.username}, time reamining is: ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))}`);
-                Mute.createTimeout(blockedUser, timeLeft, guild);
+                console.log(`Re-creating timed mute for ${mute.username}, time reamining is: ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))}`);
+                Mute.createTimeout(mute.userId, mute.username, timeLeft, guild);
             }
         }
     }

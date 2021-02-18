@@ -12,6 +12,9 @@ export class MuteModel extends Model {
     @Column
     public prevRole: string;
 
+    @Column({allowNull: false})
+    public username: string;
+
     @Column(DataType.TEXT)
     public reason: string;
 
