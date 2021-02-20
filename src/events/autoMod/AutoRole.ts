@@ -21,7 +21,11 @@ export class AutoRole extends CloseableModule {
         let d = new Date(toAddRole);
         //TODO use scheduler
         schedule.scheduleJob(`enable ${member.user.username}`, d, () => {
-            member.roles.add(RolesEnum.HEADCRABS, "added via VicBot");
+            try{
+                member.roles.add(RolesEnum.HEADCRABS, "added via VicBot");
+            }catch{
+
+            }
         });
     }
 

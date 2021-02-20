@@ -79,7 +79,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
             }
         });
         if (dbEntry) {
-            this.applyAfterDyno(role, change.newUser as GuildMember);
+            await this.applyAfterDyno(role, change.newUser as GuildMember);
         }
         return false;
     }

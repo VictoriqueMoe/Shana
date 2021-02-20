@@ -8,7 +8,7 @@ import RolesEnum = Roles.RolesEnum;
 
 const {loveSenseToken, uid, toyId} = require('../../config.json');
 
-export abstract class ActivateVibrator {
+export abstract class MessageListener {
 
     @On("message")
     @Guard(NotBot, PremiumChannelOnlyCommand, BlockGuard)
@@ -22,6 +22,30 @@ export abstract class ActivateVibrator {
             fetch(`https://api.lovense.com/api/lan/command?token=${loveSenseToken}&uid=${uid}&command=${command}&v=${v}&t=${toyId}&sec=${sec}`, {
                 method: 'post'
             });
+        }
+    }
+
+    @On("message")
+    @Guard(NotBot)
+    private moeLoliDestroyer([message]: ArgsOf<"message">, client: Client): void {
+        if (message.member.id === "270632394137010177") {
+            let banned = ["ì", "|", "lol"];
+            let messageContent = message.content;
+            let shouldBlock = false;
+            for (let ban of banned) {
+                if (messageContent.toLowerCase().includes(ban)) {
+                    shouldBlock = true;
+                    break;
+                }
+            }
+            if (shouldBlock) {
+                message.reply("Poser").then(value => {
+                    setTimeout(args => {
+                        value.delete();
+                    }, 3000);
+                });
+                message.delete();
+            }
         }
     }
 }
