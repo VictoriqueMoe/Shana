@@ -17,7 +17,7 @@ export class Test {
             } while (ctx.measureText(text).width > canvas.width - 300);
             return ctx.font;
         };
-        let member = command.member;
+        const member = command.member;
         const canvas = Canvas.createCanvas(700, 250);
         const ctx = canvas.getContext('2d');
 

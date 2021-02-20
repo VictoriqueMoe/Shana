@@ -4,6 +4,7 @@ import {Main} from "../Main";
 
 export abstract class CloseableModule extends BaseDAO<ICloseOption> {
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     protected constructor(private _model: typeof ICloseOption) {
         super();
@@ -16,7 +17,7 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> {
      * Close this module, this prevents all events from being fired. events are NOT queued
      */
     public async close(): Promise<boolean> {
-        let m = await this._model.update(
+        const m = await this._model.update(
             {
                 "status": false
             },
@@ -33,7 +34,7 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> {
      * Opens this module, allowing events to be fired.
      */
     public async open(): Promise<boolean> {
-        let m = await this._model.update(
+        const m = await this._model.update(
             {
                 "status": true
             },

@@ -6,11 +6,11 @@ export const PremiumChannelOnlyCommand: GuardFunction<"message"> = async (
     client,
     next
 ) => {
-    let channel = message.channel;
+    const channel = message.channel;
     if (!(channel instanceof TextChannel)) {
         return;
     }
-    let cat = channel.parent;
+    const cat = channel.parent;
     if (cat.id === "769353703761117194") {
         return await next();
     }

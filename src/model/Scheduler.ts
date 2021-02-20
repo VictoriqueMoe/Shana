@@ -8,9 +8,6 @@ export class Scheduler {
 
     protected static instance: Scheduler;
 
-    protected constructor() {
-    }
-
     protected _jobs: IScheduledJob[] = [];
 
     public static getInstance(): Scheduler {
@@ -39,8 +36,8 @@ export class Scheduler {
         }
 
         console.log(`Register function ${name}`);
-        let job = schedule.scheduleJob(name, whenToExecute, callBack);
-        let sJob = this.registerJob(name, job);
+        const job = schedule.scheduleJob(name, whenToExecute, callBack);
+        const sJob = this.registerJob(name, job);
         this.jobs.push(sJob);
         return sJob;
     }
@@ -64,13 +61,13 @@ export class Scheduler {
     }
 
     public cancelJob(name: string): boolean {
-        let j = this.jobs.find(j => j.name === name);
+        const j = this.jobs.find(j => j.name === name);
         if (j == null) {
             return false;
         }
         console.log(`job ${name} has been cancelled`);
-        let jobObj = j.job;
-        let b = jobObj.cancel();
+        const jobObj = j.job;
+        const b = jobObj.cancel();
         ObjectUtil.removeObjectFromArray(j, this.jobs);
         return b;
     }

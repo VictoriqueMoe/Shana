@@ -13,12 +13,12 @@ export abstract class MessageListener {
     @On("message")
     @Guard(NotBot, PremiumChannelOnlyCommand, BlockGuard)
     private activateVibrator([message]: ArgsOf<"message">, client: Client): void {
-        let hasPingedRole = message.mentions.roles.has(RolesEnum.WEEB_OVERLORD); // whore role
+        const hasPingedRole = message.mentions.roles.has(RolesEnum.WEEB_OVERLORD); // whore role
         if (hasPingedRole) {
             console.log(`user: ${message.author.username} pinged your role`);
-            let command = "AVibrate";
-            let v = 20;
-            let sec = 1;
+            const command = "AVibrate";
+            const v = 20;
+            const sec = 1;
             fetch(`https://api.lovense.com/api/lan/command?token=${loveSenseToken}&uid=${uid}&command=${command}&v=${v}&t=${toyId}&sec=${sec}`, {
                 method: 'post'
             });
@@ -29,10 +29,10 @@ export abstract class MessageListener {
     @Guard(NotBot)
     private moeLoliDestroyer([message]: ArgsOf<"message">, client: Client): void {
         if (message.member.id === "270632394137010177") {
-            let banned = ["ì", "|", "lol"];
-            let messageContent = message.content;
+            const banned = ["ì", "|", "lol"];
+            const messageContent = message.content;
             let shouldBlock = false;
-            for (let ban of banned) {
+            for (const ban of banned) {
                 if (messageContent.toLowerCase().includes(ban)) {
                     shouldBlock = true;
                     break;

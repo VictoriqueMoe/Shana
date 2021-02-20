@@ -11,7 +11,7 @@ export abstract class MuteRoleListener extends AbstractRoleApplier<RolesEnum.MUT
 
     @On("guildMemberUpdate")
     public async roleListener([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
-        let didRemove = await super.onChange(RolesEnum.MUTED, new UserChange(oldUser, newUser), RolePersistenceModel);
+        const didRemove = await super.onChange(RolesEnum.MUTED, new UserChange(oldUser, newUser), RolePersistenceModel);
         // mute was removed, so clear the timeout and mute Model if one exists
         if (didRemove) {
             try {

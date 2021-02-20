@@ -15,10 +15,10 @@ export class AutoRole extends CloseableModule {
     @On("guildMemberAdd")
     @Guard(EnabledGuard("AutoRole"))
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
-        let now = Date.now();
-        let seventySeconds = 70000;
-        let toAddRole = now + seventySeconds;
-        let d = new Date(toAddRole);
+        const now = Date.now();
+        const seventySeconds = 70000;
+        const toAddRole = now + seventySeconds;
+        const d = new Date(toAddRole);
         //TODO use scheduler
         schedule.scheduleJob(`enable ${member.user.username}`, d, () => {
             try{

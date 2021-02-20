@@ -10,13 +10,13 @@ export abstract class AMessageScheduler {
     @Guard(AdminOnlyTask, BlockGuard)
     //TODO: add help description ~help
     private scheduleMessage(command: CommandMessage): void {
-        let argumentArray = StringUtils.splitCommandLine(command.content);
+        const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 4) {
             command.reply("Arguments invalid, please make sure you supply: Name, Message, Chron and channelID each in quotes");
             return;
         }
-        let [name, message, chron, channelName] = StringUtils.splitCommandLine(command.content);
-        let channel = DiscordUtils.findChannelByName(channelName);
+        const [name, message, chron, channelName] = StringUtils.splitCommandLine(command.content);
+        const channel = DiscordUtils.findChannelByName(channelName);
         if (channel == null) {
             command.reply("Invalid channel name");
             return;
@@ -48,8 +48,8 @@ export abstract class AMessageScheduler {
     @Command("cancelScheduledMessage")
     @Guard(AdminOnlyTask, BlockGuard)
     private cancelScheduledMessage(command: CommandMessage): void {
-        let names = StringUtils.splitCommandLine(command.content);
-        for(let name of names){
+        const names = StringUtils.splitCommandLine(command.content);
+        for(const name of names){
             MessageScheduler.getInstance().cancelJob(name);
         }
 
@@ -59,14 +59,14 @@ export abstract class AMessageScheduler {
     @Command("getAllScheduledMessages")
     @Guard(AdminOnlyTask, BlockGuard)
     private getAllScheduledMessages(command: CommandMessage): void {
-        let allJobs = MessageScheduler.getInstance().jobs;
+        const allJobs = MessageScheduler.getInstance().jobs;
         if (allJobs.length === 0) {
             command.reply("There are no pending scheduled messages");
             return;
         }
-        let str = `there are ${allJobs.length} scheduled posts active \n` + allJobs.map(job => {
-            let channelThisJobBelongsTo = job.channel;
-            let nameOfJob = job.name;
+        const str = `there are ${allJobs.length} scheduled posts active \n` + allJobs.map(job => {
+            const channelThisJobBelongsTo = job.channel;
+            const nameOfJob = job.name;
             return `${nameOfJob} posts to "<#${channelThisJobBelongsTo.id}>"`;
         }).join("\n");
         command.reply(str);

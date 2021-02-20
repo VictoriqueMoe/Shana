@@ -28,9 +28,9 @@ export abstract class OnReady extends BaseDAO<any> {
     }
 
     private async initUsernames(): Promise<void> {
-        let allModels = await UsernameModel.findAll();
-        let guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
-        let pArr = allModels.map(model => {
+        const allModels = await UsernameModel.findAll();
+        const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        const pArr = allModels.map(model => {
             return guild.members.fetch(model.userId).then(member => {
                 return member.setNickname(model.usernameToPersist);
             }).then(member => {
@@ -42,19 +42,19 @@ export abstract class OnReady extends BaseDAO<any> {
     }
 
     private static async initiateMuteTimers(): Promise<void> {
-        let mutesWithTimers = await MuteModel.findAll({
+        const mutesWithTimers = await MuteModel.findAll({
             where: {
                 timeout: {
                     [Op.not]: null
                 }
             }
         });
-        let now = Date.now();
-        for (let mute of mutesWithTimers) {
-            let muteCreated = (mute.createdAt as Date).getTime();
-            let timerLength = mute.timeout;
-            let timeLeft = timerLength - (now - muteCreated);
-            let guild: Guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        const now = Date.now();
+        for (const mute of mutesWithTimers) {
+            const muteCreated = (mute.createdAt as Date).getTime();
+            const timerLength = mute.timeout;
+            const timeLeft = timerLength - (now - muteCreated);
+            const guild: Guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
             if (timeLeft <= 0) {
                 console.log(`Timer has expired for user ${mute.username}, removing from database`);
                 await MuteModel.destroy({
@@ -70,16 +70,16 @@ export abstract class OnReady extends BaseDAO<any> {
     }
 
     private async populateClosableEvents(): Promise<void> {
-        let allModules = Main.closeableModules;
-        for (let module of allModules) {
-            let moduleId = module.moduleId;
-            let exists = await CloseOptionModel.findOne({
+        const allModules = Main.closeableModules;
+        for (const module of allModules) {
+            const moduleId = module.moduleId;
+            const exists = await CloseOptionModel.findOne({
                 where: {
                     moduleId
                 }
             });
             if (!exists) {
-                let m = new CloseOptionModel({
+                const m = new CloseOptionModel({
                     moduleId
                 });
                 try {

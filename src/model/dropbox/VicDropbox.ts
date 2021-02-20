@@ -4,19 +4,19 @@ import * as _ from "lodash";
 
 export class VicDropbox {
     private static _instance: VicDropbox;
-    private isIndexed: boolean = false;
+    private isIndexed = false;
     private imageCache: files.FolderMetadataReference[];
 
     private constructor() {
         this.imageCache = [];
         this.isIndexed = false;
-        let handler = {
+        const handler = {
             get(target, propKey, receiver) {
                 if (typeof target[propKey] === 'function') {
                     return new Proxy(target[propKey], {
                         apply(applyTarget, thisArg, args) {
-                            let isIndexed = target.isIndexed;
-                            let isIndexMethod = applyTarget.name === "index";
+                            const isIndexed = target.isIndexed;
+                            const isIndexMethod = applyTarget.name === "index";
                             if (!isIndexMethod && !isIndexed) {
                                 throw new Error("Index must be called before using this class");
                             }

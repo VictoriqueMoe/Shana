@@ -1,12 +1,18 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
+  "rules": {
+    "@typescript-eslint/no-namespace": "off",
+    "no-empty": ["warn", { "allowEmptyCatch": true }],
+    "no-shadow-restricted-names": "off",
+    "@typescript-eslint/no-var-requires": 0,
+    "@typescript-eslint/ban-ts-comment":"off"
+  },
   "plugins": [
     "@typescript-eslint"
   ],
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ]
 }

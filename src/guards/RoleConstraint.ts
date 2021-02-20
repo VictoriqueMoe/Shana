@@ -3,14 +3,14 @@ import {GuildUtils} from "../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
 export const roleConstraints = (...roles: RolesEnum[]) => async ([message], client, next) => {
-    let member = await message.member.fetch();
-    let memberRoles = member.roles.cache;
+    const member = await message.member.fetch();
+    const memberRoles = member.roles.cache;
     if(GuildUtils.isMemberAdmin(message.member)){
         await next();
         return;
     }
-    for (let [, role] of memberRoles) {
-        let id = role.id;
+    for (const [, role] of memberRoles) {
+        const id = role.id;
         if (roles.includes(id as RolesEnum)) {
             await next();
             return;

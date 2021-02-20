@@ -16,6 +16,7 @@ export abstract class WeebBot {
 
     @CommandNotFound()
     private notFoundA(command: CommandMessage): void {
+        console.log(`invalid ${command.content}`);
     }
 
     public static get dropBox(): Dropbox {

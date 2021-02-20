@@ -11,7 +11,7 @@ export abstract class SpecialLeave extends BaseDAO<RolePersistenceModel> {
 
     @On("guildMemberRemove")
     private async specialLeave([member]: ArgsOf<"guildMemberRemove">, client: Client): Promise<void> {
-        let model = await new SpecialProxy().roleLeaves(RolesEnum.SPECIAL, member as GuildMember, RolePersistenceModel);
+        const model = await new SpecialProxy().roleLeaves(RolesEnum.SPECIAL, member as GuildMember, RolePersistenceModel);
         if (model) {
             try {
                 await super.commitToDatabase(model);

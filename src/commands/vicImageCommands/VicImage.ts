@@ -14,10 +14,10 @@ export abstract class VicImage {
     @Description(VicImage.getVicImageDescription())
     @Guard(NotBot, roleConstraints(RolesEnum.ZOMBIES, RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async vicImage(command: CommandMessage): Promise<void> {
-        let findingMessage = await command.channel.send("Finding image...");
-        let randomImageMetadata = VicDropbox.instance.randomImage;
-        let randomImage = (await WeebBot.dropBox.filesDownload({"path": randomImageMetadata.path_lower})).result;
-        let buffer: Buffer = (randomImage as any).fileBinary;
+        const findingMessage = await command.channel.send("Finding image...");
+        const randomImageMetadata = VicDropbox.instance.randomImage;
+        const randomImage = (await WeebBot.dropBox.filesDownload({"path": randomImageMetadata.path_lower})).result;
+        const buffer: Buffer = (randomImage as any).fileBinary;
         try {
             await command.channel.send("Found one!", {
                 files: [{

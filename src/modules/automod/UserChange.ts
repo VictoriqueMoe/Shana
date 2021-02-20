@@ -14,11 +14,11 @@ export class UserChange {
     }
 
     public get roleChanges(): RoleChangeType {
-        let oldRoles = this.oldUser.roles.cache.keyArray();
-        let newRoles = this.newUser.roles.cache.keyArray();
+        const oldRoles = this.oldUser.roles.cache.keyArray();
+        const newRoles = this.newUser.roles.cache.keyArray();
 
-        let remove: RolesEnum[] = oldRoles.filter(x => !newRoles.includes(x)).map(x => EnumEx.loopBack(RolesEnum, x, true));
-        let add: RolesEnum[] = newRoles.filter(x => !oldRoles.includes(x)).map(x => EnumEx.loopBack(RolesEnum, x, true));
+        const remove: RolesEnum[] = oldRoles.filter(x => !newRoles.includes(x)).map(x => EnumEx.loopBack(RolesEnum, x, true));
+        const add: RolesEnum[] = newRoles.filter(x => !oldRoles.includes(x)).map(x => EnumEx.loopBack(RolesEnum, x, true));
 
         return {
             remove,

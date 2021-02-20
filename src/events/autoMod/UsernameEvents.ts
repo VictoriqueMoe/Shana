@@ -7,8 +7,8 @@ export abstract class UsernameEvents {
 
     @On("guildMemberAdd")
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
-        let userId = member.id;
-        let modelObj = await UsernameModel.findOne({
+        const userId = member.id;
+        const modelObj = await UsernameModel.findOne({
             where: {
                 userId
             }
@@ -20,29 +20,29 @@ export abstract class UsernameEvents {
 
     @On("guildMemberUpdate")
     public async onMemberUpdate([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
-        let isNickChange = oldUser.nickname !== newUser.nickname;
+        const isNickChange = oldUser.nickname !== newUser.nickname;
         if (isNickChange) {
-            let userId = newUser.id;
-            let modelObj = await UsernameModel.findOne({
+            const userId = newUser.id;
+            const modelObj = await UsernameModel.findOne({
                 where: {
                     userId
                 }
             });
             if (modelObj) {
-                let fetchedLogs = await newUser.guild.fetchAuditLogs({
+                const fetchedLogs = await newUser.guild.fetchAuditLogs({
                     limit: 1,
                     type: 'MEMBER_UPDATE'
                 });
-                let roleLog = fetchedLogs.entries.first();
-                let executor = roleLog.executor;
+                const roleLog = fetchedLogs.entries.first();
+                const executor = roleLog.executor;
                 if (executor.id === "806288433323966514") {
                     return;
                 }
-                let guild = await client.guilds.fetch(GuildUtils.getGuildID());
-                let member = await guild.members.fetch(executor.id);
-                let isMemberStaff = Roles.isMemberStaff(member);
+                const guild = await client.guilds.fetch(GuildUtils.getGuildID());
+                const member = await guild.members.fetch(executor.id);
+                const isMemberStaff = Roles.isMemberStaff(member);
                 if (isMemberStaff || (executor.id === newUser.id && modelObj.force === false)) {
-                    let newNick = newUser.nickname;
+                    const newNick = newUser.nickname;
                     if(newNick  === null){
                         await UsernameModel.destroy({
                             where:{

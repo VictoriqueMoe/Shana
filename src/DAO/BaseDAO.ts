@@ -31,7 +31,7 @@ export abstract class BaseDAO<T extends Model> {
     }*/
 
     protected async commitToDatabase(model: T, options?: SaveOptions, silentOnDupe = false): Promise<T> {
-        let channel: TextChannel = Main.client.channels.cache.get(Channels.TEST_CHANNEL) as TextChannel;
+        const channel: TextChannel = Main.client.channels.cache.get(Channels.TEST_CHANNEL) as TextChannel;
         let errorStr = "";
         // hacky 'mc hack
         try {
@@ -41,9 +41,9 @@ export abstract class BaseDAO<T extends Model> {
                 if (e instanceof UniqueConstraintError) {
                     throw new UniqueViolationError(e.message);
                 } else if (e instanceof ValidationError) {
-                    let errors = e.errors;
+                    const errors = e.errors;
                     let isOnlyUniqueError = true;
-                    for (let error of errors) {
+                    for (const error of errors) {
                         if (error.type !== "unique violation") {
                             isOnlyUniqueError = false;
                         }

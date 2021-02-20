@@ -18,16 +18,16 @@ export class ChronException extends Error {
     }
 }
 
-export module GuildUtils {
+export namespace GuildUtils {
     export function getGuildID(): string {
         return GuildID as string;
     }
 
     export function isMemberAdmin(member: GuildMember): boolean {
-        let memberRoles = member.roles.cache;
-        for (let [, role] of memberRoles) {
-            let perms = role.permissions;
-            let isAdmin = perms.has(Permissions.FLAGS.ADMINISTRATOR, true);
+        const memberRoles = member.roles.cache;
+        for (const [, role] of memberRoles) {
+            const perms = role.permissions;
+            const isAdmin = perms.has(Permissions.FLAGS.ADMINISTRATOR, true);
             if (isAdmin) {
                 return true;
             }
@@ -40,21 +40,21 @@ export module GuildUtils {
     }
 }
 
-export module StringUtils {
+export namespace StringUtils {
     export function splitCommandLine(commandLine): string[] {
         let spaceMarker = '<SP>';
         while (commandLine.indexOf(spaceMarker) > -1) {
             spaceMarker += '@';
         }
-        let noSpacesInQuotes = commandLine.replace(/"([^"]*)"?/g, (fullMatch, capture) => capture.replace(/ /g, spaceMarker));
-        let mangledParamArray = noSpacesInQuotes.split(/ +/);
-        let paramArray = mangledParamArray.map((mangledParam) => mangledParam.replace(RegExp(spaceMarker, 'g'), ' '));
+        const noSpacesInQuotes = commandLine.replace(/"([^"]*)"?/g, (fullMatch, capture) => capture.replace(/ /g, spaceMarker));
+        const mangledParamArray = noSpacesInQuotes.split(/ +/);
+        const paramArray = mangledParamArray.map((mangledParam) => mangledParam.replace(RegExp(spaceMarker, 'g'), ' '));
         paramArray.shift();
         return paramArray;
     }
 }
 
-export module ChronUtils {
+export namespace ChronUtils {
     export function chronToString(chron: string): string {
         if (!isValidCron(chron, {
             seconds: true,
@@ -66,10 +66,10 @@ export module ChronUtils {
     }
 }
 
-export module DiscordUtils {
+export namespace DiscordUtils {
     export function findChannelByName(channelName: string): GuildChannel {
-        let channels = Main.client.guilds.cache.get(GuildUtils.getGuildID()).channels;
-        for (let [, channel] of channels.cache) {
+        const channels = Main.client.guilds.cache.get(GuildUtils.getGuildID()).channels;
+        for (const [, channel] of channels.cache) {
             if (channel.name === channelName) {
                 return channel;
             }
@@ -78,7 +78,7 @@ export module DiscordUtils {
     }
 
     export async function postToLog(text: string): Promise<Message> {
-        let guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
         let channel: TextChannel = null;
         if (Main.testMode) {
             channel = await guild.channels.resolve("793994947241312296") as TextChannel; // test channel
@@ -94,20 +94,20 @@ export module DiscordUtils {
      * @private
      */
     export async function canUserPreformBlock(command: CommandMessage): Promise<boolean> {
-        let userToBlockCollection = command.mentions.members;
+        const userToBlockCollection = command.mentions.members;
         let userToBlock = userToBlockCollection.values().next().value as GuildMember;
         userToBlock = await userToBlock.fetch(true);
-        let userToBlockHighestRole = userToBlock.roles.highest;
+        const userToBlockHighestRole = userToBlock.roles.highest;
 
         let userPreformingCommand = await command.member.fetch(true);
         userPreformingCommand = await userPreformingCommand.fetch(true);
-        let userPreformingActionHigestRole = userPreformingCommand.roles.highest;
+        const userPreformingActionHigestRole = userPreformingCommand.roles.highest;
 
         return userPreformingActionHigestRole.position > userToBlockHighestRole.position;
     }
 
     export async function getUserBlocked(message: Message): Promise<MuteModel> {
-        let userWhoPosted = message.member.id;
+        const userWhoPosted = message.member.id;
         return await MuteModel.findOne({
             where: {
                 userId: userWhoPosted
@@ -116,7 +116,7 @@ export module DiscordUtils {
     }
 
     export async function getAllClosableModules(): Promise<string[]> {
-        let allModules = await CloseOptionModel.findAll({
+        const allModules = await CloseOptionModel.findAll({
             attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('moduleId')), 'moduleId']],
             where: {}
         });
@@ -124,8 +124,8 @@ export module DiscordUtils {
     }
 
     export function getModule(moduleId: string): CloseableModule {
-        let modules = Main.closeableModules;
-        for (let module of modules) {
+        const modules = Main.closeableModules;
+        for (const module of modules) {
             if (module.moduleId === moduleId) {
                 return module;
             }
@@ -144,7 +144,7 @@ export class ObjectUtil {
     }
 
     public static secondsToHuman(seconds: number): string {
-        let levels = [
+        const levels = [
             [Math.floor(seconds / 31536000), 'years'],
             [Math.floor((seconds % 31536000) / 86400), 'days'],
             [Math.floor(((seconds % 31536000) % 86400) / 3600), 'hours'],
@@ -167,7 +167,7 @@ export class ObjectUtil {
         if (strings.length === 0) {
             return false;
         }
-        for (let currString of strings) {
+        for (const currString of strings) {
             if (typeof currString !== "string") {
                 return false;
             }
@@ -184,7 +184,7 @@ export class ObjectUtil {
     public static removeObjectFromArray(itemToRemove: any, arr: any[]): void {
         let arrLen = arr.length;
         while (arrLen--) {
-            let currentItem: any = arr[arrLen];
+            const currentItem: any = arr[arrLen];
             if (itemToRemove === currentItem) {
                 arr.splice(arrLen, 1);
             }
@@ -194,7 +194,7 @@ export class ObjectUtil {
 
 
 export class EnumEx {
-    public static getNamesAndValues<T extends number>(e: any): Array<object> {
+    public static getNamesAndValues<T extends number>(e: any): Array<unknown> {
         return EnumEx.getNames(e).map(n => ({name: n, value: e[n] as T}));
     }
 
@@ -204,10 +204,10 @@ export class EnumEx {
      * @param aName
      * @returns {string|null}
      */
-    public static loopBack<T>(e: any, aName: any, asValue: boolean = false): T {
-        let keyValuePair: Array<{ name: T, value: any }> = EnumEx.getNamesAndValues(e) as Array<{ name: T, value: any }>;
-        for (let i: number = 0; i < keyValuePair.length; i++) {
-            let obj: { name: T, value: any } = keyValuePair[i];
+    public static loopBack<T>(e: any, aName: any, asValue = false): T {
+        const keyValuePair: Array<{ name: T, value: any }> = EnumEx.getNamesAndValues(e) as Array<{ name: T, value: any }>;
+        for (let i = 0; i < keyValuePair.length; i++) {
+            const obj: { name: T, value: any } = keyValuePair[i];
             if (asValue) {
                 if (obj.value === aName) {
                     return obj.value;

@@ -31,14 +31,14 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         if (!fetchedLogs) {
             return;
         }
-        let roleLog = fetchedLogs.entries.first();
+        const roleLog = fetchedLogs.entries.first();
         // get the executor of the role edit
-        let executor = roleLog.executor;
+        const executor = roleLog.executor;
 
         // is the executor dyno AND was it headcrab?
-        let wasDyno = GuildUtils.getAutoBotIds().includes(executor.id);
+        const wasDyno = GuildUtils.getAutoBotIds().includes(executor.id);
         if (wasDyno) {
-            let wasHeadCrab = member.roles.cache.has(RolesEnum.HEADCRABS);
+            const wasHeadCrab = member.roles.cache.has(RolesEnum.HEADCRABS);
             if (wasHeadCrab) {
                 // remove it
                 try {
@@ -59,11 +59,11 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
      * @protected
      */
     protected async onChange(role: T, change: UserChange, model: typeof RolePersistenceModel): Promise<boolean> {
-        let isRoleRemoved = change.roleChanges.remove.includes(role);
+        const isRoleRemoved = change.roleChanges.remove.includes(role);
         // let specialRemoved = member.roles.cache.get(role) != null && member.roles.cache.get(role) == null;
-        let userId = change.newUser.id;
+        const userId = change.newUser.id;
         if (isRoleRemoved) {
-            let rowCount = await model.destroy({
+            const rowCount = await model.destroy({
                 where: {
                     userId,
                     roleId: role
@@ -72,7 +72,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
             return rowCount > 0;
         }
 
-        let dbEntry = await model.findOne({
+        const dbEntry = await model.findOne({
             where: {
                 userId,
                 roleId: role
@@ -92,8 +92,8 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
      * @protected
      */
     protected async roleJoins(role: T, member: GuildMember, model: typeof RolePersistenceModel): Promise<boolean> {
-        let userId = member.user.id;
-        let res = await model.findOne({
+        const userId = member.user.id;
+        const res = await model.findOne({
             where: {
                 userId,
                 roleId: role
@@ -114,7 +114,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
      * @protected
      */
     protected async roleLeaves(role: T, member: GuildMember, model: typeof RolePersistenceModel): Promise<RolePersistenceModel> {
-        let hasRole = member.roles.cache.has(role);
+        const hasRole = member.roles.cache.has(role);
         if (!hasRole) {
             return;
         }
@@ -146,7 +146,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         }
 
         if (!wasKicked) {
-            let roleObj = member.roles.cache.get(role);
+            const roleObj = member.roles.cache.get(role);
             // they where in special, but left on choice, this is now logged into the DB if they return
             console.log(`member ${member.user.username} left the guild while having the role of ${roleObj.name}`);
             return new model({
