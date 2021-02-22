@@ -3,8 +3,8 @@ import {NotBot} from "../../guards/NotABot";
 import {roleConstraints} from "../../guards/RoleConstraint";
 import {BlockGuard} from "../../guards/BlockGuard";
 import {Roles} from "../../enums/Roles";
-import RolesEnum = Roles.RolesEnum;
 import {ObjectUtil} from "../../utils/Utils";
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class AccountAge{
     @Command("age")

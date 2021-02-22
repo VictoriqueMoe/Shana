@@ -12,7 +12,7 @@ export abstract class SpecialJoins extends AbstractRoleApplier<RolesEnum.SPECIAL
         // member joins, check DB if they left as a special
         if (await super.roleJoins(RolesEnum.SPECIAL, member, RolePersistenceModel)) {
             // member has been found (they rejoined)
-            await DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as special (possible special evasion) \n <@697417252320051291> <@593208170869162031>`)
+            await DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as special (possible special evasion) \n <@697417252320051291> <@593208170869162031>`);
         }
     }
 }

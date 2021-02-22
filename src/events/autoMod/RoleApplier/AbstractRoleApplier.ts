@@ -2,8 +2,8 @@ import {Roles} from "../../../enums/Roles";
 import {GuildMember, User} from "discord.js";
 import {UserChange} from "../../../modules/automod/UserChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
+import {GuildUtils} from "../../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
-import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
 
 export abstract class AbstractRoleApplier<T extends RolesEnum> {
 

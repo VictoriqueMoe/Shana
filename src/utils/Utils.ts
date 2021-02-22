@@ -79,7 +79,7 @@ export namespace DiscordUtils {
 
     export async function postToLog(text: string): Promise<Message> {
         const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
-        let channel: TextChannel = null;
+        let channel: TextChannel;
         if (Main.testMode) {
             channel = await guild.channels.resolve("793994947241312296") as TextChannel; // test channel
         } else {

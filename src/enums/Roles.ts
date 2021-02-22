@@ -32,7 +32,7 @@ export namespace Roles {
             id === RolesEnum.OVERWATCH_ELITE ||
             id === RolesEnum.WEEB_OVERLORD ||
             id === RolesEnum.ADVISOR ||
-            id === RolesEnum.OWNER
+            id === RolesEnum.OWNER;
 
     }
 }

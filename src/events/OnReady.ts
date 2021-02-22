@@ -1,11 +1,10 @@
 import {On} from "@typeit/discord";
 import {Main} from "../Main";
-import {Sequelize} from "sequelize-typescript";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {Op} from "sequelize";
 import {GuildUtils, ObjectUtil} from "../utils/Utils";
-import {Guild, User} from "discord.js";
+import {Guild} from "discord.js";
 import {Mute} from "../commands/autoMod/userBlock/Mute";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
