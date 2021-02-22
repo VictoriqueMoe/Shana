@@ -1,12 +1,14 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
-import {AdminOnlyTask} from "../guards/AdminOnlyTask";
 import {DiscordUtils, StringUtils} from "../utils/Utils";
+import {roleConstraints} from "../guards/RoleConstraint";
+import {Roles} from "../enums/Roles";
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class ModuleEngine {
 
     @Command("dynoReplace")
     @Description(ModuleEngine.getEnableDynoReplaceDescription())
-    @Guard(AdminOnlyTask)
+    @Guard(roleConstraints(RolesEnum.OVERWATCH_ELITE))
     private async dynoReplace(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 1) {
@@ -25,7 +27,7 @@ export abstract class ModuleEngine {
 
     @Command("enableModule")
     @Description(ModuleEngine.getEnableModuleDescription())
-    @Guard(AdminOnlyTask)
+    @Guard(roleConstraints(RolesEnum.OVERWATCH_ELITE))
     private async enableModule(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 2) {

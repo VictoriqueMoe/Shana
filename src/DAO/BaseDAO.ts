@@ -50,7 +50,6 @@ export abstract class BaseDAO<T extends Model> {
                     }
                     if (isOnlyUniqueError) {
                         throw new UniqueViolationError(e.message);
-                        return;
                     }
                     errorStr = errors.map(error => `${error.message}`).join("\n");
                 } else {

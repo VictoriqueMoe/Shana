@@ -21,11 +21,9 @@ export class AutoRole extends CloseableModule {
         const d = new Date(toAddRole);
         //TODO use scheduler
         schedule.scheduleJob(`enable ${member.user.username}`, d, () => {
-            try {
-                member.roles.add(RolesEnum.HEADCRABS, "added via VicBot");
-            } catch {
-
-            }
+            member.roles.add(RolesEnum.HEADCRABS, "added via VicBot").catch(reason => {
+                console.log("Member does not exist in Auto Role");
+            });
         });
     }
 
