@@ -166,6 +166,7 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
             });
             DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`);
         });
+        // set the User ID to the job
         Mute._timeOutMap.set(userId, job);
     }
 

@@ -4,6 +4,25 @@ import {DiscordUtils, StringUtils} from "../utils/Utils";
 
 export abstract class ModuleEngine {
 
+    @Command("dynoReplace")
+    @Description(ModuleEngine.getEnableDynoReplaceDescription())
+    @Guard(AdminOnlyTask)
+    private async dynoReplace(command: CommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(command.content);
+        if (argumentArray.length !== 1) {
+            command.reply(`Command arguments wrong, usage: ~enableModule <"enable">`);
+            return;
+        }
+        const isEnable = argumentArray[0].toLowerCase() === "true";
+        const dynoModules = DiscordUtils.getDynoReplacementModules();
+        for (const module of dynoModules) {
+            isEnable ? await module.open() : await module.close();
+        }
+        const modulesEnabled = dynoModules.map(d => d.moduleId);
+        const str = `the following modules have been ${isEnable ? "enabled" : "disabled"}: \n ${modulesEnabled.join(", ")}`;
+        command.reply(str);
+    }
+
     @Command("enableModule")
     @Description(ModuleEngine.getEnableModuleDescription())
     @Guard(AdminOnlyTask)
@@ -33,5 +52,9 @@ export abstract class ModuleEngine {
 
     private static getEnableModuleDescription() {
         return '\n enable a module \n usage: ~enableModule <"moduleId"> <"enable"> \n example: ~enableModule "autoRole" "false" will disable the auto role module';
+    }
+
+    private static getEnableDynoReplaceDescription() {
+        return '\n enable all the modules needed to replace dyno functionality (curreonly only supports user join/leave/ban logging and auto role) \n usage: ~dynoReplace <"enable"> \n example: ~dynoReplace "true"';
     }
 }

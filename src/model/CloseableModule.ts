@@ -4,7 +4,6 @@ import {Main} from "../Main";
 
 export abstract class CloseableModule extends BaseDAO<ICloseOption> {
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     protected constructor(private _model: typeof ICloseOption) {
         super();
@@ -12,6 +11,8 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> {
     }
 
     public abstract get moduleId(): string;
+
+    public abstract get isDynoReplacement():boolean;
 
     /**
      * Close this module, this prevents all events from being fired. events are NOT queued

@@ -21,9 +21,9 @@ export class AutoRole extends CloseableModule {
         const d = new Date(toAddRole);
         //TODO use scheduler
         schedule.scheduleJob(`enable ${member.user.username}`, d, () => {
-            try{
+            try {
                 member.roles.add(RolesEnum.HEADCRABS, "added via VicBot");
-            }catch{
+            } catch {
 
             }
         });
@@ -32,6 +32,10 @@ export class AutoRole extends CloseableModule {
 
     public get moduleId(): string {
         return "AutoRole";
+    }
+
+    public get isDynoReplacement(): boolean {
+        return true;
     }
 
 }

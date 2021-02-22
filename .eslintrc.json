@@ -6,7 +6,8 @@
     "no-empty": ["warn", { "allowEmptyCatch": true }],
     "no-shadow-restricted-names": "off",
     "@typescript-eslint/no-var-requires": 0,
-    "@typescript-eslint/ban-ts-comment":"off"
+    "@typescript-eslint/ban-ts-comment":"off",
+    "@typescript-eslint/no-empty-interface": "off"
   },
   "plugins": [
     "@typescript-eslint"

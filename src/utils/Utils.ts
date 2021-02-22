@@ -132,6 +132,17 @@ export namespace DiscordUtils {
         }
         return null;
     }
+
+    export function getDynoReplacementModules(): CloseableModule[] {
+        const modules = Main.closeableModules;
+        const returnArr: CloseableModule[] = [];
+        for (const module of modules) {
+            if (module.isDynoReplacement) {
+                returnArr.push(module);
+            }
+        }
+        return returnArr;
+    }
 }
 
 export class ObjectUtil {
