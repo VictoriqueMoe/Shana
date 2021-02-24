@@ -11,10 +11,11 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
      * Give a role to a user
      * @param role
      * @param member
+     * @param reason
      * @protected
      */
-    protected async applyRole(role: T, member: GuildMember): Promise<void> {
-        await member.roles.add(role);
+    protected async applyRole(role: T, member: GuildMember, reason? :string): Promise<void> {
+        await member.roles.add(role, reason);
     }
 
     private async applyAfterDyno(role: T, member: GuildMember): Promise<void> {
@@ -107,7 +108,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
     }
 
     /**
-     * When called, This will check the the logs to see if the user left or was kicked, if left, and they have the role supplied, they will be put in the RolePersistenceModel table
+     * When called, This will check the the logs to see if the user left or was kicked, if left, and they have the role supplied, this will return a populated RolePersistenceModel object
      * @param role
      * @param member
      * @param model

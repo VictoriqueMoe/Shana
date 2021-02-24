@@ -28,6 +28,7 @@ export class AuditLogger extends CloseableModule {
     @Guard(EnabledGuard("userLog"))
     private async memberLeaves([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const memberLeft = member.id;
+        const memberUsername = member.user.username;
         const banLogs = await member.guild.fetchAuditLogs({
             limit: 1,
             type: 'MEMBER_BAN_ADD',
@@ -53,12 +54,12 @@ export class AuditLogger extends CloseableModule {
                 if (target.id === memberLeft) {
                     const personWhoDidKick = banLog.executor;
                     const reason = banLog.reason;
-                    DiscordUtils.postToLog(`<@${memberLeft}> has been kicked by ${personWhoDidKick.username} for reason: "${reason}"`);
+                    DiscordUtils.postToLog(`"${memberUsername}" has been kicked by ${personWhoDidKick.username} for reason: "${reason}"`);
                     return;
                 }
             }
         }
-        DiscordUtils.postToLog(`<@${memberLeft}> has left the server`);
+        DiscordUtils.postToLog(`"${memberUsername}" has left the server`);
     }
 
     @On("guildBanAdd")
@@ -84,5 +85,9 @@ export class AuditLogger extends CloseableModule {
 
     public get isDynoReplacement(): boolean {
         return true;
+    }
+
+    get isEnabled(): boolean {
+        return false;
     }
 }

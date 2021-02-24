@@ -13,13 +13,142 @@ import {IScheduledJob} from "../../../model/IScheduledJob";
 import {Main} from "../../../Main";
 import RolesEnum = Roles.RolesEnum;
 
-export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
-    private static _timeOutMap: Map<string, IScheduledJob> = new Map();
+export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
+    private static _instance: MuteSingleton;
+
+    private readonly _timeOutMap: Map<string, IScheduledJob> = new Map();
 
     private constructor() {
         super();
-        Mute._timeOutMap = new Map();
+        this._timeOutMap = new Map();
     }
+
+    public static get instance(): MuteSingleton {
+        if (!MuteSingleton._instance) {
+            MuteSingleton._instance = new MuteSingleton();
+        }
+        return MuteSingleton._instance;
+    }
+
+    private addRolePersist(user: GuildMember): Promise<RolePersistenceModel> {
+        return super.commitToDatabase(new RolePersistenceModel({
+            "userId": user.id,
+            "roleId": RolesEnum.MUTED
+        })) as Promise<RolePersistenceModel>;
+    }
+
+    public async muteUser(user: GuildMember, reason: string, creatorID: string, seconds?: number): Promise<MuteModel> {
+        const prevRolesArr = Array.from(user.roles.cache.values());
+        const prevRolesIdStr = prevRolesArr.map(r => r.id).join(",");
+        const blockedUserId = user.id;
+        const blockUserObject = user.user;
+        const obj = {
+            userId: blockedUserId,
+            username: blockUserObject.username,
+            reason,
+            creatorID,
+            prevRole: prevRolesIdStr
+        };
+        const hasTimeout = !Number.isNaN(seconds);
+        const maxMillis = 8640000000000000 - Date.now();
+        let millis = -1;
+        if (hasTimeout) {
+            millis = seconds * 1000;
+            obj["timeout"] = seconds * 1000;
+            if (Number.isNaN(millis) || millis <= 0 || millis > maxMillis) {
+                throw new Error(`Timout is invalid, it can not be below 0 and can not be more than: "${maxMillis / 1000}"`);
+            }
+        }
+        const model = new MuteModel(obj);
+        let userObject: GuildMember = null;
+        let savedModel: MuteModel = null;
+        try {
+            savedModel = await Main.dao.transaction(async t => {
+                const m = await super.commitToDatabase(model) as MuteModel;
+                userObject = await user.guild.members.fetch(m.userId);
+                await this.addRolePersist(userObject);
+                return m;
+            }) as MuteModel;
+        } catch {
+            return null;
+        }
+        try {
+            await userObject.roles.remove([...userObject.roles.cache.keys()]);
+        } catch {
+            return null;
+        }
+        await userObject.roles.add(RolesEnum.MUTED);
+        if (hasTimeout) {
+            MuteSingleton.instance.createTimeout(blockUserObject.id, blockUserObject.username, millis, user.guild);
+        }
+        return savedModel;
+    }
+
+    public async doRemove(userId: string, skipPersistence = false): Promise<void> {
+        const whereClaus = {
+            where: {
+                userId
+            }
+        };
+        const muteModel = await MuteModel.findOne(whereClaus);
+        if (!muteModel) {
+            throw new Error('That user is not currently muted.');
+        }
+        const prevRoles = muteModel.getPrevRoles();
+        const rowCount = await MuteModel.destroy(whereClaus);
+        if (rowCount != 1) {
+            throw new Error('That user is not currently muted.');
+        }
+        if (!skipPersistence) {
+            const persistenceModelRowCount = await RolePersistenceModel.destroy(whereClaus);
+            if (persistenceModelRowCount != 1) {
+                //the application has SHIT itself, if one table has an entry but the other not, fuck knows what to do here...
+                throw new Error("Unknown error occurred, error is a synchronisation issue between the Persistence model and the Mute Model ");
+            }
+        }
+        const timeoutMap = this.timeOutMap;
+        let hasTimer = false;
+        for (const [_userId, timeOutFunction] of timeoutMap) {
+            if (userId === _userId) {
+                console.log(`cleared timeout for ${_userId}`);
+                Scheduler.getInstance().cancelJob(timeOutFunction.name);
+                hasTimer = true;
+            }
+        }
+        if (hasTimer) {
+            this.timeOutMap.delete(userId);
+        }
+        const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        const member = await guild.members.fetch(userId);
+        await member.roles.remove(RolesEnum.MUTED);
+        for (const roleEnum of prevRoles) {
+            const role = await Roles.getRole(roleEnum);
+            console.log(`re-applying role ${role.name} to ${member.user.username}`);
+            await member.roles.add(role.id);
+        }
+    }
+
+    public get timeOutMap(): Map<string, IScheduledJob> {
+        return this._timeOutMap;
+    }
+
+    public createTimeout(userId: string, username: string, millis: number, guild: Guild): void {
+        const now = Date.now();
+        const future = now + millis;
+        const newDate = new Date(future);
+        const job = Scheduler.getInstance().register(userId, newDate, async () => {
+            await Main.dao.transaction(async t => {
+                await MuteSingleton.instance.doRemove(userId);
+            });
+            DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`);
+        });
+        // set the User ID to the job
+        this._timeOutMap.set(userId, job);
+    }
+
+}
+
+export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
 
     @Command("mute")
     @Description(Mute.getMuteDescription())
@@ -63,57 +192,25 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
             return;
         }
 
-
-        const prevRolesArr = Array.from(mentionedMember.roles.cache.values());
-        const prevRolesIdStr = prevRolesArr.map(r => r.id).join(",");
-
-        const obj = {
-            userId: blockedUserId,
-            username: blockUserObject.username,
-            reason,
-            creatorID,
-            prevRole: prevRolesIdStr
-        };
         const hasTimeout = ObjectUtil.validString(timeout) && !Number.isNaN(Number.parseInt(timeout));
-        let millis = -1;
-        let seconds = -1;
-        const maxMillis = 8640000000000000 - Date.now();
-        if (hasTimeout) {
-            obj["timeout"] = (Number.parseInt(timeout) * 1000);
-            seconds = Number.parseInt(timeout);
-            millis = seconds * 1000;
-            if (Number.isNaN(millis) || millis <= 0 || millis > maxMillis) {
-                command.reply(`Timout is invalid, it can not be below 0 and can not be more than: "${maxMillis / 1000}"`);
-                return;
+        let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
+        try {
+            if (hasTimeout) {
+                const seconds = Number.parseInt(timeout);
+                await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, seconds);
+                replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
+            } else {
+                await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID);
             }
-        }
-        const model = new MuteModel(obj);
-        let userObject: GuildMember = null;
-        let savedModel: MuteModel = null;
-        try {
-            savedModel = await Main.dao.transaction(async t => {
-                const m = await super.commitToDatabase(model) as MuteModel;
-                userObject = await command.guild.members.fetch(m.userId);
-                await this.addRolePersist(userObject);
-                return m;
-            }) as MuteModel;
-        } catch {
+        } catch (e) {
+            command.reply(e.message);
             return;
         }
-        try {
-            await userObject.roles.remove([...userObject.roles.cache.keys()]);
-        } catch {
-            return;
-        }
-        await userObject.roles.add(RolesEnum.MUTED);
-        let replyMessage = `User "${userObject.user.username}" has been muted from this server with reason "${savedModel.reason}"`;
-        if (hasTimeout) {
-            Mute.createTimeout(blockUserObject.id, blockUserObject.username, millis, command.guild);
-            replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
-        }
+
         command.reply(replyMessage);
 
     }
+
 
     @Command("viewAllMutes")
     @Description(Mute.getViewAllMuteDescription())
@@ -143,81 +240,9 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
         return currentBlocks;
     }
 
-    private addRolePersist(user: GuildMember): Promise<RolePersistenceModel> {
-        return super.commitToDatabase(new RolePersistenceModel({
-            "userId": user.id,
-            "roleId": RolesEnum.MUTED
-        })) as Promise<RolePersistenceModel>;
-    }
-
-    public static get timeOutMap(): Map<string, IScheduledJob> {
-        return Mute._timeOutMap;
-    }
-
-
-    public static createTimeout(userId: string, username: string, millis: number, guild: Guild): void {
-        const now = Date.now();
-        const future = now + millis;
-        const newDate = new Date(future);
-        const job = Scheduler.getInstance().register(userId, newDate, async () => {
-            await Main.dao.transaction(async t => {
-                await Mute.doRemove(userId);
-            });
-            DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`);
-        });
-        // set the User ID to the job
-        Mute._timeOutMap.set(userId, job);
-    }
-
-    public static async doRemove(userId: string, skipPersistence = false): Promise<void> {
-        const whereClaus = {
-            where: {
-                userId
-            }
-        };
-        const muteModel = await MuteModel.findOne(whereClaus);
-        if (!muteModel) {
-            throw new Error('That user is not currently muted.');
-        }
-        const prevRoles = muteModel.getPrevRoles();
-        const rowCount = await MuteModel.destroy(whereClaus);
-        if (rowCount != 1) {
-            throw new Error('That user is not currently muted.');
-        }
-        if (!skipPersistence) {
-            const persistenceModelRowCount = await RolePersistenceModel.destroy(whereClaus);
-            if (persistenceModelRowCount != 1) {
-                //the application has SHIT itself, if one table has an entry but the other not, fuck knows what to do here...
-                throw new Error("Unknown error occurred, error is a synchronisation issue between the Persistence model and the Mute Model ");
-            }
-        }
-        const timeoutMap = Mute.timeOutMap;
-        let hasTimer = false;
-        for (const [_userId, timeOutFunction] of timeoutMap) {
-            if (userId === _userId) {
-                console.log(`cleared timeout for ${_userId}`);
-                Scheduler.getInstance().cancelJob(timeOutFunction.name);
-                hasTimer = true;
-            }
-        }
-        if (hasTimer) {
-            Mute.timeOutMap.delete(userId);
-        }
-        const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
-        const member = await guild.members.fetch(userId);
-        await member.roles.remove(RolesEnum.MUTED);
-        for (const roleEnum of prevRoles) {
-            const role = await Roles.getRole(roleEnum);
-            console.log(`re-applying role ${role.name} to ${member.user.username}`);
-            await member.roles.add(role.id);
-        }
-    }
-
-
     private static getViewAllMuteDescription() {
         return "View all the currently active mutes";
     }
-
 
     private static getMuteDescription() {
         return `\n Block a user from sending any messages with reason \n usage: ~mute <"username"> <"reason"> [timeout in seconds] \n example: ~mute "@SomeUser" "annoying" 20 \n make sure that the @ is blue before sending`;

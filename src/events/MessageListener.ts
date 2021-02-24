@@ -29,11 +29,11 @@ export abstract class MessageListener {
     @Guard(NotBot)
     private moeLoliDestroyer([message]: ArgsOf<"message">, client: Client): void {
         if (message.member.id === "270632394137010177") {
-            const banned = ["ì", "|", "lol"];
-            const messageContent = message.content;
+            const banned = ["ì", "|", "lol", "loli"];
+            const messageContent = message.content.replace(/\s/g, '').toLocaleLowerCase();
             let shouldBlock = false;
             for (const ban of banned) {
-                if (messageContent.toLowerCase().includes(ban)) {
+                if (messageContent.includes(ban.toLocaleLowerCase())) {
                     shouldBlock = true;
                     break;
                 }

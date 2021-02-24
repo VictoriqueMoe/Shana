@@ -4,6 +4,8 @@ import {Main} from "../Main";
 
 export abstract class CloseableModule extends BaseDAO<ICloseOption> {
 
+    private _isEEnabled: boolean;
+
     // @ts-ignore
     protected constructor(private _model: typeof ICloseOption) {
         super();
@@ -12,7 +14,7 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> {
 
     public abstract get moduleId(): string;
 
-    public abstract get isDynoReplacement():boolean;
+    public abstract get isDynoReplacement(): boolean;
 
     /**
      * Close this module, this prevents all events from being fired. events are NOT queued
@@ -28,6 +30,7 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> {
                 }
             }
         );
+        this._isEEnabled = m[0] === 1;
         return m[0] === 1;
     }
 
@@ -45,6 +48,11 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> {
                 }
             }
         );
+        this._isEEnabled = m[0] === 1;
         return m[0] === 1;
+    }
+
+    public get isEnabled(): boolean {
+        return this._isEEnabled;
     }
 }

@@ -4,7 +4,7 @@ import {Roles} from "../../../enums/Roles";
 import {UserChange} from "../../../modules/automod/UserChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils} from "../../../utils/Utils";
-import {Mute} from "../../../commands/autoMod/userBlock/Mute";
+import {Mute, MuteSingleton} from "../../../commands/autoMod/userBlock/Mute";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class MuteRoleListener extends AbstractRoleApplier<RolesEnum.MUTED> {
@@ -15,7 +15,7 @@ export abstract class MuteRoleListener extends AbstractRoleApplier<RolesEnum.MUT
         // mute was removed, so clear the timeout and mute Model if one exists
         if (didRemove) {
             try {
-                await Mute.doRemove(newUser.id, true);
+                await MuteSingleton.instance.doRemove(newUser.id, true);
                 DiscordUtils.postToLog(`User: "<@${newUser.id}> has been un-muted"`);
             } catch {
             }

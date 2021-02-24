@@ -92,7 +92,11 @@ export abstract class Tag extends BaseDAO<TagModel> {
             return;
         }
         const [_name] = argumentArray;
-        const tag = await TagModel.findOne({where: {_name: _name}});
+        const tag = await TagModel.findOne({
+            where: {
+                _name: _name
+            }
+        });
         if (tag) {
             command.channel.send(`${_name} was created by ${tag.username} at ${tag.createdAt} and has been used ${tag.usage_count} times.`);
             return;

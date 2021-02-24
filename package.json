@@ -30,6 +30,8 @@
     "discord.js": "^12.5.1",
     "dropbox": "^9.1.0",
     "fetch": "^1.1.0",
+    "immutable": "^4.0.0-rc.12",
+    "isurl": "^4.0.1",
     "lodash": "^4.17.20",
     "node-fetch": "^2.6.1",
     "node-schedule": "^2.0.0",

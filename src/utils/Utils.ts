@@ -36,7 +36,7 @@ export namespace GuildUtils {
     }
 
     export function getAutoBotIds(): string[] {
-        return ["159985870458322944", "155149108183695360"];
+        return ["159985870458322944", "155149108183695360", "806288433323966514"];
     }
 }
 

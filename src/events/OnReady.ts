@@ -5,7 +5,7 @@ import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {Op} from "sequelize";
 import {GuildUtils, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
-import {Mute} from "../commands/autoMod/userBlock/Mute";
+import {Mute, MuteSingleton} from "../commands/autoMod/userBlock/Mute";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
@@ -63,7 +63,7 @@ export abstract class OnReady extends BaseDAO<any> {
                 });
             } else {
                 console.log(`Re-creating timed mute for ${mute.username}, time reamining is: ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))}`);
-                Mute.createTimeout(mute.userId, mute.username, timeLeft, guild);
+                MuteSingleton.instance.createTimeout(mute.userId, mute.username, timeLeft, guild);
             }
         }
     }

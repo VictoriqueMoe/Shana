@@ -5,9 +5,9 @@ import {ICloseOption} from "../ICloseOption";
 export class CloseOptionModel extends Model implements ICloseOption {
 
     @Column({unique: true, allowNull: false})
-    moduleId: string;
+    public moduleId: string;
 
     @Column({allowNull: false, defaultValue: false})
-    status: boolean;
+    public status: boolean;
 
 }

@@ -5,10 +5,14 @@ import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersisten
 import {DiscordUtils} from "../../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
+//todo will ultimatly be removed once this bot replaces dyno
 export abstract class SpecialJoins extends AbstractRoleApplier<RolesEnum.SPECIAL> {
 
     @On("guildMemberAdd")
     private async specialJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
+        if (DiscordUtils.getModule("AutoRole").isEnabled) {
+            return;
+        }
         // member joins, check DB if they left as a special
         if (await super.roleJoins(RolesEnum.SPECIAL, member, RolePersistenceModel)) {
             // member has been found (they rejoined)
