@@ -7,6 +7,9 @@ import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {CloseableModule} from "../model/CloseableModule";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {Sequelize} from "sequelize-typescript";
+import {defaults} from "request";
+
+const request = defaults({ encoding: null });
 
 const {GuildID} = require('../../config.json');
 
@@ -41,7 +44,7 @@ export namespace GuildUtils {
 }
 
 export namespace StringUtils {
-    export function splitCommandLine(commandLine): string[] {
+    export function splitCommandLine(commandLine: string): string[] {
         let spaceMarker = '<SP>';
         while (commandLine.indexOf(spaceMarker) > -1) {
             spaceMarker += '@';
@@ -75,6 +78,18 @@ export namespace DiscordUtils {
             }
         }
         return null;
+    }
+
+    export function loadImage(url: string): Promise<Buffer> {
+        return new Promise((resolve, reject) => {
+            request.get(url, function (err, resp, buffer) {
+                if(err){
+                    reject(err);
+                    return;
+                }
+                resolve(buffer);
+            });
+        });
     }
 
     export async function postToLog(text: string): Promise<Message> {

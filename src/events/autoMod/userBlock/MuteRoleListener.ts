@@ -4,7 +4,7 @@ import {Roles} from "../../../enums/Roles";
 import {UserChange} from "../../../modules/automod/UserChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils} from "../../../utils/Utils";
-import {Mute, MuteSingleton} from "../../../commands/autoMod/userBlock/Mute";
+import {MuteSingleton} from "../../../commands/autoMod/userBlock/MuteSingleton";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class MuteRoleListener extends AbstractRoleApplier<RolesEnum.MUTED> {

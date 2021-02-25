@@ -28,11 +28,12 @@
     "cron-validator": "^1.2.1",
     "cronstrue": "^1.109.0",
     "discord.js": "^12.5.1",
-    "dropbox": "^9.1.0",
+    "dropbox": "^9.2.0",
     "fetch": "^1.1.0",
+    "gm": "^1.23.1",
     "immutable": "^4.0.0-rc.12",
     "isurl": "^4.0.1",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "node-fetch": "^2.6.1",
     "node-schedule": "^2.0.0",
     "reflect-metadata": "^0.1.13",
@@ -44,12 +45,12 @@
   "homepage": "https://github.com/VictoriqueMoe/SlutBot#readme",
   "devDependencies": {
     "@types/node": "^14.14.31",
-    "@typescript-eslint/eslint-plugin": "^4.15.1",
-    "@typescript-eslint/parser": "^4.15.1",
+    "@typescript-eslint/eslint-plugin": "^4.15.2",
+    "@typescript-eslint/parser": "^4.15.2",
     "eslint": "^7.20.0",
     "ts-lint": "^4.5.1",
     "ts-node": "^9.1.1",
     "tslib": "^2.1.0",
-    "typescript": "^4.1.5"
+    "typescript": "^4.2.2"
   }
 }

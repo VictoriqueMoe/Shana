@@ -2,12 +2,12 @@ import {CloseableModule} from "../../model/CloseableModule";
 import {CloseOptionModel} from "../../model/DB/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {BlockGuard} from "../../guards/BlockGuard";
 import {MessageGateKeeperManager} from "../../model/MessageGateKeeperManager";
 import {ACTION} from "../../enums/ACTION";
-import {MuteSingleton} from "../../commands/autoMod/userBlock/Mute";
 import {Main} from "../../Main";
 import {excludeGuard} from "../../guards/ExcludeGuard";
+import {MuteSingleton} from "../../commands/autoMod/userBlock/MuteSingleton";
+import {EnabledGuard} from "../../guards/EnabledGuard";
 
 export class MessageGateKeeper extends CloseableModule {
 
@@ -16,7 +16,7 @@ export class MessageGateKeeper extends CloseableModule {
     }
 
     @On("message")
-    @Guard(NotBot, excludeGuard)
+    @Guard(NotBot, excludeGuard, EnabledGuard("MessageGateKeeper"))
     private async process([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const filters = MessageGateKeeperManager.instance.filters;
         outer:

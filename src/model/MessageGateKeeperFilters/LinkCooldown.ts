@@ -1,5 +1,4 @@
 import {ACTION} from "../../enums/ACTION";
-import {MessageGateKeeperManager} from "../MessageGateKeeperManager";
 import {IValueBackedMessageGateKeeperFilter} from "../../modules/automod/IValueBackedMessageGateKeeperFilter";
 import {Message} from "discord.js";
 import {CooldownArray} from "../CooldownArray";
@@ -12,7 +11,6 @@ export class LinkCooldown extends AbstractFilter implements IValueBackedMessageG
     public constructor() {
         super();
         this.cooldownArray = new CooldownArray(Number.parseInt(this.value));
-        MessageGateKeeperManager.instance.addFilter(this);
     }
 
     public get actions(): ACTION[] {

@@ -1,8 +1,8 @@
 import {GuildUtils} from "../utils/Utils";
 import {Roles} from "../enums/Roles";
 import {GuildMember} from "discord.js";
-import RolesEnum = Roles.RolesEnum;
 import {GuardFunction} from "@typeit/discord";
+import RolesEnum = Roles.RolesEnum;
 
 export const excludeGuard: GuardFunction<"message"> = async (
     [message],

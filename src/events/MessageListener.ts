@@ -24,28 +24,4 @@ export abstract class MessageListener {
             });
         }
     }
-
-    @On("message")
-    @Guard(NotBot)
-    private moeLoliDestroyer([message]: ArgsOf<"message">, client: Client): void {
-        if (message.member.id === "270632394137010177") {
-            const banned = ["ì", "|", "lol", "loli"];
-            const messageContent = message.content.replace(/\s/g, '').toLocaleLowerCase();
-            let shouldBlock = false;
-            for (const ban of banned) {
-                if (messageContent.includes(ban.toLocaleLowerCase())) {
-                    shouldBlock = true;
-                    break;
-                }
-            }
-            if (shouldBlock) {
-                message.reply("Poser").then(value => {
-                    setTimeout(args => {
-                        value.delete();
-                    }, 3000);
-                });
-                message.delete();
-            }
-        }
-    }
 }

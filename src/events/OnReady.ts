@@ -5,10 +5,10 @@ import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {Op} from "sequelize";
 import {GuildUtils, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
-import {Mute, MuteSingleton} from "../commands/autoMod/userBlock/Mute";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
+import {MuteSingleton} from "../commands/autoMod/userBlock/MuteSingleton";
 
 /**
  * TODO: couple this class to appropriate classes
@@ -34,8 +34,11 @@ export abstract class OnReady extends BaseDAO<any> {
                 return member.setNickname(model.usernameToPersist);
             }).then(member => {
                 console.log(`Set username for "${member.user.username}" to "${model.usernameToPersist}"`);
+            }).catch(reason => {
+                console.log(`Unable to set username for user ${model.userId} as they no longer exist in this guild`);
             });
         });
+
         await Promise.all(pArr);
         console.log("set all Usernames");
     }

@@ -1,8 +1,13 @@
 import {IMessageGateKeeperFilter} from "../../modules/automod/IMessageGateKeeperFilter";
 import {Message} from "discord.js";
 import {ACTION} from "../../enums/ACTION";
+import {MessageGateKeeperManager} from "../MessageGateKeeperManager";
 
 export abstract class AbstractFilter implements IMessageGateKeeperFilter{
+
+    protected constructor() {
+        MessageGateKeeperManager.instance.addFilter(this);
+    }
 
     /**
      *  Get the number of filter violations needed in order to activate a mute if the filter defines a punishment as mute
