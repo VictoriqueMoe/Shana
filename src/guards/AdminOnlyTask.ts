@@ -6,7 +6,7 @@ export const AdminOnlyTask: GuardFunction<"message"> = async (
     client,
     next
 ) => {
-    if(GuildUtils.isMemberAdmin(message.member)){
+    if (GuildUtils.isMemberAdmin(message.member)) {
         await next();
         return;
     }

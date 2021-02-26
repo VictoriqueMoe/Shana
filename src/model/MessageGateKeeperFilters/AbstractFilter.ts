@@ -3,7 +3,7 @@ import {Message} from "discord.js";
 import {ACTION} from "../../enums/ACTION";
 import {MessageGateKeeperManager} from "../MessageGateKeeperManager";
 
-export abstract class AbstractFilter implements IMessageGateKeeperFilter{
+export abstract class AbstractFilter implements IMessageGateKeeperFilter {
 
     protected constructor() {
         MessageGateKeeperManager.instance.addFilter(this);

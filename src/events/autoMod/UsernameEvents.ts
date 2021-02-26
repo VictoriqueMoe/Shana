@@ -43,13 +43,13 @@ export abstract class UsernameEvents {
                 const isMemberStaff = Roles.isMemberStaff(member);
                 if (isMemberStaff || (executor.id === newUser.id && modelObj.force === false)) {
                     const newNick = newUser.nickname;
-                    if(newNick  === null){
+                    if (newNick === null) {
                         await UsernameModel.destroy({
-                            where:{
+                            where: {
                                 userId
                             }
                         });
-                    }else{
+                    } else {
                         await UsernameModel.update(
                             {
                                 "usernameToPersist": newUser.nickname
@@ -61,9 +61,9 @@ export abstract class UsernameEvents {
                             }
                         );
                     }
-                    if(newUser.nickname == null){
+                    if (newUser.nickname == null) {
                         DiscordUtils.postToLog(`User "${newUser.user.username}" has been reset and removed from database`);
-                    }else{
+                    } else {
                         DiscordUtils.postToLog(`User "${newUser.user.username}" has a persisted nickname of "${modelObj.usernameToPersist}", howerver, this has been updated to "${newUser.nickname === null ? newUser.user.username : newUser.nickname}"`);
                     }
                     return;

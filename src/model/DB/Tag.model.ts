@@ -1,21 +1,21 @@
 import {AllowNull, Column, DataType, Default, Model, Table} from 'sequelize-typescript';
 
 @Table
-export class TagModel extends Model{
+export class TagModel extends Model {
 
     @Column({unique: true})
     private _name: string;
 
     @Column(DataType.TEXT)
-    private _description:string;
+    private _description: string;
 
     @Column
-    private _username:string;
+    private _username: string;
 
     @AllowNull(false)
     @Default(0)
     @Column(DataType.INTEGER)
-    private _usage_count:number;
+    private _usage_count: number;
 
     public get name(): string {
         return this._name;

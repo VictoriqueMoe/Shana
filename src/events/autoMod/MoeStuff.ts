@@ -40,10 +40,15 @@ export abstract class MoeStuff {
             if (hasAttachments) {
                 for (const [, attatchmentObject] of attachments) {
                     const urlToImage = attatchmentObject.attachment as string;
-                    const image = await DiscordUtils.loadImage(urlToImage);
-                    const localImage = await fs.promises.readFile(`${__dirname}/../../bannedImages/9151420Mm6ymStm_1.gif`);
-                    if (image.equals(localImage)) {
-                        this.doPoser(message);
+                    const image = await DiscordUtils.loadResourceFromURL(urlToImage);
+                    const dir = `${__dirname}/../../bannedImages`;
+                    const files = await fs.promises.readdir(`${__dirname}/../../bannedImages`);
+                    for (const file of files) {
+                        const localImage = await fs.promises.readFile(`${dir}/${file}`);
+                        if (image.equals(localImage)) {
+                            this.doPoser(message);
+                            break;
+                        }
                     }
                 }
             }

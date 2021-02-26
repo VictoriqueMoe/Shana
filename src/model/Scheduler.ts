@@ -56,7 +56,7 @@ export class Scheduler {
     }
 
     // @ts-ignore
-    protected set jobs(jobs: IScheduledJob[]){
+    protected set jobs(jobs: IScheduledJob[]) {
         this._jobs = jobs;
     }
 

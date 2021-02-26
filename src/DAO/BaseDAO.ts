@@ -58,7 +58,7 @@ export abstract class BaseDAO<T extends Model> {
             }
         } catch (e) {
             if (e instanceof UniqueViolationError) {
-                if(!silentOnDupe){
+                if (!silentOnDupe) {
                     channel.send(`Entry already exists in database`);
                     console.log(`Entry already exists in database: ${model}`);
                 }

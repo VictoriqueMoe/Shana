@@ -1,7 +1,7 @@
 import {Column, Default, Model, Table} from "sequelize-typescript";
 
 @Table
-export class UsernameModel extends Model{
+export class UsernameModel extends Model {
 
     @Column({unique: true, allowNull: false})
     public userId: string;
@@ -11,6 +11,6 @@ export class UsernameModel extends Model{
 
     @Default(false)
     @Column
-    public force: boolean
+    public force: boolean;
 
 }

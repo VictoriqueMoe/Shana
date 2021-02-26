@@ -6,13 +6,13 @@ import {Roles} from "../../enums/Roles";
 import {ObjectUtil} from "../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
-export abstract class AccountAge{
+export abstract class AccountAge {
     @Command("age")
     @Description(AccountAge.viewDescriptionForSetUsernames())
     @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async getAccountAge(command: CommandMessage): Promise<void> {
         const mentions = command.mentions;
-        if(mentions.users.size != 1){
+        if (mentions.users.size != 1) {
             command.reply("Please supply username");
             return;
         }

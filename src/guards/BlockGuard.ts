@@ -6,7 +6,7 @@ export const BlockGuard: GuardFunction<"message"> = async (
     client,
     next
 ) => {
-    if(await DiscordUtils.getUserBlocked(message) == null){
+    if (await DiscordUtils.getUserBlocked(message) == null) {
         await next();
         return;
     }

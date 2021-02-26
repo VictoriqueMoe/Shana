@@ -14,7 +14,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
      * @param reason
      * @protected
      */
-    protected async applyRole(role: T, member: GuildMember, reason? :string): Promise<void> {
+    protected async applyRole(role: T, member: GuildMember, reason?: string): Promise<void> {
         await member.roles.add(role, reason);
     }
 

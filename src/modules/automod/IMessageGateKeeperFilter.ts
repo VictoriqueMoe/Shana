@@ -23,7 +23,7 @@ export interface IMessageGateKeeperFilter {
     /**
      * Message used to warn when action includes ACTION.WARN
      */
-    readonly warnMessage:string
+    readonly warnMessage: string
 
     /**
      * Do the actual filter and return true if it passes or false otherwise

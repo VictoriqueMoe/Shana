@@ -1,4 +1,4 @@
-export enum ACTION{
+export enum ACTION {
     WARN,
     DELETE,
     MUTE,

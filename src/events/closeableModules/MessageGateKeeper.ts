@@ -20,43 +20,43 @@ export class MessageGateKeeper extends CloseableModule {
     private async process([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const filters = MessageGateKeeperManager.instance.filters;
         outer:
-        for (const filter of filters) {
-            const didPassFilter = filter.doFilter(message);
-            if (!didPassFilter) {
-                const actionsToTake = filter.actions;
-                for (const action of actionsToTake) {
-                    switch (action) {
-                        case ACTION.DELETE:
-                            await message.delete({
-                                reason: filter.id
-                            });
-                            break;
-                        case ACTION.WARN: {
-                            const warnResponse = await message.reply(filter.warnMessage);
-                            setTimeout(() => {
-                                warnResponse.delete();
-                            }, 5000);
-                            break;
+            for (const filter of filters) {
+                const didPassFilter = filter.doFilter(message);
+                if (!didPassFilter) {
+                    const actionsToTake = filter.actions;
+                    for (const action of actionsToTake) {
+                        switch (action) {
+                            case ACTION.DELETE:
+                                await message.delete({
+                                    reason: filter.id
+                                });
+                                break;
+                            case ACTION.WARN: {
+                                const warnResponse = await message.reply(filter.warnMessage);
+                                setTimeout(() => {
+                                    warnResponse.delete();
+                                }, 5000);
+                                break;
+                            }
+                            case ACTION.MUTE: {
+                                const botId = Main.client.user.id;
+                                await MuteSingleton.instance.muteUser(message.member, filter.warnMessage, botId, 600);
+                                const warnResponse = await message.reply("you have been timed out for 10 mins");
+                                setTimeout(() => {
+                                    warnResponse.delete();
+                                }, 5000);
+                                break;
+                            }
+                            case ACTION.BAN:
+                                await message.member.ban({
+                                    reason: `auto ban for ${filter.id}`
+                                });
+                                break outer;
                         }
-                        case ACTION.MUTE: {
-                            const botId = Main.client.user.id;
-                            await MuteSingleton.instance.muteUser(message.member, filter.warnMessage, botId, 600);
-                            const warnResponse = await message.reply("you have been timed out for 10 mins");
-                            setTimeout(() => {
-                                warnResponse.delete();
-                            }, 5000);
-                            break;
-                        }
-                        case ACTION.BAN:
-                            await message.member.ban({
-                                reason: `auto ban for ${filter.id}`
-                            });
-                            break outer;
                     }
+                    break;
                 }
-                break;
             }
-        }
     }
 
     public get isDynoReplacement(): boolean {

@@ -5,7 +5,7 @@ import RolesEnum = Roles.RolesEnum;
 export const roleConstraints = (...roles: RolesEnum[]) => async ([message], client, next) => {
     const member = await message.member.fetch();
     const memberRoles = member.roles.cache;
-    if(GuildUtils.isMemberAdmin(message.member)){
+    if (GuildUtils.isMemberAdmin(message.member)) {
         await next();
         return;
     }

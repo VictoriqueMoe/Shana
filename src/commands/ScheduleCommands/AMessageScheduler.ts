@@ -49,11 +49,11 @@ export abstract class AMessageScheduler {
     @Guard(AdminOnlyTask, BlockGuard)
     private cancelScheduledMessage(command: CommandMessage): void {
         const names = StringUtils.splitCommandLine(command.content);
-        for(const name of names){
+        for (const name of names) {
             MessageScheduler.getInstance().cancelJob(name);
         }
 
-        command.reply( `Job(s) cancelled`);
+        command.reply(`Job(s) cancelled`);
     }
 
     @Command("getAllScheduledMessages")
