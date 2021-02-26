@@ -1,9 +1,7 @@
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {Collection, Message, MessageAttachment} from "discord.js";
+import {Message} from "discord.js";
 import {Main} from "../../Main";
-import {DiscordUtils} from "../../utils/Utils";
-import * as fs from "fs";
 
 
 export abstract class MoeStuff {
@@ -22,11 +20,6 @@ export abstract class MoeStuff {
             let messageContent = message.content.replace(/\s/g, '').toLocaleLowerCase();
             messageContent = messageContent.replace(/[ ,.-]/g, "");
             let shouldBlock = false;
-            const hasAttachments = message.attachments.size > 0;
-            let attachments: Collection<string, MessageAttachment> = null;
-            if (hasAttachments) {
-                attachments = message.attachments;
-            }
             for (const ban of banned) {
                 if (messageContent.includes(ban.toLocaleLowerCase())) {
                     shouldBlock = true;
@@ -36,21 +29,6 @@ export abstract class MoeStuff {
             if (shouldBlock) {
                 this.doPoser(message);
                 return;
-            }
-            if (hasAttachments) {
-                for (const [, attatchmentObject] of attachments) {
-                    const urlToImage = attatchmentObject.attachment as string;
-                    const image = await DiscordUtils.loadResourceFromURL(urlToImage);
-                    const dir = `${__dirname}/../../bannedImages`;
-                    const files = await fs.promises.readdir(`${__dirname}/../../bannedImages`);
-                    for (const file of files) {
-                        const localImage = await fs.promises.readFile(`${dir}/${file}`);
-                        if (image.equals(localImage)) {
-                            this.doPoser(message);
-                            break;
-                        }
-                    }
-                }
             }
         }
     }
