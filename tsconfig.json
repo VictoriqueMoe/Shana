@@ -14,7 +14,8 @@
       "esnext.asynciterable"
     ],
     "moduleResolution": "node",
-    "outDir": "./build"
+    "outDir": "./build",
+    "allowSyntheticDefaultImports": true
   },
   "exclude": [
     "node_modules"

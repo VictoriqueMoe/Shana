@@ -1,16 +1,16 @@
 import {ACTION} from "../../enums/ACTION";
 import {IValueBackedMessageGateKeeperFilter} from "../../modules/automod/IValueBackedMessageGateKeeperFilter";
 import {Message} from "discord.js";
-import {CooldownArray} from "../CooldownArray";
+import {TimedArray} from "../TimedArray";
 import isURL from "isurl";
 import {AbstractFilter} from "./AbstractFilter";
 
 export class LinkCooldown extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
-    private cooldownArray: CooldownArray;
+    private cooldownArray: TimedArray<string>;
 
     public constructor() {
         super();
-        this.cooldownArray = new CooldownArray(Number.parseInt(this.value));
+        this.cooldownArray = new TimedArray(Number.parseInt(this.value));
     }
 
     public get actions(): ACTION[] {
@@ -32,12 +32,12 @@ export class LinkCooldown extends AbstractFilter implements IValueBackedMessageG
             return true;
         }
         const memberId = content.member.id;
-        const isInMap = this.cooldownArray.isUserInCooldown(memberId);
+        const isInMap = this.cooldownArray.isInArray(memberId);
         if (!isInMap) {
             this.cooldownArray.push(memberId);
             return true;
         }
-        this.cooldownArray.refreshUser(memberId);
+        this.cooldownArray.refresh(memberId);
         return false;
     }
 

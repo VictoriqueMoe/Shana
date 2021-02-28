@@ -58,18 +58,19 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         const model = new MuteModel(obj);
         let userObject: GuildMember = null;
         let savedModel: MuteModel = null;
+        userObject = await user.guild.members.fetch(blockedUserId);
+        for (const [roleId, role] of userObject.roles.cache) {
+            try {
+                await userObject.roles.remove(roleId);
+            } catch {
+            }
+        }
         try {
             savedModel = await Main.dao.transaction(async t => {
                 const m = await super.commitToDatabase(model) as MuteModel;
-                userObject = await user.guild.members.fetch(m.userId);
                 await this.addRolePersist(userObject);
                 return m;
             }) as MuteModel;
-        } catch {
-            return null;
-        }
-        try {
-            await userObject.roles.remove([...userObject.roles.cache.keys()]);
         } catch {
             return null;
         }
@@ -120,7 +121,11 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         for (const roleEnum of prevRoles) {
             const role = await Roles.getRole(roleEnum);
             console.log(`re-applying role ${role.name} to ${member.user.username}`);
-            await member.roles.add(role.id);
+            try {
+                await member.roles.add(role.id);
+            } catch {
+                continue;
+            }
         }
     }
 
