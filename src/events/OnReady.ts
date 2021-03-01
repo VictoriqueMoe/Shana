@@ -91,7 +91,6 @@ export abstract class OnReady extends BaseDAO<any> {
                         throw e;
                     }
                 }
-
             }
         }
     }

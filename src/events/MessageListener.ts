@@ -49,7 +49,11 @@ export abstract class MessageListener {
 
     @On("message")
     private async scanAttachments([message]: ArgsOf<"message">, client: Client): Promise<void> {
-        if (Roles.isMemberStaff(message.member) && !Main.testMode) {
+        const member = message.member;
+        if(!member){
+            return;
+        }
+        if (Roles.isMemberStaff(member) && !Main.testMode) {
             return;
         }
         const attachments = message.attachments;
