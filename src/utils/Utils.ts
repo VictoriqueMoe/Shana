@@ -205,7 +205,7 @@ export class ObjectUtil {
                 return false;
             }
             if (currString.trim().length === 0) {
-                return true;
+                return false;
             }
         }
         return true;
