@@ -43,6 +43,9 @@ export abstract class WeebGF {
         if (!ObjectUtil.validString(messageContent)) {
             return;
         }
+        if(messageContent.startsWith("~ignore")){
+            return;
+        }
         //TODO: make a guard
         const channelId = message.channel.id;
         let shouldPost: boolean;

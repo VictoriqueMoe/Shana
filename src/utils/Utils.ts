@@ -169,6 +169,10 @@ export class ObjectUtil {
         return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
     }
 
+    public static isValidObject(obj: Record<string, unknown>): boolean {
+        return typeof obj === "object" && obj !== null && obj !== undefined && Object.keys(obj).length > 0;
+    }
+
     public static secondsToHuman(seconds: number): string {
         const levels = [
             [Math.floor(seconds / 31536000), 'years'],

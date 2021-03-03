@@ -14,7 +14,7 @@ export type additionalGenGetArgs = {
     },
     "vs"?: {
         "type"?: 1 | 2 | 3,
-        "avatar": string
+        avatar:string
     },
     "blur"?: {
         "blur"?: number
@@ -39,7 +39,7 @@ export type additionalGenGetArgs = {
         "text": string
     }
 }
-type avatar = {
+export type avatar = {
     "avatar": string
 }
 
