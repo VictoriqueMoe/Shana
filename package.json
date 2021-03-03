@@ -1,7 +1,7 @@
 {
   "name": "slutbot",
   "version": "1.0.0",
-  "description": "",
+  "description": "Notice me",
   "main": "./build/Main.js",
   "scripts": {
     "start": "ts-node src/Main.ts",

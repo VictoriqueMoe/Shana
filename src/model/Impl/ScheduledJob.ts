@@ -1,7 +1,7 @@
 import {IScheduledJob} from "../IScheduledJob";
 import * as schedule from "node-schedule";
 
-export class ScheduledMessage implements IScheduledJob {
+export class ScheduledJob implements IScheduledJob {
     constructor(private _name: string, private _job: schedule.Job) {
     }
 

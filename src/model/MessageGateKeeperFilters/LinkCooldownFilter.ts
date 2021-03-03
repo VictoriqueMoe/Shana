@@ -5,7 +5,7 @@ import {TimedArray} from "../TimedArray";
 import isURL from "isurl";
 import {AbstractFilter} from "./AbstractFilter";
 
-export class LinkCooldown extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
+export class LinkCooldownFilter extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
     private cooldownArray: TimedArray<string>;
 
     public constructor() {

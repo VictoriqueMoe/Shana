@@ -2,7 +2,7 @@ import * as schedule from 'node-schedule';
 import {isValidCron} from 'cron-validator';
 import {ChronException, ObjectUtil} from '../utils/Utils';
 import {IScheduledJob} from "./IScheduledJob";
-import {ScheduledMessage} from "./Impl/ScheduledMessage";
+import {ScheduledJob} from "./Impl/ScheduledJob";
 
 export class Scheduler {
 
@@ -43,7 +43,7 @@ export class Scheduler {
     }
 
     protected registerJob(name: string, job: schedule.Job): IScheduledJob {
-        return new ScheduledMessage(name, job);
+        return new ScheduledJob(name, job);
     }
 
     public getJob(name: string): schedule.Job {
