@@ -6,6 +6,7 @@ import {MessageScheduler} from "../../model/MessageScheduler";
 import {BlockGuard} from "../../guards/BlockGuard";
 
 export abstract class AMessageScheduler {
+
     @Command("scheduleMessage")
     @Guard(AdminOnlyTask, BlockGuard)
     //TODO: add help description ~help

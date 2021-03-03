@@ -7,7 +7,7 @@ import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BaseDAO} from "../../DAO/BaseDAO";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 const getUrls = require('get-urls');
-
+const exiftool = require('node-exiftool');
 const md5 = require('md5');
 import RolesEnum = Roles.RolesEnum;
 
@@ -42,7 +42,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
         }
         const waitMessage = await command.channel.send("Extracting attachments...");
         const urls = attatchmentArray.map(value => (value.attachment as string));
-        if (urlsInMessage.size > 0) {
+        if (urlsInMessage && urlsInMessage.size > 0) {
             urls.push(...urlsInMessage.values());
         }
         let successful = 0;

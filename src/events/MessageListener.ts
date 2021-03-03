@@ -62,7 +62,7 @@ export abstract class MessageListener {
 
         if (ObjectUtil.validString(messageContent)) {
             const urlsInMessage = getUrls(messageContent);
-            if (urlsInMessage.size > 0) {
+            if (urlsInMessage && urlsInMessage.size > 0) {
                 arratchmentUrl.push(...urlsInMessage.values());
             }
         }
