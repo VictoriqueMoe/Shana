@@ -1,13 +1,13 @@
 import {IMessageGateKeeperFilter} from "./IMessageGateKeeperFilter";
 import {Message} from "discord.js";
-import {MessageGateKeeperManager} from "./manager/MessageGateKeeperManager";
 import {ICloseableModule} from "../../../ICloseableModule";
 import {ACTION} from "../../../../../enums/ACTION";
+import {SubModuleManager} from "../manager/SubModuleManager";
 
 export abstract class AbstractFilter implements IMessageGateKeeperFilter {
 
     protected constructor(protected _parentModule: ICloseableModule) {
-        MessageGateKeeperManager.instance.addFilter(this);
+        SubModuleManager.instance.addSubModules(this);
     }
 
     public get parentModule(): ICloseableModule {
@@ -35,7 +35,7 @@ export abstract class AbstractFilter implements IMessageGateKeeperFilter {
      *
      */
     public static get muteViolationTimeout(): number {
-        return 60; //  hard-coded for now
+        return 15; //  hard-coded for now
     }
 
     // eslint-disable-next-line no-undef

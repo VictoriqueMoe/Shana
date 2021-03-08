@@ -20,8 +20,11 @@ export abstract class ModuleEngine {
         for (const module of dynoModules) {
             isEnable ? await module.open() : await module.close();
         }
-        const modulesEnabled = dynoModules.map(d => d.moduleId);
-        const str = `the following modules have been ${isEnable ? "enabled" : "disabled"}: \n ${modulesEnabled.join(", ")}`;
+        const modulesEnabled = dynoModules.map(d => {
+            const subModules = d.submodules.filter(sm => sm.isActive);
+            return subModules.size > 0 ? `${d.moduleId} (subModules: ${(subModules.map(s => s.id)).join(", ")})` : d.moduleId;
+        });
+        const str = `the following modules have been ${isEnable ? "enabled" : "disabled"}: \n ${modulesEnabled.join("\n ")}`;
         command.reply(str);
     }
 

@@ -1,14 +1,14 @@
 import {IMessageGateKeeperFilter} from "./IMessageGateKeeperFilter";
 
 export type BannedWordEntryies = {
-    "exactWord"?:string[],
-    "WildCardWords":string[]
+    "exactWord"?: string[],
+    "WildCardWords": string[]
 }
 
-export interface IBannedWordMessageGateKeeperFilter extends IMessageGateKeeperFilter{
+export interface IBannedWordMessageGateKeeperFilter extends IMessageGateKeeperFilter {
 
     /**
      * Return an object containing the banned words
      */
-    readonly bannedWords:BannedWordEntryies;
+    readonly bannedWords: BannedWordEntryies;
 }

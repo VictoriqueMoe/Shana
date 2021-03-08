@@ -3,8 +3,10 @@ import {ICloseOption} from "../../DB/autoMod/ICloseOption";
 import {Main} from "../../../Main";
 import {ICloseableModule} from "../ICloseableModule";
 import {ISubModule} from "../dynoAutoMod/subModules/ISubModule";
+import * as Immutable from "immutable";
+import {SubModuleManager} from "../dynoAutoMod/subModules/manager/SubModuleManager";
 
-export abstract class CloseableModule extends BaseDAO<ICloseOption> implements ICloseableModule{
+export abstract class CloseableModule extends BaseDAO<ICloseOption> implements ICloseableModule {
 
     private _isEnabled: boolean;
 
@@ -18,8 +20,8 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> implements I
 
     public abstract get isDynoReplacement(): boolean;
 
-    public get submodules(): ISubModule[]{
-        return [];
+    public get submodules(): Immutable.Set<ISubModule> {
+        return SubModuleManager.instance.getSubModulesFromParent(this);
     }
 
     /**

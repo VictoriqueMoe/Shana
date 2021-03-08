@@ -1,6 +1,7 @@
 import {ISubModule} from "./dynoAutoMod/subModules/ISubModule";
+import * as Immutable from "immutable";
 
-export interface ICloseableModule{
+export interface ICloseableModule {
 
     /**
      * ID of this module
@@ -12,7 +13,7 @@ export interface ICloseableModule{
      */
     readonly isDynoReplacement: boolean;
 
-    readonly submodules: ISubModule[];
+    readonly submodules: Immutable.Set<ISubModule>;
 
     /**
      * Close this module, this prevents all events from being fired. events are NOT queued

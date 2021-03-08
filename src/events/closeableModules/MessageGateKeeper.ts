@@ -2,7 +2,6 @@ import {CloseableModule} from "../../model/closeableModules/impl/CloseableModule
 import {CloseOptionModel} from "../../model/DB/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {MessageGateKeeperManager} from "../../model/closeableModules/dynoAutoMod/subModules/MessageGateKeeperFilters/manager/MessageGateKeeperManager";
 import {excludeGuard} from "../../guards/ExcludeGuard";
 import {EnabledGuard} from "../../guards/EnabledGuard";
 import {TimedSet} from "../../model/Impl/TimedSet";
@@ -15,6 +14,8 @@ import {MuteSingleton} from "../../commands/autoMod/userBlock/MuteSingleton";
 import {Main} from "../../Main";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {ISubModule} from "../../model/closeableModules/dynoAutoMod/subModules/ISubModule";
+import {SubModuleManager} from "../../model/closeableModules/dynoAutoMod/subModules/manager/SubModuleManager";
+import * as Immutable from "immutable";
 
 export class MessageGateKeeper extends CloseableModule {
 
@@ -27,7 +28,7 @@ export class MessageGateKeeper extends CloseableModule {
     @On("message")
     @Guard(NotBot, excludeGuard, EnabledGuard("MessageGateKeeper"))
     private async process([message]: ArgsOf<"message">, client: Client): Promise<void> {
-        const filters = MessageGateKeeperManager.instance.filters;
+        const filters = this.submodules;
         const violatedFilters: IMessageGateKeeperFilter[] = [];
         if (!message.member) {
             return;
@@ -47,45 +48,51 @@ export class MessageGateKeeper extends CloseableModule {
             }
         }
         violatedFilters.sort((a, b) => a.priority - b.priority);
-        for (const filter of violatedFilters) {
-            const actionsToTake = filter.actions;
-            for (const action of actionsToTake) {
-                switch (action) {
-                    case ACTION.MUTE: {
-                        let fromArray = this.getFromArray(userId);
-                        if (fromArray) {
-                            fromArray.muteViolations++;
-                            this._muteTimeoutArray.refresh(fromArray);
-                        } else {
-                            fromArray = new MuteViolation(userId, filter.id);
-                            this._muteTimeoutArray.add(fromArray);
-                        }
-                        if (fromArray.hasViolationLimitReached) {
-                            try {
-                                await this.muteUser(fromArray, member, "Auto mod violation limit reached", Main.client.user.id, AbstractFilter.autoMuteTimeout);
-                            } catch (e) {
-                                console.error(e);
-                                continue;
+        outer:
+            for (const filter of violatedFilters) {
+                const actionsToTake = filter.actions;
+                let didPreformTerminaloperation = false;
+                for (const action of actionsToTake) {
+                    switch (action) {
+                        case ACTION.MUTE: {
+                            let fromArray = this.getFromArray(userId);
+                            if (fromArray) {
+                                fromArray.muteViolations++;
+                                this._muteTimeoutArray.refresh(fromArray);
+                            } else {
+                                fromArray = new MuteViolation(userId, filter.id);
+                                this._muteTimeoutArray.add(fromArray);
                             }
+                            if (fromArray.hasViolationLimitReached) {
+                                try {
+                                    await this.muteUser(fromArray, member, "Auto mod violation limit reached", Main.client.user.id, AbstractFilter.autoMuteTimeout);
+                                    didPreformTerminaloperation = true;
+                                } catch (e) {
+                                    console.error(e);
+                                    continue;
+                                }
+                            }
+                            break;
                         }
-                        break;
+                        case ACTION.WARN: {
+                            const warnResponse = await message.reply(filter.warnMessage);
+                            setTimeout(() => {
+                                warnResponse.delete();
+                            }, 5000);
+                            break;
+                        }
+                        case ACTION.DELETE: {
+                            await message.delete({
+                                reason: `Auto mod violation "${filter.id}"`
+                            });
+                            break;
+                        }
                     }
-                    case ACTION.WARN: {
-                        const warnResponse = await message.reply(filter.warnMessage);
-                        setTimeout(() => {
-                            warnResponse.delete();
-                        }, 5000);
-                        break;
-                    }
-                    case ACTION.DELETE: {
-                        await message.delete({
-                            reason: `Auto mod violation "${filter.id}"`
-                        });
-                        break;
+                    if (didPreformTerminaloperation) {
+                        break outer;
                     }
                 }
             }
-        }
     }
 
     private async muteUser(violationObj: MuteViolation, user: GuildMember, reason: string, creatorID: string, seconds?: number): Promise<MuteModel> {
@@ -108,8 +115,8 @@ export class MessageGateKeeper extends CloseableModule {
         return arr.find(value => value.userId === userId);
     }
 
-    public get submodules(): ISubModule[] {
-        return [];
+    public get submodules(): Immutable.Set<IMessageGateKeeperFilter> {
+        return super.submodules as Immutable.Set<IMessageGateKeeperFilter>;
     }
 
 }

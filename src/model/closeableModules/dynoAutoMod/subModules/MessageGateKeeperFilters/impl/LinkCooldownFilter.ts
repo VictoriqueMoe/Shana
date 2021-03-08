@@ -27,6 +27,9 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedMe
         return true;
     }
 
+    /**
+     * The time between links
+     */
     public get value(): string {
         return "5"; // hard coded for now
     }
@@ -48,7 +51,7 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedMe
     }
 
     public get id(): string {
-        return "Link Cooldown";
+        return "Link Cooldown Filter";
     }
 
     public get warnMessage(): string {

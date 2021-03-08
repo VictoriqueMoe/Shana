@@ -18,7 +18,7 @@ export class AllCapsFilter extends AbstractFilter {
     }
 
     public get isActive(): boolean {
-        return true;
+        return false;
     }
 
     public get priority(): number {
@@ -30,6 +30,6 @@ export class AllCapsFilter extends AbstractFilter {
     }
 
     public doFilter(content: Message): boolean {
-         return ObjectUtil.getAmountOfCapsAsPercentage(content.content) <= 70;
+        return ObjectUtil.getAmountOfCapsAsPercentage(content.content) < 70;
     }
 }

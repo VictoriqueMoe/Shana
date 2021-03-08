@@ -11,6 +11,11 @@ export interface ISubModule {
     readonly id: string;
 
     /**
+     * Is this filter active
+     */
+    readonly isActive: boolean;
+
+    /**
      * Get the parent module this belongs to
      */
     readonly parentModule: ICloseableModule;

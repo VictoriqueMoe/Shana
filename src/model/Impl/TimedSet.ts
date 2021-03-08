@@ -1,7 +1,6 @@
 import Timeout = NodeJS.Timeout;
 import * as Immutable from 'immutable';
 import {ITimedSet} from "../ITimedSet";
-import {WeebGFSession} from "../../events/weebGirlfriend/WeebGFSession";
 
 /**
  * This set will evict items from the array after the set timout.

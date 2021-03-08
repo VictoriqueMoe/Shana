@@ -11,6 +11,8 @@ import {defaults} from "request";
 import {glob} from "glob";
 import * as path from "path";
 
+const emojiRegex = require('emoji-regex/es2015/index.js');
+
 const request = defaults({encoding: null});
 
 const {GuildID} = require('../../config.json');
@@ -105,6 +107,21 @@ export namespace DiscordUtils {
                 resolve(buffer);
             });
         });
+    }
+
+
+    export function getEmojiFromMessage(message: Message): string[] {
+        const regex = new RegExp(/<(a?):(\w+):(\d+)>/, "g");
+        const messageText = message.content;
+        const emojiArray = messageText.match(regex) || [];
+        const emoJiRexp = emojiRegex();
+        let match;
+        // eslint-disable-next-line no-cond-assign
+        while (match = emoJiRexp.exec(messageText)) {
+            const emoji = match[0];
+            emojiArray.push(emoji);
+        }
+        return emojiArray;
     }
 
     export async function postToLog(text: string): Promise<Message> {

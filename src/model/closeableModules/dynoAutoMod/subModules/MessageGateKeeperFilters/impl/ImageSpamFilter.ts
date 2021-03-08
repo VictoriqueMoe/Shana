@@ -1,29 +1,28 @@
-import {AbstractFilter} from "../AbstractFilter";
-import {ACTION} from "../../../../../../enums/ACTION";
-import {Message} from "discord.js";
-import {PRIORITY} from "../../../../../../enums/PRIORITY";
-import {TimedSet} from "../../../../../Impl/TimedSet";
 import {InjectDynoSubModule} from "../../../../../decorators/InjectDynoSubModule";
 import {MessageGateKeeper} from "../../../../../../events/closeableModules/MessageGateKeeper";
-import {ICloseableModule} from "../../../../ICloseableModule";
+import {AbstractFilter} from "../AbstractFilter";
 import {IValueBackedMessageGateKeeperFilter} from "../IValueBackedMessageGateKeeperFilter";
-import {ObjectUtil} from "../../../../../../utils/Utils";
+import {TimedSet} from "../../../../../Impl/TimedSet";
+import {ICloseableModule} from "../../../../ICloseableModule";
+import {ACTION} from "../../../../../../enums/ACTION";
+import {PRIORITY} from "../../../../../../enums/PRIORITY";
+import {Message} from "discord.js";
 
 @InjectDynoSubModule(MessageGateKeeper)
-export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
+export class ImageSpamFilter extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
 
     private constructor(parentFilter: ICloseableModule) {
         super(parentFilter);
-        this._cooldownArray = new TimedSet(5000);
+        this._cooldownArray = new TimedSet(10000);
     }
 
     /**
-     * How many messages they are allowed to send in 5 seconds
+     * How many images are allowed at once in the space of 10 seconds
      */
     public get value(): string {
-        return "5"; // hard coded for now
+        return "4"; // hard coded for now
     }
 
     public get actions(): ACTION[] {
@@ -31,7 +30,7 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
     }
 
     public get id(): string {
-        return "Fast Message Spam Filter";
+        return "Image Spam Filter";
     }
 
     public get isActive(): boolean {
@@ -43,14 +42,15 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
     }
 
     public get warnMessage(): string {
-        return "You are posting too fast, slow down!";
+        return "You are posting too many images, slow down!";
     }
 
     public doFilter(content: Message): boolean {
-        if (!ObjectUtil.validString(content.content)) {
+        const memberId = content.member.id;
+        const attachments = content.attachments;
+        if (attachments.size === 0) {
             return true;
         }
-        const memberId = content.member.id;
         let fromArray = this.getFromArray(memberId);
         if (fromArray) {
             fromArray.count++;
@@ -72,7 +72,7 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
 class MessageSpamEntry {
     public count: number;
 
-    constructor(public userId: string, private _instance: FastMessageSpamFilter) {
+    constructor(public userId: string, private _instance: ImageSpamFilter) {
         this.count = 1;
     }
 

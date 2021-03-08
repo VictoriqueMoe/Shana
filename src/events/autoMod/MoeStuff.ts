@@ -9,17 +9,11 @@ export abstract class MoeStuff {
     @On("message")
     @Guard(NotBot)
     private async moeLoliDestroyer([message]: ArgsOf<"message">, client: Client): Promise<void> {
-        let allow = false;
-        if (Main.testMode) {
-            if (message.member.id === "697417252320051291") {
-                allow = true;
-            }
-        }
         if (!message.member) {
             return;
         }
-        if (message.member.id === "270632394137010177" || allow) {
-            const banned = ["ì", "|", "lol", "loli"];
+        if (message.member.id === "270632394137010177") {
+            const banned = ["ì", "|", "lol", "loli", "l0l"];
             let messageContent = message.content.replace(/\s/g, '').toLocaleLowerCase();
             messageContent = messageContent.replace(/[ ,.-]/g, "");
             let shouldBlock = false;

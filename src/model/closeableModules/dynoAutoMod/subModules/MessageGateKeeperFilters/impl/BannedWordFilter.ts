@@ -21,7 +21,7 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordMessa
     }
 
     public get id(): string {
-        return "Banned word filter";
+        return "Banned Word Filter";
     }
 
     public get isActive(): boolean {
