@@ -17,7 +17,7 @@ export class SpoilersFilter extends AbstractFilter {
     }
 
     public doFilter(content: Message): boolean {
-        const regex = new RegExp(/\|\|/, "g");
+        const regex = /\|{2}(.*)\|{2}/gm;
         const messageContent = content.content;
         if (regex.test(messageContent)) {
             return false;

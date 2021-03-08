@@ -4,7 +4,7 @@ import {EnabledGuard} from "../../guards/EnabledGuard";
 import {CloseOptionModel} from "../../model/DB/autoMod/impl/CloseOption.model";
 import {Roles} from "../../enums/Roles";
 import * as schedule from "node-schedule";
-import {AbstractRoleApplier} from "../autoMod/RoleApplier/AbstractRoleApplier";
+import {AbstractRoleApplier} from "../customAutoMod/RoleApplier/AbstractRoleApplier";
 import {GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils, EnumEx} from "../../utils/Utils";

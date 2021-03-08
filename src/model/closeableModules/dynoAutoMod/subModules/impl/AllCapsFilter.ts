@@ -10,7 +10,7 @@ import {ObjectUtil} from "../../../../../utils/Utils";
 export class AllCapsFilter extends AbstractFilter {
 
     public get actions(): ACTION[] {
-        return [ACTION.WARN];
+        return [];
     }
 
     public get id(): string {

@@ -10,7 +10,7 @@ import {ACTION} from "../../enums/ACTION";
 import {IDynoAutoModFilter} from "../../model/closeableModules/dynoAutoMod/subModules/IDynoAutoModFilter";
 import {GuildMember} from "discord.js";
 import {MuteModel} from "../../model/DB/autoMod/impl/Mute.model";
-import {MuteSingleton} from "../../commands/autoMod/userBlock/MuteSingleton";
+import {MuteSingleton} from "../../commands/customAutoMod/userBlock/MuteSingleton";
 import {Main} from "../../Main";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import * as Immutable from "immutable";

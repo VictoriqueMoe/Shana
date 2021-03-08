@@ -1,6 +1,6 @@
 import {GuildUtils} from "../utils/Utils";
 import {Roles} from "../enums/Roles";
-import {GuildMember} from "discord.js";
+import {GuildMember, TextChannel} from "discord.js";
 import {GuardFunction} from "@typeit/discord";
 import {Main} from "../Main";
 import RolesEnum = Roles.RolesEnum;
@@ -24,6 +24,15 @@ export const excludeGuard: GuardFunction<"message"> = async (
         if (memberRoles.has(immuneRoles)) {
             return;
         }
+    }
+    const channel = message.channel;
+    if (!(channel instanceof TextChannel)) {
+        return;
+    }
+    // channel also hard coded too!
+    const parent = channel.parent;
+    if(parent.id === "360789754846904320"){
+        return;
     }
     await next();
 };

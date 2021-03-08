@@ -8,7 +8,7 @@ import {Guild} from "discord.js";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
-import {MuteSingleton} from "../commands/autoMod/userBlock/MuteSingleton";
+import {MuteSingleton} from "../commands/customAutoMod/userBlock/MuteSingleton";
 
 /**
  * TODO: couple this class to appropriate classes

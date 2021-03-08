@@ -8,7 +8,6 @@ import {DiscordUtils, GuildUtils, ObjectUtil} from "../utils/Utils";
 import {BannedAttachmentsModel} from "../model/DB/BannedAttachments.model";
 import {Main} from "../Main";
 import {Message} from "discord.js";
-import {celverBotResponse, cleverBotRequest, WeebGF} from "./weebGirlfriend/WeebGF";
 import RolesEnum = Roles.RolesEnum;
 
 const {cleverBotKey} = require('../../config.json');
@@ -59,14 +58,14 @@ export abstract class MessageListener {
         if (!ObjectUtil.validString(messageContent)) {
             return;
         }
-        const request: cleverBotRequest = {
+        const request = {
             "key": cleverBotKey,
             "input": messageContent
         };
         const url = Object.keys(request).map(key => `${key}=${encodeURIComponent(request[key])}`).join('&');
-        let reply: celverBotResponse = null;
+        let reply = null;
         try {
-            const replyPayload = await fetch(`${WeebGF.api}?${url}`, {
+            const replyPayload = await fetch(`https://www.cleverbot.com/getreply?${url}`, {
                 method: 'get'
             });
             reply = await replyPayload.json();
