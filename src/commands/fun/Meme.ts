@@ -13,7 +13,7 @@ import {AssertionError} from "assert";
 
 const {prefix} = require('../../../config.json');
 
-export abstract class Fun {
+export abstract class Meme {
     private handler = ImageFun.instance;
 
     @Command("generateEndpoints")

@@ -1,6 +1,7 @@
 import {Client} from "@typeit/discord";
 import {CloseableModule} from "./model/closeableModules/impl/CloseableModule";
 import {Sequelize} from "sequelize-typescript";
+
 const {token} = require('../config.json');
 
 export class CloseableModuleSet extends Set<CloseableModule> {
@@ -31,7 +32,7 @@ export class Main {
 
     private static _client: Client;
 
-    public static testMode = true;
+    public static testMode = false;
 
     private static _dao: Sequelize;
 
@@ -49,7 +50,7 @@ export class Main {
             host: 'localhost',
             dialect: 'sqlite',
             logging: (sql, timing) => {
-                if(Main.testMode){
+                if (Main.testMode) {
                     console.log(sql, timing);
                 }
             },

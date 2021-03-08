@@ -1,11 +1,11 @@
-import {InjectDynoSubModule} from "../../../../../decorators/InjectDynoSubModule";
-import {MessageGateKeeper} from "../../../../../../events/closeableModules/MessageGateKeeper";
 import {AbstractFilter} from "../AbstractFilter";
-import {ACTION} from "../../../../../../enums/ACTION";
+import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {PRIORITY} from "../../../../../../enums/PRIORITY";
+import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
+import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
 
-@InjectDynoSubModule(MessageGateKeeper)
+@InjectDynoSubModule(DynoAutoMod)
 export class SpoilersFilter extends AbstractFilter {
 
     public get actions(): ACTION[] {

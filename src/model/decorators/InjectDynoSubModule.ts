@@ -1,4 +1,4 @@
-import {IMessageGateKeeperFilter} from "../closeableModules/dynoAutoMod/subModules/MessageGateKeeperFilters/IMessageGateKeeperFilter";
+import {IDynoAutoModFilter} from "../closeableModules/dynoAutoMod/subModules/IDynoAutoModFilter";
 import {DIService} from "@typeit/discord";
 import {ISubModule} from "../closeableModules/dynoAutoMod/subModules/ISubModule";
 import {ICloseableModule} from "../closeableModules/ICloseableModule";
@@ -11,7 +11,7 @@ export function InjectDynoSubModule(parentModule: typeof CloseableModule) {
         if (parentFilter == null) {
             throw new Error(`Unable to find any module for ${parentModule}`);
         }
-        const instance: IMessageGateKeeperFilter = new constructor(parentFilter);
+        const instance: IDynoAutoModFilter = new constructor(parentFilter);
         console.log(`Register submodule: "${instance.id}" with parent: "${parentFilter.moduleId}"`);
     };
 }

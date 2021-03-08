@@ -1,17 +1,17 @@
-import {IValueBackedMessageGateKeeperFilter} from "../IValueBackedMessageGateKeeperFilter";
 import {AbstractFilter} from "../AbstractFilter";
-import {TimedSet} from "../../../../../Impl/TimedSet";
-import {ACTION} from "../../../../../../enums/ACTION";
+import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {InjectDynoSubModule} from "../../../../../decorators/InjectDynoSubModule";
-import {PRIORITY} from "../../../../../../enums/PRIORITY";
-import {MessageGateKeeper} from "../../../../../../events/closeableModules/MessageGateKeeper";
-import {ICloseableModule} from "../../../../ICloseableModule";
+import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
+import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
+import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
+import {TimedSet} from "../../../../Impl/TimedSet";
+import {ICloseableModule} from "../../../ICloseableModule";
 
 const getUrls = require('get-urls');
 
-@InjectDynoSubModule(MessageGateKeeper)
-export class LinkCooldownFilter extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
+@InjectDynoSubModule(DynoAutoMod)
+export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
     private _cooldownArray: TimedSet<string>;
 
     private constructor(parentFilter: ICloseableModule) {

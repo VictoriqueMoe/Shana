@@ -1,13 +1,13 @@
-import {InjectDynoSubModule} from "../../../../../decorators/InjectDynoSubModule";
-import {MessageGateKeeper} from "../../../../../../events/closeableModules/MessageGateKeeper";
 import {AbstractFilter} from "../AbstractFilter";
-import {IValueBackedMessageGateKeeperFilter} from "../IValueBackedMessageGateKeeperFilter";
-import {ACTION} from "../../../../../../enums/ACTION";
+import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {PRIORITY} from "../../../../../../enums/PRIORITY";
+import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
+import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
+import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
 
-@InjectDynoSubModule(MessageGateKeeper)
-export class MassMentionsFilter extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
+@InjectDynoSubModule(DynoAutoMod)
+export class MassMentionsFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
 
     public get actions(): ACTION[] {
         return [ACTION.DELETE, ACTION.WARN];

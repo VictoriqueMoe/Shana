@@ -1,13 +1,13 @@
 import {AbstractFilter} from "../AbstractFilter";
-import {BannedWordEntryies, IBannedWordMessageGateKeeperFilter} from "../IBannedWordMessageGateKeeperFilter";
-import {ACTION} from "../../../../../../enums/ACTION";
+import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {InjectDynoSubModule} from "../../../../../decorators/InjectDynoSubModule";
-import {PRIORITY} from "../../../../../../enums/PRIORITY";
-import {MessageGateKeeper} from "../../../../../../events/closeableModules/MessageGateKeeper";
+import {BannedWordEntryies, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
+import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
+import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
 
-@InjectDynoSubModule(MessageGateKeeper)
-export class BannedWordFilter extends AbstractFilter implements IBannedWordMessageGateKeeperFilter {
+@InjectDynoSubModule(DynoAutoMod)
+export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoAutoModFilter {
 
     public get actions(): ACTION[] {
         return [ACTION.DELETE, ACTION.WARN, ACTION.MUTE];

@@ -5,19 +5,17 @@ import {NotBot} from "../../guards/NotABot";
 import {excludeGuard} from "../../guards/ExcludeGuard";
 import {EnabledGuard} from "../../guards/EnabledGuard";
 import {TimedSet} from "../../model/Impl/TimedSet";
-import {AbstractFilter} from "../../model/closeableModules/dynoAutoMod/subModules/MessageGateKeeperFilters/AbstractFilter";
+import {AbstractFilter} from "../../model/closeableModules/dynoAutoMod/subModules/AbstractFilter";
 import {ACTION} from "../../enums/ACTION";
-import {IMessageGateKeeperFilter} from "../../model/closeableModules/dynoAutoMod/subModules/MessageGateKeeperFilters/IMessageGateKeeperFilter";
+import {IDynoAutoModFilter} from "../../model/closeableModules/dynoAutoMod/subModules/IDynoAutoModFilter";
 import {GuildMember} from "discord.js";
 import {MuteModel} from "../../model/DB/autoMod/impl/Mute.model";
 import {MuteSingleton} from "../../commands/autoMod/userBlock/MuteSingleton";
 import {Main} from "../../Main";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
-import {ISubModule} from "../../model/closeableModules/dynoAutoMod/subModules/ISubModule";
-import {SubModuleManager} from "../../model/closeableModules/dynoAutoMod/subModules/manager/SubModuleManager";
 import * as Immutable from "immutable";
 
-export class MessageGateKeeper extends CloseableModule {
+export class DynoAutoMod extends CloseableModule {
 
     private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
 
@@ -26,10 +24,10 @@ export class MessageGateKeeper extends CloseableModule {
     }
 
     @On("message")
-    @Guard(NotBot, excludeGuard, EnabledGuard("MessageGateKeeper"))
+    @Guard(NotBot, excludeGuard, EnabledGuard("DynoAutoMod"))
     private async process([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const filters = this.submodules;
-        const violatedFilters: IMessageGateKeeperFilter[] = [];
+        const violatedFilters: IDynoAutoModFilter[] = [];
         if (!message.member) {
             return;
         }
@@ -107,7 +105,7 @@ export class MessageGateKeeper extends CloseableModule {
     }
 
     public get moduleId(): string {
-        return "MessageGateKeeper";
+        return "DynoAutoMod";
     }
 
     private getFromArray(userId: string): MuteViolation {
@@ -115,8 +113,8 @@ export class MessageGateKeeper extends CloseableModule {
         return arr.find(value => value.userId === userId);
     }
 
-    public get submodules(): Immutable.Set<IMessageGateKeeperFilter> {
-        return super.submodules as Immutable.Set<IMessageGateKeeperFilter>;
+    public get submodules(): Immutable.Set<IDynoAutoModFilter> {
+        return super.submodules as Immutable.Set<IDynoAutoModFilter>;
     }
 
 }

@@ -1,11 +1,11 @@
 import {Message} from "discord.js";
-import {ISubModule} from "../ISubModule";
-import {ACTION} from "../../../../../enums/ACTION";
+import {ISubModule} from "./ISubModule";
+import {ACTION} from "../../../enums/ACTION";
 
 /**
  * all values hard coded for now, but will be persisted in the future
  */
-export interface IMessageGateKeeperFilter extends ISubModule {
+export interface IDynoAutoModFilter extends ISubModule {
     /**
      * Get the actions that are done when this filter is violated
      */

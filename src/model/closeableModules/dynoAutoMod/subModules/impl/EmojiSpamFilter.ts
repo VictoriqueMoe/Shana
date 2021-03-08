@@ -1,14 +1,14 @@
-import {InjectDynoSubModule} from "../../../../../decorators/InjectDynoSubModule";
-import {MessageGateKeeper} from "../../../../../../events/closeableModules/MessageGateKeeper";
 import {AbstractFilter} from "../AbstractFilter";
-import {IValueBackedMessageGateKeeperFilter} from "../IValueBackedMessageGateKeeperFilter";
-import {ACTION} from "../../../../../../enums/ACTION";
+import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {PRIORITY} from "../../../../../../enums/PRIORITY";
-import {DiscordUtils} from "../../../../../../utils/Utils";
+import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
+import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
+import {DiscordUtils} from "../../../../../utils/Utils";
+import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
 
-@InjectDynoSubModule(MessageGateKeeper)
-export class EmojiSpamFilter extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
+@InjectDynoSubModule(DynoAutoMod)
+export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
 
     public get actions(): ACTION[] {
         return [ACTION.DELETE, ACTION.WARN, ACTION.MUTE];

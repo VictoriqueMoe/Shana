@@ -14,7 +14,8 @@ import {MuteSingleton} from "../commands/autoMod/userBlock/MuteSingleton";
  * TODO: couple this class to appropriate classes
  */
 export abstract class OnReady extends BaseDAO<any> {
-    private readonly classesToLoad = [`${__dirname}/../model/closeableModules/dynoAutoMod/subModules/MessageGateKeeperFilters/impl/*.ts`];
+    private readonly classesToLoad = [`${__dirname}/../model/closeableModules/dynoAutoMod/subModules/impl/*.ts`];
+
     @On("ready")
     private async initialize(): Promise<void> {
         await Main.client.user.setActivity('Anime', {type: 'WATCHING'});

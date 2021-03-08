@@ -1,12 +1,12 @@
 import {AbstractFilter} from "../AbstractFilter";
+import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {ACTION} from "../../../../../../enums/ACTION";
-import {InjectDynoSubModule} from "../../../../../decorators/InjectDynoSubModule";
-import {ObjectUtil} from "../../../../../../utils/Utils";
-import {PRIORITY} from "../../../../../../enums/PRIORITY";
-import {MessageGateKeeper} from "../../../../../../events/closeableModules/MessageGateKeeper";
+import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
+import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
+import {ObjectUtil} from "../../../../../utils/Utils";
 
-@InjectDynoSubModule(MessageGateKeeper)
+@InjectDynoSubModule(DynoAutoMod)
 export class AllCapsFilter extends AbstractFilter {
 
     public get actions(): ACTION[] {

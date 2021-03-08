@@ -1,16 +1,16 @@
 import {AbstractFilter} from "../AbstractFilter";
-import {ACTION} from "../../../../../../enums/ACTION";
+import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
+import {TimedSet} from "../../../../Impl/TimedSet";
+import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {PRIORITY} from "../../../../../../enums/PRIORITY";
-import {TimedSet} from "../../../../../Impl/TimedSet";
-import {InjectDynoSubModule} from "../../../../../decorators/InjectDynoSubModule";
-import {MessageGateKeeper} from "../../../../../../events/closeableModules/MessageGateKeeper";
-import {ICloseableModule} from "../../../../ICloseableModule";
-import {IValueBackedMessageGateKeeperFilter} from "../IValueBackedMessageGateKeeperFilter";
-import {ObjectUtil} from "../../../../../../utils/Utils";
+import {ObjectUtil} from "../../../../../utils/Utils";
+import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
+import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {ICloseableModule} from "../../../ICloseableModule";
+import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
 
-@InjectDynoSubModule(MessageGateKeeper)
-export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
+@InjectDynoSubModule(DynoAutoMod)
+export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
 

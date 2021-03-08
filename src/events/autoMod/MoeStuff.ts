@@ -1,7 +1,6 @@
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
 import {Message} from "discord.js";
-import {Main} from "../../Main";
 
 
 export abstract class MoeStuff {

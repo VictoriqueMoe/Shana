@@ -1,10 +1,10 @@
-import {IMessageGateKeeperFilter} from "./IMessageGateKeeperFilter";
+import {IDynoAutoModFilter} from "./IDynoAutoModFilter";
 import {Message} from "discord.js";
-import {ICloseableModule} from "../../../ICloseableModule";
-import {ACTION} from "../../../../../enums/ACTION";
-import {SubModuleManager} from "../manager/SubModuleManager";
+import {SubModuleManager} from "./manager/SubModuleManager";
+import {ACTION} from "../../../../enums/ACTION";
+import {ICloseableModule} from "../../ICloseableModule";
 
-export abstract class AbstractFilter implements IMessageGateKeeperFilter {
+export abstract class AbstractFilter implements IDynoAutoModFilter {
 
     protected constructor(protected _parentModule: ICloseableModule) {
         SubModuleManager.instance.addSubModules(this);
