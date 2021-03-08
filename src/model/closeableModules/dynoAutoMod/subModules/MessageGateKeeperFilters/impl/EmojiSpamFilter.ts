@@ -7,8 +7,6 @@ import {Message} from "discord.js";
 import {PRIORITY} from "../../../../../../enums/PRIORITY";
 import {DiscordUtils} from "../../../../../../utils/Utils";
 
-const emojiRegex = require('emoji-regex/es2015/index.js');
-
 @InjectDynoSubModule(MessageGateKeeper)
 export class EmojiSpamFilter extends AbstractFilter implements IValueBackedMessageGateKeeperFilter {
 
