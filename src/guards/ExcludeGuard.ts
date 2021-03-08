@@ -3,6 +3,7 @@ import {Roles} from "../enums/Roles";
 import {GuildMember} from "discord.js";
 import {GuardFunction} from "@typeit/discord";
 import RolesEnum = Roles.RolesEnum;
+import {Main} from "../Main";
 
 export const excludeGuard: GuardFunction<"message"> = async (
     [message],
@@ -10,6 +11,9 @@ export const excludeGuard: GuardFunction<"message"> = async (
     next
 ) => {
     const member: GuildMember = await message.member.fetch();
+    if(Main.testMode){
+        return await next();
+    }
     if (GuildUtils.isMemberAdmin(member)) {
         return;
     }

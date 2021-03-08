@@ -6,7 +6,7 @@ import {IMessageGateKeeperFilter} from "./IMessageGateKeeperFilter";
 export interface IValueBackedMessageGateKeeperFilter extends IMessageGateKeeperFilter {
 
     /**
-     * get the value
+     * Some filters have additional values for settings, this will return the unique setting for this filter
      */
     readonly value: string;
 }

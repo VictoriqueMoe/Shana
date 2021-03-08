@@ -1,10 +1,12 @@
-import {BaseDAO} from "../DAO/BaseDAO";
-import {ICloseOption} from "./DB/autoMod/ICloseOption";
-import {Main} from "../Main";
+import {BaseDAO} from "../../../DAO/BaseDAO";
+import {ICloseOption} from "../../DB/autoMod/ICloseOption";
+import {Main} from "../../../Main";
+import {ICloseableModule} from "../ICloseableModule";
+import {ISubModule} from "../dynoAutoMod/subModules/ISubModule";
 
-export abstract class CloseableModule extends BaseDAO<ICloseOption> {
+export abstract class CloseableModule extends BaseDAO<ICloseOption> implements ICloseableModule{
 
-    private _isEEnabled: boolean;
+    private _isEnabled: boolean;
 
     // @ts-ignore
     protected constructor(private _model: typeof ICloseOption) {
@@ -15,6 +17,10 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> {
     public abstract get moduleId(): string;
 
     public abstract get isDynoReplacement(): boolean;
+
+    public get submodules(): ISubModule[]{
+        return [];
+    }
 
     /**
      * Close this module, this prevents all events from being fired. events are NOT queued
@@ -30,7 +36,8 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> {
                 }
             }
         );
-        this._isEEnabled = m[0] === 1;
+        this._isEnabled = m[0] === 1;
+        console.log(`Module: ${this.moduleId} disabled`);
         return m[0] === 1;
     }
 
@@ -48,11 +55,12 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> {
                 }
             }
         );
-        this._isEEnabled = m[0] === 1;
+        this._isEnabled = m[0] === 1;
+        console.log(`Module: ${this.moduleId} enabled`);
         return m[0] === 1;
     }
 
     public get isEnabled(): boolean {
-        return this._isEEnabled;
+        return this._isEnabled;
     }
 }

@@ -6,6 +6,7 @@ import {Roles} from "../../enums/Roles";
 import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BaseDAO} from "../../DAO/BaseDAO";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
+
 const getUrls = require('get-urls');
 const exiftool = require('node-exiftool');
 const md5 = require('md5');

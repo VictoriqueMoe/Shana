@@ -1,7 +1,5 @@
 import {ArgsOf, Client, On} from "@typeit/discord";
-import {Channels} from "../../enums/Channels";
-import {TextChannel} from "discord.js";
-import {ObjectUtil} from "../../utils/Utils";
+import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 
 export abstract class BabyAccountDetector {
 
@@ -13,8 +11,7 @@ export abstract class BabyAccountDetector {
         const oneWeek = 604800000;
         const accountAge = now - memberCreated;
         if (accountAge <= oneWeek) {
-            const logChannel = member.guild.channels.cache.get(Channels.LOG_CHANNEL) as TextChannel;
-            logChannel.send(`Account joined <@${member.id}> is less than 1 week old at ${ObjectUtil.secondsToHuman(Math.round(accountAge / 1000))}`);
+            DiscordUtils.postToLog(`Account joined <@${member.id}> is less than 1 week old at ${ObjectUtil.secondsToHuman(Math.round(accountAge / 1000))}`);
         }
     }
 }

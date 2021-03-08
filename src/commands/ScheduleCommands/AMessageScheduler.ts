@@ -2,7 +2,7 @@ import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {ChronException, ChronUtils, DiscordUtils, StringUtils} from "../../utils/Utils";
 import {TextChannel} from "discord.js";
 import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
-import {MessageScheduler} from "../../model/MessageScheduler";
+import {MessageScheduler} from "../../model/scheduler/impl/MessageScheduler";
 import {BlockGuard} from "../../guards/BlockGuard";
 
 export abstract class AMessageScheduler {

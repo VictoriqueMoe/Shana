@@ -1,8 +1,8 @@
 import * as schedule from 'node-schedule';
 import {isValidCron} from 'cron-validator';
-import {ChronException, ObjectUtil} from '../utils/Utils';
-import {IScheduledJob} from "./IScheduledJob";
-import {ScheduledJob} from "./Impl/ScheduledJob";
+import {ChronException, ObjectUtil} from '../../../utils/Utils';
+import {IScheduledJob} from "../IScheduledJob";
+import {ScheduledJob} from "../../Impl/ScheduledJob";
 
 export class Scheduler {
 

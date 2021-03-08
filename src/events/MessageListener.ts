@@ -4,11 +4,14 @@ import fetch from "node-fetch";
 import {PremiumChannelOnlyCommand} from "../guards/PremiumChannelOnlyCommand";
 import {BlockGuard} from "../guards/BlockGuard";
 import {Roles} from "../enums/Roles";
-import {DiscordUtils, ObjectUtil} from "../utils/Utils";
+import {DiscordUtils, GuildUtils, ObjectUtil} from "../utils/Utils";
 import {BannedAttachmentsModel} from "../model/DB/BannedAttachments.model";
 import {Main} from "../Main";
+import {Message} from "discord.js";
+import {celverBotResponse, cleverBotRequest, WeebGF} from "./weebGirlfriend/WeebGF";
 import RolesEnum = Roles.RolesEnum;
 
+const {cleverBotKey} = require('../../config.json');
 const getUrls = require('get-urls');
 
 const md5 = require('md5');
@@ -34,6 +37,47 @@ export abstract class MessageListener {
 
     @On("message")
     @Guard(NotBot)
+    private async replier([message]: ArgsOf<"message">, client: Client): Promise<void> {
+        if (message.channel.id === "815042892120457216") {
+            return;
+        }
+        const repliedMessage = message.reference;
+        if (!repliedMessage) {
+            return;
+        }
+        const repliedMessageId = repliedMessage.messageID;
+        let repliedMessageObj: Message;
+        try {
+            repliedMessageObj = await message.channel.messages.fetch(repliedMessageId);
+        } catch {
+            return;
+        }
+        if (repliedMessageObj.member.id !== GuildUtils.vicBotId) {
+            return;
+        }
+        const messageContent = message.content;
+        if (!ObjectUtil.validString(messageContent)) {
+            return;
+        }
+        const request: cleverBotRequest = {
+            "key": cleverBotKey,
+            "input": messageContent
+        };
+        const url = Object.keys(request).map(key => `${key}=${encodeURIComponent(request[key])}`).join('&');
+        let reply: celverBotResponse = null;
+        try {
+            const replyPayload = await fetch(`${WeebGF.api}?${url}`, {
+                method: 'get'
+            });
+            reply = await replyPayload.json();
+        } catch (e) {
+            return;
+        }
+        message.channel.send(reply.output);
+    }
+
+    @On("message")
+    @Guard(NotBot)
     private async iLoveCocks([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const atttchments = message.attachments;
         const imgHash = "40d2949f7479d0f2ada3b178c1e1bcbd";
@@ -50,7 +94,7 @@ export abstract class MessageListener {
     @On("message")
     private async scanAttachments([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const member = message.member;
-        if(!member){
+        if (!member) {
             return;
         }
         if (Roles.isMemberStaff(member) && !Main.testMode) {
@@ -69,7 +113,12 @@ export abstract class MessageListener {
         let shouldDelete = false;
         let reason: string = null;
         for (const url of arratchmentUrl) {
-            const attachment = await DiscordUtils.loadResourceFromURL(url);
+            let attachment;
+            try {
+                attachment = await DiscordUtils.loadResourceFromURL(url);
+            } catch {
+                continue;
+            }
             const attachmentHash = md5(attachment);
             const exists = await BannedAttachmentsModel.findOne({
                 where: {

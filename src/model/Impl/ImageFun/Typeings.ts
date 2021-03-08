@@ -32,7 +32,7 @@ export type additionalGenGetArgs = {
         type: "1" | "2"
     }
     "symmetry"?: {
-        orientation : orientation
+        orientation: orientation
     },
     "whowouldwin"?: avatar,
     "afusion"?: avatar,

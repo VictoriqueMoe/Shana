@@ -86,13 +86,13 @@ export abstract class Fun {
         }
         let fileName = `${ObjectUtil.guid()}`;
         fileName = endPoint === GENERATE_ENDPOINT.triggered ? `${fileName}.gif` : `${fileName}.jpg`;
-        await command.channel.send("", {
+        command.channel.send("", {
             files: [{
                 attachment: result,
                 name: fileName
             }]
         });
-        if (endPoint === GENERATE_ENDPOINT.blur) {
+        if (endPoint === GENERATE_ENDPOINT.blur || endPoint === GENERATE_ENDPOINT.pixelize) {
             if (argumentArray[1] === "true") {
                 command.delete();
             }
@@ -126,7 +126,7 @@ export abstract class Fun {
                 const blur = Number.parseInt(value);
                 if (Number.isNaN(blur)) {
                     throw new AssertionError({
-                        message: `Please ensure blue amount is a number`
+                        message: `Please ensure blur amount is a number`
                     });
                 }
                 if (blur < 1 || blur > 30) {

@@ -4,10 +4,12 @@ import {isValidCron} from 'cron-validator';
 import {Main} from "../Main";
 import {CommandMessage} from "@typeit/discord";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
-import {CloseableModule} from "../model/CloseableModule";
+import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {Sequelize} from "sequelize-typescript";
 import {defaults} from "request";
+import {glob} from "glob";
+import * as path from "path";
 
 const request = defaults({encoding: null});
 
@@ -21,7 +23,18 @@ export class ChronException extends Error {
     }
 }
 
+export function loadClasses(...paths: string[]): void {
+    for (const pathRes of paths) {
+        glob.sync(pathRes).forEach(function (file) {
+            console.log(`Load class: "${file}"`);
+            require(path.resolve(file));
+        });
+    }
+}
+
 export namespace GuildUtils {
+    export const vicBotId = "806288433323966514";
+
     export function getGuildID(): string {
         return GuildID as string;
     }
@@ -39,8 +52,9 @@ export namespace GuildUtils {
     }
 
     export function getAutoBotIds(): string[] {
-        return ["159985870458322944", "155149108183695360", "806288433323966514"];
+        return ["159985870458322944", "155149108183695360", GuildUtils.vicBotId];
     }
+
 }
 
 export namespace StringUtils {
@@ -84,6 +98,7 @@ export namespace DiscordUtils {
         return new Promise((resolve, reject) => {
             request.get(url, function (err, resp, buffer) {
                 if (err) {
+                    console.error(err, url);
                     reject(err);
                     return;
                 }
@@ -167,6 +182,22 @@ export class ObjectUtil {
         }
 
         return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    }
+
+    public static getAmountOfCapsAsPercentage(valueCheck: string): number {
+        if (!ObjectUtil.validString(valueCheck)) {
+            return 0;
+        }
+
+        function isUpper(str: string): boolean {
+            return !/[a-z]/.test(str) && /[A-Z]/.test(str);
+        }
+
+        valueCheck = valueCheck.trim();
+        valueCheck = valueCheck.replace(/\s/g, '');
+        const stringLength = valueCheck.length;
+        const amountOfCaps = valueCheck.split("").filter(char => isUpper(char)).length;
+        return Math.floor((amountOfCaps * 100) / stringLength);
     }
 
     public static isValidObject(obj: Record<string, unknown>): boolean {

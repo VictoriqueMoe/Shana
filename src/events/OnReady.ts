@@ -3,7 +3,7 @@ import {Main} from "../Main";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {Op} from "sequelize";
-import {GuildUtils, ObjectUtil} from "../utils/Utils";
+import {GuildUtils, loadClasses, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
@@ -14,7 +14,7 @@ import {MuteSingleton} from "../commands/autoMod/userBlock/MuteSingleton";
  * TODO: couple this class to appropriate classes
  */
 export abstract class OnReady extends BaseDAO<any> {
-
+    private readonly classesToLoad = [`${__dirname}/../model/closeableModules/dynoAutoMod/subModules/MessageGateKeeperFilters/impl/*.ts`];
     @On("ready")
     private async initialize(): Promise<void> {
         await Main.client.user.setActivity('Anime', {type: 'WATCHING'});
@@ -23,6 +23,7 @@ export abstract class OnReady extends BaseDAO<any> {
         await OnReady.initiateMuteTimers();
         await this.initUsernames();
         await this.populateClosableEvents();
+        loadClasses(...this.classesToLoad);
         console.log("Bot logged in.");
     }
 
@@ -75,12 +76,16 @@ export abstract class OnReady extends BaseDAO<any> {
         const allModules = Main.closeableModules;
         for (const module of allModules) {
             const moduleId = module.moduleId;
-            const exists = await CloseOptionModel.findOne({
+            const modelPercisted = await CloseOptionModel.findOne({
                 where: {
                     moduleId
                 }
             });
-            if (!exists) {
+            if (modelPercisted) {
+                if (modelPercisted.status) {
+                    console.log(`Module: ${modelPercisted.moduleId} enabled`);
+                }
+            } else {
                 const m = new CloseOptionModel({
                     moduleId
                 });

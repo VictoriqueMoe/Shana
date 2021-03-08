@@ -1,4 +1,4 @@
-import {IMessageGateKeeperFilter} from "../modules/automod/IMessageGateKeeperFilter";
+import {IMessageGateKeeperFilter} from "../IMessageGateKeeperFilter";
 import * as Immutable from 'immutable';
 
 export class MessageGateKeeperManager {

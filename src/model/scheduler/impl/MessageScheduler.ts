@@ -1,8 +1,8 @@
 import {Scheduler} from "./Scheduler";
-import {IScheduledMessageJob} from "./IScheduledMessageJob";
+import {IScheduledMessageJob} from "../IScheduledMessageJob";
 import * as schedule from 'node-schedule';
 import {GuildChannel} from "discord.js";
-import {ScheduledMessageJob} from "./Impl/ScheduledMessageJob";
+import {ScheduledMessageJob} from "../../Impl/ScheduledMessageJob";
 
 export class MessageScheduler extends Scheduler {
 

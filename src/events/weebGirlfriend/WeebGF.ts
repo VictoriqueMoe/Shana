@@ -1,6 +1,6 @@
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {ObjectUtil} from "../../utils/Utils";
-import {TimedArray} from "../../model/TimedArray";
+import {TimedSet} from "../../model/Impl/TimedSet";
 import fetch from "node-fetch";
 import {Main} from "../../Main";
 import {NotBot} from "../../guards/NotABot";
@@ -8,7 +8,7 @@ import {WeebGFSession} from "./WeebGFSession";
 
 const {cleverBotKey} = require('../../../config.json');
 
-type celverBotResponse = {
+export type celverBotResponse = {
     cs: string,
     input: string,
     conversation_id: string,
@@ -17,7 +17,7 @@ type celverBotResponse = {
     time_elapsed: string
 };
 
-type cleverBotRequest = {
+export type cleverBotRequest = {
     key: string,
     input: string,
     cb_settings_tweak1?: number, //sensible to wacky
@@ -28,11 +28,11 @@ type cleverBotRequest = {
 
 export abstract class WeebGF {
 
-    private _sessionArray: TimedArray<WeebGFSession>;
-    private readonly api = `https://www.cleverbot.com/getreply`;
+    private _sessionArray: TimedSet<WeebGFSession>;
+    public static readonly api = `https://www.cleverbot.com/getreply`;
 
     private constructor() {
-        this._sessionArray = new TimedArray(600000); // 10 mins
+        this._sessionArray = new TimedSet(600000); // 10 mins
         //this._sessionArray = new TimedArray(30000);
     }
 
@@ -43,14 +43,14 @@ export abstract class WeebGF {
         if (!ObjectUtil.validString(messageContent)) {
             return;
         }
-        if(messageContent.startsWith("~ignore")){
+        if (messageContent.startsWith("~ignore")) {
             return;
         }
         //TODO: make a guard
         const channelId = message.channel.id;
         let shouldPost: boolean;
         if (Main.testMode && message.member.id === "697417252320051291") {
-            shouldPost = true;
+            shouldPost = false;
         } else {
             shouldPost = channelId === "815042892120457216" || channelId === "815426029094699029";
         }
@@ -76,7 +76,7 @@ export abstract class WeebGF {
         const url = Object.keys(request).map(key => `${key}=${encodeURIComponent(request[key])}`).join('&');
         let reply: celverBotResponse = null;
         try {
-            const replyPayload = await fetch(`${this.api}?${url}`, {
+            const replyPayload = await fetch(`${WeebGF.api}?${url}`, {
                 method: 'get'
             });
             reply = await replyPayload.json();
@@ -93,9 +93,9 @@ export abstract class WeebGF {
         }
 
         if (ObjectUtil.validString(sessionFromArray)) {
-            this._sessionArray.remove(sessionFromArray);
+            this._sessionArray.delete(sessionFromArray);
         }
-        this._sessionArray.push(new WeebGFSession(guildId, reply.cs));
+        this._sessionArray.add(new WeebGFSession(guildId, reply.cs));
         message.channel.send(reply.output);
     }
 

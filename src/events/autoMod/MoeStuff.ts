@@ -15,6 +15,9 @@ export abstract class MoeStuff {
                 allow = true;
             }
         }
+        if (!message.member) {
+            return;
+        }
         if (message.member.id === "270632394137010177" || allow) {
             const banned = ["ì", "|", "lol", "loli"];
             let messageContent = message.content.replace(/\s/g, '').toLocaleLowerCase();

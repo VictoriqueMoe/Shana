@@ -45,6 +45,6 @@ export class Test {
 
         const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'welcome-image.png');
 
-        command.channel.send(`Welcome to the server, ${member}!`, attachment);
+        command.channel.send(`Welcome to Hell, ${member}!`, attachment);
     }
 }

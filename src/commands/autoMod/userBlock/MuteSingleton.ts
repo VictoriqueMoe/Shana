@@ -1,10 +1,10 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {IScheduledJob} from "../../../model/IScheduledJob";
+import {IScheduledJob} from "../../../model/scheduler/IScheduledJob";
 import {Guild, GuildMember} from "discord.js";
 import {Main} from "../../../Main";
-import {Scheduler} from "../../../model/Scheduler";
+import {Scheduler} from "../../../model/scheduler/impl/Scheduler";
 import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
 import {Roles} from "../../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
@@ -59,7 +59,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         let userObject: GuildMember = null;
         let savedModel: MuteModel = null;
         userObject = await user.guild.members.fetch(blockedUserId);
-        for (const [roleId, role] of userObject.roles.cache) {
+        for (const [roleId] of userObject.roles.cache) {
             try {
                 await userObject.roles.remove(roleId);
             } catch {
@@ -116,7 +116,13 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
             this.timeOutMap.delete(userId);
         }
         const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
-        const member = await guild.members.fetch(userId);
+        let member;
+        try {
+            member = await guild.members.fetch(userId);
+        } catch {
+            return;
+        }
+
         await member.roles.remove(RolesEnum.MUTED);
         for (const roleEnum of prevRoles) {
             const role = await Roles.getRole(roleEnum);
@@ -124,7 +130,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
             try {
                 await member.roles.add(role.id);
             } catch {
-                continue;
+
             }
         }
     }

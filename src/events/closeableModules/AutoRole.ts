@@ -1,4 +1,4 @@
-import {CloseableModule} from "../../model/CloseableModule";
+import {CloseableModule} from "../../model/closeableModules/impl/CloseableModule";
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../guards/EnabledGuard";
 import {CloseOptionModel} from "../../model/DB/autoMod/impl/CloseOption.model";
