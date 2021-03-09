@@ -8,6 +8,7 @@ import {DiscordUtils, GuildUtils, ObjectUtil} from "../utils/Utils";
 import {BannedAttachmentsModel} from "../model/DB/BannedAttachments.model";
 import {Main} from "../Main";
 import {Message} from "discord.js";
+import {Op} from "sequelize";
 import RolesEnum = Roles.RolesEnum;
 
 const {cleverBotKey} = require('../../config.json');
@@ -121,7 +122,13 @@ export abstract class MessageListener {
             const attachmentHash = md5(attachment);
             const exists = await BannedAttachmentsModel.findOne({
                 where: {
-                    attachmentHash
+                    [Op.or]: [
+                        {
+                            attachmentHash
+                        }, {
+                            url
+                        }
+                    ]
                 }
             });
             if (exists) {

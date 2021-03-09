@@ -1,6 +1,6 @@
 import {Message} from "discord.js";
 import {ISubModule} from "./ISubModule";
-import {ACTION} from "../../../enums/ACTION";
+import {ACTION} from "../../../../enums/ACTION";
 
 /**
  * all values hard coded for now, but will be persisted in the future

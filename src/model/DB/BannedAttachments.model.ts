@@ -7,5 +7,8 @@ export class BannedAttachmentsModel extends Model {
     public attachmentHash: string;
 
     @Column
+    public url: string;
+
+    @Column
     public reason: string;
 }

@@ -78,6 +78,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
         }
         const entry = new BannedAttachmentsModel({
             attachmentHash,
+            url,
             reason
         });
         await super.commitToDatabase(entry);
