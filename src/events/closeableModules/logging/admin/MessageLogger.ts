@@ -26,7 +26,7 @@ export class MessageLogger extends CloseableModule {
         }
         const messageBefore = oldMessage.content;
         const messageAfter = newMessage.content;
-        if(!ObjectUtil.validString(messageBefore) && !ObjectUtil.validString(messageAfter)){
+        if(!ObjectUtil.validString(messageBefore) && !ObjectUtil.validString(messageAfter) || (messageBefore === messageAfter)){
             return;
         }
         const member = newMessage.member;
