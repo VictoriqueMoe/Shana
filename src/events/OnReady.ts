@@ -25,7 +25,7 @@ export abstract class OnReady extends BaseDAO<any> {
         await this.initUsernames();
         await this.populateClosableEvents();
         await this.cacheChannels();
-        loadClasses(...this.classesToLoad);
+        await loadClasses(...this.classesToLoad);
         console.log("Bot logged in.");
     }
 

@@ -1,21 +1,20 @@
-import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
-import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../../../guards/EnabledGuard";
-import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
-import {MessageEmbed} from "discord.js";
+import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
+import {MessageEmbed, User} from "discord.js";
 import {Main} from "../../../../Main";
+import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 
 /**
  * Message Edited
  * Messaged Deleted
  * Bulk Message Deletion
  */
-export class MessageLogger extends CloseableModule {
+export class MessageLogger extends AbstractAdminAuditLogger {
     private static _uid = ObjectUtil.guid();
 
     constructor() {
-        super(CloseOptionModel, MessageLogger._uid);
+        super(MessageLogger._uid);
     }
 
     @On("messageUpdate")
@@ -26,16 +25,16 @@ export class MessageLogger extends CloseableModule {
         }
         const messageBefore = oldMessage.content;
         const messageAfter = newMessage.content;
-        if(!ObjectUtil.validString(messageBefore) && !ObjectUtil.validString(messageAfter)){
+        if (!ObjectUtil.validString(messageBefore) && !ObjectUtil.validString(messageAfter)) {
             return;
         }
 
-        if(messageBefore === messageAfter){
+        if (messageBefore === messageAfter) {
             return;
         }
         const member = newMessage.member;
         const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
-        const userJoinEmbed = new MessageEmbed()
+        const embed = new MessageEmbed()
             .setColor('#337FD5')
             .setAuthor(`${member.user.tag}`, avatarUrl)
             .setDescription(`Message edited in <#${newMessage.channel.id}> [Jump to Message](${newMessage.url})`)
@@ -49,7 +48,7 @@ export class MessageLogger extends CloseableModule {
                 })
             .setTimestamp()
             .setFooter(`${member.id}`);
-        DiscordUtils.postToAdminLog(userJoinEmbed);
+        super.postToLog(embed);
     }
 
 
@@ -65,21 +64,39 @@ export class MessageLogger extends CloseableModule {
         const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
         const messageContent = message.content;
         const description = truncate(`Message sent by <@${member.id}> deleted in <#${message.channel.id}> \n ${messageContent}`);
-        const userJoinEmbed = new MessageEmbed()
+        const embed = new MessageEmbed()
             .setColor('#FF470F')
             .setAuthor(`${member.user.tag}`, avatarUrl)
             .setDescription(description)
             .setTimestamp()
             .setFooter(`${member.id}`);
-        DiscordUtils.postToAdminLog(userJoinEmbed);
+        try {
+            const deleteMessageLog = await DiscordUtils.getAuditLogEntry("MESSAGE_DELETE", message.guild);
+            const target = deleteMessageLog.target;
+            if (target instanceof User) {
+                if (target.id === member.user.id) {
+                    embed.addField("deleted by", `${deleteMessageLog.executor.tag}`);
+                }
+            }
+        } catch {
+        }
+
+        super.postToLog(embed);
     }
 
-    get isDynoReplacement(): boolean {
-        return true;
+    @On("messageDeleteBulk")
+    @Guard(EnabledGuard("AdminLog"))
+    private async bulkDelete([collection]: ArgsOf<"messageDeleteBulk">, client: Client): Promise<void> {
+        const len = collection.size;
+        const channelSet: Set<string> = new Set();
+        collection.forEach(({id}) => channelSet.add(id));
+        const channelIdArray = Array.from(channelSet.entries());
+        const description = `Bulk Delete in ${channelIdArray.map(id => `<#${id}>`).join(", ")}, ${len} messages deleted`;
+        const embed = new MessageEmbed()
+            .setColor('#337FD5')
+            .setAuthor(GuildUtils.getGuildName(), GuildUtils.getGuildIconUrl())
+            .setDescription(description)
+            .setTimestamp();
+        super.postToLog(embed);
     }
-
-    get moduleId(): string {
-        return "AdminLog";
-    }
-
 }

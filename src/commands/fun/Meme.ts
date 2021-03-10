@@ -10,7 +10,6 @@ import {
     GenerateEndPointResponse
 } from "../../model/Impl/ImageFun/Typeings";
 import {AssertionError} from "assert";
-import {Message} from "discord.js";
 
 const {prefix} = require('../../../config.json');
 

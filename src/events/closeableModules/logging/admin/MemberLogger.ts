@@ -1,10 +1,9 @@
-import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
-import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../../../guards/EnabledGuard";
-import {Guild, GuildMember, MessageEmbed, User} from "discord.js";
+import {MessageEmbed, User} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
 import {Roles} from "../../../../enums/Roles";
+import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import RolesEnum = Roles.RolesEnum;
 
 /**
@@ -34,12 +33,12 @@ import RolesEnum = Roles.RolesEnum;
  * Member Left Voice Channel
  * Member Moved To Voice Channel
  */
-export class MemberLogger extends CloseableModule {
+export class MemberLogger extends AbstractAdminAuditLogger {
 
     private static _uid = ObjectUtil.guid();
 
     constructor() {
-        super(CloseOptionModel, MemberLogger._uid);
+        super(MemberLogger._uid);
     }
 
     @On("guildBanRemove")
@@ -49,7 +48,7 @@ export class MemberLogger extends CloseableModule {
         const MemberBannedTag = user.tag;
         const avatarUrl = user.displayAvatarURL({format: 'jpg'});
         const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_REMOVE", guild);
-        const userJoinEmbed = new MessageEmbed()
+        const embed = new MessageEmbed()
             .setColor('#337FD5')
             .setTitle('Member Unbanned')
             .setAuthor(`Member Unbanned`, avatarUrl)
@@ -58,9 +57,9 @@ export class MemberLogger extends CloseableModule {
             .setTimestamp()
             .setFooter(`${user.id}`);
         if (auditEntry && auditEntry.target instanceof User && auditEntry.target.id === memberBannedId) {
-            userJoinEmbed.addField("ban Removed By", auditEntry.executor.tag);
+            embed.addField("ban Removed By", auditEntry.executor.tag);
         }
-        DiscordUtils.postToAdminLog(userJoinEmbed);
+        super.postToLog(embed);
     }
 
     @On("guildMemberAdd")
@@ -80,7 +79,7 @@ export class MemberLogger extends CloseableModule {
             )
             .setTimestamp()
             .setFooter(`${member.id}`);
-        DiscordUtils.postToAdminLog(userJoinEmbed);
+        super.postToLog(userJoinEmbed);
     }
 
     @On("guildMemberRemove")
@@ -110,6 +109,7 @@ export class MemberLogger extends CloseableModule {
             const target = kickLog.target;
             if (target instanceof User) {
                 if (target.id === member.id) {
+                    // check the date of the audit log incase someone was kicked, joins and leaves again, if you do not check the time, it will think the old left over log is the new one and treat the leave as a kick
                     if (kickLog.createdAt >= member.joinedAt) {
                         wasKicked = true;
                     }
@@ -152,22 +152,26 @@ export class MemberLogger extends CloseableModule {
                 }
             );
         }
-        DiscordUtils.postToAdminLog(userJoinEmbed);
+        super.postToLog(userJoinEmbed);
     }
 
     @On("guildBanAdd")
     @Guard(EnabledGuard("AdminLog"))
     private async memberBanned([guild, user]: ArgsOf<"guildBanAdd">, client: Client): Promise<void> {
+
+        const avatarUrl = user.displayAvatarURL({format: 'jpg'});
+        const userBanned = new MessageEmbed()
+            .setColor('#FF470F')
+            .setTitle('Member banned')
+            .setAuthor(`Member banned`, avatarUrl)
+            .setDescription(`<@${user.id}> ${user.username}`)
+            .setThumbnail(avatarUrl)
+            .setTimestamp()
+            .setFooter(`${user.id}`);
         const res = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_ADD", guild);
         if (res) {
-            const avatarUrl = user.displayAvatarURL({format: 'jpg'});
-            const userBanned = new MessageEmbed()
-                .setColor('#FF470F')
-                .setTitle('Member banned')
-                .setAuthor(`Member banned`, avatarUrl)
-                .setDescription(`<@${user.id}> ${user.username}`)
-                .setThumbnail(avatarUrl)
-                .addFields(
+            if (user.id === res.id) {
+                userBanned.addFields(
                     {
                         name: "Banned by",
                         value: res.executor.tag
@@ -176,18 +180,9 @@ export class MemberLogger extends CloseableModule {
                         name: "Reason",
                         value: ObjectUtil.validString(res.reason) ? res.reason : "No reason provided"
                     }
-                )
-                .setTimestamp()
-                .setFooter(`${user.id}`);
-            DiscordUtils.postToAdminLog(userBanned);
+                );
+            }
         }
-    }
-
-    public get isDynoReplacement(): boolean {
-        return true;
-    }
-
-    public get moduleId(): string {
-        return "AdminLog";
+        super.postToLog(userBanned);
     }
 }

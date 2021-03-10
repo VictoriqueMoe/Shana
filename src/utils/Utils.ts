@@ -8,6 +8,7 @@ import {
     Message,
     MessageEmbed,
     Permissions,
+    Role,
     TextChannel,
     User
 } from "discord.js";
@@ -22,6 +23,7 @@ import {Sequelize} from "sequelize-typescript";
 import {defaults} from "request";
 import {glob} from "glob";
 import * as path from "path";
+import {Channels} from "../enums/Channels";
 
 const emojiRegex = require('emoji-regex/es2015/index.js');
 
@@ -37,13 +39,26 @@ export class ChronException extends Error {
     }
 }
 
-export function loadClasses(...paths: string[]): void {
-    for (const pathRes of paths) {
-        glob.sync(pathRes).forEach(function (file) {
-            console.log(`Load class: "${file}"`);
-            require(path.resolve(file));
-        });
-    }
+export function loadClasses(...paths: string[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+        let i = 0;
+        for (const pathRes of paths) {
+            glob(pathRes, (err, files) => {
+                i++;
+                for (const file of files) {
+                    console.log(`Load class: "${file}"`);
+                    try {
+                        require(path.resolve(file));
+                    } catch (e) {
+                        reject(e);
+                    }
+                }
+                if (i === paths.length) {
+                    resolve();
+                }
+            });
+        }
+    });
 }
 
 export namespace GuildUtils {
@@ -51,6 +66,18 @@ export namespace GuildUtils {
 
     export function getGuildID(): string {
         return GuildID as string;
+    }
+
+    export function getGuildIconUrl(): string {
+        const guild = Main.client.guilds.cache.get(GuildUtils.getGuildID());
+        return guild.iconURL({
+            dynamic: true,
+        });
+    }
+
+    export function getGuildName(): string {
+        const guild = Main.client.guilds.cache.get(GuildUtils.getGuildID());
+        return guild.name;
     }
 
     export function isMemberAdmin(member: GuildMember): boolean {
@@ -98,6 +125,55 @@ export namespace ChronUtils {
 }
 
 export namespace DiscordUtils {
+
+
+    export type RoleChange = {
+        permissions?: {
+            added: string[]
+            removed: string[],
+        },
+        nameChange?: {
+            before: string,
+            after: string
+        },
+        colourChange?: {
+            before: string,
+            after: string
+        }
+    };
+
+    export function getRoleChanges(oldRole: Role, newRole: Role): RoleChange {
+        const retObj:RoleChange = {};
+        const added = oldRole.permissions.missing(newRole.permissions.bitfield);
+        const removed = newRole.permissions.missing(oldRole.permissions.bitfield);
+
+        if(added.length > 0 || removed.length > 0){
+            retObj["permissions"] = {
+                added,
+                removed
+            };
+        }
+        const oldName = oldRole.name;
+        const newName = newRole.name;
+        if (oldName !== newName) {
+            retObj["nameChange"] = {
+                "before": oldName,
+                "after": newName
+            };
+        }
+
+        const oldColour = oldRole.hexColor;
+        const newColour = newRole.hexColor;
+        if (oldColour !== newColour) {
+            retObj["colourChange"] = {
+                "before": oldColour,
+                "after": newColour
+            };
+        }
+
+        return retObj;
+    }
+
     export function findChannelByName(channelName: string): GuildChannel {
         const channels = Main.client.guilds.cache.get(GuildUtils.getGuildID()).channels;
         for (const [, channel] of channels.cache) {
@@ -148,24 +224,15 @@ export namespace DiscordUtils {
         return emojiArray;
     }
 
-    export async function postToLog(text: string): Promise<Message> {
+    export async function postToLog(message: MessageEmbed | string, adminLog = false): Promise<Message> {
         const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
         let channel: TextChannel;
         if (Main.testMode) {
-            channel = await guild.channels.resolve("793994947241312296") as TextChannel; // test channel
+            channel = await guild.channels.resolve(Channels.TEST_CHANNEL) as TextChannel;
+        } else if (adminLog) {
+            channel = await guild.channels.resolve(Channels.ADMIN_LOG) as TextChannel;
         } else {
-            channel = await guild.channels.resolve("327484813336641536") as TextChannel;
-        }
-        return await channel.send(text);
-    }
-
-    export async function postToAdminLog(message: MessageEmbed | string): Promise<Message> {
-        const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
-        let channel: TextChannel;
-        if (Main.testMode) {
-            channel = await guild.channels.resolve("793994947241312296") as TextChannel; // test channel
-        } else {
-            channel = await guild.channels.resolve("555111700081279039") as TextChannel; // admin log
+            channel = await guild.channels.resolve(Channels.LOG_CHANNEL) as TextChannel;
         }
         return await channel.send(message);
     }
@@ -270,7 +337,7 @@ export class ObjectUtil {
         return Math.floor((amountOfCaps * 100) / stringLength);
     }
 
-    public static isValidObject(obj: Record<string, unknown>): boolean {
+    public static isValidObject(obj: unknown): boolean {
         return typeof obj === "object" && obj !== null && obj !== undefined && Object.keys(obj).length > 0;
     }
 
