@@ -126,7 +126,7 @@ export class MemberLogger extends CloseableModule {
                 .setThumbnail(avatarUrl)
                 .addFields({
                         name: "Kicked by",
-                        value: kickLog.executor.username
+                        value: kickLog.executor.tag
                     },
                     {
                         name: "Reason",
@@ -170,7 +170,7 @@ export class MemberLogger extends CloseableModule {
                 .addFields(
                     {
                         name: "Banned by",
-                        value: res.executor.username
+                        value: res.executor.tag
                     },
                     {
                         name: "Reason",
