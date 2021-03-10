@@ -8,7 +8,7 @@ export type RoleChangeType = {
     add: RolesEnum[]
 };
 
-export class UserChange {
+export class MemberRoleChange {
 
     constructor(private _oldUser: GuildMember | PartialGuildMember, private _newUser: GuildMember | PartialGuildMember) {
     }

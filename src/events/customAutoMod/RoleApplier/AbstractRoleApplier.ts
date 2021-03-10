@@ -1,6 +1,6 @@
 import {Roles} from "../../../enums/Roles";
 import {GuildMember, User} from "discord.js";
-import {UserChange} from "../../../modules/automod/UserChange";
+import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
@@ -22,7 +22,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         // step 1 get the last role edit
         let roleLog = null;
         try {
-            roleLog = DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", member.guild);
+            roleLog = await DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", member.guild);
         } catch (e) {
             //   console.error(e);
         }
@@ -55,7 +55,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
      * @param model
      * @protected
      */
-    protected async onChange(role: T, change: UserChange, model: typeof RolePersistenceModel): Promise<boolean> {
+    protected async onChange(role: T, change: MemberRoleChange, model: typeof RolePersistenceModel): Promise<boolean> {
         const isRoleRemoved = change.roleChanges.remove.includes(role);
         // let specialRemoved = member.roles.cache.get(role) != null && member.roles.cache.get(role) == null;
         const userId = change.newUser.id;

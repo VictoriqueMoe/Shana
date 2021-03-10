@@ -2,7 +2,10 @@ import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../../../guards/EnabledGuard";
-import {MessageEmbed, Role} from "discord.js";
+import {MessageEmbed, Role, User} from "discord.js";
+import {MemberRoleChange} from "../../../../modules/automod/MemberRoleChange";
+import {Roles} from "../../../../enums/Roles";
+
 
 /**
  * Role Created
@@ -16,6 +19,59 @@ export class RoleLogger extends AbstractAdminAuditLogger {
 
     constructor() {
         super(RoleLogger._uid);
+    }
+
+    @On("guildMemberUpdate")
+    @Guard(EnabledGuard("AdminLog"))
+    private async roleGiven([oldMember, newMember]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
+        const oldRolesMan = oldMember.roles;
+        const newRolesMan = newMember.roles;
+        const wasChange = oldRolesMan.cache.size !== newRolesMan.cache.size;
+        if (!wasChange) {
+            return;
+        }
+        const avatarUrl = newMember.user.displayAvatarURL({format: 'jpg'});
+        const embed = new MessageEmbed()
+            .setAuthor(newMember.user.tag, avatarUrl)
+            .setTitle(`Role changed`)
+            .setDescription(`<@${newMember.id}> has had their roles changed`)
+            .setTimestamp()
+            .setFooter(`${newMember.user.id}`);
+
+        const change = new MemberRoleChange(oldMember, newMember);
+        const roleChanges = change.roleChanges;
+        const added = roleChanges.add;
+        if(added.length > 0){
+            const arr = [];
+            for(const roleEnum of added){
+                const roleObj = await Roles.getRole(roleEnum);
+                embed.setColor(roleObj.hexColor);
+                arr.push(`\`${roleObj.name}\``);
+            }
+            const str = arr.join(", ");
+            embed.addField("Added role(s)", str);
+        }
+        const removed = roleChanges.remove;
+        if(removed.length > 0){
+            const arr = [];
+            for(const roleEnum of removed){
+                const roleObj = await Roles.getRole(roleEnum);
+                embed.setColor(roleObj.hexColor);
+                arr.push(`\`${roleObj.name}\``);
+            }
+            const str = arr.join(", ");
+            embed.addField("Removed role(s)", str);
+        }
+
+        const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", oldMember.guild);
+        const {executor, target} = auditEntry;
+        if (target instanceof User) {
+            if(target.id === newMember.id){
+                embed.addField("Modified by", executor.tag);
+            }
+        }
+
+        super.postToLog(embed);
     }
 
     @On("roleUpdate")
