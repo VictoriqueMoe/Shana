@@ -2,7 +2,7 @@ import {CloseableModule} from "../../../../model/closeableModules/impl/Closeable
 import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../../../guards/EnabledGuard";
-import {Guild, MessageEmbed, User} from "discord.js";
+import {Guild, GuildMember, MessageEmbed, User} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
 import {Roles} from "../../../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
@@ -57,8 +57,8 @@ export class MemberLogger extends CloseableModule {
             .setThumbnail(avatarUrl)
             .setTimestamp()
             .setFooter(`${user.id}`);
-        if(auditEntry){
-            userJoinEmbed.addField("ban Removed By", auditEntry.executor.username);
+        if (auditEntry && auditEntry.target instanceof User && auditEntry.target.id === memberBannedId) {
+            userJoinEmbed.addField("ban Removed By", auditEntry.executor.tag);
         }
         DiscordUtils.postToAdminLog(userJoinEmbed);
     }

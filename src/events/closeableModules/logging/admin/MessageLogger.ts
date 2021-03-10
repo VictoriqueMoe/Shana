@@ -26,7 +26,11 @@ export class MessageLogger extends CloseableModule {
         }
         const messageBefore = oldMessage.content;
         const messageAfter = newMessage.content;
-        if(!ObjectUtil.validString(messageBefore) && !ObjectUtil.validString(messageAfter) || (messageBefore === messageAfter)){
+        if(!ObjectUtil.validString(messageBefore) && !ObjectUtil.validString(messageAfter)){
+            return;
+        }
+
+        if(messageBefore === messageAfter){
             return;
         }
         const member = newMessage.member;
@@ -60,7 +64,7 @@ export class MessageLogger extends CloseableModule {
         const member = message.member;
         const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
         const messageContent = message.content;
-        const description = truncate(`Message sent by <@${member.id}> deleted in <#${message.channel.id}> \n ${truncate(messageContent)}`);
+        const description = truncate(`Message sent by <@${member.id}> deleted in <#${message.channel.id}> \n ${messageContent}`);
         const userJoinEmbed = new MessageEmbed()
             .setColor('#FF470F')
             .setAuthor(`${member.user.tag}`, avatarUrl)

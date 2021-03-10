@@ -11,10 +11,6 @@ import {DiscordUtils, EnumEx, ObjectUtil} from "../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
 class RoleProxy<T extends RolesEnum> extends AbstractRoleApplier<T> {
-    public async roleJoins(role: T, member: GuildMember, model: typeof RolePersistenceModel): Promise<boolean> {
-        return super.roleJoins(role, member, model);
-    }
-
     public async applyRole(role: T, member: GuildMember, reason?: string): Promise<void> {
         return super.applyRole(role, member, reason);
     }
@@ -47,19 +43,17 @@ export class AutoRole extends CloseableModule {
             try {
                 if (persistedRole) {
                     const rolePersisted = EnumEx.loopBack(RolesEnum, persistedRole.roleId, true) as unknown as RolesEnum;
-                    const didAdd = await this._roleApplier.roleJoins(rolePersisted, member, RolePersistenceModel);
-                    if (didAdd) {
-                        if (rolePersisted === RolesEnum.SPECIAL) {
-                            DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as special (possible special evasion) \n <@697417252320051291> <@593208170869162031>`);
-                        } else if (rolePersisted === RolesEnum.MUTED) {
-                            DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and because of this, has been re-muted.`);
-                        }
-                        return;
+                    await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
+                    if (rolePersisted === RolesEnum.SPECIAL) {
+                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as special (possible special evasion) \n <@697417252320051291> <@593208170869162031>`);
+                    } else if (rolePersisted === RolesEnum.MUTED) {
+                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and because of this, has been re-muted.`);
                     }
+                    return;
                 }
                 await this._roleApplier.applyRole(RolesEnum.HEADCRABS, member, "added via VicBot");
             } catch {
-                console.log("Member does not exist in Auto Role");
+                await this._roleApplier.applyRole(RolesEnum.HEADCRABS, member, "added via VicBot");
             }
         });
     }
