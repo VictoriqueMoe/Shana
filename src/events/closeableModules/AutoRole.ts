@@ -7,7 +7,7 @@ import * as schedule from "node-schedule";
 import {AbstractRoleApplier} from "../customAutoMod/RoleApplier/AbstractRoleApplier";
 import {GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../model/DB/autoMod/impl/RolePersistence.model";
-import {DiscordUtils, EnumEx} from "../../utils/Utils";
+import {DiscordUtils, EnumEx, ObjectUtil} from "../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
 class RoleProxy<T extends RolesEnum> extends AbstractRoleApplier<T> {
@@ -24,8 +24,10 @@ export class AutoRole extends CloseableModule {
 
     private _roleApplier = new RoleProxy();
 
+    private static _uid = ObjectUtil.guid();
+
     constructor() {
-        super(CloseOptionModel);
+        super(CloseOptionModel, AutoRole._uid);
     }
 
     @On("guildMemberAdd")

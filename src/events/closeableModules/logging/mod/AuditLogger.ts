@@ -2,7 +2,7 @@ import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.mo
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../../../guards/EnabledGuard";
 import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
-import {DiscordUtils} from "../../../../utils/Utils";
+import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
 import {User} from "discord.js";
 
 /**
@@ -13,8 +13,11 @@ import {User} from "discord.js";
  * Member leave
  */
 export class AuditLogger extends CloseableModule {
+
+    private static _uid = ObjectUtil.guid();
+
     constructor() {
-        super(CloseOptionModel);
+        super(CloseOptionModel, AuditLogger._uid);
     }
 
     @On("guildMemberAdd")

@@ -4,14 +4,14 @@ import {Main} from "../../../Main";
 import {ICloseableModule} from "../ICloseableModule";
 import {ISubModule} from "../dynoAutoMod/subModules/ISubModule";
 import * as Immutable from "immutable";
-import {SubModuleManager} from "../dynoAutoMod/subModules/manager/SubModuleManager";
+import {SubModuleManager} from "../manager/SubModuleManager";
 
 export abstract class CloseableModule extends BaseDAO<ICloseOption> implements ICloseableModule {
 
     private _isEnabled: boolean;
 
     // @ts-ignore
-    protected constructor(private _model: typeof ICloseOption) {
+    protected constructor(private _model: typeof ICloseOption, private _uid:string) {
         super();
         Main.closeableModules.add(this);
     }
@@ -22,6 +22,10 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> implements I
 
     public get submodules(): Immutable.Set<ISubModule> {
         return SubModuleManager.instance.getSubModulesFromParent(this);
+    }
+
+    public get uid():string{
+        return this._uid;
     }
 
     /**

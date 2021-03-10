@@ -19,8 +19,10 @@ export class DynoAutoMod extends CloseableModule {
 
     private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
 
+    private static _uid = ObjectUtil.guid();
+
     constructor() {
-        super(CloseOptionModel);
+        super(CloseOptionModel, DynoAutoMod._uid);
     }
 
     @On("message")

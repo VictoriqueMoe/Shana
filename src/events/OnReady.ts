@@ -24,8 +24,23 @@ export abstract class OnReady extends BaseDAO<any> {
         await OnReady.initiateMuteTimers();
         await this.initUsernames();
         await this.populateClosableEvents();
+        await this.cacheChannels();
         loadClasses(...this.classesToLoad);
         console.log("Bot logged in.");
+    }
+
+    private async cacheChannels(): Promise<void> {
+        const guild =  await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        const promises = guild.channels.cache.map((channel, id) => {
+            return channel.fetch(true).then(() => {
+                console.log(`cashed channel: "${channel.name}"`);
+            }).catch(() => {
+                console.log(`Unable to cache: "${channel.name}"`);
+            });
+        });
+        return Promise.all(promises).then(() => {
+            console.log("Channel cache done");
+        });
     }
 
     private async initUsernames(): Promise<void> {
@@ -84,7 +99,8 @@ export abstract class OnReady extends BaseDAO<any> {
             });
             if (modelPercisted) {
                 if (modelPercisted.status) {
-                    console.log(`Module: ${modelPercisted.moduleId} enabled`);
+                    const moduleName = ObjectUtil.validString(module.constructor.name) ? module.constructor.name : "";
+                    console.log(`Module: ${modelPercisted.moduleId} (${moduleName}) enabled`);
                 }
             } else {
                 const m = new CloseOptionModel({

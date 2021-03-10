@@ -170,6 +170,11 @@ export namespace DiscordUtils {
         return await channel.send(message);
     }
 
+    /**
+     * Please note: if you are checking for an entry of one you are NOT listening to, you will need to check the creation date against user join date for ALL events
+     * @param type
+     * @param guild
+     */
     export async function getAuditLogEntry(type: GuildAuditLogsAction, guild: Guild): Promise<GuildAuditLogsEntry> {
         const fetchObj: GuildAuditLogsFetchOptions = {
             limit: 1,

@@ -2,13 +2,13 @@ import {CloseableModule} from "../../../../model/closeableModules/impl/Closeable
 import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../../../guards/EnabledGuard";
-import {MessageEmbed, User} from "discord.js";
+import {Guild, MessageEmbed, User} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
 import {Roles} from "../../../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
 
 /**
- * admin audit Logger for quick logs. this will log:
+ * admin audit Logger for Admin Audit logging. this will log:
  * Member join
  * Member ban
  * Member kick
@@ -35,8 +35,32 @@ import RolesEnum = Roles.RolesEnum;
  * Member Moved To Voice Channel
  */
 export class MemberLogger extends CloseableModule {
+
+    private static _uid = ObjectUtil.guid();
+
     constructor() {
-        super(CloseOptionModel);
+        super(CloseOptionModel, MemberLogger._uid);
+    }
+
+    @On("guildBanRemove")
+    @Guard(EnabledGuard("AdminLog"))
+    private async banRemoved([guild, user]: ArgsOf<"guildBanRemove">, client: Client): Promise<void> {
+        const memberBannedId = user.id;
+        const MemberBannedTag = user.tag;
+        const avatarUrl = user.displayAvatarURL({format: 'jpg'});
+        const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_REMOVE", guild);
+        const userJoinEmbed = new MessageEmbed()
+            .setColor('#43B581')
+            .setTitle('Member Unbanned')
+            .setAuthor(`Member Unbanned`, avatarUrl)
+            .setDescription(`<@${memberBannedId}> ${MemberBannedTag}`)
+            .setThumbnail(avatarUrl)
+            .setTimestamp()
+            .setFooter(`${user.id}`);
+        if(auditEntry){
+            userJoinEmbed.addField("ban Removed By", auditEntry.executor.username);
+        }
+        DiscordUtils.postToAdminLog(userJoinEmbed);
     }
 
     @On("guildMemberAdd")

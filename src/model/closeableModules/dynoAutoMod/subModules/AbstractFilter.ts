@@ -1,6 +1,6 @@
 import {IDynoAutoModFilter} from "./IDynoAutoModFilter";
 import {Message} from "discord.js";
-import {SubModuleManager} from "./manager/SubModuleManager";
+import {SubModuleManager} from "../../manager/SubModuleManager";
 import {ACTION} from "../../../../enums/ACTION";
 import {ICloseableModule} from "../../ICloseableModule";
 

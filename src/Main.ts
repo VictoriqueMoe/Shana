@@ -7,7 +7,7 @@ const {token} = require('../config.json');
 export class CloseableModuleSet extends Set<CloseableModule> {
     add(value: CloseableModule): this {
         for (const v of this.values()) {
-            if (v.moduleId === value.moduleId) {
+            if (v.uid === value.uid) {
                 super.delete(v);
                 break;
             }
@@ -18,7 +18,7 @@ export class CloseableModuleSet extends Set<CloseableModule> {
 
     has(value: CloseableModule): boolean {
         for (const v of this.values()) {
-            if (v.moduleId === value.moduleId) {
+            if (v.uid === value.uid) {
                 return true;
             }
         }
