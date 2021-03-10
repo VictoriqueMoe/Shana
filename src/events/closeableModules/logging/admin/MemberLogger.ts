@@ -50,7 +50,7 @@ export class MemberLogger extends CloseableModule {
         const avatarUrl = user.displayAvatarURL({format: 'jpg'});
         const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_REMOVE", guild);
         const userJoinEmbed = new MessageEmbed()
-            .setColor('#43B581')
+            .setColor('#337FD5')
             .setTitle('Member Unbanned')
             .setAuthor(`Member Unbanned`, avatarUrl)
             .setDescription(`<@${memberBannedId}> ${MemberBannedTag}`)
