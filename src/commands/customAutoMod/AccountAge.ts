@@ -3,7 +3,7 @@ import {NotBot} from "../../guards/NotABot";
 import {roleConstraints} from "../../guards/RoleConstraint";
 import {BlockGuard} from "../../guards/BlockGuard";
 import {Roles} from "../../enums/Roles";
-import {ObjectUtil} from "../../utils/Utils";
+import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class AccountAge {
@@ -17,9 +17,8 @@ export abstract class AccountAge {
             return;
         }
         const mention = mentions.users.array()[0];
-        const createdDate = mention.createdAt.getTime();
-        const accountAge = Date.now() - createdDate;
-        command.reply(`Account age is is: ${ObjectUtil.secondsToHuman(Math.round(accountAge / 1000))}`);
+        const age = DiscordUtils.getAccountAge(mention, true);
+        command.reply(`Account age is is: ${age}`);
     }
 
     private static viewDescriptionForSetUsernames() {

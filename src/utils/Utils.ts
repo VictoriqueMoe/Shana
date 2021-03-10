@@ -1,4 +1,16 @@
-import {GuildChannel, GuildMember, Message, Permissions, TextChannel} from "discord.js";
+import {
+    Guild,
+    GuildAuditLogsAction,
+    GuildAuditLogsEntry,
+    GuildAuditLogsFetchOptions,
+    GuildChannel,
+    GuildMember,
+    Message,
+    MessageEmbed,
+    Permissions,
+    TextChannel,
+    User
+} from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {Main} from "../Main";
@@ -109,6 +121,18 @@ export namespace DiscordUtils {
         });
     }
 
+    export function getAccountAge(user: User | GuildMember, format = false): number | string {
+        if (user instanceof GuildMember) {
+            user = user.user;
+        }
+        const createdDate = user.createdAt.getTime();
+        const accountAge = Date.now() - createdDate;
+        if (format) {
+            return ObjectUtil.secondsToHuman(Math.round(accountAge / 1000));
+        } else {
+            return accountAge;
+        }
+    }
 
     export function getEmojiFromMessage(message: Message): string[] {
         const regex = new RegExp(/<(a?):(\w+):(\d+)>/, "g");
@@ -133,6 +157,30 @@ export namespace DiscordUtils {
             channel = await guild.channels.resolve("327484813336641536") as TextChannel;
         }
         return await channel.send(text);
+    }
+
+    export async function postToAdminLog(message: MessageEmbed | string): Promise<Message> {
+        const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        let channel: TextChannel;
+        if (Main.testMode) {
+            channel = await guild.channels.resolve("793994947241312296") as TextChannel; // test channel
+        } else {
+            channel = await guild.channels.resolve("555111700081279039") as TextChannel; // admin log
+        }
+        return await channel.send(message);
+    }
+
+    export async function getAuditLogEntry(type: GuildAuditLogsAction, guild: Guild): Promise<GuildAuditLogsEntry> {
+        const fetchObj: GuildAuditLogsFetchOptions = {
+            limit: 1,
+            type
+        };
+        const fetchedAuditLog = await guild.fetchAuditLogs(fetchObj);
+        const logEntry = fetchedAuditLog.entries.first();
+        if (!logEntry) {
+            return null;
+        }
+        return logEntry;
     }
 
     /**

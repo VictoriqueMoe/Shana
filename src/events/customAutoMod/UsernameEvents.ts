@@ -29,11 +29,7 @@ export abstract class UsernameEvents {
                 }
             });
             if (modelObj) {
-                const fetchedLogs = await newUser.guild.fetchAuditLogs({
-                    limit: 1,
-                    type: 'MEMBER_UPDATE'
-                });
-                const roleLog = fetchedLogs.entries.first();
+                const roleLog = await DiscordUtils.getAuditLogEntry("MEMBER_UPDATE", newUser.guild);
                 const executor = roleLog.executor;
                 if (executor.id === "806288433323966514") {
                     return;

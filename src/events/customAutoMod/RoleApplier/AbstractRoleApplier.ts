@@ -2,7 +2,7 @@ import {Roles} from "../../../enums/Roles";
 import {GuildMember, User} from "discord.js";
 import {UserChange} from "../../../modules/automod/UserChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {GuildUtils} from "../../../utils/Utils";
+import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class AbstractRoleApplier<T extends RolesEnum> {
@@ -20,19 +20,15 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
 
     private async applyAfterDyno(role: T, member: GuildMember): Promise<void> {
         // step 1 get the last role edit
-        let fetchedLogs = null;
+        let roleLog = null;
         try {
-            fetchedLogs = await member.guild.fetchAuditLogs({
-                limit: 1,
-                type: 'MEMBER_ROLE_UPDATE'
-            });
+            roleLog = DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", member.guild);
         } catch (e) {
             //   console.error(e);
         }
-        if (!fetchedLogs) {
+        if (!roleLog) {
             return;
         }
-        const roleLog = fetchedLogs.entries.first();
         // get the executor of the role edit
         const executor = roleLog.executor;
 
@@ -121,12 +117,7 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         }
         // at this point we KNOW the member is special AND they left, but we do not know if they left voluntary or was kicked
         // we need to look at the audit logs
-        const fetchedLogs = await member.guild.fetchAuditLogs({
-            limit: 1,
-            type: 'MEMBER_KICK',
-        });
-
-        const kickLog = fetchedLogs.entries.first();
+        const kickLog = await DiscordUtils.getAuditLogEntry("MEMBER_KICK", member.guild);
         let wasKicked: boolean;
         if (!kickLog) {
             console.log(`${member.user.tag} left the guild, most likely of their own will.`);
