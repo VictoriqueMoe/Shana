@@ -117,16 +117,7 @@ export class MemberLogger extends CloseableModule {
             }
         }
         const rolesArr = roles.filter(r => r.id !== RolesEnum.EVERYONE).map(role => `<@&${role.id}>`);
-        if (!wasKicked) {
-            userJoinEmbed = new MessageEmbed()
-                .setColor('#FF470F')
-                .setTitle('Member Left')
-                .setAuthor(`Member Left`, avatarUrl)
-                .setDescription(`<@${memberJoinedId}> ${memberJoinedTag}`)
-                .setThumbnail(avatarUrl)
-                .setTimestamp()
-                .setFooter(`${member.id}`);
-        } else {
+        if (wasKicked) {
             userJoinEmbed = new MessageEmbed()
                 .setColor('#FF470F')
                 .setTitle('Member Was Kicked')
@@ -141,6 +132,15 @@ export class MemberLogger extends CloseableModule {
                         name: "Reason",
                         value: ObjectUtil.validString(kickLog.reason) ? kickLog.reason : "No reason provided"
                     })
+                .setTimestamp()
+                .setFooter(`${member.id}`);
+        } else {
+            userJoinEmbed = new MessageEmbed()
+                .setColor('#FF470F')
+                .setTitle('Member Left')
+                .setAuthor(`Member Left`, avatarUrl)
+                .setDescription(`<@${memberJoinedId}> ${memberJoinedTag}`)
+                .setThumbnail(avatarUrl)
                 .setTimestamp()
                 .setFooter(`${member.id}`);
         }
