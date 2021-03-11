@@ -1,5 +1,5 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
-import {DiscordUtils, ObjectUtil, StringUtils} from "../../../utils/Utils";
+import {DiscordUtils, EnumEx, ObjectUtil, StringUtils, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {NotBot} from "../../../guards/NotABot";
@@ -10,6 +10,7 @@ import {GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {MuteSingleton} from "./MuteSingleton";
 import RolesEnum = Roles.RolesEnum;
+import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
 
@@ -55,12 +56,27 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
             return;
         }
 
-        const hasTimeout = ObjectUtil.validString(timeout) && !Number.isNaN(Number.parseInt(timeout));
+        const hasTimeout = ObjectUtil.validString(timeout);
         let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
         try {
             if (hasTimeout) {
-                const seconds = Number.parseInt(timeout);
-                await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, seconds);
+                let seconds = -1;
+                if (ObjectUtil.isNumeric(timeout)) {
+                    seconds = Number.parseInt(timeout);
+                    await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, seconds);
+                } else {
+                    const unit = timeout.replace(/\d+/, "");
+                    const numberValueStr = timeout.slice(0, -unit.length);
+                    const timeEnum = EnumEx.loopBack(TIME_UNIT, unit, true) as TIME_UNIT;
+                    if (!ObjectUtil.validString(timeEnum)) {
+                        command.reply(`invalid unit, '${unit}', available values are: \n ${this.getMuteTimeOutStr()}`);
+                        return;
+                    }
+                    const numValue = Number.parseInt(numberValueStr);
+                    await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, numValue, timeEnum);
+                    seconds = TimeUtils.convertToMilli(numValue, timeEnum) / 1000;
+                }
+
                 replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
             } else {
                 await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID);
@@ -72,6 +88,21 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
 
         command.reply(replyMessage);
 
+    }
+
+    private getMuteTimeOutStr(): string {
+        const keyValuePair: Array<{ name: TIME_UNIT, value: string }> = EnumEx.getNamesAndValues(TIME_UNIT) as Array<{ name: TIME_UNIT, value: string }>;
+        return keyValuePair.map(kv => {
+            const {name, value}: { name: TIME_UNIT, value: string } = kv;
+            return `'${value}' -> ${name}`;
+        }).join("\n ");
+    }
+
+    @Command("muteTimeUnits")
+    @Description(Mute.getMuteTimeUnitsDescription())
+    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    private async getTimeUnits(command: CommandMessage): Promise<void> {
+        command.reply(`\n ${this.getMuteTimeOutStr()}`);
     }
 
 
@@ -108,6 +139,10 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
     }
 
     private static getMuteDescription() {
-        return `\n Block a user from sending any messages with reason \n usage: ~mute <"username"> <"reason"> [timeout in seconds] \n example: ~mute "@SomeUser" "annoying" 20 \n make sure that the @ is blue before sending`;
+        return `\n Block a user from sending any messages with reason \n usage: ~mute <"username"> <"reason"> [timeout in seconds] | ["timeout in seconds + time Unit"] \n example: ~mute "@SomeUser" "annoying" 20 = mute for 20 seconds \n ~mute "@SomeUser" "annoying" "2h" = mute for 2 hours \n make sure that the @ is blue before sending`;
+    }
+
+    private static getMuteTimeUnitsDescription() {
+        return "Get all the available time units you can use in mute";
     }
 }

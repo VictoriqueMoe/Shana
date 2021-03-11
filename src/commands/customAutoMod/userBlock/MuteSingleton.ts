@@ -5,9 +5,10 @@ import {IScheduledJob} from "../../../model/scheduler/IScheduledJob";
 import {Guild, GuildMember} from "discord.js";
 import {Main} from "../../../Main";
 import {Scheduler} from "../../../model/scheduler/impl/Scheduler";
-import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
+import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {Roles} from "../../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
+import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
     private static _instance: MuteSingleton;
@@ -33,7 +34,15 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         })) as Promise<RolePersistenceModel>;
     }
 
-    public async muteUser(user: GuildMember, reason: string, creatorID: string, seconds?: number): Promise<MuteModel> {
+    /**
+     * Mute a user from the server with an optional timeout
+     * @param user - the User to mute
+     * @param reason - reason for the mute
+     * @param creatorID - User ID who did the mute
+     * @param timeOut - the timeout. if unit is not passed, this will be evaluated as seconds
+     * @param unit - the unit of time to apply to the timeOut argument
+     */
+    public async muteUser(user: GuildMember, reason: string, creatorID: string, timeOut?: number, unit?: TIME_UNIT): Promise<MuteModel> {
         const prevRolesArr = Array.from(user.roles.cache.values());
         const prevRolesIdStr = prevRolesArr.map(r => r.id).join(",");
         const blockedUserId = user.id;
@@ -45,15 +54,18 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
             creatorID,
             prevRole: prevRolesIdStr
         };
-        const hasTimeout = !Number.isNaN(seconds);
+        const hasTimeout = !isNaN(timeOut);
         const maxMillis = 8640000000000000 - Date.now();
         let millis = -1;
         if (hasTimeout) {
-            millis = seconds * 1000;
-            obj["timeout"] = seconds * 1000;
+            millis = timeOut * 1000;
+            if(ObjectUtil.validString(unit)){
+                millis = TimeUtils.convertToMilli(timeOut, unit);
+            }
             if (Number.isNaN(millis) || millis <= 0 || millis > maxMillis) {
                 throw new Error(`Timout is invalid, it can not be below 0 and can not be more than: "${maxMillis / 1000}"`);
             }
+            obj["timeout"] = millis;
         }
         const model = new MuteModel(obj);
         let userObject: GuildMember = null;

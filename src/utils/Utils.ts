@@ -112,6 +112,41 @@ export namespace StringUtils {
     }
 }
 
+
+export namespace TimeUtils {
+    export enum TIME_UNIT {
+        seconds = "s",
+        minutes = "mi",
+        hours = "h",
+        days = "d",
+        weeks = "w",
+        months = "mo",
+        years = "y",
+        decades = "de"
+    }
+
+    export function convertToMilli(value: number, unit: TIME_UNIT): number {
+        switch (unit) {
+            case TimeUtils.TIME_UNIT.seconds:
+                return value * 1000;
+            case TimeUtils.TIME_UNIT.minutes:
+                return value * 60000;
+            case TimeUtils.TIME_UNIT.hours:
+                return value * 3600000;
+            case TimeUtils.TIME_UNIT.days:
+                return value * 86400000;
+            case TimeUtils.TIME_UNIT.weeks:
+                return value * 604800000;
+            case TimeUtils.TIME_UNIT.months:
+                return value * 2629800000;
+            case TimeUtils.TIME_UNIT.years:
+                return value * 31556952000;
+            case TimeUtils.TIME_UNIT.decades:
+                return value * 315569520000;
+        }
+    }
+}
+
 export namespace ChronUtils {
     export function chronToString(chron: string): string {
         if (!isValidCron(chron, {
@@ -143,11 +178,11 @@ export namespace DiscordUtils {
     };
 
     export function getRoleChanges(oldRole: Role, newRole: Role): RoleChange {
-        const retObj:RoleChange = {};
+        const retObj: RoleChange = {};
         const added = oldRole.permissions.missing(newRole.permissions.bitfield);
         const removed = newRole.permissions.missing(oldRole.permissions.bitfield);
 
-        if(added.length > 0 || removed.length > 0){
+        if (added.length > 0 || removed.length > 0) {
             retObj["permissions"] = {
                 added,
                 removed
@@ -339,6 +374,11 @@ export class ObjectUtil {
 
     public static isValidObject(obj: unknown): boolean {
         return typeof obj === "object" && obj !== null && obj !== undefined && Object.keys(obj).length > 0;
+    }
+
+    public static isNumeric(n: string): boolean {
+        // @ts-ignore
+        return !isNaN(parseFloat(n)) && isFinite(n);
     }
 
     public static secondsToHuman(seconds: number): string {
