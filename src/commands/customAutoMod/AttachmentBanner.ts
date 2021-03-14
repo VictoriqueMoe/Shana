@@ -3,15 +3,18 @@ import {NotBot} from "../../guards/NotABot";
 import {roleConstraints} from "../../guards/RoleConstraint";
 import {BlockGuard} from "../../guards/BlockGuard";
 import {Roles} from "../../enums/Roles";
-import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
+import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BaseDAO} from "../../DAO/BaseDAO";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {DirResult} from "tmp";
+import {Main} from "../../Main";
+import {MessageEmbed} from "discord.js";
 
 const isVideo = require('is-video');
 const fs = require('fs');
 const tmp = require('tmp');
-
+const checkVideo = require('check-video');
+const pathToFfmpeg = require('ffmpeg-static');
 const {promisify} = require('util');
 const sizeOf = promisify(require('image-size'));
 const getUrls = require('get-urls');
@@ -24,9 +27,15 @@ const sanitize = require('sanitize-filename');
 
 export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
 
+    private static readonly MAX_SIZE_BYTES: number = 10485760;
+    private static readonly MAX_SIZE_KB = AttachmentBanner.MAX_SIZE_BYTES / 1024;
+
     @On("message")
     @Guard(NotBot)
     private async discordMessageCrash([message]: ArgsOf<"message">, client: Client): Promise<void> {
+        if (Main.testMode && message.member.id !== "697417252320051291") {
+            return;
+        }
         const messageContent = message.content;
         let urlsInMessage: Set<string> = null;
         if (ObjectUtil.validString(messageContent)) {
@@ -43,13 +52,11 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
         const vidTemp = tmp.dirSync({
             unsafeCleanup: true
         });
-        const tmpobj = tmp.dirSync({
-            unsafeCleanup: true
-        });
         let didBan = false;
+        let errors: string[] = [];
         try {
             for (const urlToAttachment of urls) {
-                if(!isVideo(urlToAttachment)){
+                if (!isVideo(urlToAttachment)) {
                     continue;
                 }
                 let fail = false;
@@ -65,7 +72,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                         attachmentHash
                     }
                 }) === 1;
-                if (exists) {
+                if (exists && !Main.testMode) {
                     continue;
                 }
                 const size = Buffer.byteLength(attachment);
@@ -94,25 +101,33 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                         return;
                     }
                 }
-                const {w, h} = video.metadata.video.resolution;
-                const path = tmpobj.name;
+
+                const encoding: string = video.metadata.video.codec;
+                if (ObjectUtil.validString(encoding)) {
+                    if (encoding !== "AVC" && encoding !== "h264") {
+                        return;
+                    }
+                }
                 try {
-                    // possible replace with https://www.npmjs.com/package/check-video
-                    const frames = await video.fnExtractFrameToJPG(path, {
-                        every_n_frames: 1
+                    // if more false positive, check using
+                    // ffmpeg -v debug -threads 8 -nostats -i "india.mp4" -f null - >~error.log 2>&1
+                    errors = await checkVideo(fileName, {
+                        bin: pathToFfmpeg,
+                        buffer: AttachmentBanner.MAX_SIZE_KB
                     });
-                    for (const image of frames) {
-                        const dimensions = await sizeOf(image);
-                        if (dimensions.width !== w || dimensions.height !== h) {
+                    if (ArrayUtils.isValidArray(errors)) {
+                        const videoErrorExpanded = this._analyseError(errors);
+                        if (ArrayUtils.isValidArray(videoErrorExpanded)) {
+                            errors = videoErrorExpanded;
+                            console.error(`possible not an error ${fileName} \n${errors}`);
                             fail = true;
-                            break;
                         }
                     }
                 } catch (e) {
-                    console.error("possible not an error \n" + e);
+                    console.error(`possible not an error ${fileName} \n ${e}`);
                     fail = true;
                 }
-                if (fail) {
+                if (fail && !Main.testMode) {
                     await this.doBanAttachment(attachment, "Discord crash video", urlToAttachment);
                     await message.delete({
                         reason: "Discord crash video"
@@ -121,11 +136,50 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                 }
             }
         } finally {
-            this._cleanup(vidTemp, tmpobj);
+            this._cleanup(vidTemp);
         }
-        if (didBan) {
-            message.reply(`This item contains suspicious code, and has been deleted, if you think this an error, please ping <@697417252320051291>`);
+        if (didBan || Main.testMode) {
+            let messageToRespond = `This item contains suspicious code, and has been deleted, if you think this an error, please ping <@697417252320051291>`;
+            try {
+                const vicMemeber = await message.guild.members.fetch("697417252320051291");
+                if (vicMemeber) {
+                    messageToRespond += ` (${vicMemeber} (${vicMemeber.user.tag}))`;
+                }
+            } catch {
+            }
+            message.reply(messageToRespond);
+            const messageMember = message.member;
+            const descriptionPostfix = `that contains suspicious code in <#${message.channel.id}>, this could be a discord crash video. the first 10 errors are as shown below: `;
+            const embed = new MessageEmbed()
+                .setColor('#337FD5')
+                .setAuthor(message.member, GuildUtils.getGuildIconUrl())
+                .setDescription(`someone posted a video ${descriptionPostfix}`)
+                .setTimestamp();
+            if (messageMember) {
+                const avatarUrl = messageMember.user.displayAvatarURL({format: 'jpg'});
+                embed.setAuthor(messageMember.user.tag, avatarUrl);
+                embed.setDescription(`<@${messageMember.id}> posted a video ${descriptionPostfix}`);
+            }
+            errors.slice(0, 10).forEach((value, index) => {
+                embed.addField(`hex dump #${index + 1}`, value);
+            });
+
+            DiscordUtils.postToLog(embed);
         }
+    }
+
+    private _analyseError(errors: string[]): string[] {
+        const retArray: string[] = [];
+        for (const error of errors) {
+            const innerErrorArray = error.split(/\r?\n/);
+            for (const innerError of innerErrorArray) {
+                if (!ObjectUtil.validString(innerError) || innerError.includes("Last message repeated") || innerError.includes("non monotonically increasing dts to muxer")) {
+                    continue;
+                }
+                retArray.push(innerError);
+            }
+        }
+        return retArray;
     }
 
     private _cleanup(...paths: DirResult[]) {

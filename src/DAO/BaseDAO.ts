@@ -1,7 +1,7 @@
 import {Model} from "sequelize-typescript";
 import {SaveOptions} from "sequelize/types/lib/model";
 import {UniqueConstraintError, ValidationError} from "sequelize";
-import {ObjectUtil} from "../utils/Utils";
+import {DiscordUtils, ObjectUtil} from "../utils/Utils";
 import {TextChannel} from "discord.js";
 import {Channels} from "../enums/Channels";
 import {Main} from "../Main";
@@ -31,7 +31,6 @@ export abstract class BaseDAO<T extends Model> {
     }*/
 
     protected async commitToDatabase(model: T, options?: SaveOptions, silentOnDupe = false): Promise<T> {
-        const channel: TextChannel = Main.client.channels.cache.get(Channels.TEST_CHANNEL) as TextChannel;
         let errorStr = "";
         // hacky 'mc hack
         try {
@@ -59,14 +58,14 @@ export abstract class BaseDAO<T extends Model> {
         } catch (e) {
             if (e instanceof UniqueViolationError) {
                 if (!silentOnDupe) {
-                    channel.send(`Entry already exists in database`);
+                    DiscordUtils.postToLog(`Entry already exists in database`);
                     console.log(`Entry already exists in database: ${model}`);
                 }
                 throw e;
             }
         } finally {
             if (model == null || ObjectUtil.validString(errorStr)) {
-                channel.send(`An error occurred: ${errorStr}`);
+                DiscordUtils.postToLog(`An error occurred: ${errorStr}`);
             }
         }
     }

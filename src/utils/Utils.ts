@@ -112,6 +112,11 @@ export namespace StringUtils {
     }
 }
 
+export namespace ArrayUtils {
+    export function isValidArray(array: any): boolean {
+        return Array.isArray(array) && array.length > 0;
+    }
+}
 
 export namespace TimeUtils {
     export enum TIME_UNIT {
