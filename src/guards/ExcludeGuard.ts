@@ -10,6 +10,9 @@ export const excludeGuard: GuardFunction<"message"> = async (
     client,
     next
 ) => {
+    if(!message.member){
+        return;
+    }
     const member: GuildMember = await message.member.fetch();
     if (Main.testMode) {
         return await next();

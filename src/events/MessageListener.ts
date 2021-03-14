@@ -11,6 +11,7 @@ import {Message} from "discord.js";
 import {Op} from "sequelize";
 import RolesEnum = Roles.RolesEnum;
 
+
 const {cleverBotKey} = require('../../config.json');
 const getUrls = require('get-urls');
 
@@ -52,7 +53,7 @@ export abstract class MessageListener {
         } catch {
             return;
         }
-        if (repliedMessageObj.member.id !== GuildUtils.vicBotId) {
+        if (repliedMessageObj.member && repliedMessageObj.member.id !== GuildUtils.vicBotId) {
             return;
         }
         const messageContent = message.content;

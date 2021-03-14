@@ -5,7 +5,7 @@ import {IScheduledJob} from "../../../model/scheduler/IScheduledJob";
 import {Guild, GuildMember} from "discord.js";
 import {Main} from "../../../Main";
 import {Scheduler} from "../../../model/scheduler/impl/Scheduler";
-import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {Roles} from "../../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
 import TIME_UNIT = TimeUtils.TIME_UNIT;
