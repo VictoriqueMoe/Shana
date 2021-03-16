@@ -87,9 +87,6 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                 } catch {
                     continue;
                 }
-                if (!ObjectUtil.validString(video.metadata.video.container)) {
-                    continue;
-                }
                 if (ObjectUtil.validString(video.metadata.video.container)) {
                     const container: string = video.metadata.video.container;
                     if (container.includes("image")
