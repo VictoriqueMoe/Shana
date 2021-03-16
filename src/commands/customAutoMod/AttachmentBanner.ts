@@ -72,7 +72,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                     continue;
                 }
                 const size = Buffer.byteLength(attachment);
-                if (size > 10485760) {
+                if (size > AttachmentBanner.MAX_SIZE_BYTES) {
                     continue;
                 }
                 const fileName = join(vidTemp.name, sanitize(basename(urlToAttachment)));
