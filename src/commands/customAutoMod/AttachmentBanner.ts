@@ -102,8 +102,6 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                     }
                 }
                 try {
-                    // if more false positive, check using
-                    // ffmpeg -v debug -threads 8 -nostats -i "india.mp4" -f null - >~error.log 2>&1
                     errors = await Ffmpeg.checkVideo(fileName, AttachmentBanner.MAX_SIZE_BYTES);
                     if (ArrayUtils.isValidArray(errors)) {
                         const videoErrorExpanded = this._analyseError(errors);
