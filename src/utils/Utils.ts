@@ -112,6 +112,29 @@ export namespace StringUtils {
     }
 }
 
+export namespace Ffmpeg {
+
+    const {promisify} = require('util');
+    const execFile = promisify(require('child_process').execFile);
+    const pathToFfmpeg = require('ffmpeg-static');
+
+    export async function checkVideo(file: string, obufferSize: number): Promise<string[]> {
+        const info: string[] = [];
+        try {
+            const {stderr} = await execFile(pathToFfmpeg, ['-v', 'debug', '-nostats', '-i', file, '-f', 'null', '-',], {
+                maxBuffer: obufferSize
+            });
+            if (stderr) {
+                info.push(stderr);
+            }
+        } catch (err) {
+            info.push(err.message);
+        }
+
+        return info;
+    }
+}
+
 export namespace ArrayUtils {
     export function isValidArray(array: any): boolean {
         return Array.isArray(array) && array.length > 0;

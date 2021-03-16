@@ -3,7 +3,7 @@ import {NotBot} from "../../guards/NotABot";
 import {roleConstraints} from "../../guards/RoleConstraint";
 import {BlockGuard} from "../../guards/BlockGuard";
 import {Roles} from "../../enums/Roles";
-import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
+import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BaseDAO} from "../../DAO/BaseDAO";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {DirResult} from "tmp";
@@ -13,10 +13,6 @@ import {MessageEmbed} from "discord.js";
 const isVideo = require('is-video');
 const fs = require('fs');
 const tmp = require('tmp');
-const checkVideo = require('check-video');
-const pathToFfmpeg = require('ffmpeg-static');
-const {promisify} = require('util');
-const sizeOf = promisify(require('image-size'));
 const getUrls = require('get-urls');
 const md5 = require('md5');
 import ffmpeg = require("ffmpeg");
@@ -111,10 +107,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                 try {
                     // if more false positive, check using
                     // ffmpeg -v debug -threads 8 -nostats -i "india.mp4" -f null - >~error.log 2>&1
-                    errors = await checkVideo(fileName, {
-                        bin: pathToFfmpeg,
-                        buffer: AttachmentBanner.MAX_SIZE_KB
-                    });
+                    errors = await Ffmpeg.checkVideo(fileName, AttachmentBanner.MAX_SIZE_BYTES);
                     if (ArrayUtils.isValidArray(errors)) {
                         const videoErrorExpanded = this._analyseError(errors);
                         if (ArrayUtils.isValidArray(videoErrorExpanded)) {
@@ -172,11 +165,10 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
         const retArray: string[] = [];
         for (const error of errors) {
             const innerErrorArray = error.split(/\r?\n/);
-            for (const innerError of innerErrorArray) {
-                if (!ObjectUtil.validString(innerError) || innerError.includes("Last message repeated") || innerError.includes("non monotonically increasing dts to muxer")) {
-                    continue;
+            for (const innerIfno of innerErrorArray) {
+                if(innerIfno.includes("Frame parameters mismatch context")){
+                    retArray.push(innerIfno);
                 }
-                retArray.push(innerError);
             }
         }
         return retArray;
@@ -241,8 +233,11 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
             command.reply("no attachments extracted, see above errors");
             return;
         }
-        await waitMessage.delete();
-        await repliedMessageObj.delete();
+        try{
+            await waitMessage.delete();
+            await repliedMessageObj.delete();
+        }catch{}
+
         command.reply("attachments extracted, any more messages with these attachments will be auto deleted");
     }
 
