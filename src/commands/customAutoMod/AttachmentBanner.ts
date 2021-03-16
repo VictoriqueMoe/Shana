@@ -9,9 +9,9 @@ import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {DirResult} from "tmp";
 import {Main} from "../../Main";
 import {MessageEmbed} from "discord.js";
+import * as fs from 'fs';
 
 const isVideo = require('is-video');
-const fs = require('fs');
 const tmp = require('tmp');
 const getUrls = require('get-urls');
 const md5 = require('md5');
