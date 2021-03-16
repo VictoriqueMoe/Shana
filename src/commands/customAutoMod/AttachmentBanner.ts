@@ -94,14 +94,14 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                     const container: string = video.metadata.video.container;
                     if (container.includes("image")
                         || container.includes("gif")) {
-                        return;
+                        continue;
                     }
                 }
 
                 const encoding: string = video.metadata.video.codec;
                 if (ObjectUtil.validString(encoding)) {
                     if (encoding !== "AVC" && encoding !== "h264") {
-                        return;
+                        continue;
                     }
                 }
                 try {

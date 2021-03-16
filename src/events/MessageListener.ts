@@ -139,9 +139,11 @@ export abstract class MessageListener {
             }
         }
         if (shouldDelete) {
-            await message.delete();
-            message.reply("Message contains a banned attachment");
-            DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a banned attachment that was banned for reason: "${reason}"`);
+            try{
+                await message.delete();
+                message.reply("Message contains a banned attachment");
+                DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a banned attachment that was banned for reason: "${reason}"`);
+            }catch{}
         }
     }
 }
