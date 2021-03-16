@@ -11,12 +11,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VictoriqueMoe/SlutBot.git"
+    "url": "git+https://github.com/VictoriqueMoe/WeebBot.git"
   },
   "author": "VictoriqueMoe",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/VictoriqueMoe/SlutBot/issues"
+    "url": "https://github.com/VictoriqueMoe/WeebBot/issues"
   },
   "dependencies": {
     "@typeit/discord": "^4.0.9",
