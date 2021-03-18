@@ -11,13 +11,10 @@ import {Message} from "discord.js";
 import {Op} from "sequelize";
 import RolesEnum = Roles.RolesEnum;
 
-
-const {cleverBotKey} = require('../../config.json');
 const getUrls = require('get-urls');
 
 const md5 = require('md5');
 
-const {loveSenseToken, uid, toyId} = require('../../config.json');
 
 export abstract class MessageListener {
 
@@ -30,7 +27,7 @@ export abstract class MessageListener {
             const command = "AVibrate";
             const v = 20;
             const sec = 1;
-            fetch(`https://api.lovense.com/api/lan/command?token=${loveSenseToken}&uid=${uid}&command=${command}&v=${v}&t=${toyId}&sec=${sec}`, {
+            fetch(`https://api.lovense.com/api/lan/command?token=${process.env.loveSenseToken}&uid=${process.env.uid}&command=${command}&v=${v}&t=${process.env.toyId}&sec=${sec}`, {
                 method: 'post'
             });
         }
@@ -61,7 +58,7 @@ export abstract class MessageListener {
             return;
         }
         const request = {
-            "key": cleverBotKey,
+            "key": process.env.cleverBotKey,
             "input": messageContent
         };
         const url = Object.keys(request).map(key => `${key}=${encodeURIComponent(request[key])}`).join('&');

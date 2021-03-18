@@ -10,11 +10,9 @@ import {
 import fetch, {Headers} from "node-fetch";
 import {URLSearchParams} from "url";
 
-const {amethysteToken} = require('../../../../config.json');
-
 export class ImageFun {
     private static _instance: ImageFun;
-    private readonly token: string = amethysteToken;
+    private readonly token: string = process.env.amethysteToken;
     private readonly baseUrl: string = "https://v1.api.amethyste.moe";
 
     private constructor() {

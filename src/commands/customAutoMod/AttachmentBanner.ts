@@ -8,7 +8,7 @@ import {BaseDAO} from "../../DAO/BaseDAO";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {DirResult} from "tmp";
 import {Main} from "../../Main";
-import {MessageEmbed} from "discord.js";
+import {Collection, MessageEmbed} from "discord.js";
 import * as fs from 'fs';
 
 const isVideo = require('is-video');
@@ -33,11 +33,11 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
             return;
         }
         const messageContent = message.content;
-        let urlsInMessage: Set<string> = null;
+        let urlsInMessage: Set<string> = new Set();
         if (ObjectUtil.validString(messageContent)) {
             urlsInMessage = getUrls(messageContent);
         }
-        const attatchmentArray = message.attachments;
+        const attatchmentArray = message.attachments || new Collection();
         if (attatchmentArray.size === 0 && urlsInMessage.size === 0) {
             return;
         }
@@ -161,7 +161,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
         for (const error of errors) {
             const innerErrorArray = error.split(/\r?\n/);
             for (const innerIfno of innerErrorArray) {
-                if(innerIfno.includes("Frame parameters mismatch context")){
+                if (innerIfno.includes("Frame parameters mismatch context")) {
                     retArray.push(innerIfno);
                 }
             }
@@ -228,10 +228,11 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
             command.reply("no attachments extracted, see above errors");
             return;
         }
-        try{
+        try {
             await waitMessage.delete();
             await repliedMessageObj.delete();
-        }catch{}
+        } catch {
+        }
 
         command.reply("attachments extracted, any more messages with these attachments will be auto deleted");
     }

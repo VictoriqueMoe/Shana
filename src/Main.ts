@@ -1,8 +1,12 @@
 import {Client} from "@typeit/discord";
 import {CloseableModule} from "./model/closeableModules/impl/CloseableModule";
 import {Sequelize} from "sequelize-typescript";
+import * as dotenv from "dotenv";
+import {EnumEx} from "./utils/Utils";
+import {DEFAULT_SETTINGS, SETTINGS} from "./enums/SETTINGS";
+import {SettingsManager} from "./model/settings/SettingsManager";
 
-const {token} = require('../config.json');
+dotenv.config({path: __dirname + '/../.env'});
 
 export class CloseableModuleSet extends Set<CloseableModule> {
     add(value: CloseableModule): this {
@@ -44,7 +48,7 @@ export class Main {
         return this._client;
     }
 
-    public static start(): void {
+    public static async start(): Promise<void> {
         this._client = new Client();
         Main._dao = new Sequelize('database', '', '', {
             host: 'localhost',
@@ -60,13 +64,28 @@ export class Main {
                 return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
             }
         });
-
-        this._client.login(
-            token,
+        await Main.dao.sync({force: false});
+        await this._client.login(
+            process.env.token,
             `${__dirname}/discord/*.ts`,
             `${__dirname}/discord/*.js`,
         );
     }
+
+    public static async setDefaultSettings(): Promise<void> {
+        const guilds = this.client.guilds;
+        const cache = guilds.cache;
+        const nameValue = EnumEx.getNamesAndValues(DEFAULT_SETTINGS) as any;
+        for (const [guildId] of cache) {
+            for (const keyValuesObj of nameValue) {
+                const setting: SETTINGS = keyValuesObj.name;
+                const value = keyValuesObj.value;
+                await SettingsManager.instance.saveOrUpdateSetting(setting, value, guildId, true);
+            }
+        }
+    }
 }
 
-Main.start();
+((async () => {
+    await Main.start();
+})());

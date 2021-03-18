@@ -10,8 +10,7 @@ import {
     GenerateEndPointResponse
 } from "../../model/Impl/ImageFun/Typeings";
 import {AssertionError} from "assert";
-
-const {prefix} = require('../../../config.json');
+import {getPrefix} from "../../discord/WeebBot";
 
 export abstract class Meme {
     private handler = ImageFun.instance;
@@ -31,6 +30,7 @@ export abstract class Meme {
     @Guard(NotBot)
     private async generate(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
+        const prefix = await getPrefix(command.guild.id);
         let endPoint = command.commandContent.replace(prefix, "");
         endPoint = endPoint.split(" ").shift();
         const enumObj = GENERATE_ENDPOINT[endPoint];

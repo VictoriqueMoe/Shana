@@ -29,8 +29,6 @@ const emojiRegex = require('emoji-regex/es2015/index.js');
 
 const request = defaults({encoding: null});
 
-const {GuildID} = require('../../config.json');
-
 export class ChronException extends Error {
     constructor(e: string) {
         super(e);
@@ -65,7 +63,7 @@ export namespace GuildUtils {
     export const vicBotId = "806288433323966514";
 
     export function getGuildID(): string {
-        return GuildID as string;
+        return process.env.GuildID as string;
     }
 
     export function getGuildIconUrl(): string {

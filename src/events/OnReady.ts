@@ -24,14 +24,14 @@ export abstract class OnReady extends BaseDAO<any> {
                 status: "invisible"
             });
         }else{
-            await Main.client.user.setActivity('Anime', {type: 'WATCHING'});
+            await Main.client.user.setActivity('P-body', {type: 'PLAYING'});
         }
-        await Main.dao.sync({force: false});
         await VicDropbox.instance.index();
         await OnReady.initiateMuteTimers();
         await this.initUsernames();
         await this.populateClosableEvents();
         await this.cacheChannels();
+        await Main.setDefaultSettings();
         await loadClasses(...this.classesToLoad);
         console.log("Bot logged in.");
     }
