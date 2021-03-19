@@ -50,7 +50,7 @@ export abstract class MessageListener {
         } catch {
             return;
         }
-        if (repliedMessageObj.member && repliedMessageObj.member.id !== GuildUtils.vicBotId) {
+        if (!repliedMessageObj.member || repliedMessageObj.member.id !== GuildUtils.vicBotId) {
             return;
         }
         const messageContent = message.content;

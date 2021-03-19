@@ -14,7 +14,7 @@ export abstract class SpecialLeave extends BaseDAO<RolePersistenceModel> {
         const model = await new SpecialProxy().roleLeaves(RolesEnum.SPECIAL, member as GuildMember, RolePersistenceModel);
         if (model) {
             try {
-                await super.commitToDatabase(model);
+                await super.commitToDatabase(model, {}, true);
             } catch (e) {
                 if (e instanceof UniqueViolationError) {
                     return;

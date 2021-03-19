@@ -5,6 +5,7 @@ import * as dotenv from "dotenv";
 import {EnumEx} from "./utils/Utils";
 import {DEFAULT_SETTINGS, SETTINGS} from "./enums/SETTINGS";
 import {SettingsManager} from "./model/settings/SettingsManager";
+import * as http from "http";
 
 dotenv.config({path: __dirname + '/../.env'});
 
@@ -39,6 +40,8 @@ export class Main {
     public static testMode = false;
 
     private static _dao: Sequelize;
+
+    static botServer: http.Server;
 
     public static get dao(): Sequelize {
         return Main._dao;

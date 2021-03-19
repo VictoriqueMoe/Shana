@@ -9,6 +9,7 @@ import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
 import {MuteSingleton} from "../commands/customAutoMod/userBlock/MuteSingleton";
+import {BotServer} from "../api/BotServer";
 
 /**
  * TODO: couple this class to appropriate classes
@@ -33,6 +34,7 @@ export abstract class OnReady extends BaseDAO<any> {
         await this.cacheChannels();
         await Main.setDefaultSettings();
         await loadClasses(...this.classesToLoad);
+        await this.startServer();
         console.log("Bot logged in.");
     }
 
@@ -122,5 +124,11 @@ export abstract class OnReady extends BaseDAO<any> {
                 }
             }
         }
+    }
+
+    private async startServer():Promise<void> {
+        const server = await BotServer.getInstance();
+        const startServer = server.start(4401);
+        Main.botServer = startServer;
     }
 }
