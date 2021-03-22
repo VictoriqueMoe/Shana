@@ -51,28 +51,28 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
             return true;
         }
         const memberId = content.member.id;
-        let fromArray = this.getFromArray(memberId);
+        let fromArray = this.getFromArray(memberId, content.member.guild.id);
         if (fromArray) {
             fromArray.count++;
             this._cooldownArray.refresh(fromArray);
         } else {
-            fromArray = new MessageSpamEntry(memberId, this);
+            fromArray = new MessageSpamEntry(memberId, this, content.member.guild.id);
             this._cooldownArray.add(fromArray);
         }
         return !fromArray.hasViolationLimitReached;
 
     }
 
-    private getFromArray(userId: string): MessageSpamEntry {
+    private getFromArray(userId: string, guildId: string): MessageSpamEntry {
         const arr = this._cooldownArray.rawSet;
-        return arr.find(value => value.userId === userId);
+        return arr.find(value => value.userId === userId && value.guildId === guildId);
     }
 }
 
 class MessageSpamEntry {
     public count: number;
 
-    constructor(public userId: string, private _instance: FastMessageSpamFilter) {
+    constructor(public userId: string, private _instance: FastMessageSpamFilter, public guildId: string) {
         this.count = 1;
     }
 

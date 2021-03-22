@@ -4,12 +4,12 @@ import {roleConstraints} from "../../guards/RoleConstraint";
 import {BlockGuard} from "../../guards/BlockGuard";
 import {Roles} from "../../enums/Roles";
 import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {BaseDAO} from "../../DAO/BaseDAO";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {DirResult} from "tmp";
 import {Main} from "../../Main";
 import {Collection, MessageEmbed} from "discord.js";
 import * as fs from 'fs';
+import {AbstractCommand} from "../AbstractCommand";
 
 const isVideo = require('is-video');
 const tmp = require('tmp');
@@ -21,10 +21,69 @@ import RolesEnum = Roles.RolesEnum;
 const {basename, join} = require('path');
 const sanitize = require('sanitize-filename');
 
-export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
+export abstract class AttachmentBanner extends AbstractCommand<BannedAttachmentsModel> {
+
+    constructor() {
+        super({
+            commands: [
+                {
+                    name: "banAttachment",
+                    description: {
+                        text: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \n banning an attachment means that if it is posted again, it is automatically deleted and logged",
+                        examples: ["banAttachment = while replying to a message you wish to ban"],
+                    }
+                }
+            ]
+        });
+    }
 
     private static readonly MAX_SIZE_BYTES: number = 10485760;
     private static readonly MAX_SIZE_KB = AttachmentBanner.MAX_SIZE_BYTES / 1024;
+
+    public async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string): Promise<BannedAttachmentsModel> {
+        const attachmentHash = md5(attachment);
+        const exists = await BannedAttachmentsModel.count({
+            where: {
+                attachmentHash,
+                guildId
+            }
+        }) === 1;
+        if (exists) {
+            return null;
+        }
+        const entry = new BannedAttachmentsModel({
+            attachmentHash,
+            url,
+            reason,
+            guildId
+        });
+        return super.commitToDatabase(entry);
+    }
+
+    private _analyseError(errors: string[]): string[] {
+        const retArray: string[] = [];
+        for (const error of errors) {
+            const innerErrorArray = error.split(/\r?\n/);
+            for (const innerIfno of innerErrorArray) {
+                if (innerIfno.includes("Frame parameters mismatch context")) {
+                    retArray.push(innerIfno);
+                }
+            }
+        }
+        return retArray;
+    }
+
+    private _cleanup(...paths: DirResult[]) {
+        for (const lPath of paths) {
+            if (lPath) {
+                try {
+                    lPath.removeCallback();
+                } catch {
+                    fs.rmdirSync(lPath.name, {recursive: true});
+                }
+            }
+        }
+    }
 
     @On("message")
     @Guard(NotBot)
@@ -65,7 +124,8 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                 const attachmentHash = md5(attachment);
                 const exists = await BannedAttachmentsModel.count({
                     where: {
-                        attachmentHash
+                        attachmentHash,
+                        guildId: message.guild.id
                     }
                 }) === 1;
                 if (exists && !Main.testMode) {
@@ -116,7 +176,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                     fail = true;
                 }
                 if (fail && !Main.testMode) {
-                    await this.doBanAttachment(attachment, "Discord crash video", urlToAttachment);
+                    await this.doBanAttachment(attachment, "Discord crash video", urlToAttachment, message.guild.id);
                     await message.delete({
                         reason: "Discord crash video"
                     });
@@ -140,7 +200,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
             const descriptionPostfix = `that contains suspicious code in <#${message.channel.id}>, this could be a discord crash video. the first 10 errors are as shown below: `;
             const embed = new MessageEmbed()
                 .setColor('#337FD5')
-                .setAuthor(message.member, GuildUtils.getGuildIconUrl())
+                .setAuthor(message.member, GuildUtils.getGuildIconUrl(message.guild.id))
                 .setDescription(`someone posted a video ${descriptionPostfix}`)
                 .setTimestamp();
             if (messageMember) {
@@ -152,32 +212,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
                 embed.addField(`hex dump #${index + 1}`, value);
             });
 
-            DiscordUtils.postToLog(embed);
-        }
-    }
-
-    private _analyseError(errors: string[]): string[] {
-        const retArray: string[] = [];
-        for (const error of errors) {
-            const innerErrorArray = error.split(/\r?\n/);
-            for (const innerIfno of innerErrorArray) {
-                if (innerIfno.includes("Frame parameters mismatch context")) {
-                    retArray.push(innerIfno);
-                }
-            }
-        }
-        return retArray;
-    }
-
-    private _cleanup(...paths: DirResult[]) {
-        for (const lPath of paths) {
-            if (lPath) {
-                try {
-                    lPath.removeCallback();
-                } catch {
-                    fs.rmdirSync(lPath.name, {recursive: true});
-                }
-            }
+            DiscordUtils.postToLog(embed, message.guild.id);
         }
     }
 
@@ -217,7 +252,7 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
         for (const urlToAttachment of urls) {
             try {
                 const attachment = await DiscordUtils.loadResourceFromURL(urlToAttachment);
-                await this.doBanAttachment(attachment, reason, urlToAttachment);
+                await this.doBanAttachment(attachment, reason, urlToAttachment, command.guild.id);
                 successful++;
             } catch (e) {
                 await command.reply(`Error extracting attachment"`);
@@ -235,24 +270,6 @@ export abstract class AttachmentBanner extends BaseDAO<BannedAttachmentsModel> {
         }
 
         command.reply("attachments extracted, any more messages with these attachments will be auto deleted");
-    }
-
-    public async doBanAttachment(attachment: Buffer, reason: string, url: string): Promise<BannedAttachmentsModel> {
-        const attachmentHash = md5(attachment);
-        const exists = await BannedAttachmentsModel.count({
-            where: {
-                attachmentHash
-            }
-        }) === 1;
-        if (exists) {
-            return null;
-        }
-        const entry = new BannedAttachmentsModel({
-            attachmentHash,
-            url,
-            reason
-        });
-        return super.commitToDatabase(entry);
     }
 
     private static viewDescriptionForSetUsernames() {

@@ -1,34 +1,9 @@
 import {Model} from "sequelize-typescript";
 import {SaveOptions} from "sequelize/types/lib/model";
 import {UniqueConstraintError, ValidationError} from "sequelize";
-import {DiscordUtils, ObjectUtil} from "../utils/Utils";
-import {TextChannel} from "discord.js";
-import {Channels} from "../enums/Channels";
-import {Main} from "../Main";
+import {ObjectUtil} from "../utils/Utils";
 
 export abstract class BaseDAO<T extends Model> {
-
-    /*protected async saveOrUpdate(model: T): Promise<T> {
-        let b = model.get();
-        // @ts-ignore
-        let staticCLass: typeof ModelStatic = model.constructor as typeof ModelStatic;
-        try {
-            return await this.commitToDatabase(model);
-        } catch (e) {
-            if (e instanceof UniqueViolationError) {
-                // @ts-ignore
-                let persistenceObject: T = await staticCLass.findOne({where: {id: model.id}}) as T;
-                return staticCLass.update(
-                    b,
-                    {
-                        where: {
-                            id: model.id
-                        }
-                    }
-                )[1] as T;
-            }
-        }
-    }*/
 
     protected async commitToDatabase(model: T, options?: SaveOptions, silentOnDupe = false): Promise<T> {
         let errorStr = "";
@@ -58,14 +33,13 @@ export abstract class BaseDAO<T extends Model> {
         } catch (e) {
             if (e instanceof UniqueViolationError) {
                 if (!silentOnDupe) {
-                    DiscordUtils.postToLog(`Entry already exists in database`);
                     console.log(`Entry already exists in database: ${model}`);
                 }
                 throw e;
             }
         } finally {
             if (model == null || ObjectUtil.validString(errorStr)) {
-                DiscordUtils.postToLog(`An error occurred: ${errorStr}`);
+                console.error(`An error occurred: ${errorStr}`);
             }
         }
     }

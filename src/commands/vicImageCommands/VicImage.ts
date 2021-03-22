@@ -6,9 +6,29 @@ import {WeebBot} from "../../discord/WeebBot";
 import {NotBot} from "../../guards/NotABot";
 import {BlockGuard} from "../../guards/BlockGuard";
 import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
+import {AbstractCommand} from "../AbstractCommand";
 import RolesEnum = Roles.RolesEnum;
 
-export abstract class VicImage {
+export abstract class VicImage extends AbstractCommand<any> {
+
+    constructor() {
+        super({
+            commands: [
+                {
+                    name: "vicImage",
+                    description: {
+                        text: `Get a random image of <@697417252320051291>`
+                    }
+                },
+                {
+                    name: "vicReIndex",
+                    description: {
+                        text: "Re-index image metadata from dropbox"
+                    }
+                }
+            ]
+        });
+    }
 
     @Command("vicImage")
     @Description(VicImage.getVicImageDescription())

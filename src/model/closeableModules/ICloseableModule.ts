@@ -29,10 +29,10 @@ export interface ICloseableModule {
     /**
      * Close this module, this prevents all events from being fired. events are NOT queued
      */
-    close(): Promise<boolean>;
+    close(guildId: string): Promise<boolean>;
 
     /**
      * Opens this module, allowing events to be fired.
      */
-    open(): Promise<boolean>;
+    open(guildId: string): Promise<boolean>;
 }

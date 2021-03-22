@@ -4,9 +4,32 @@ import {roleConstraints} from "../../guards/RoleConstraint";
 import {BlockGuard} from "../../guards/BlockGuard";
 import {Roles} from "../../enums/Roles";
 import {DiscordUtils} from "../../utils/Utils";
+import {AbstractCommand} from "../AbstractCommand";
 import RolesEnum = Roles.RolesEnum;
 
-export abstract class AccountAge {
+export abstract class AccountAge extends AbstractCommand<any> {
+
+    constructor() {
+        super({
+            commands: [
+                {
+                    name: "age",
+                    description: {
+                        text: "Get the age on an account",
+                        args: [
+                            {
+                                name: "user",
+                                type: "mention",
+                                optional: false,
+                                description: "The user you want to check the account age of"
+                            }
+                        ]
+                    }
+                }
+            ]
+        });
+    }
+
     @Command("age")
     @Description(AccountAge.viewDescriptionForSetUsernames())
     @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)

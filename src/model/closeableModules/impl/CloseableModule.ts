@@ -11,7 +11,7 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> implements I
     private _isEnabled: boolean;
 
     // @ts-ignore
-    protected constructor(private _model: typeof ICloseOption, private _uid:string) {
+    protected constructor(private _model: typeof ICloseOption, private _uid: string) {
         super();
         Main.closeableModules.add(this);
     }
@@ -24,21 +24,22 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> implements I
         return SubModuleManager.instance.getSubModulesFromParent(this);
     }
 
-    public get uid():string{
+    public get uid(): string {
         return this._uid;
     }
 
     /**
      * Close this module, this prevents all events from being fired. events are NOT queued
      */
-    public async close(): Promise<boolean> {
+    public async close(guildId: string): Promise<boolean> {
         const m = await this._model.update(
             {
                 "status": false
             },
             {
                 where: {
-                    "moduleId": this.moduleId
+                    "moduleId": this.moduleId,
+                    guildId
                 }
             }
         );
@@ -50,14 +51,15 @@ export abstract class CloseableModule extends BaseDAO<ICloseOption> implements I
     /**
      * Opens this module, allowing events to be fired.
      */
-    public async open(): Promise<boolean> {
+    public async open(guildId: string): Promise<boolean> {
         const m = await this._model.update(
             {
                 "status": true
             },
             {
                 where: {
-                    "moduleId": this.moduleId
+                    "moduleId": this.moduleId,
+                    guildId
                 }
             }
         );

@@ -59,7 +59,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         if (auditEntry && auditEntry.target instanceof User && auditEntry.target.id === memberBannedId) {
             embed.addField("ban Removed By", auditEntry.executor.tag);
         }
-        super.postToLog(embed);
+        super.postToLog(embed, guild.id);
     }
 
     @On("guildMemberAdd")
@@ -79,7 +79,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
             )
             .setTimestamp()
             .setFooter(`${member.id}`);
-        super.postToLog(userJoinEmbed);
+        super.postToLog(userJoinEmbed, member.guild.id);
     }
 
     @On("guildMemberRemove")
@@ -152,7 +152,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
                 }
             );
         }
-        super.postToLog(userJoinEmbed);
+        super.postToLog(userJoinEmbed, member.guild.id);
     }
 
     @On("guildBanAdd")
@@ -183,6 +183,6 @@ export class MemberLogger extends AbstractAdminAuditLogger {
                 );
             }
         }
-        super.postToLog(userBanned);
+        super.postToLog(userBanned, guild.id);
     }
 }

@@ -48,31 +48,32 @@ export class ImageSpamFilter extends AbstractFilter implements IValueBackedDynoA
     public doFilter(content: Message): boolean {
         const memberId = content.member.id;
         const attachments = content.attachments;
+        const guildId = content.member.guild.id;
         if (attachments.size === 0) {
             return true;
         }
-        let fromArray = this.getFromArray(memberId);
+        let fromArray = this.getFromArray(memberId, guildId);
         if (fromArray) {
             fromArray.count++;
             this._cooldownArray.refresh(fromArray);
         } else {
-            fromArray = new MessageSpamEntry(memberId, this);
+            fromArray = new MessageSpamEntry(memberId, this, guildId);
             this._cooldownArray.add(fromArray);
         }
         return !fromArray.hasViolationLimitReached;
 
     }
 
-    private getFromArray(userId: string): MessageSpamEntry {
+    private getFromArray(userId: string, guildId: string): MessageSpamEntry {
         const arr = this._cooldownArray.rawSet;
-        return arr.find(value => value.userId === userId);
+        return arr.find(value => value.userId === userId && value.guildId === guildId);
     }
 }
 
 class MessageSpamEntry {
     public count: number;
 
-    constructor(public userId: string, private _instance: ImageSpamFilter) {
+    constructor(public userId: string, private _instance: ImageSpamFilter, public guildId: string) {
         this.count = 1;
     }
 

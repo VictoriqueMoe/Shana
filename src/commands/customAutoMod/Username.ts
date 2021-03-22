@@ -1,4 +1,4 @@
-import {BaseDAO, UniqueViolationError} from "../../DAO/BaseDAO";
+import {UniqueViolationError} from "../../DAO/BaseDAO";
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
@@ -7,15 +7,75 @@ import {BlockGuard} from "../../guards/BlockGuard";
 import {Roles} from "../../enums/Roles";
 import {StringUtils} from "../../utils/Utils";
 import {GuildMember} from "discord.js";
+import {AbstractCommand} from "../AbstractCommand";
 import RolesEnum = Roles.RolesEnum;
 
-export abstract class Username extends BaseDAO<UsernameModel> {
+export abstract class Username extends AbstractCommand<UsernameModel> {
+
+    constructor() {
+        super({
+            commands: [
+                {
+                    name: "viewUsernames",
+                    description: {
+                        text: "View all the persisted usernames this bot is aware of"
+                    }
+                },
+                {
+                    name: "removeUsername",
+                    depricated: true,
+                    description: {
+                        text: "This command is used to remove and reset the persisted entry. \n this command is the SAME as wiping the username using the discord 'change username' feature and will be removed in the future",
+                        args: [
+                            {
+                                name: "User",
+                                type: "mention",
+                                optional: false,
+                                description: "The member you wish to reset the username for"
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: "username",
+                    description: {
+                        text: "force a username to always be set to a member, this will automatically apply the username if they leave and rejoin again. \n you can optionally add a block to anyone other than staff member from changing it",
+                        examples: ["username @user 'this is a new username' = username will always be 'this is a new username' if they leave and rejoin", "username @user 'this is a new username' true = same as before, but this means they can not change it shemselves"],
+                        args: [
+                            {
+                                name: "User",
+                                type: "mention",
+                                optional: false,
+                                description: "The user you want to change nicknames"
+                            },
+                            {
+                                name: "new nickName",
+                                type: "text",
+                                optional: false,
+                                description: "The new nickname for the user"
+                            },
+                            {
+                                name: "Block changes",
+                                type: "boolean",
+                                optional: true,
+                                description: "Block this username from being changed by another other than staff members (as defined in the staff members config)"
+                            }
+                        ]
+                    }
+                }
+            ]
+        });
+    }
 
     @Command("viewUsernames")
     @Description(Username.viewDescriptionForSetUsernames())
     @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async ViewAllSetUsernames(command: CommandMessage): Promise<void> {
-        const allModels = await UsernameModel.findAll();
+        const allModels = await UsernameModel.findAll({
+            where: {
+                guildId: command.guild.id
+            }
+        });
         const guild = command.guild;
         if (allModels.length === 0) {
             command.reply("No members in the database");
@@ -23,10 +83,14 @@ export abstract class Username extends BaseDAO<UsernameModel> {
         }
         let message = `\n`;
         for (const model of allModels) {
-            const member = await guild.members.fetch(model.userId);
-            message += `\n user: "${member.user.username}" has a persisted username of "${model.usernameToPersist}"`;
-            if (model.force) {
-                message += ` Additionally, this user is not allowed to change it`;
+            try {
+                const member = await guild.members.fetch(model.userId);
+                message += `\n user: "${member.user.tag}" has a persisted username of "${model.usernameToPersist}"`;
+                if (model.force) {
+                    message += ` Additionally, this user is not allowed to change it`;
+                }
+            } catch {
+
             }
         }
         command.reply(message);
@@ -50,7 +114,8 @@ export abstract class Username extends BaseDAO<UsernameModel> {
         const userId = mentionMember.id;
         const rowCount = await UsernameModel.destroy({
             where: {
-                userId
+                userId,
+                guildId: mentionMember.guild.id
             }
         });
         rowCount === 1 ? command.reply("Member remove from Database") : command.reply("Member not found in database");
@@ -90,7 +155,8 @@ export abstract class Username extends BaseDAO<UsernameModel> {
         const obj = {
             userId,
             usernameToPersist,
-            force
+            force,
+            guildId: mentionMember.guild.id
         };
 
         const model = new UsernameModel(obj);
@@ -105,7 +171,8 @@ export abstract class Username extends BaseDAO<UsernameModel> {
                     },
                     {
                         where: {
-                            userId
+                            userId,
+                            guildId: mentionMember.guild.id
                         }
                     }
                 );

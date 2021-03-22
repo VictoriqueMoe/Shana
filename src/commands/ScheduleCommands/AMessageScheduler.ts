@@ -4,8 +4,28 @@ import {TextChannel} from "discord.js";
 import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {MessageScheduler} from "../../model/scheduler/impl/MessageScheduler";
 import {BlockGuard} from "../../guards/BlockGuard";
+import {AbstractCommand} from "../AbstractCommand";
 
-export abstract class AMessageScheduler {
+export abstract class AMessageScheduler extends AbstractCommand<any> {
+
+    constructor() {
+        super({
+            commands: [
+                {
+                    name: "scheduleMessage"
+                },
+                {
+                    name: "cancelAllScheduledMessages"
+                },
+                {
+                    name: "cancelScheduledMessage"
+                },
+                {
+                    name: "getAllScheduledMessages"
+                }
+            ]
+        });
+    }
 
     @Command("scheduleMessage")
     @Guard(AdminOnlyTask, BlockGuard)
@@ -17,7 +37,7 @@ export abstract class AMessageScheduler {
             return;
         }
         const [name, message, chron, channelName] = StringUtils.splitCommandLine(command.content);
-        const channel = DiscordUtils.findChannelByName(channelName);
+        const channel = DiscordUtils.findChannelByName(channelName, command.guild.id);
         if (channel == null) {
             command.reply("Invalid channel name");
             return;

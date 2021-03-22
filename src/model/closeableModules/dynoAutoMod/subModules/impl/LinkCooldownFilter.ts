@@ -12,7 +12,7 @@ const getUrls = require('get-urls');
 
 @InjectDynoSubModule(DynoAutoMod)
 export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
-    private _cooldownArray: TimedSet<string>;
+    private _cooldownArray: TimedSet<LinkCooldownEntry>;
 
     private constructor(parentFilter: ICloseableModule) {
         super(parentFilter);
@@ -39,12 +39,14 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
         const urls = getUrls(messageContent);
         if (urls && urls.size > 0) {
             const memberId = content.member.id;
-            const isInMap = this._cooldownArray.has(memberId);
-            if (!isInMap) {
-                this._cooldownArray.add(memberId);
+            const guildId = content.member.guild.id;
+            let fromArray = this.getFromArray(memberId, guildId);
+            if (!fromArray) {
+                fromArray = new LinkCooldownEntry(memberId, guildId);
+                this._cooldownArray.add(fromArray);
                 return true;
             }
-            this._cooldownArray.refresh(memberId);
+            this._cooldownArray.refresh(fromArray);
             return false;
         }
         return true;
@@ -60,5 +62,15 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
 
     public get priority(): number {
         return PRIORITY.LAST;
+    }
+
+    private getFromArray(userId: string, guildId: string): LinkCooldownEntry {
+        const arr = this._cooldownArray.rawSet;
+        return arr.find(value => value.userId === userId && value.guildId === guildId);
+    }
+}
+
+class LinkCooldownEntry {
+    constructor(public userId: string, public guildId: string) {
     }
 }

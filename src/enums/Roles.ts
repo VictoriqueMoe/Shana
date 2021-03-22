@@ -1,6 +1,5 @@
 import {GuildMember, Role} from "discord.js";
 import {Main} from "../Main";
-import {GuildUtils} from "../utils/Utils";
 
 export namespace Roles {
     export enum RolesEnum {
@@ -20,7 +19,7 @@ export namespace Roles {
 
     export function getRole(role: RolesEnum): Promise<Role> {
         const client = Main.client;
-        const guild = client.guilds.cache.get(GuildUtils.getGuildID());
+        const guild = client.guilds.cache.get("264429768219426819");
         const roles = guild.roles;
         return roles.fetch(role);
     }

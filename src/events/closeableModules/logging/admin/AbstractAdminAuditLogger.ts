@@ -17,7 +17,7 @@ export abstract class AbstractAdminAuditLogger extends CloseableModule {
         return "AdminLog";
     }
 
-    protected postToLog(content: MessageEmbed | string): Promise<Message> {
-        return DiscordUtils.postToLog(content, true);
+    protected postToLog(content: MessageEmbed | string, guildId: string): Promise<Message> {
+        return DiscordUtils.postToLog(content, guildId, true);
     }
 }

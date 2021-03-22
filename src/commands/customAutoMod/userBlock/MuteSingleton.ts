@@ -5,7 +5,7 @@ import {IScheduledJob} from "../../../model/scheduler/IScheduledJob";
 import {Guild, GuildMember} from "discord.js";
 import {Main} from "../../../Main";
 import {Scheduler} from "../../../model/scheduler/impl/Scheduler";
-import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
+import {DiscordUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {Roles} from "../../../enums/Roles";
 import RolesEnum = Roles.RolesEnum;
 import TIME_UNIT = TimeUtils.TIME_UNIT;
@@ -27,13 +27,6 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         return MuteSingleton._instance;
     }
 
-    private addRolePersist(user: GuildMember): Promise<RolePersistenceModel> {
-        return super.commitToDatabase(new RolePersistenceModel({
-            "userId": user.id,
-            "roleId": RolesEnum.MUTED
-        })) as Promise<RolePersistenceModel>;
-    }
-
     /**
      * Mute a user from the server with an optional timeout
      * @param user - the User to mute
@@ -52,6 +45,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
             username: blockUserObject.username,
             reason,
             creatorID,
+            guildId: user.guild.id,
             prevRole: prevRolesIdStr
         };
         const hasTimeout = !isNaN(timeOut);
@@ -59,7 +53,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         let millis = -1;
         if (hasTimeout) {
             millis = timeOut * 1000;
-            if(ObjectUtil.validString(unit)){
+            if (ObjectUtil.validString(unit)) {
                 millis = TimeUtils.convertToMilli(timeOut, unit);
             }
             if (Number.isNaN(millis) || millis <= 0 || millis > maxMillis) {
@@ -93,10 +87,11 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         return savedModel;
     }
 
-    public async doRemove(userId: string, skipPersistence = false): Promise<void> {
+    public async doRemove(userId: string, guildId: string, skipPersistence = false): Promise<void> {
         const whereClaus = {
             where: {
-                userId
+                userId,
+                guildId
             }
         };
         const muteModel = await MuteModel.findOne(whereClaus);
@@ -127,7 +122,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         if (hasTimer) {
             this.timeOutMap.delete(userId);
         }
-        const guild = await Main.client.guilds.fetch(GuildUtils.getGuildID());
+        const guild = await Main.client.guilds.fetch(guildId);
         let member;
         try {
             member = await guild.members.fetch(userId);
@@ -147,22 +142,30 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
     }
 
-    public get timeOutMap(): Map<string, IScheduledJob> {
-        return this._timeOutMap;
-    }
-
     public createTimeout(userId: string, username: string, millis: number, guild: Guild): void {
         const now = Date.now();
         const future = now + millis;
         const newDate = new Date(future);
         const job = Scheduler.getInstance().register(userId, newDate, async () => {
             await Main.dao.transaction(async t => {
-                await MuteSingleton.instance.doRemove(userId);
+                await MuteSingleton.instance.doRemove(userId, guild.id);
             });
-            DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`);
+            DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);
         });
         // set the User ID to the job
         this._timeOutMap.set(userId, job);
+    }
+
+    public get timeOutMap(): Map<string, IScheduledJob> {
+        return this._timeOutMap;
+    }
+
+    private addRolePersist(user: GuildMember): Promise<RolePersistenceModel> {
+        return super.commitToDatabase(new RolePersistenceModel({
+            "userId": user.id,
+            "roleId": RolesEnum.MUTED,
+            guildId: user.guild.id
+        })) as Promise<RolePersistenceModel>;
     }
 
 }

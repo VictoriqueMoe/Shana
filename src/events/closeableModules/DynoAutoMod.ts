@@ -55,12 +55,12 @@ export class DynoAutoMod extends CloseableModule {
                 for (const action of actionsToTake) {
                     switch (action) {
                         case ACTION.MUTE: {
-                            let fromArray = this.getFromArray(userId);
+                            let fromArray = this.getFromArray(userId, member.guild.id);
                             if (fromArray) {
                                 fromArray.muteViolations++;
                                 this._muteTimeoutArray.refresh(fromArray);
                             } else {
-                                fromArray = new MuteViolation(userId, filter.id);
+                                fromArray = new MuteViolation(userId, filter.id, member.guild.id);
                                 this._muteTimeoutArray.add(fromArray);
                             }
                             if (fromArray.hasViolationLimitReached) {
@@ -98,7 +98,7 @@ export class DynoAutoMod extends CloseableModule {
     private async muteUser(violationObj: MuteViolation, user: GuildMember, reason: string, creatorID: string, seconds?: number): Promise<MuteModel> {
         const model = await MuteSingleton.instance.muteUser(user, reason, creatorID, seconds);
         this._muteTimeoutArray.delete(violationObj);
-        await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${ObjectUtil.secondsToHuman(seconds)}`);
+        await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${ObjectUtil.secondsToHuman(seconds)}`, user.guild.id);
         return model;
     }
 
@@ -110,9 +110,9 @@ export class DynoAutoMod extends CloseableModule {
         return "DynoAutoMod";
     }
 
-    private getFromArray(userId: string): MuteViolation {
+    private getFromArray(userId: string, guildid: string): MuteViolation {
         const arr = this._muteTimeoutArray.rawSet;
-        return arr.find(value => value.userId === userId);
+        return arr.find(value => value.userId === userId && value._guildId === guildid);
     }
 
     public get submodules(): Immutable.Set<IDynoAutoModFilter> {
@@ -124,7 +124,7 @@ export class DynoAutoMod extends CloseableModule {
 class MuteViolation {
     public muteViolations: number;
 
-    constructor(public userId, public filterId: string) {
+    constructor(public userId, public filterId: string, public _guildId: string) {
         this.muteViolations = 1;
     }
 

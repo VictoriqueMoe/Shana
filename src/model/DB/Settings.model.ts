@@ -1,7 +1,9 @@
-import {Column, DataType, Model, Table} from "sequelize-typescript";
+import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
+import {IGuildAware} from "./IGuildAware";
+import {GuildableModel} from "./guild/Guildable.model";
 
 @Table
-export class SettingsModel extends Model {
+export class SettingsModel extends Model implements IGuildAware {
 
     @Column({unique: true})
     public setting: string;
@@ -9,6 +11,10 @@ export class SettingsModel extends Model {
     @Column(DataType.TEXT)
     public value: string;
 
+    @ForeignKey(() => GuildableModel)
     @Column
-    public guildId: string;
+    guildId: string;
+
+    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
+    guildableModel: GuildableModel;
 }

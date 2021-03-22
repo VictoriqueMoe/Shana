@@ -1,10 +1,12 @@
-import {AllowNull, Column, DataType, Default, Model, Table} from "sequelize-typescript";
+import {AllowNull, BelongsTo, Column, DataType, Default, ForeignKey, Model, Table} from "sequelize-typescript";
 import {Roles} from "../../../../enums/Roles";
 import {EnumEx} from "../../../../utils/Utils";
+import {IGuildAware} from "../../IGuildAware";
+import {GuildableModel} from "../../guild/Guildable.model";
 import RolesEnum = Roles.RolesEnum;
 
 @Table
-export class MuteModel extends Model {
+export class MuteModel extends Model implements IGuildAware {
 
     @Column({unique: true, allowNull: false})
     public userId: string;
@@ -29,6 +31,13 @@ export class MuteModel extends Model {
     @AllowNull(true)
     @Column(DataType.INTEGER)
     public timeout: number;
+
+    @ForeignKey(() => GuildableModel)
+    @Column
+    guildId: string;
+
+    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
+    guildableModel: GuildableModel;
 
     public getPrevRoles(): RolesEnum[] {
         return this.prevRole.split(",").filter(r => r !== RolesEnum.EVERYONE).map(r => EnumEx.loopBack(RolesEnum, r, true));

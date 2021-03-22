@@ -37,7 +37,8 @@ export class AutoRole extends CloseableModule {
         schedule.scheduleJob(`enable ${member.user.username}`, d, async () => {
             const persistedRole = await RolePersistenceModel.findOne({
                 where: {
-                    "userId": member.id
+                    "userId": member.id,
+                    guildId: member.guild.id
                 }
             });
             try {
@@ -45,9 +46,9 @@ export class AutoRole extends CloseableModule {
                     const rolePersisted = EnumEx.loopBack(RolesEnum, persistedRole.roleId, true) as unknown as RolesEnum;
                     await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
                     if (rolePersisted === RolesEnum.SPECIAL) {
-                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as special (possible special evasion) \n <@697417252320051291> <@593208170869162031>`);
+                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as special (possible special evasion) \n <@697417252320051291> <@593208170869162031>`, member.guild.id);
                     } else if (rolePersisted === RolesEnum.MUTED) {
-                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and because of this, has been re-muted.`);
+                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and because of this, has been re-muted.`, member.guild.id);
                     }
                     return;
                 }

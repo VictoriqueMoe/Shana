@@ -41,9 +41,9 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         const change = new MemberRoleChange(oldMember, newMember);
         const roleChanges = change.roleChanges;
         const added = roleChanges.add;
-        if(added.length > 0){
+        if (added.length > 0) {
             const arr = [];
-            for(const roleEnum of added){
+            for (const roleEnum of added) {
                 const roleObj = await Roles.getRole(roleEnum);
                 embed.setColor(roleObj.hexColor);
                 arr.push(`\`${roleObj.name}\``);
@@ -52,9 +52,9 @@ export class RoleLogger extends AbstractAdminAuditLogger {
             embed.addField("Added role(s)", str);
         }
         const removed = roleChanges.remove;
-        if(removed.length > 0){
+        if (removed.length > 0) {
             const arr = [];
-            for(const roleEnum of removed){
+            for (const roleEnum of removed) {
                 const roleObj = await Roles.getRole(roleEnum);
                 embed.setColor(roleObj.hexColor);
                 arr.push(`\`${roleObj.name}\``);
@@ -66,24 +66,25 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", oldMember.guild);
         const {executor, target} = auditEntry;
         if (target instanceof User) {
-            if(target.id === newMember.id){
+            if (target.id === newMember.id) {
                 embed.addField("Modified by", executor.tag);
             }
         }
 
-        super.postToLog(embed);
+        super.postToLog(embed, newMember.guild.id);
     }
 
     @On("roleUpdate")
     @Guard(EnabledGuard("AdminLog"))
     private async roleUpdated([oldRole, newRole]: ArgsOf<"roleUpdate">, client: Client): Promise<void> {
         const roleChange = DiscordUtils.getRoleChanges(oldRole, newRole);
+        const guildId = newRole.guild.id;
         if (!ObjectUtil.isValidObject(roleChange)) {
             return;
         }
         const embed = new MessageEmbed()
             .setColor('#43B581')
-            .setAuthor(GuildUtils.getGuildName(), GuildUtils.getGuildIconUrl())
+            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
             .setTitle(`Role "${oldRole.name}" Changed`)
             .setTimestamp()
             .setFooter(`${newRole.id}`);
@@ -140,7 +141,7 @@ export class RoleLogger extends AbstractAdminAuditLogger {
             ]);
             embed.setColor(after);
         }
-        super.postToLog(embed);
+        super.postToLog(embed, guildId);
     }
 
     @On("roleCreate")
@@ -148,10 +149,10 @@ export class RoleLogger extends AbstractAdminAuditLogger {
     private async roleCreated([role]: ArgsOf<"roleCreate">, client: Client): Promise<void> {
         const roleAuditLogEntry = await DiscordUtils.getAuditLogEntry("ROLE_CREATE", role.guild);
         const {executor, target} = roleAuditLogEntry;
-
+        const guildId = role.guild.id;
         const embed = new MessageEmbed()
             .setColor(role.hexColor)
-            .setAuthor(GuildUtils.getGuildName(), GuildUtils.getGuildIconUrl())
+            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
             .setDescription(`Role Created: ${role.name}`)
             .setTimestamp()
             .setFooter(`${role.id}`);
@@ -162,17 +163,18 @@ export class RoleLogger extends AbstractAdminAuditLogger {
                 }
             }
         }
-        super.postToLog(embed);
+        super.postToLog(embed, guildId);
     }
 
     @On("roleDelete")
     @Guard(EnabledGuard("AdminLog"))
     private async roleDeleted([role]: ArgsOf<"roleDelete">, client: Client): Promise<void> {
+        const guildId = role.guild.id;
         const roleAuditLogEntry = await DiscordUtils.getAuditLogEntry("ROLE_DELETE", role.guild);
         const {executor, target} = roleAuditLogEntry;
         const embed = new MessageEmbed()
             .setColor(role.hexColor)
-            .setAuthor(GuildUtils.getGuildName(), GuildUtils.getGuildIconUrl())
+            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
             .setDescription(`Role Deleted: "${role.name}"`)
             .setTimestamp()
             .setFooter(`${role.id}`);
@@ -184,7 +186,7 @@ export class RoleLogger extends AbstractAdminAuditLogger {
                 }
             }
         }
-        super.postToLog(embed);
+        super.postToLog(embed, guildId);
     }
 
 }

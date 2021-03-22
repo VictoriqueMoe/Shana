@@ -24,7 +24,7 @@ export class AuditLogger extends CloseableModule {
     @Guard(EnabledGuard("userLog"))
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const memberJoined = member.id;
-        DiscordUtils.postToLog(`<@${memberJoined}> has joined the server`);
+        DiscordUtils.postToLog(`<@${memberJoined}> has joined the server`, member.guild.id);
     }
 
     @On("guildMemberRemove")
@@ -53,13 +53,13 @@ export class AuditLogger extends CloseableModule {
                     if (kickLog.createdAt >= member.joinedAt) {
                         const personWhoDidKick = banLog.executor;
                         const reason = banLog.reason;
-                        DiscordUtils.postToLog(`"${memberUsername}" has been kicked by ${personWhoDidKick.username} for reason: "${reason}"`);
+                        DiscordUtils.postToLog(`"${memberUsername}" has been kicked by ${personWhoDidKick.username} for reason: "${reason}"`, member.guild.id);
                         return;
                     }
                 }
             }
         }
-        DiscordUtils.postToLog(`"${memberUsername}" has left the server`);
+        DiscordUtils.postToLog(`"${memberUsername}" has left the server`, member.guild.id);
     }
 
     @On("guildBanAdd")
@@ -70,7 +70,7 @@ export class AuditLogger extends CloseableModule {
         if (res) {
             const personWhoDidBan = res.executor;
             const reason = res.reason;
-            DiscordUtils.postToLog(`<@${memberBanned}> has been BANNED by ${personWhoDidBan.username} for reason: "${reason}"`);
+            DiscordUtils.postToLog(`<@${memberBanned}> has been BANNED by ${personWhoDidBan.username} for reason: "${reason}"`, guild.id);
         }
     }
 

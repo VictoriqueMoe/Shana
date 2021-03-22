@@ -18,35 +18,6 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         await member.roles.add(role, reason);
     }
 
-    private async applyAfterDyno(role: T, member: GuildMember): Promise<void> {
-        // step 1 get the last role edit
-        let roleLog = null;
-        try {
-            roleLog = await DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", member.guild);
-        } catch (e) {
-            //   console.error(e);
-        }
-        if (!roleLog) {
-            return;
-        }
-        // get the executor of the role edit
-        const executor = roleLog.executor;
-
-        // is the executor dyno AND was it headcrab?
-        const wasDyno = GuildUtils.getAutoBotIds().includes(executor.id);
-        if (wasDyno) {
-            const wasHeadCrab = member.roles.cache.has(RolesEnum.HEADCRABS);
-            if (wasHeadCrab) {
-                // remove it
-                try {
-                    await member.roles.remove(RolesEnum.HEADCRABS);
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-        }
-    }
-
     /**
      * Will, when called check if a role has been removed, and if it has, will check if that role is stored in the role persistence table, if it is, then it is removed from the db
      * If ANY role was changed because of Dyno, AMD the any role is stored in the persistence table for that user, this will remove the role dyno gave it
@@ -63,7 +34,8 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
             const rowCount = await model.destroy({
                 where: {
                     userId,
-                    roleId: role
+                    roleId: role,
+                    guildId: change.newUser.guild.id
                 }
             });
             return rowCount > 0;
@@ -93,7 +65,8 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
         const res = await model.findOne({
             where: {
                 userId,
-                roleId: role
+                roleId: role,
+                guildId: member.guild.id
             }
         });
         if (res) {
@@ -143,9 +116,39 @@ export abstract class AbstractRoleApplier<T extends RolesEnum> {
             console.log(`member ${member.user.username} left the guild while having the role of ${roleObj.name}`);
             return new model({
                 "userId": member.user.id,
-                "roleId": role
+                "roleId": role,
+                guildId: member.guild.id
             });
         }
         return null;
+    }
+
+    private async applyAfterDyno(role: T, member: GuildMember): Promise<void> {
+        // step 1 get the last role edit
+        let roleLog = null;
+        try {
+            roleLog = await DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", member.guild);
+        } catch (e) {
+            //   console.error(e);
+        }
+        if (!roleLog) {
+            return;
+        }
+        // get the executor of the role edit
+        const executor = roleLog.executor;
+
+        // is the executor dyno AND was it headcrab?
+        const wasDyno = (await GuildUtils.getAutoBotIds(member.guild.id)).includes(executor.id);
+        if (wasDyno) {
+            const wasHeadCrab = member.roles.cache.has(RolesEnum.HEADCRABS);
+            if (wasHeadCrab) {
+                // remove it
+                try {
+                    await member.roles.remove(RolesEnum.HEADCRABS);
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        }
     }
 }

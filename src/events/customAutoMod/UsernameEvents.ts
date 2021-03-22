@@ -1,31 +1,21 @@
 import {ArgsOf, Client, On} from "@typeit/discord";
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
-import {DiscordUtils, GuildUtils} from "../../utils/Utils";
+import {DiscordUtils} from "../../utils/Utils";
 import {Roles} from "../../enums/Roles";
 
 export abstract class UsernameEvents {
 
-    @On("guildMemberAdd")
-    private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
-        const userId = member.id;
-        const modelObj = await UsernameModel.findOne({
-            where: {
-                userId
-            }
-        });
-        if (modelObj) {
-            member.setNickname(modelObj.usernameToPersist);
-        }
-    }
-
     @On("guildMemberUpdate")
     public async onMemberUpdate([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
         const isNickChange = oldUser.nickname !== newUser.nickname;
+        const guildId = newUser.guild.id;
         if (isNickChange) {
             const userId = newUser.id;
+            const guildId = newUser.guild.id;
             const modelObj = await UsernameModel.findOne({
                 where: {
-                    userId
+                    userId,
+                    guildId
                 }
             });
             if (modelObj) {
@@ -34,7 +24,7 @@ export abstract class UsernameEvents {
                 if (executor.id === "806288433323966514") {
                     return;
                 }
-                const guild = await client.guilds.fetch(GuildUtils.getGuildID());
+                const guild = await client.guilds.fetch(guildId);
                 const member = await guild.members.fetch(executor.id);
                 const isMemberStaff = Roles.isMemberStaff(member);
                 if (isMemberStaff || (executor.id === newUser.id && modelObj.force === false)) {
@@ -42,7 +32,8 @@ export abstract class UsernameEvents {
                     if (newNick === null) {
                         await UsernameModel.destroy({
                             where: {
-                                userId
+                                userId,
+                                guildId
                             }
                         });
                     } else {
@@ -52,20 +43,35 @@ export abstract class UsernameEvents {
                             },
                             {
                                 where: {
-                                    userId
+                                    userId,
+                                    guildId
                                 }
                             }
                         );
                     }
                     if (newUser.nickname == null) {
-                        DiscordUtils.postToLog(`User "${newUser.user.username}" has been reset and removed from database`);
+                        DiscordUtils.postToLog(`User "${newUser.user.username}" has been reset and removed from database`, guildId);
                     } else {
-                        DiscordUtils.postToLog(`User "${newUser.user.username}" has a persisted nickname of "${modelObj.usernameToPersist}", howerver, this has been updated to "${newUser.nickname === null ? newUser.user.username : newUser.nickname}"`);
+                        DiscordUtils.postToLog(`User "${newUser.user.username}" has a persisted nickname of "${modelObj.usernameToPersist}", howerver, this has been updated to "${newUser.nickname === null ? newUser.user.username : newUser.nickname}"`, guildId);
                     }
                     return;
                 }
                 newUser.setNickname(modelObj.usernameToPersist);
             }
+        }
+    }
+
+    @On("guildMemberAdd")
+    private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
+        const userId = member.id;
+        const modelObj = await UsernameModel.findOne({
+            where: {
+                userId,
+                guildId: member.guild.id
+            }
+        });
+        if (modelObj) {
+            member.setNickname(modelObj.usernameToPersist);
         }
     }
 }

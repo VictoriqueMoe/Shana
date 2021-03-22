@@ -14,7 +14,7 @@ export abstract class MuteRoleJoins extends AbstractRoleApplier<RolesEnum.MUTED>
             return;
         }
         if (await super.roleJoins(RolesEnum.MUTED, member, RolePersistenceModel)) {
-            await DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and because of this, has been re-muted.`);
+            await DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and because of this, has been re-muted.`, member.guild.id);
         }
     }
 }

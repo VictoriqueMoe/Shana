@@ -15,8 +15,8 @@ export abstract class MuteRoleListener extends AbstractRoleApplier<RolesEnum.MUT
         // mute was removed, so clear the timeout and mute Model if one exists
         if (didRemove) {
             try {
-                await MuteSingleton.instance.doRemove(newUser.id, true);
-                DiscordUtils.postToLog(`User: "<@${newUser.id}> has been un-muted"`);
+                await MuteSingleton.instance.doRemove(newUser.id, newUser.guild.id, true);
+                DiscordUtils.postToLog(`User: "<@${newUser.id}> has been un-muted"`, newUser.guild.id);
             } catch {
             }
         }

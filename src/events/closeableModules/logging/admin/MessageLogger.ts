@@ -48,7 +48,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
                 })
             .setTimestamp()
             .setFooter(`${member.id}`);
-        super.postToLog(embed);
+        super.postToLog(embed, member.guild.id);
     }
 
 
@@ -81,7 +81,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
         } catch {
         }
 
-        super.postToLog(embed);
+        super.postToLog(embed, message.guild.id);
     }
 
     @On("messageDeleteBulk")
@@ -89,14 +89,15 @@ export class MessageLogger extends AbstractAdminAuditLogger {
     private async bulkDelete([collection]: ArgsOf<"messageDeleteBulk">, client: Client): Promise<void> {
         const len = collection.size;
         const channelSet: Set<string> = new Set();
+        const guildId: string = collection.array()[0].guild.id;
         collection.forEach(({id}) => channelSet.add(id));
         const channelIdArray = Array.from(channelSet.entries());
         const description = `Bulk Delete in ${channelIdArray.map(id => `<#${id}>`).join(", ")}, ${len} messages deleted`;
         const embed = new MessageEmbed()
             .setColor('#337FD5')
-            .setAuthor(GuildUtils.getGuildName(), GuildUtils.getGuildIconUrl())
+            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
             .setDescription(description)
             .setTimestamp();
-        super.postToLog(embed);
+        super.postToLog(embed, guildId);
     }
 }

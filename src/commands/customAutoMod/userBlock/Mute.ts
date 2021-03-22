@@ -1,7 +1,6 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {DiscordUtils, EnumEx, ObjectUtil, StringUtils, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
-import {BaseDAO} from "../../../DAO/BaseDAO";
 import {NotBot} from "../../../guards/NotABot";
 import {roleConstraints} from "../../../guards/RoleConstraint";
 import {Roles} from "../../../enums/Roles";
@@ -9,10 +8,57 @@ import {BlockGuard} from "../../../guards/BlockGuard";
 import {GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {MuteSingleton} from "./MuteSingleton";
+import {AbstractCommand} from "../../AbstractCommand";
 import RolesEnum = Roles.RolesEnum;
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
-export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
+export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
+
+    public constructor() {
+        super({
+            commands: [
+                {
+                    name: "mute",
+                    description: {
+                        text: "Block a user from sending any messages with an optional timeout",
+                        examples: ['mute @user "they where annoying" 2d = Mute user for 2 days', 'mute @user "they where not so annoying" 60 = Mute user for 60 seconds', 'mute @user "they where REALLY annoying" = Mute user indefinitely until unmute'],
+                        args: [
+                            {
+                                name: "User",
+                                optional: false,
+                                type: "mention",
+                                description: "User you wish to mute"
+                            },
+                            {
+                                name: "Reason",
+                                optional: false,
+                                type: "text",
+                                description: "The reason why this user is muted"
+                            },
+                            {
+                                name: "Timeout",
+                                optional: true,
+                                type: "number",
+                                description: "timeout in seconds for how long this user should be muted. \n you can also use the time unit at the end of the number to use other time units"
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: "muteTimeUnits",
+                    description: {
+                        text: "Get all the available time units you can use in mute"
+                    }
+                },
+                {
+                    name: "viewAllMutes",
+                    description: {
+                        text: "View all the currently active mutes"
+                    }
+                }
+            ]
+        });
+    }
 
     @Command("mute")
     @Description(Mute.getMuteDescription())
@@ -110,7 +156,11 @@ export abstract class Mute extends BaseDAO<MuteModel | RolePersistenceModel> {
     @Description(Mute.getViewAllMuteDescription())
     @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async viewAllMutes(command: CommandMessage): Promise<MuteModel[]> {
-        const currentBlocks = await MuteModel.findAll();
+        const currentBlocks = await MuteModel.findAll({
+            where: {
+                guildId: command.guild.id
+            }
+        });
         if (currentBlocks.length === 0) {
             command.reply("No members are muted");
             return;
