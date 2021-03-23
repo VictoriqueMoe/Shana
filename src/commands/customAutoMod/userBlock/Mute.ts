@@ -16,6 +16,10 @@ export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
 
     public constructor() {
         super({
+            module:{
+                name:"Mute",
+                description: "Commands to mute people from servers"
+            },
             commands: [
                 {
                     name: "mute",

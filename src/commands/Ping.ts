@@ -6,6 +6,10 @@ export abstract class Ping extends AbstractCommand<any> {
 
     constructor() {
         super({
+            module:{
+                name:"Ping",
+                description: "Commands to check the status and health of this bot"
+            },
             commands: [
                 {
                     name: "ping",

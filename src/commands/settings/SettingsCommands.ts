@@ -10,6 +10,10 @@ export class SettingsCommands extends AbstractCommand<any> {
 
     constructor() {
         super({
+            module:{
+                name:"Settings",
+                description: "Commands to change internal seetings of this bot"
+            },
             commands: [
                 {
                     name: "prefix",

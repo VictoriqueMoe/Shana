@@ -1,6 +1,8 @@
 import {Typeings} from "../model/types/Typeings";
 import {BaseDAO} from "../DAO/BaseDAO";
 import {Model} from "sequelize-typescript";
+import {GuildMember} from "discord.js";
+import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import CommandArgs = Typeings.CommandArgs;
 import Command = Typeings.Command;
 
@@ -13,10 +15,13 @@ export abstract class AbstractCommand<T extends Model> extends BaseDAO<T> {
         return this._commands;
     }
 
-    public getCommand(name: string): Command {
+    public async getCommand(name: string, member: GuildMember): Promise<Command> {
         for (const command of this._commands.commands) {
             if (command.name === name) {
-                return command;
+                if (await CommandSecurityManager.instance.canRunCommand(member, name)) {
+                    return command;
+                }
+                return null;
             }
         }
         return null;

@@ -20,6 +20,10 @@ export abstract class Meme extends AbstractCommand<any> {
     constructor() {
         super(
             {
+                module:{
+                    name:"Memes",
+                    description: "Commands generate memes. All commands that are marked as type 'attachment' can take both an uploaded image (has to be jpg) OR a mention"
+                },
                 "commands": [
                     {
                         "name": "3000years",

@@ -1,5 +1,9 @@
 export namespace Typeings {
     export type CommandArgs = {
+        module:{
+            name:string,
+            description:string
+        },
         commands: Command[]
     };
     export type Command = {

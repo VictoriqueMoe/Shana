@@ -6,7 +6,7 @@ import {AbstractCommand} from "../../../commands/AbstractCommand";
 import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
 
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
-    private commandClasses: AbstractCommand<any> [];
+    private readonly commandClasses: AbstractCommand<any> [];
 
     private constructor() {
         super();
@@ -34,6 +34,40 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
 
     public get runnableCommands(): AbstractCommand<any>[] {
         return this.commandClasses;
+    }
+
+    public async getCommandModulesForMember(member: GuildMember): Promise<AbstractCommand<any> []> {
+        if (GuildUtils.isMemberAdmin(member)) {
+            return this.commandClasses;
+        }
+        const retArray: AbstractCommand<any>[] = [];
+        const memberRoles = member.roles.cache.keyArray();
+        const allCommands = await CommandSecurityModel.findAll({
+            where: {
+                guildId: member.guild.id
+            }
+        });
+        outer:
+            for (const commandClass of this.commandClasses) {
+                const {commands} = commandClass.commandDescriptors;
+                for (const commandDescriptor of commands) {
+                    const {name} = commandDescriptor;
+                    const command = allCommands.find(command => command.commandName === name);
+                    if (!command) {
+                        continue outer;
+                    }
+                    if (command.allowedRoles.includes("*")) {
+                        retArray.push(commandClass);
+                        continue outer;
+                    }
+                    const inArray = command.allowedRoles.some(value => memberRoles.includes(value));
+                    if (inArray) {
+                        retArray.push(commandClass);
+                        continue outer;
+                    }
+                }
+            }
+        return retArray;
     }
 
     public async canRunCommand(member: GuildMember, commandName: string): Promise<boolean> {

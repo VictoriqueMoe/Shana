@@ -10,6 +10,10 @@ export abstract class AMessageScheduler extends AbstractCommand<any> {
 
     constructor() {
         super({
+            module:{
+                name:"MessageScheduler",
+                description: "Commands to schedule messages to send every x or at x"
+            },
             commands: [
                 {
                     name: "scheduleMessage"

@@ -25,6 +25,10 @@ export abstract class AttachmentBanner extends AbstractCommand<BannedAttachments
 
     constructor() {
         super({
+            module:{
+                name:"AttachmentBanner",
+                description: "Commands deal with banning attachments and embeds from messages"
+            },
             commands: [
                 {
                     name: "banAttachment",

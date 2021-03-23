@@ -9,6 +9,10 @@ export abstract class ModuleEngine extends AbstractCommand<any> {
 
     constructor() {
         super({
+            module:{
+                name:"closeableModules",
+                description: "Commands to enable or disable features"
+            },
             commands: [
                 {
                     name: "dynoReplace",

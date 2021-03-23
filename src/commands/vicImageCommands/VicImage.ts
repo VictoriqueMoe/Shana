@@ -13,6 +13,10 @@ export abstract class VicImage extends AbstractCommand<any> {
 
     constructor() {
         super({
+            module:{
+                name:"VicImage",
+                description: "Commands to obtain images of <@697417252320051291>"
+            },
             commands: [
                 {
                     name: "vicImage",

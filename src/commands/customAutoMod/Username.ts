@@ -14,6 +14,10 @@ export abstract class Username extends AbstractCommand<UsernameModel> {
 
     constructor() {
         super({
+            module:{
+                name:"Username",
+                description: "Commands to set usernames for people"
+            },
             commands: [
                 {
                     name: "viewUsernames",

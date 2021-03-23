@@ -11,6 +11,10 @@ export abstract class AccountAge extends AbstractCommand<any> {
 
     constructor() {
         super({
+            module:{
+               name:"AccountAge",
+               description: "Commands to get ages of accounts"
+            },
             commands: [
                 {
                     name: "age",
