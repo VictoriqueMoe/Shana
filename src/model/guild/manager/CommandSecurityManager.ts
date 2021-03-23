@@ -36,6 +36,10 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         return this.commandClasses;
     }
 
+    /**
+     * Change to return JSON object with modules and commands for the user
+     * @param member
+     */
     public async getCommandModulesForMember(member: GuildMember): Promise<AbstractCommand<any> []> {
         if (GuildUtils.isMemberAdmin(member)) {
             return this.commandClasses;

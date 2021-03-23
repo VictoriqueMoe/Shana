@@ -50,7 +50,7 @@ export class Help extends AbstractCommand<any> {
 
     @Command("help")
     @Guard(NotBot)
-    private async mute(command: CommandMessage): Promise<void> {
+    private async help(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 3 && argumentArray.length !== 2 && argumentArray.length !== 1 && argumentArray.length !== 0) {
             command.reply('Invalid arguments, please supply <"moduleName"> <"command from module OR page number">');
