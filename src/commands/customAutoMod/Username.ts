@@ -1,4 +1,3 @@
-import {UniqueViolationError} from "../../DAO/BaseDAO";
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
@@ -156,30 +155,36 @@ export abstract class Username extends AbstractCommand<UsernameModel> {
             return;
         }
         const userId = mentionMember.id;
-        const obj = {
-            userId,
-            usernameToPersist,
-            force,
-            guildId: mentionMember.guild.id
-        };
-
-        const model = new UsernameModel(obj);
-        try {
-            await super.commitToDatabase(model, undefined, true);
-        } catch (e) {
-            if (e instanceof UniqueViolationError) {
-                await UsernameModel.update(
-                    {
-                        usernameToPersist,
-                        force
-                    },
-                    {
-                        where: {
-                            userId,
-                            guildId: mentionMember.guild.id
-                        }
+        if (await UsernameModel.count({
+            where: {
+                userId,
+                guildId: mentionMember.guild.id
+            }
+        }) > 0) {
+            await UsernameModel.update(
+                {
+                    usernameToPersist,
+                    force
+                },
+                {
+                    where: {
+                        userId,
+                        guildId: mentionMember.guild.id
                     }
-                );
+                }
+            );
+        }else{
+            const obj = {
+                userId,
+                usernameToPersist,
+                force,
+                guildId: mentionMember.guild.id
+            };
+
+            const model = new UsernameModel(obj);
+            try {
+                await super.commitToDatabase(model, undefined, true);
+            } catch (e) {
             }
         }
         await mentionMember.setNickname(usernameToPersist);

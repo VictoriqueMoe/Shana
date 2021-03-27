@@ -15,6 +15,8 @@ export class BotGuildUpdater extends BaseDAO<GuildableModel> {
         const onReadyClass: OnReady = DIService.instance.getService(OnReady);
         Promise.all(onReadyClass.init()).then(() => {
             console.log(`Joined server "${guild.name}"`);
+        }).catch(e => {
+            console.error(e);
         });
     }
 

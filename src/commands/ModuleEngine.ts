@@ -48,6 +48,12 @@ export abstract class ModuleEngine extends AbstractCommand<any> {
                             }
                         ]
                     }
+                },
+                {
+                    name: "getModuleNames",
+                    description:{
+                        text: "Return a list of all modules to use with the 'enableModule' command"
+                    }
                 }
             ]
         });
@@ -101,7 +107,6 @@ export abstract class ModuleEngine extends AbstractCommand<any> {
             const didClose = await module.close(command.guild.id);
             didClose ? command.reply(`module ${moduleId} (subModules: ${subModulesStr}) has been disabled`) : command.reply(`module ${moduleId} (subModules: ${subModulesStr}) can not be disabled`);
         }
-
     }
 
     @Command("getModuleNames")

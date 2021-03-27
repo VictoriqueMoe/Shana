@@ -11,7 +11,6 @@ import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
 import {MuteSingleton} from "../commands/customAutoMod/userBlock/MuteSingleton";
 import {BotServer} from "../api/BotServer";
 import {GuildableModel} from "../model/DB/guild/Guildable.model";
-import {GuildManager} from "../model/guild/manager/GuildManager";
 import {CommandSecurityModel} from "../model/DB/guild/CommandSecurity.model";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 
@@ -53,7 +52,6 @@ export class OnReady extends BaseDAO<any> {
     public init(): Promise<any>[] {
         const pArr: Promise<any>[] = [];
         pArr.push(this.populateClosableEvents());
-        pArr.push(this.cacheChannels());
         pArr.push(Main.setDefaultSettings());
         pArr.push(this.populateCommandSecurity());
         return pArr;
@@ -79,24 +77,6 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(this.startServer());
         return Promise.all(pArr).then(() => {
             console.log("Bot logged in.");
-        });
-    }
-
-    private async cacheChannels(): Promise<void> {
-        const guilds = await GuildManager.instance.getGuilds();
-        const promises: Promise<void>[] = [];
-        for (const guild of guilds) {
-            const innerArr = guild.channels.cache.map((channel, id) => {
-                return channel.fetch(true).then(() => {
-                    console.log(`cashed channel: "${channel.name}"`);
-                }).catch(() => {
-                    console.log(`Unable to cache: "${channel.name}"`);
-                });
-            });
-            promises.push(...innerArr);
-        }
-        return Promise.all(promises).then(() => {
-            console.log("Channel cache done");
         });
     }
 

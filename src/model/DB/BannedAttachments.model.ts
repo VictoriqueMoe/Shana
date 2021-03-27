@@ -5,7 +5,7 @@ import {GuildableModel} from "./guild/Guildable.model";
 @Table
 export class BannedAttachmentsModel extends Model implements IGuildAware {
 
-    @Column({unique: true})
+    @Column({unique: false})
     public attachmentHash: string;
 
     @Column

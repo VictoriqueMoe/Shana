@@ -8,7 +8,7 @@ import RolesEnum = Roles.RolesEnum;
 @Table
 export class MuteModel extends Model implements IGuildAware {
 
-    @Column({unique: true, allowNull: false})
+    @Column({unique: false, allowNull: false})
     public userId: string;
 
     @Column

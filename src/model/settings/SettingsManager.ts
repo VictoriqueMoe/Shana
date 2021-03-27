@@ -1,4 +1,4 @@
-import {BaseDAO, UniqueViolationError} from "../../DAO/BaseDAO";
+import {BaseDAO} from "../../DAO/BaseDAO";
 import {SettingsModel} from "../DB/Settings.model";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {ArrayUtils} from "../../utils/Utils";
@@ -87,30 +87,31 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
         });
         let retRow = -1;
         let textPrefix = "";
-        try {
+        if(await SettingsModel.count({
+            where:{
+                guildId,
+                setting
+            }
+        }) > 0){
+            if (saveOnly) {
+                return 0;
+            }
+            const result = await SettingsModel.update({
+                value
+            }, {
+                where: {
+                    guildId,
+                    setting
+                }
+            });
+            this.updateCache(setting, value, guildId);
+            retRow = result[0];
+            textPrefix = "Updated";
+        }else{
             await super.commitToDatabase(newModel, {}, true);
             this.updateCache(setting, value, guildId);
             retRow = 1;
             textPrefix = "Saved";
-        } catch (e) {
-            if (e instanceof UniqueViolationError) {
-                if (saveOnly) {
-                    return 0;
-                }
-                const result = await SettingsModel.update({
-                    value
-                }, {
-                    where: {
-                        guildId,
-                        setting
-                    }
-                });
-                this.updateCache(setting, value, guildId);
-                retRow = result[0];
-                textPrefix = "Updated";
-            } else {
-                throw e;
-            }
         }
         if (retRow > 0) {
             console.log(`${textPrefix} setting: "${setting}" with value: "${value}" on guildId: ${guildId}`);

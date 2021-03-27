@@ -5,7 +5,7 @@ import {IGuildAware} from "../../IGuildAware";
 @Table
 export class UsernameModel extends Model implements IGuildAware {
 
-    @Column({unique: true, allowNull: false})
+    @Column({unique: false, allowNull: false})
     public userId: string;
 
     @Column

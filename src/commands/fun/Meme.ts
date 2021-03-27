@@ -495,10 +495,16 @@ export abstract class Meme extends AbstractCommand<any> {
                                     "description": "The image to use for this meme (keep blank to refer to yourself)"
                                 },
                                 {
-                                    "name": "User",
-                                    "type": "mention",
+                                    "name": "pixelation amount",
+                                    "type": "number",
                                     "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
+                                    "description": "The amount of pixels to use, smaller = more pixelated (between 1 and 50)"
+                                },
+                                {
+                                    "name": "delete message",
+                                    "type": "boolean",
+                                    "optional": true,
+                                    "description": "if true, the bot will delete the message you send automatically"
                                 }
                             ]
                         }
@@ -822,7 +828,7 @@ export abstract class Meme extends AbstractCommand<any> {
         if (!ObjectUtil.validString(enumObj)) {
             return;
         }
-        const avatarUrl = command.member.user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = command.member.user.displayAvatarURL({format: 'jpg', size: 1024});
         const request: GenerateEndPointRequest = {
             "endPoint": enumObj,
             "Body_Params": {
@@ -1019,12 +1025,11 @@ export abstract class Meme extends AbstractCommand<any> {
         }
         const returnObj: avatarArr = {};
         if (members.length === 1) {
-            returnObj[`avatar`] = members[0].user.displayAvatarURL({format: 'jpg'});
+            returnObj[`avatar`] = members[0].user.displayAvatarURL({format: 'jpg', size: 1024});
         } else {
             for (let i = 0; i < members.length; i++) {
                 const member = members[i];
-                const url = member.user.displayAvatarURL({format: 'jpg'});
-                returnObj[`avatar${i + 1}`] = url;
+                returnObj[`avatar${i + 1}`] = member.user.displayAvatarURL({format: 'jpg', size: 1024});
             }
         }
         return returnObj;

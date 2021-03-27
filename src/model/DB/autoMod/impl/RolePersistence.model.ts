@@ -6,7 +6,7 @@ import {GuildableModel} from "../../guild/Guildable.model";
 @Table
 export class RolePersistenceModel extends Model implements Identifiable, IGuildAware {
 
-    @Column({unique: true, allowNull: false})
+    @Column({unique: false, allowNull: false})
     public userId: string;
 
     @Column

@@ -5,7 +5,7 @@ import {GuildableModel} from "./guild/Guildable.model";
 @Table
 export class SettingsModel extends Model implements IGuildAware {
 
-    @Column({unique: true})
+    @Column({unique: false})
     public setting: string;
 
     @Column(DataType.TEXT)

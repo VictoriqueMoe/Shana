@@ -111,23 +111,25 @@ export class Help extends AbstractCommand<any> {
                 // eslint-disable-next-line prefer-const
                 let {name, depricated, description: {args, examples, text}} = commandObj;
                 embed.setTitle(`${prefix}${name}`);
-                if(!ObjectUtil.validString(text)){
+                if (!ObjectUtil.validString(text)) {
                     text = "No description";
                 }
-                embed.setDescription(`${text} \n\n all arguments of type 'text' should be wrapped with speach marks: ""`);
-                if(ArrayUtils.isValidArray(examples)){
-                    embed.addField("Examples", examples.join("\n"));
+                embed.setDescription(`${text} \n\nall arguments of type 'text' should be wrapped with speach marks: ""`);
+                if (ArrayUtils.isValidArray(examples)) {
+                    embed.addField("Examples:", examples.map(example => `${prefix}${example}`).join("\n\n"));
                 }
-                embed.addField('Arguments:', '\u200b');
-                for (const arg of args) {
-                    const {name, description, optional, type} = arg;
-                    const str = `***Description***: ${description} \n ***Optional***: ${optional} \n ***Type***: ${type}`;
-                    embed.addField(name, str);
+                if (ArrayUtils.isValidArray(args)) {
+                    embed.addField('Arguments:', '\u200b');
+                    for (const arg of args) {
+                        const {name, description, optional, type} = arg;
+                        const str = `***Description***: ${description} \n***Optional***: ${optional} \n***Type***: ${type}`;
+                        embed.addField(name, str);
+                    }
                 }
             } else {
                 const {name, description} = moduleRequested.commandDescriptors.module;
-                embed.setDescription(`${description} \n \n if you wish to see the command in more detail like examples and arguments, please run "${prefix}help ${name} 'commandName' " \n\n you may specify a page using: "${prefix}help ${name} 'pagenumber'"`);
-                embed.setTitle(`${moduleName} commands`);
+                embed.setDescription(`${description} \n \nif you wish to see the command in more detail like examples and arguments, please run "${prefix}help ${name} 'commandName' " \n\nyou may specify a page using: "${prefix}help ${name} 'pagenumber'"`);
+                embed.setTitle(`${moduleName}`);
                 const {commands} = moduleRequested.commandDescriptors;
                 await this.populatePagedFields(pageNumber, commands, embed, member, prefix);
             }
@@ -144,7 +146,7 @@ export class Help extends AbstractCommand<any> {
     }
 
     private async populatePagedFields(pageNumber: number, commands: Typeings.Command[], embed: MessageEmbed, member: GuildMember, prefix: string) {
-        const chunks = this.chunk(commands, 25);
+        const chunks = this.chunk(commands, 24);
         const maxPage = chunks.length;
         if (pageNumber > maxPage) {
             pageNumber = maxPage;
@@ -153,6 +155,7 @@ export class Help extends AbstractCommand<any> {
             pageNumber = 1;
         }
         embed.setFooter(`Page ${pageNumber} of ${maxPage}`);
+        embed.addField('Commands:', '\u200b');
         const resultOfPage = chunks[pageNumber - 1];
         for (const command of resultOfPage) {
             const {name, description, depricated} = command;
@@ -166,7 +169,13 @@ export class Help extends AbstractCommand<any> {
             if (depricated) {
                 fieldValue += " \n\nThis command is deprecated and will be removed in the future";
             }
-            embed.addField(`${prefix}${name}`, fieldValue, true);
+            if (ArrayUtils.isValidArray(description.args)) {
+                const requiredArgs = description.args.filter(arg => !arg.optional).length;
+                if (requiredArgs > 0) {
+                    fieldValue += `\n\n*this command requires: ${requiredArgs} mandatory arguments*`;
+                }
+            }
+            embed.addField(`${prefix}${name}`, fieldValue, resultOfPage.length > 5);
         }
     }
 }

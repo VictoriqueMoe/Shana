@@ -6,7 +6,7 @@ import {GuildableModel} from "../../guild/Guildable.model";
 @Table
 export class CloseOptionModel extends Model implements ICloseOption, IGuildAware {
 
-    @Column({unique: true, allowNull: false})
+    @Column({unique: false, allowNull: false})
     public moduleId: string;
 
     @Column({allowNull: false, defaultValue: false})

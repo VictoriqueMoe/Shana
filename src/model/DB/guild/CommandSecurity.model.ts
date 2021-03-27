@@ -6,7 +6,7 @@ import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 @Table
 export class CommandSecurityModel extends Model implements IGuildAware {
 
-    @Column({unique: true, allowNull: false})
+    @Column({unique: false, allowNull: false})
     public commandName: string;
 
     @Column({

@@ -46,7 +46,7 @@ export const EnabledGuard = (moduleId: string) => async (args, client, next) => 
             guildId
         }
     });
-    if (module.status) {
+    if (module && module.status) {
         return await next();
     }
 };
