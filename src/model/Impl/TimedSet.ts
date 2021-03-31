@@ -98,7 +98,7 @@ export class TimedSet<T> implements ITimedSet<T> {
 
     public forEach(callbackfn: (value: T, value2: T, set: Set<T>) => void, thisArg?: any): void {
         this._map.forEach((value, key, map) => {
-            callbackfn(key, key, this);
+            callbackfn.call(thisArg ? thisArg : this, key, key, this);
         });
     }
 
