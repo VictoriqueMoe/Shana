@@ -635,6 +635,12 @@ export abstract class Meme extends AbstractCommand<any> {
                                     "type": "attachment",
                                     "optional": true,
                                     "description": "The image to use for this meme (keep blank to refer to yourself)"
+                                },
+                                {
+                                    name: "Text to use",
+                                    type: "text",
+                                    optional: false,
+                                    description: "The text to use on the steamcard"
                                 }
                             ]
                         }

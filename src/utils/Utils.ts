@@ -27,8 +27,9 @@ import {Channels} from "../enums/Channels";
 import {ChannelManager} from "../model/guild/manager/ChannelManager";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 
+const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
-
+const isImageFast = require('is-image-fast');
 const request = defaults({encoding: null});
 
 export class ChronException extends Error {
@@ -178,6 +179,91 @@ export namespace ChronUtils {
 }
 
 export namespace DiscordUtils {
+
+
+    /**
+     * Obtains image URL for a message on this order:
+     * message Attachments
+     * message URL
+     * reference message
+     * @param command
+     */
+    export async function getImageUrlsFromMessageOrReference(command: CommandMessage): Promise<Set<string>> {
+        const messageAttachments = command.attachments;
+        if (messageAttachments && messageAttachments.size > 0) {
+            const attachmentUrls: string[] = messageAttachments.map(value => value.attachment).filter(attachment => ObjectUtil.validString(attachment)) as string[];
+            const urlMessageSet = new Set<string>();
+            if (ArrayUtils.isValidArray(attachmentUrls)) {
+                for (const attachmentUrl of attachmentUrls) {
+                    if (await isImageFast(attachmentUrl)) {
+                        urlMessageSet.add(attachmentUrl);
+                    }
+                }
+            }
+            if (urlMessageSet.size > 0) {
+                return urlMessageSet;
+            }
+        }
+
+        // message URL
+        const messageContent = command.content;
+        if (ObjectUtil.validString(messageContent)) {
+            const urlsInMessage = getUrls(messageContent);
+            if (urlsInMessage && urlsInMessage.size > 0) {
+                const urlMessageSet = new Set<string>();
+                for (const url of urlsInMessage) {
+                    if (await isImageFast(url)) {
+                        urlMessageSet.add(url);
+                    }
+                }
+                if (urlMessageSet.size > 0) {
+                    return urlMessageSet;
+                }
+            }
+        }
+        // replied attachment
+        {
+            const repliedMessageRef = command.reference;
+            const urlMessageSet = new Set<string>();
+            if (repliedMessageRef) {
+                const repliedMessageID = repliedMessageRef.messageID;
+                const repliedMessageObj = await command.channel.messages.fetch(repliedMessageID);
+                const repliedMessageContent = repliedMessageObj.content;
+                const repliedMessageAttatch = (repliedMessageObj.attachments && repliedMessageObj.attachments.size > 0) ? repliedMessageObj.attachments : null;
+                if (repliedMessageAttatch) {
+                    const repliedMessageAttatch = repliedMessageObj.attachments;
+                    const attachmentUrls: string[] = repliedMessageAttatch.map(value => value.attachment).filter(attachment => ObjectUtil.validString(attachment)) as string[];
+                    if (ArrayUtils.isValidArray(attachmentUrls)) {
+                        for (const attachmentUrl of attachmentUrls) {
+                            if (await isImageFast(attachmentUrl)) {
+                                urlMessageSet.add(attachmentUrl);
+                            }
+                        }
+                    }
+                    if (urlMessageSet.size > 0) {
+                        return urlMessageSet;
+                    }
+                }
+
+                if (ObjectUtil.validString(repliedMessageContent)) {
+                    const urlsInMessage = getUrls(repliedMessageObj.content);
+                    if (urlsInMessage && urlsInMessage.size > 0) {
+                        for(const urlInMessage of urlsInMessage){
+                            if (await isImageFast(urlInMessage)) {
+                                urlMessageSet.add(urlInMessage);
+                            }
+                        }
+
+                    }
+                }
+                if (urlMessageSet.size > 0) {
+                    return urlMessageSet;
+                }
+            }
+
+            return new Set();
+        }
+    }
 
 
     export type RoleChange = {

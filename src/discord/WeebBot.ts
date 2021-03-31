@@ -5,11 +5,15 @@ import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 
 export async function getPrefix(message: Message | string, client?: Client) {
-    let guildId = "";
-    if(typeof message === "string"){
-        guildId = message;
-    }else{
-        guildId = message.guild.id;
+    let guildId = "~";
+    try{
+        if(typeof message === "string"){
+            guildId = message;
+        }else{
+            guildId = message.guild.id;
+        }
+    }catch (e){
+        console.error(e);
     }
     return SettingsManager.instance.getSetting(SETTINGS.PREFIX, guildId);
 }

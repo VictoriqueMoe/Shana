@@ -20,6 +20,10 @@ export class TimedSet<T> implements ITimedSet<T> {
         this._map = new Map();
     }
 
+    public isEmpty(): boolean {
+        return this._map.size === 0;
+    }
+
     public add(key: T): this {
         this._map.set(key, setTimeout(() => {
             this._map.delete(key);
