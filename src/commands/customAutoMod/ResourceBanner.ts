@@ -7,7 +7,7 @@ import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil, StringUtils} f
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {DirResult} from "tmp";
 import {Main} from "../../Main";
-import {Collection, MessageEmbed} from "discord.js";
+import {Collection, Message, MessageEmbed, Snowflake} from "discord.js";
 import * as fs from 'fs';
 import {AbstractCommand} from "../AbstractCommand";
 
@@ -17,17 +17,18 @@ const getUrls = require('get-urls');
 const md5 = require('md5');
 import ffmpeg = require("ffmpeg");
 import RolesEnum = Roles.RolesEnum;
+import EmojiInfo = DiscordUtils.EmojiInfo;
 
 const {basename, join} = require('path');
 const sanitize = require('sanitize-filename');
 
-export abstract class AttachmentBanner extends AbstractCommand<BannedAttachmentsModel> {
+export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsModel> {
 
     constructor() {
         super({
-            module:{
-                name:"AttachmentBanner",
-                description: "Commands deal with banning attachments and embeds from messages"
+            module: {
+                name: "ResourceBanner",
+                description: "Commands deal with banning attachments, embeds and emojis from messages"
             },
             commands: [
                 {
@@ -36,15 +37,91 @@ export abstract class AttachmentBanner extends AbstractCommand<BannedAttachments
                         text: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \n banning an attachment means that if it is posted again, it is automatically deleted and logged",
                         examples: ["banAttachment = while replying to a message you wish to ban"],
                     }
+                },
+                {
+                    name: "banEmoji",
+                    description: {
+                        text: "This command is used to ban emojis from other servers, to use it, reply to a message that contains the emoji you want banned, if the replied message contains more than one emoji, this bot will ask you what one you wish to ban",
+                    }
                 }
             ]
         });
     }
 
     private static readonly MAX_SIZE_BYTES: number = 10485760;
-    private static readonly MAX_SIZE_KB = AttachmentBanner.MAX_SIZE_BYTES / 1024;
 
-    public async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string): Promise<BannedAttachmentsModel> {
+    @Command("banEmoji")
+    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE))
+    private async banEmoji(command: CommandMessage): Promise<void> {
+        const repliedMessageLink = command.reference;
+        if (!repliedMessageLink) {
+            command.reply("Please reply to a message");
+            return;
+        }
+        const argumentArray = StringUtils.splitCommandLine(command.content);
+        if (argumentArray.length !== 1) {
+            command.reply("Please supply a reason");
+            return;
+        }
+        const reason: string = argumentArray[0];
+        const repliedMessageID = repliedMessageLink.messageID;
+        const repliedMessageObj = await command.channel.messages.fetch(repliedMessageID);
+        const emojisFromMessage = DiscordUtils.getEmojiFromMessage(repliedMessageObj, false);
+        if (emojisFromMessage.length === 0) {
+            command.reply("Message contains no external emoji");
+            return;
+        }
+        let emojiId: string = null;
+        if (emojisFromMessage.length > 0) {
+            const emojiMap: Map<string, string> = new Map();
+            const aCharCode = 'A'.charCodeAt(0);
+            for (let i = 0; i < emojisFromMessage.length; i++) {
+                const emoji = emojisFromMessage[i];
+                const letter = String.fromCharCode(i + aCharCode);
+                emojiMap.set(letter, emoji);
+            }
+            let reply = "";
+            emojiMap.forEach((value, key) => {
+                reply += `${key}: ${value} \n`;
+            });
+            await command.reply(`What emoji would you like to ban: \n${reply}`);
+            const filter = (response: Message): boolean => {
+                if (!response.member || !command.member) {
+                    return false;
+                }
+                return response.member.id === command.member.id && emojiMap.has(response.content.toUpperCase());
+            };
+            let collected: Collection<Snowflake, Message> = null;
+            try {
+                collected = await command.channel.awaitMessages(filter, {max: 1, time: 10000, errors: ['time']});
+            } catch {
+                command.reply("No match found, please try command again");
+                return;
+            }
+            const result = collected.first().content.toUpperCase();
+            const emojiRef = emojiMap.get(result);
+            emojiId = emojiRef.split(":").pop().slice(0, -1);
+        } else {
+            emojiId = emojisFromMessage[0].split(":").pop().slice(0, -1);
+        }
+
+        const findMessage = await command.reply("Please wait while i extract the emoji...");
+        let emojiInfo: EmojiInfo = null;
+        try {
+            emojiInfo = await DiscordUtils.getEmojiInfo(emojiId);
+        } catch {
+            await findMessage.delete();
+            command.reply("Error finding emoji");
+            return;
+        }
+
+        await this.doBanAttachment(emojiInfo.buffer, reason, emojiInfo.url, command.guild.id, true);
+        await findMessage.delete();
+        await command.reply("Emoji added to ban database");
+        repliedMessageObj.delete();
+    }
+
+    public async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji = false): Promise<BannedAttachmentsModel> {
         const attachmentHash = md5(attachment);
         const exists = await BannedAttachmentsModel.count({
             where: {
@@ -59,7 +136,8 @@ export abstract class AttachmentBanner extends AbstractCommand<BannedAttachments
             attachmentHash,
             url,
             reason,
-            guildId
+            guildId,
+            isEmoji
         });
         return super.commitToDatabase(entry);
     }
@@ -136,7 +214,7 @@ export abstract class AttachmentBanner extends AbstractCommand<BannedAttachments
                     continue;
                 }
                 const size = Buffer.byteLength(attachment);
-                if (size > AttachmentBanner.MAX_SIZE_BYTES) {
+                if (size > ResourceBanner.MAX_SIZE_BYTES) {
                     continue;
                 }
                 const fileName = join(vidTemp.name, sanitize(basename(urlToAttachment)));
@@ -166,7 +244,7 @@ export abstract class AttachmentBanner extends AbstractCommand<BannedAttachments
                     }
                 }
                 try {
-                    errors = await Ffmpeg.checkVideo(fileName, AttachmentBanner.MAX_SIZE_BYTES);
+                    errors = await Ffmpeg.checkVideo(fileName, ResourceBanner.MAX_SIZE_BYTES);
                     if (ArrayUtils.isValidArray(errors)) {
                         const videoErrorExpanded = this._analyseError(errors);
                         if (ArrayUtils.isValidArray(videoErrorExpanded)) {
@@ -221,7 +299,7 @@ export abstract class AttachmentBanner extends AbstractCommand<BannedAttachments
     }
 
     @Command("banAttachment")
-    @Description(AttachmentBanner.viewDescriptionForSetUsernames())
+    @Description(ResourceBanner.viewDescriptionForSetUsernames())
     @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async banAttachment(command: CommandMessage): Promise<void> {
         const repliedMessageRef = command.reference;

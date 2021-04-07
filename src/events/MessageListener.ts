@@ -10,6 +10,7 @@ import {Main} from "../Main";
 import {Message} from "discord.js";
 import {Op} from "sequelize";
 import RolesEnum = Roles.RolesEnum;
+import EmojiInfo = DiscordUtils.EmojiInfo;
 
 const getUrls = require('get-urls');
 
@@ -85,6 +86,53 @@ export abstract class MessageListener {
             if (attachmentHash === imgHash) {
                 message.channel.send("<@697417252320051291> does");
                 return;
+            }
+        }
+    }
+
+    @On("message")
+    private async scanEmoji([message]: ArgsOf<"message">, client: Client): Promise<void> {
+        const member = message.member;
+        if (!member) {
+            return;
+        }
+        if (GuildUtils.isMemberAdmin(message.member) && Main.testMode === false) {
+            return;
+        }
+        const emojis = DiscordUtils.getEmojiFromMessage(message, false);
+        let bannedEmojiInfo: EmojiInfo = null;
+        for (const emoji of emojis) {
+            const emojiId = emoji.split(":").pop().slice(0, -1);
+            try {
+                bannedEmojiInfo = await DiscordUtils.getEmojiInfo(emojiId);
+            } catch {
+
+            }
+        }
+        if (!bannedEmojiInfo) {
+            return;
+        }
+        const emojiHash = md5(bannedEmojiInfo.buffer);
+        const exists = await BannedAttachmentsModel.findOne({
+            where: {
+                guildId: message.guild.id,
+                isEmoji: true,
+                [Op.or]: [
+                    {
+                        attachmentHash: emojiHash
+                    }, {
+                        url: bannedEmojiInfo.url
+                    }
+                ]
+            }
+        });
+        if (exists) {
+            const reasonToDel = exists.reason;
+            try {
+                await message.delete();
+                message.reply("Message contains a banned emoji");
+                DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a message that contained a banned emoji with reason: "${reasonToDel}"`, message.guild.id);
+            } catch {
             }
         }
     }

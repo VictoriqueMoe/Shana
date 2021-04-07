@@ -34,7 +34,7 @@ export class Misc extends AbstractCommand<any> {
                         args: [
                             {
                                 type: "attachment",
-                                optional: true,
+                                optional: false,
                                 name: "image",
                                 description: "The image to search"
                             }

@@ -179,6 +179,33 @@ export namespace ChronUtils {
 }
 
 export namespace DiscordUtils {
+    export type EmojiInfo = {
+        "buffer": Buffer,
+        "url": string
+    };
+
+    export async function getEmojiInfo(emojiId: string): Promise<EmojiInfo> {
+        let emojiInfo: EmojiInfo = null;
+        const tryExtensions = ["gif", "png"];
+        for (let i = 0; i < 2; i++) {
+            const ext = tryExtensions[i];
+            const url = `https://cdn.discordapp.com/emojis/${emojiId}.${ext}`;
+            try {
+                const emojiImageBuffer = await DiscordUtils.loadResourceFromURL(url);
+                emojiInfo = {
+                    buffer: emojiImageBuffer,
+                    url: url
+                };
+                break;
+            } catch {
+                console.log(`Emoji not found as: ${ext}`);
+            }
+        }
+        if (!emojiInfo) {
+            throw new Error("Error finding emoji");
+        }
+        return emojiInfo;
+    }
 
 
     /**
@@ -349,16 +376,18 @@ export namespace DiscordUtils {
         }
     }
 
-    export function getEmojiFromMessage(message: Message): string[] {
+    export function getEmojiFromMessage(message: Message, includeDefaultEmoji = true): string[] {
         const regex = new RegExp(/<(a?):(\w+):(\d+)>/, "g");
         const messageText = message.content;
         const emojiArray = messageText.match(regex) || [];
-        const emoJiRexp = emojiRegex();
-        let match;
-        // eslint-disable-next-line no-cond-assign
-        while (match = emoJiRexp.exec(messageText)) {
-            const emoji = match[0];
-            emojiArray.push(emoji);
+        if (includeDefaultEmoji) {
+            const emoJiRexp = emojiRegex();
+            let match;
+            // eslint-disable-next-line no-cond-assign
+            while (match = emoJiRexp.exec(messageText)) {
+                const emoji = match[0];
+                emojiArray.push(emoji);
+            }
         }
         return emojiArray;
     }
