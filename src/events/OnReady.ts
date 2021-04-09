@@ -65,7 +65,7 @@ export class OnReady extends BaseDAO<any> {
                 status: "idle"
             });
         } else {
-            await Main.client.user.setActivity('P-body', {type: 'PLAYING'});
+            await Main.client.user.setActivity('Portal 2', {type: 'PLAYING'});
         }
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();

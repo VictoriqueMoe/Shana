@@ -7,7 +7,7 @@ import {Roles} from "../enums/Roles";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../utils/Utils";
 import {BannedAttachmentsModel} from "../model/DB/BannedAttachments.model";
 import {Main} from "../Main";
-import {Message} from "discord.js";
+import {Message, User} from "discord.js";
 import {Op} from "sequelize";
 import RolesEnum = Roles.RolesEnum;
 import EmojiInfo = DiscordUtils.EmojiInfo;
@@ -90,6 +90,65 @@ export abstract class MessageListener {
         }
     }
 
+    @On("messageReactionAdd")
+    private async scanEmojiReactAdd([reaction, user]: ArgsOf<"messageReactionAdd">, client: Client): Promise<void> {
+        const emjiFromReaction = reaction.emoji;
+        const emojiId = emjiFromReaction.id;
+        if (!(user instanceof User)) {
+            try {
+                user = (await reaction.message.guild.members.fetch(user.id)).user;
+            } catch (e) {
+                console.error(e);
+                return;
+            }
+        }
+        this.doEmojiBan([emojiId], user, reaction.message, true);
+    }
+
+    private async doEmojiBan(emojiIds: string[], user: User, message: Message, isReaction: boolean): Promise<void> {
+        for (const emoji of emojiIds) {
+            let bannedEmojiInfo: EmojiInfo = null;
+            try {
+                bannedEmojiInfo = await DiscordUtils.getEmojiInfo(emoji);
+            } catch {
+
+            }
+            if (!bannedEmojiInfo) {
+                return;
+            }
+            const emojiHash = md5(bannedEmojiInfo.buffer);
+            const exists = await BannedAttachmentsModel.findOne({
+                where: {
+                    guildId: message.guild.id,
+                    isEmoji: true,
+                    [Op.or]: [
+                        {
+                            attachmentHash: emojiHash
+                        }, {
+                            url: bannedEmojiInfo.url
+                        }
+                    ]
+                }
+            });
+            if (exists) {
+                const reasonToDel = exists.reason;
+                try {
+                    let prefix = "Message";
+                    if (isReaction) {
+                        await message.reactions.cache.find(r => r.emoji.id == bannedEmojiInfo.id).users.remove(user);
+                        prefix = "Reaction";
+                    } else {
+                        await message.delete();
+                        DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a message that contained a banned emoji with reason: "${reasonToDel}"`, message.guild.id);
+                    }
+                    message.reply(`${prefix} contains a banned emoji`);
+                } catch {
+                }
+                break;
+            }
+        }
+    }
+
     @On("message")
     private async scanEmoji([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const member = message.member;
@@ -100,41 +159,8 @@ export abstract class MessageListener {
             return;
         }
         const emojis = DiscordUtils.getEmojiFromMessage(message, false);
-        let bannedEmojiInfo: EmojiInfo = null;
-        for (const emoji of emojis) {
-            const emojiId = emoji.split(":").pop().slice(0, -1);
-            try {
-                bannedEmojiInfo = await DiscordUtils.getEmojiInfo(emojiId);
-            } catch {
-
-            }
-        }
-        if (!bannedEmojiInfo) {
-            return;
-        }
-        const emojiHash = md5(bannedEmojiInfo.buffer);
-        const exists = await BannedAttachmentsModel.findOne({
-            where: {
-                guildId: message.guild.id,
-                isEmoji: true,
-                [Op.or]: [
-                    {
-                        attachmentHash: emojiHash
-                    }, {
-                        url: bannedEmojiInfo.url
-                    }
-                ]
-            }
-        });
-        if (exists) {
-            const reasonToDel = exists.reason;
-            try {
-                await message.delete();
-                message.reply("Message contains a banned emoji");
-                DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a message that contained a banned emoji with reason: "${reasonToDel}"`, message.guild.id);
-            } catch {
-            }
-        }
+        const emojiIds = emojis.map(emoji => emoji.split(":").pop().slice(0, -1));
+        this.doEmojiBan(emojiIds, message.member.user, message, false);
     }
 
     @On("message")

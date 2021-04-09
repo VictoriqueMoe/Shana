@@ -181,7 +181,8 @@ export namespace ChronUtils {
 export namespace DiscordUtils {
     export type EmojiInfo = {
         "buffer": Buffer,
-        "url": string
+        "url": string,
+        "id": string
     };
 
     export async function getEmojiInfo(emojiId: string): Promise<EmojiInfo> {
@@ -194,7 +195,8 @@ export namespace DiscordUtils {
                 const emojiImageBuffer = await DiscordUtils.loadResourceFromURL(url);
                 emojiInfo = {
                     buffer: emojiImageBuffer,
-                    url: url
+                    url: url,
+                    id: emojiId
                 };
                 break;
             } catch {
