@@ -178,6 +178,7 @@ export namespace ChronUtils {
     }
 }
 
+
 export namespace DiscordUtils {
     export type EmojiInfo = {
         "buffer": Buffer,

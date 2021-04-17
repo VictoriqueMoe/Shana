@@ -95,7 +95,7 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
             try {
                 collected = await command.channel.awaitMessages(filter, {max: 1, time: 10000, errors: ['time']});
             } catch {
-                command.reply("No match found, please try command again");
+                command.reply("Timout exceeded.");
                 return;
             }
             const result = collected.first().content.toUpperCase();

@@ -163,6 +163,7 @@ export abstract class MessageListener {
         this.doEmojiBan(emojiIds, message.member.user, message, false);
     }
 
+
     @On("message")
     private async scanAttachments([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const member = message.member;
