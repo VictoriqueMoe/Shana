@@ -3,17 +3,19 @@ import {NotBot} from "../../guards/NotABot";
 import {roleConstraints} from "../../guards/RoleConstraint";
 import {BlockGuard} from "../../guards/BlockGuard";
 import {Roles} from "../../enums/Roles";
-import {DiscordUtils} from "../../utils/Utils";
+import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {AbstractCommand} from "../AbstractCommand";
+import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
+import {Main} from "../../Main";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class AccountAge extends AbstractCommand<any> {
 
     constructor() {
         super({
-            module:{
-               name:"AccountAge",
-               description: "Commands to get ages of accounts"
+            module: {
+                name: "Ages",
+                description: "commands to get ages of accounts and servers"
             },
             commands: [
                 {
@@ -29,9 +31,29 @@ export abstract class AccountAge extends AbstractCommand<any> {
                             }
                         ]
                     }
+                },
+                {
+                    name: "serverAge",
+                    description: {
+                        text: "Get the age of this server"
+                    }
                 }
             ]
         });
+    }
+
+    @Command("serverAge")
+    @Description(AccountAge.viewDescriptionForSetUsernames())
+    @Guard(NotBot, AdminOnlyTask)
+    private async serverAge(command: CommandMessage): Promise<void> {
+        const guildId = command.guild.id;
+        const guild = await Main.client.guilds.fetch(guildId);
+        const guildDate = guild.createdAt;
+        const timeStamp = guildDate.getTime();
+        const age = Date.now() - timeStamp;
+        const humanReadable = ObjectUtil.secondsToHuman(Math.round(age / 1000));
+        const dateCreatedStr = guildDate.toUTCString();
+        command.reply(`Server is: ${humanReadable}\n and was created was created at: ${dateCreatedStr}`);
     }
 
     @Command("age")
