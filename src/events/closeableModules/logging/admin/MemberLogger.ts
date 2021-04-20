@@ -13,25 +13,6 @@ import RolesEnum = Roles.RolesEnum;
  * Member kick
  * Member leave
  * Member unBanned
- *
- * Message Edited
- * Messaged Deleted
- * Bulk Message Deletion
- *
- * Channel Created
- * Channel Deleted
- *
- * Role Created
- * Role Deleted
- * Role Updated
- * Role Given
- * Role Removed
- *
- * Nickname Changed
- *
- * Member Joined Voice Channel
- * Member Left Voice Channel
- * Member Moved To Voice Channel
  */
 export class MemberLogger extends AbstractAdminAuditLogger {
 

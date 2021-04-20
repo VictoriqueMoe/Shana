@@ -41,7 +41,7 @@ export class Main {
 
     private static _dao: Sequelize;
 
-    static botServer: http.Server;
+    public static botServer: http.Server;
 
     public static get dao(): Sequelize {
         return Main._dao;
