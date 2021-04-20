@@ -189,7 +189,7 @@ export namespace DiscordUtils {
     export async function getEmojiInfo(emojiId: string): Promise<EmojiInfo> {
         let emojiInfo: EmojiInfo = null;
         const tryExtensions = ["gif", "png"];
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < tryExtensions.length; i++) {
             const ext = tryExtensions[i];
             const url = `https://cdn.discordapp.com/emojis/${emojiId}.${ext}`;
             try {
