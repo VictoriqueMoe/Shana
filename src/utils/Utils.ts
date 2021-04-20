@@ -194,12 +194,14 @@ export namespace DiscordUtils {
             const url = `https://cdn.discordapp.com/emojis/${emojiId}.${ext}`;
             try {
                 const emojiImageBuffer = await DiscordUtils.loadResourceFromURL(url);
-                emojiInfo = {
-                    buffer: emojiImageBuffer,
-                    url: url,
-                    id: emojiId
-                };
-                break;
+                if (emojiImageBuffer.length > 0) {
+                    emojiInfo = {
+                        buffer: emojiImageBuffer,
+                        url: url,
+                        id: emojiId
+                    };
+                    break;
+                }
             } catch {
                 console.log(`Emoji not found as: ${ext}`);
             }

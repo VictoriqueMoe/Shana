@@ -72,7 +72,7 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
             return;
         }
         let emojiId: string = null;
-        if (emojisFromMessage.length > 0) {
+        if (emojisFromMessage.length > 1) {
             const emojiMap: Map<string, string> = new Map();
             const aCharCode = 'A'.charCodeAt(0);
             for (let i = 0; i < emojisFromMessage.length; i++) {
