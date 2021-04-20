@@ -7,7 +7,7 @@ import {AbstractController} from "../AbstractController";
 export class BotController extends AbstractController{
 
     @Get('allGuilds')
-    private async asyncThirdParty(req: Request, res: Response) {
+    private async getAllGuilds(req: Request, res: Response) {
         const guilds = Main.client.guilds.cache;
         const obj = {};
         for(const [guildId, guild] of guilds){
