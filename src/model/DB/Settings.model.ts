@@ -8,7 +8,7 @@ export class SettingsModel extends Model implements IGuildAware {
     @Column({unique: false})
     public setting: string;
 
-    @Column(DataType.TEXT)
+    @Column({type: DataType.TEXT, allowNull: true, defaultValue: null})
     public value: string;
 
     @ForeignKey(() => GuildableModel)

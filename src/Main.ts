@@ -2,7 +2,7 @@ import {Client} from "@typeit/discord";
 import {CloseableModule} from "./model/closeableModules/impl/CloseableModule";
 import {Sequelize} from "sequelize-typescript";
 import * as dotenv from "dotenv";
-import {EnumEx} from "./utils/Utils";
+import {EnumEx, ObjectUtil} from "./utils/Utils";
 import {DEFAULT_SETTINGS, SETTINGS} from "./enums/SETTINGS";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import * as http from "http";
@@ -82,7 +82,10 @@ export class Main {
         for (const [guildId] of cache) {
             for (const keyValuesObj of nameValue) {
                 const setting: SETTINGS = keyValuesObj.name;
-                const value = keyValuesObj.value;
+                let value = keyValuesObj.value;
+                if (!ObjectUtil.validString(value)) {
+                    value = null;
+                }
                 await SettingsManager.instance.saveOrUpdateSetting(setting, value, guildId, true);
             }
         }
