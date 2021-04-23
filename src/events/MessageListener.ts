@@ -133,15 +133,13 @@ export abstract class MessageListener {
             if (exists) {
                 const reasonToDel = exists.reason;
                 try {
-                    let prefix = "Message";
                     if (isReaction) {
                         await message.reactions.cache.find(r => r.emoji.id == bannedEmojiInfo.id).users.remove(user);
-                        prefix = "Reaction";
                     } else {
                         await message.delete();
+                        message.channel.send(`Message contains a banned emoji`);
                         DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a message that contained a banned emoji with reason: "${reasonToDel}"`, message.guild.id);
                     }
-                    message.reply(`${prefix} contains a banned emoji`);
                 } catch {
                 }
                 break;
