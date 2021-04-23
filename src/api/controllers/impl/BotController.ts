@@ -45,6 +45,24 @@ export class BotController extends AbstractController {
         });
     }
 
+    @Get('getAllRoles')
+    private async getAllRoles(req: Request, res: Response) {
+        let guild: Guild;
+        try {
+            guild = await this.getGuild(req);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.NOT_FOUND);
+        }
+        let roleArray = guild.roles.cache.array();
+        roleArray = roleArray.filter(role => {
+            const bot = guild.me;
+            const botHighestRole = bot.roles.highest.position;
+            return role.position < botHighestRole && !role.managed && role.name !== "@everyone";
+        });
+        const roleMap = roleArray.map(role => role.toJSON());
+        return super.ok(res, roleMap);
+    }
+
     @Get('getUsersFromRoles')
     private async getUsersFromRoles(req: Request, res: Response) {
         let guild: Guild;
@@ -54,17 +72,8 @@ export class BotController extends AbstractController {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
         const roleRequested = req.query.roleId as string;
-        if (!ObjectUtil.validString(roleRequested)) {
-            return super.doError(res, "Please supply a role Id", StatusCodes.BAD_REQUEST);
-        }
-        const guildMap: Map<string, GuildMember> = new Map();
-        const allMembers = guild.members.cache.array();
-        for (const member of allMembers) {
-            if (member.roles.cache.has(roleRequested)) {
-                guildMap.set(member.id, member);
-            }
-        }
-        const objArr = Array.from(guildMap.values()).map(member => {
+        const roles = await guild.roles.fetch(roleRequested);
+        const objArr = roles.members.array().map(member => {
             const json = member.toJSON();
             json["username"] = member.user.tag;
             return json;
