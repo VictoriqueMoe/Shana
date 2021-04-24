@@ -216,7 +216,7 @@ export abstract class MessageListener {
                 message.reply("Message contains a banned attachment");
                 DiscordUtils.postToLog(`Member: <@${member.id}> posted a banned attachment "${reason}"`, message.guild.id);
                 if (member) {
-                    GuildUtils.sendToJail(member);
+                    await GuildUtils.sendToJail(member);
                 }
             } catch {
             }
