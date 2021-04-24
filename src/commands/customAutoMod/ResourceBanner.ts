@@ -139,6 +139,7 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
             guildId,
             isEmoji
         });
+
         return super.commitToDatabase(entry);
     }
 
@@ -269,20 +270,13 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
             this._cleanup(vidTemp);
         }
         if (didBan || Main.testMode) {
-            let messageToRespond = `This item contains suspicious code, and has been deleted, if you think this an error, please ping <@697417252320051291>`;
-            try {
-                const vicMemeber = await message.guild.members.fetch("697417252320051291");
-                if (vicMemeber) {
-                    messageToRespond += ` (${vicMemeber} (${vicMemeber.user.tag}))`;
-                }
-            } catch {
-            }
+            const messageToRespond = `This item is a Discord crash video and has been deleted`;
             message.reply(messageToRespond);
             const messageMember = message.member;
-            const descriptionPostfix = `that contains suspicious code in <#${message.channel.id}>, this could be a discord crash video. the first 10 errors are as shown below: `;
+            const descriptionPostfix = `that contains suspicious code in <#${message.channel.id}>, this is a discord crash video. the first 10 errors are as shown below: `;
             const embed = new MessageEmbed()
                 .setColor('#337FD5')
-                .setAuthor(message.member, GuildUtils.getGuildIconUrl(message.guild.id))
+                .setAuthor(messageMember, GuildUtils.getGuildIconUrl(message.guild.id))
                 .setDescription(`someone posted a video ${descriptionPostfix}`)
                 .setTimestamp();
             if (messageMember) {
@@ -293,8 +287,8 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
             errors.slice(0, 10).forEach((value, index) => {
                 embed.addField(`hex dump #${index + 1}`, value);
             });
-
             DiscordUtils.postToLog(embed, message.guild.id);
+            GuildUtils.sendToJail(messageMember);
         }
     }
 

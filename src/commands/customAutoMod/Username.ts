@@ -4,17 +4,18 @@ import {NotBot} from "../../guards/NotABot";
 import {roleConstraints} from "../../guards/RoleConstraint";
 import {BlockGuard} from "../../guards/BlockGuard";
 import {Roles} from "../../enums/Roles";
-import {StringUtils} from "../../utils/Utils";
+import {DiscordUtils, StringUtils} from "../../utils/Utils";
 import {GuildMember} from "discord.js";
 import {AbstractCommand} from "../AbstractCommand";
+import {GuildManager} from "../../model/guild/manager/GuildManager";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class Username extends AbstractCommand<UsernameModel> {
 
     constructor() {
         super({
-            module:{
-                name:"Username",
+            module: {
+                name: "Username",
                 description: "Commands to set usernames for people"
             },
             commands: [
@@ -144,9 +145,11 @@ export abstract class Username extends AbstractCommand<UsernameModel> {
             return;
         }
         const mentionMember = mentionMembers.values().next().value as GuildMember;
-        const vicBotRole = await Roles.getRole(RolesEnum.WEEB_OVERLORD);
+        const guild = await GuildManager.instance.getGuild(command.guild.id);
+        const bot = await DiscordUtils.getBot(guild.id);
+        const botHighestRole = bot.roles.highest;
         const roleOfMember = mentionMember.roles.highest;
-        if (roleOfMember.position > vicBotRole.position) {
+        if (roleOfMember.position > botHighestRole.position) {
             command.reply("You can not use this command against a member who's highest role is above this bots highest role");
             return;
         }
@@ -173,7 +176,7 @@ export abstract class Username extends AbstractCommand<UsernameModel> {
                     }
                 }
             );
-        }else{
+        } else {
             const obj = {
                 userId,
                 usernameToPersist,

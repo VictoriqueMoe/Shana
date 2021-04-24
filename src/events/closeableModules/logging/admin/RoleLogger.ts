@@ -4,7 +4,7 @@ import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../../../guards/EnabledGuard";
 import {MessageEmbed, Role, User} from "discord.js";
 import {MemberRoleChange} from "../../../../modules/automod/MemberRoleChange";
-import {Roles} from "../../../../enums/Roles";
+import {GuildManager} from "../../../../model/guild/manager/GuildManager";
 
 
 /**
@@ -41,10 +41,11 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         const change = new MemberRoleChange(oldMember, newMember);
         const roleChanges = change.roleChanges;
         const added = roleChanges.add;
+        const guild = await GuildManager.instance.getGuild(oldMember.guild.id);
         if (added.length > 0) {
             const arr = [];
-            for (const roleEnum of added) {
-                const roleObj = await Roles.getRole(roleEnum);
+            for (const roleId of added) {
+                const roleObj = await guild.roles.fetch(roleId);
                 embed.setColor(roleObj.hexColor);
                 arr.push(`\`${roleObj.name}\``);
             }
@@ -54,8 +55,8 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         const removed = roleChanges.remove;
         if (removed.length > 0) {
             const arr = [];
-            for (const roleEnum of removed) {
-                const roleObj = await Roles.getRole(roleEnum);
+            for (const roleId of removed) {
+                const roleObj = await guild.roles.fetch(roleId);
                 embed.setColor(roleObj.hexColor);
                 arr.push(`\`${roleObj.name}\``);
             }

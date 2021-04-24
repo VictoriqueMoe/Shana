@@ -1,9 +1,7 @@
 import {AllowNull, BelongsTo, Column, DataType, Default, ForeignKey, Model, Table} from "sequelize-typescript";
-import {Roles} from "../../../../enums/Roles";
-import {EnumEx} from "../../../../utils/Utils";
+import {GuildUtils} from "../../../../utils/Utils";
 import {IGuildAware} from "../../IGuildAware";
 import {GuildableModel} from "../../guild/Guildable.model";
-import RolesEnum = Roles.RolesEnum;
 
 @Table
 export class MuteModel extends Model implements IGuildAware {
@@ -39,7 +37,14 @@ export class MuteModel extends Model implements IGuildAware {
     @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
     guildableModel: GuildableModel;
 
-    public getPrevRoles(): RolesEnum[] {
-        return this.prevRole.split(",").filter(r => r !== RolesEnum.EVERYONE).map(r => EnumEx.loopBack(RolesEnum, r, true));
+    public async getPrevRoles(): Promise<string[]> {
+        const prevRoles = this.prevRole.split(",");
+        const newArr: string[] = [];
+        for (const prevRole of prevRoles) {
+            if (await GuildUtils.RoleUtils.isValidRole(this.guildId, prevRole)) {
+                newArr.push(prevRole);
+            }
+        }
+        return newArr;
     }
 }

@@ -5,9 +5,8 @@ import {IScheduledJob} from "../../../model/scheduler/IScheduledJob";
 import {Guild, GuildMember} from "discord.js";
 import {Main} from "../../../Main";
 import {Scheduler} from "../../../model/scheduler/impl/Scheduler";
-import {DiscordUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
-import {Roles} from "../../../enums/Roles";
-import RolesEnum = Roles.RolesEnum;
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
+import {GuildManager} from "../../../model/guild/manager/GuildManager";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
@@ -36,6 +35,11 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
      * @param unit - the unit of time to apply to the timeOut argument
      */
     public async muteUser(user: GuildMember, reason: string, creatorID: string, timeOut?: number, unit?: TIME_UNIT): Promise<MuteModel> {
+        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(user.guild.id);
+        if (!mutedRole) {
+            return;
+        }
+        const muteRoleId = mutedRole.id;
         const prevRolesArr = Array.from(user.roles.cache.values());
         const prevRolesIdStr = prevRolesArr.map(r => r.id).join(",");
         const blockedUserId = user.id;
@@ -74,20 +78,20 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         try {
             savedModel = await Main.dao.transaction(async t => {
                 const m = await super.commitToDatabase(model) as MuteModel;
-                await this.addRolePersist(userObject);
+                await this.addRolePersist(userObject, muteRoleId);
                 return m;
             }) as MuteModel;
         } catch {
             return null;
         }
-        await userObject.roles.add(RolesEnum.MUTED);
+        await userObject.roles.add(muteRoleId);
         if (hasTimeout) {
-            MuteSingleton.instance.createTimeout(blockUserObject.id, blockUserObject.username, millis, user.guild);
+            MuteSingleton.instance.createTimeout(blockUserObject.id, blockUserObject.username, millis, user.guild, muteRoleId);
         }
         return savedModel;
     }
 
-    public async doRemove(userId: string, guildId: string, skipPersistence = false): Promise<void> {
+    public async doRemove(userId: string, guildId: string, muteRoleId: string, skipPersistence = false): Promise<void> {
         const whereClaus = {
             where: {
                 userId,
@@ -98,7 +102,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         if (!muteModel) {
             throw new Error('That user is not currently muted.');
         }
-        const prevRoles = muteModel.getPrevRoles();
+        const prevRoles = await muteModel.getPrevRoles();
         const rowCount = await MuteModel.destroy(whereClaus);
         if (rowCount != 1) {
             throw new Error('That user is not currently muted.');
@@ -130,9 +134,9 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
             return;
         }
 
-        await member.roles.remove(RolesEnum.MUTED);
-        for (const roleEnum of prevRoles) {
-            const role = await Roles.getRole(roleEnum);
+        await member.roles.remove(muteRoleId);
+        for (const roleId of prevRoles) {
+            const role = await (await GuildManager.instance.getGuild(guildId)).roles.fetch(roleId);
             console.log(`re-applying role ${role.name} to ${member.user.username}`);
             try {
                 await member.roles.add(role.id);
@@ -142,13 +146,13 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
     }
 
-    public createTimeout(userId: string, username: string, millis: number, guild: Guild): void {
+    public createTimeout(userId: string, username: string, millis: number, guild: Guild, muteRoleId: string): void {
         const now = Date.now();
         const future = now + millis;
         const newDate = new Date(future);
         const job = Scheduler.getInstance().register(userId, newDate, async () => {
             await Main.dao.transaction(async t => {
-                await MuteSingleton.instance.doRemove(userId, guild.id);
+                await MuteSingleton.instance.doRemove(userId, guild.id, muteRoleId);
             });
             DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);
         });
@@ -160,10 +164,10 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         return this._timeOutMap;
     }
 
-    private addRolePersist(user: GuildMember): Promise<RolePersistenceModel> {
+    private addRolePersist(user: GuildMember, muteRoleId: string): Promise<RolePersistenceModel> {
         return super.commitToDatabase(new RolePersistenceModel({
             "userId": user.id,
-            "roleId": RolesEnum.MUTED,
+            "roleId": muteRoleId,
             guildId: user.guild.id
         })) as Promise<RolePersistenceModel>;
     }

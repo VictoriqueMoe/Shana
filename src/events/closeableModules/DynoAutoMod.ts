@@ -12,7 +12,7 @@ import {GuildMember} from "discord.js";
 import {MuteModel} from "../../model/DB/autoMod/impl/Mute.model";
 import {MuteSingleton} from "../../commands/customAutoMod/userBlock/MuteSingleton";
 import {Main} from "../../Main";
-import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
+import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import * as Immutable from "immutable";
 
 export class DynoAutoMod extends CloseableModule {
@@ -48,6 +48,7 @@ export class DynoAutoMod extends CloseableModule {
             }
         }
         violatedFilters.sort((a, b) => a.priority - b.priority);
+        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(message.guild.id);
         outer:
             for (const filter of violatedFilters) {
                 const actionsToTake = filter.actions;
@@ -55,6 +56,9 @@ export class DynoAutoMod extends CloseableModule {
                 for (const action of actionsToTake) {
                     switch (action) {
                         case ACTION.MUTE: {
+                            if (!mutedRole) {
+                                return;
+                            }
                             let fromArray = this.getFromArray(userId, member.guild.id);
                             if (fromArray) {
                                 fromArray.muteViolations++;

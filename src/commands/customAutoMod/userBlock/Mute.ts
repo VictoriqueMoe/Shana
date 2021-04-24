@@ -1,5 +1,5 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
-import {DiscordUtils, EnumEx, ObjectUtil, StringUtils, TimeUtils} from "../../../utils/Utils";
+import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, StringUtils, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {NotBot} from "../../../guards/NotABot";
 import {roleConstraints} from "../../../guards/RoleConstraint";
@@ -16,8 +16,8 @@ export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
 
     public constructor() {
         super({
-            module:{
-                name:"Mute",
+            module: {
+                name: "Mute",
                 description: "Commands to mute people from servers"
             },
             commands: [
@@ -68,6 +68,10 @@ export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
     @Description(Mute.getMuteDescription())
     @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
     private async mute(command: CommandMessage): Promise<void> {
+        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(command.guild.id);
+        if (!mutedRole) {
+            command.reply("This command has not been configured or is disabled");
+        }
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 3 && argumentArray.length !== 2) {
             command.reply(`Command arguments wrong, usage: ~mute <"username"> <"reason"> [timeout in seconds]`);
@@ -85,8 +89,8 @@ export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
         const blockUserObject = mentionedUserCollection.get(blockedUserId);
         const didYouBlockABot = blockUserObject.bot;
         const canBlock = await DiscordUtils.canUserPreformBlock(command);
-
-        const botRole = await Roles.getRole(RolesEnum.VIC_BOT);
+        const bot = await DiscordUtils.getBot(command.guild.id);
+        const botRole = bot.roles.highest;
         if (botRole.position <= mentionedMember.roles.highest.position) {
             command.reply("You can not block a member whose role is above or on the same level as this bot!");
             return;

@@ -211,9 +211,13 @@ export abstract class MessageListener {
         }
         if (shouldDelete) {
             try {
+                const member = message.member;
                 await message.delete();
                 message.reply("Message contains a banned attachment");
-                DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a banned attachment that was banned for reason: "${reason}"`, message.guild.id);
+                DiscordUtils.postToLog(`Member: <@${member.id}> posted a banned attachment "${reason}"`, message.guild.id);
+                if (member) {
+                    GuildUtils.sendToJail(member);
+                }
             } catch {
             }
         }

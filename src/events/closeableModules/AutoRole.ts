@@ -2,16 +2,15 @@ import {CloseableModule} from "../../model/closeableModules/impl/CloseableModule
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../guards/EnabledGuard";
 import {CloseOptionModel} from "../../model/DB/autoMod/impl/CloseOption.model";
-import {Roles} from "../../enums/Roles";
 import * as schedule from "node-schedule";
 import {AbstractRoleApplier} from "../customAutoMod/RoleApplier/AbstractRoleApplier";
-import {GuildMember} from "discord.js";
+import {GuildMember, Role} from "discord.js";
 import {RolePersistenceModel} from "../../model/DB/autoMod/impl/RolePersistence.model";
-import {DiscordUtils, EnumEx, ObjectUtil} from "../../utils/Utils";
-import RolesEnum = Roles.RolesEnum;
+import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
+import {GuildManager} from "../../model/guild/manager/GuildManager";
 
-class RoleProxy<T extends RolesEnum> extends AbstractRoleApplier<T> {
-    public async applyRole(role: T, member: GuildMember, reason?: string): Promise<void> {
+class RoleProxy extends AbstractRoleApplier {
+    public async applyRole(role: Role, member: GuildMember, reason?: string): Promise<void> {
         return super.applyRole(role, member, reason);
     }
 }
@@ -35,26 +34,32 @@ export class AutoRole extends CloseableModule {
         const d = new Date(toAddRole);
         //TODO use scheduler
         schedule.scheduleJob(`enable ${member.user.username}`, d, async () => {
+            const guildId = member.guild.id;
             const persistedRole = await RolePersistenceModel.findOne({
                 where: {
-                    "userId": member.id,
-                    guildId: member.guild.id
+                    userId: member.id,
+                    guildId
                 }
             });
             try {
                 if (persistedRole) {
-                    const rolePersisted = EnumEx.loopBack(RolesEnum, persistedRole.roleId, true) as unknown as RolesEnum;
+                    const guild = await GuildManager.instance.getGuild(guildId);
+                    const rolePersisted = await guild.roles.fetch(persistedRole.roleId);
                     await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
-                    if (rolePersisted === RolesEnum.SPECIAL) {
+                    const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
+                    const muteRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
+                    if (jailRole && rolePersisted.id === jailRole.id) {
                         DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as special (possible special evasion) \n <@697417252320051291> <@593208170869162031>`, member.guild.id);
-                    } else if (rolePersisted === RolesEnum.MUTED) {
+                    } else if (muteRole && rolePersisted.id === muteRole.id) {
                         DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and because of this, has been re-muted.`, member.guild.id);
                     }
                     return;
                 }
-                await this._roleApplier.applyRole(RolesEnum.HEADCRABS, member, "added via VicBot");
             } catch {
-                await this._roleApplier.applyRole(RolesEnum.HEADCRABS, member, "added via VicBot");
+            }
+            const autoRole = await GuildUtils.RoleUtils.getAutoRole(guildId);
+            if (autoRole) {
+                await this._roleApplier.applyRole(autoRole, member, "added via VicBot");
             }
         });
     }

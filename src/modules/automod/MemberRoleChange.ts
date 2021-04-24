@@ -1,11 +1,9 @@
 import {GuildMember, PartialGuildMember} from "discord.js";
 import {Roles} from "../../enums/Roles";
-import {EnumEx} from "../../utils/Utils";
-import RolesEnum = Roles.RolesEnum;
 
 export type RoleChangeType = {
-    remove: RolesEnum[],
-    add: RolesEnum[]
+    remove: string[],
+    add: string[]
 };
 
 export class MemberRoleChange {
@@ -17,8 +15,8 @@ export class MemberRoleChange {
         const oldRoles = this.oldUser.roles.cache.keyArray();
         const newRoles = this.newUser.roles.cache.keyArray();
 
-        const remove: RolesEnum[] = oldRoles.filter(x => !newRoles.includes(x)).map(x => EnumEx.loopBack(RolesEnum, x, true));
-        const add: RolesEnum[] = newRoles.filter(x => !oldRoles.includes(x)).map(x => EnumEx.loopBack(RolesEnum, x, true));
+        const remove: string[] = oldRoles.filter(x => !newRoles.includes(x));
+        const add: string[] = newRoles.filter(x => !oldRoles.includes(x));
 
         return {
             remove,

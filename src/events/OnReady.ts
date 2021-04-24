@@ -3,7 +3,7 @@ import {Main} from "../Main";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {Op} from "sequelize";
-import {ArrayUtils, loadClasses, ObjectUtil} from "../utils/Utils";
+import {ArrayUtils, GuildUtils, loadClasses, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
@@ -30,6 +30,10 @@ export class OnReady extends BaseDAO<any> {
         });
         const now = Date.now();
         for (const mute of mutesWithTimers) {
+            const mutedRole = await GuildUtils.RoleUtils.getMuteRole(mute.guildId);
+            if (!mutedRole) {
+                continue;
+            }
             const muteCreated = (mute.createdAt as Date).getTime();
             const timerLength = mute.timeout;
             const timeLeft = timerLength - (now - muteCreated);
@@ -44,7 +48,7 @@ export class OnReady extends BaseDAO<any> {
                 });
             } else {
                 console.log(`Re-creating timed mute for ${mute.username}, time reamining is: ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))}`);
-                MuteSingleton.instance.createTimeout(mute.userId, mute.username, timeLeft, guild);
+                MuteSingleton.instance.createTimeout(mute.userId, mute.username, timeLeft, guild, mutedRole.id);
             }
         }
     }

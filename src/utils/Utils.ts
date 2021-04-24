@@ -26,6 +26,8 @@ import * as path from "path";
 import {Channels} from "../enums/Channels";
 import {ChannelManager} from "../model/guild/manager/ChannelManager";
 import {GuildManager} from "../model/guild/manager/GuildManager";
+import {SettingsManager} from "../model/settings/SettingsManager";
+import {SETTINGS} from "../enums/SETTINGS";
 
 const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
@@ -50,6 +52,65 @@ export function loadClasses(...paths: string[]): Promise<any[]> {
 
 export namespace GuildUtils {
     export const vicBotId = "806288433323966514";
+
+    export namespace RoleUtils {
+
+        export async function isValidRole(guildId: string, role: string | Role): Promise<boolean> {
+            const guild = await GuildManager.instance.getGuild(guildId);
+            const roleId = typeof role === "string" ? role : role.id;
+            const guildRoles = guild.roles.cache.array();
+            for (const guildRole of guildRoles) {
+                if (guildRole.id === roleId) {
+                    if (guildRole.managed) {
+                        return false;
+                    }
+                    return guildRole.name !== "@everyone";
+                }
+            }
+            return false;
+        }
+
+        export async function getJailRole(guildId: string): Promise<Role | null> {
+            return getRole(guildId, SETTINGS.JAIL_ROLE);
+        }
+
+        export async function getMuteRole(guildId: string): Promise<Role | null> {
+            return getRole(guildId, SETTINGS.MUTE_ROLE);
+        }
+
+        export async function getAutoRole(guildId: string): Promise<Role | null> {
+            return getRole(guildId, SETTINGS.AUTO_ROLE);
+        }
+
+        // eslint-disable-next-line no-inner-declarations
+        async function getRole(guildId: string, setting: SETTINGS): Promise<Role | null> {
+            const role = await SettingsManager.instance.getSetting(setting, guildId);
+            if (!ObjectUtil.validString(role)) {
+                return null;
+            }
+            try {
+                const guild = await GuildManager.instance.getGuild(guildId);
+                return guild.roles.fetch(role);
+            } catch {
+                return null;
+            }
+        }
+    }
+
+    export async function sendToJail(member: GuildMember): Promise<void> {
+        const jailRole = await GuildUtils.RoleUtils.getJailRole(member.guild.id);
+        if (!jailRole) {
+            return;
+        }
+        for (const [roleId] of member.roles.cache) {
+            try {
+                await member.roles.remove(roleId);
+            } catch {
+            }
+        }
+        member.roles.add(jailRole);
+    }
+
 
     export function getGuildIconUrl(guildId: string): string {
         const guild = Main.client.guilds.cache.get(guildId);
@@ -186,6 +247,11 @@ export namespace DiscordUtils {
         "id": string
     };
 
+    export async function getBot(guildId: string): Promise<GuildMember> {
+        const guild = await GuildManager.instance.getGuild(guildId);
+        return guild.me;
+    }
+
     export async function getEmojiInfo(emojiId: string): Promise<EmojiInfo> {
         let emojiInfo: EmojiInfo = null;
         const tryExtensions = ["gif", "png"];
@@ -280,7 +346,7 @@ export namespace DiscordUtils {
                 if (ObjectUtil.validString(repliedMessageContent)) {
                     const urlsInMessage = getUrls(repliedMessageObj.content);
                     if (urlsInMessage && urlsInMessage.size > 0) {
-                        for(const urlInMessage of urlsInMessage){
+                        for (const urlInMessage of urlsInMessage) {
                             if (await isImageFast(urlInMessage)) {
                                 urlMessageSet.add(urlInMessage);
                             }
