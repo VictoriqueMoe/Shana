@@ -104,6 +104,9 @@ export namespace GuildUtils {
         }
         for (const [roleId] of member.roles.cache) {
             try {
+                if (roleId === jailRole.id) {
+                    continue;
+                }
                 await member.roles.remove(roleId);
             } catch {
             }
