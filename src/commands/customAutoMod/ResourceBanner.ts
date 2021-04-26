@@ -171,7 +171,11 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
         if (Main.testMode && message.member.id !== "697417252320051291") {
             return;
         }
-        message = await message.fetch(true);
+        try {
+            message = await message.fetch(true);
+        } catch {
+
+        }
         const messageContent = message.content;
         let urlsInMessage: Set<string> = new Set();
         if (ObjectUtil.validString(messageContent)) {

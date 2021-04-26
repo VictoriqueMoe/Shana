@@ -2,15 +2,77 @@ import {Controller, Get, Post} from "@overnightjs/core";
 import {Request, Response} from 'express';
 import {Main} from "../../../Main";
 import {AbstractController} from "../AbstractController";
-import {DiscordUtils, EnumEx, ObjectUtil} from "../../../utils/Utils";
+import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {Channel, Guild, GuildMember} from "discord.js";
 import {StatusCodes} from "http-status-codes";
 import {SETTINGS} from "../../../enums/SETTINGS";
 import {SettingsManager} from "../../../model/settings/SettingsManager";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
+import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
 
 @Controller("api/bot")
 export class BotController extends AbstractController {
+
+    @Post("unMuteMembers")
+    private async unMuteMembers(req: Request, res: Response) {
+        type payload = string[];
+        let guild: Guild;
+        try {
+            guild = await this.getGuild(req);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.NOT_FOUND);
+        }
+        const muteRole = await GuildUtils.RoleUtils.getMuteRole(guild.id);
+        if (!muteRole) {
+            return;
+        }
+        const body: payload = req.body;
+        for (const userId of body) {
+            await Main.dao.transaction(async t => {
+                await MuteSingleton.instance.doRemove(userId, guild.id, muteRole.id);
+            });
+        }
+        return super.ok(res, {});
+    }
+
+
+    @Post(/(banUsers|kickUsers)/)
+    private async banUsers(req: Request, res: Response) {
+        type payload = {
+            memberId: string,
+            reason?: string
+        }[];
+        const body: payload = req.body;
+        let guild: Guild;
+        try {
+            guild = await this.getGuild(req);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.NOT_FOUND);
+        }
+        for (const banInfo of body) {
+            const {memberId, reason} = banInfo;
+            let member: GuildMember = null;
+            try {
+                member = await guild.members.fetch(memberId);
+            } catch {
+
+            }
+            if (member) {
+                if (req.url === "/banUsers") {
+                    if (member.bannable) {
+                        await member.ban({
+                            reason
+                        });
+                    }
+                } else {
+                    if (member.kickable) {
+                        await member.kick(reason);
+                    }
+                }
+            }
+        }
+        return super.ok(res, {});
+    }
 
 
     @Post("setRolesForMembers")
@@ -167,7 +229,7 @@ export class BotController extends AbstractController {
             const dateCreated = (createdAt as Date).getTime();
             const timeLeft = timeout - (Date.now() - dateCreated);
             const tmeLeftStr = ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000));
-            data.push([null, username, nickName, tmeLeftStr, creatorTag, reason]);
+            data.push([null, username, nickName, tmeLeftStr, creatorTag, reason, currentBlock.userId]);
         }
         return super.ok(res, data);
     }
