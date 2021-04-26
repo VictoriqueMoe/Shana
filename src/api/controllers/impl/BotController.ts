@@ -1,4 +1,4 @@
-import {Controller, Get} from "@overnightjs/core";
+import {Controller, Get, Post} from "@overnightjs/core";
 import {Request, Response} from 'express';
 import {Main} from "../../../Main";
 import {AbstractController} from "../AbstractController";
@@ -11,6 +11,43 @@ import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 
 @Controller("api/bot")
 export class BotController extends AbstractController {
+
+
+    @Post("setRolesForMembers")
+    private async add(req: Request, res: Response) {
+        type payload = {
+            "userId": string,
+            "roleIds": string[]
+        }[];
+        const body: payload = req.body;
+        let guild: Guild;
+        try {
+            guild = await this.getGuild(req);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.NOT_FOUND);
+        }
+        try {
+            for (const p of body) {
+                const {userId, roleIds} = p;
+                let member: GuildMember;
+                try {
+                    member = await guild.members.fetch(userId);
+                } catch {
+                    continue;
+                }
+                for (const [roleId] of member.roles.cache) {
+                    try {
+                        await member.roles.remove(roleId);
+                    } catch {
+                    }
+                }
+                await member.roles.add(roleIds);
+            }
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.BAD_REQUEST);
+        }
+        return super.ok(res, {});
+    }
 
     @Get('allGuilds')
     private async getAllGuilds(req: Request, res: Response) {

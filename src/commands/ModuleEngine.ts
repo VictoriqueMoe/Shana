@@ -1,9 +1,7 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {DiscordUtils, StringUtils} from "../utils/Utils";
-import {roleConstraints} from "../guards/RoleConstraint";
-import {Roles} from "../enums/Roles";
+import {secureCommand} from "../guards/RoleConstraint";
 import {AbstractCommand} from "./AbstractCommand";
-import RolesEnum = Roles.RolesEnum;
 
 export abstract class ModuleEngine extends AbstractCommand<any> {
 
@@ -61,7 +59,7 @@ export abstract class ModuleEngine extends AbstractCommand<any> {
 
     @Command("dynoReplace")
     @Description(ModuleEngine.getEnableDynoReplaceDescription())
-    @Guard(roleConstraints(RolesEnum.OVERWATCH_ELITE))
+    @Guard(secureCommand)
     private async dynoReplace(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 1) {
@@ -83,7 +81,7 @@ export abstract class ModuleEngine extends AbstractCommand<any> {
 
     @Command("enableModule")
     @Description(ModuleEngine.getEnableModuleDescription())
-    @Guard(roleConstraints(RolesEnum.OVERWATCH_ELITE))
+    @Guard(secureCommand)
     private async enableModule(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 2) {
@@ -110,7 +108,7 @@ export abstract class ModuleEngine extends AbstractCommand<any> {
     }
 
     @Command("getModuleNames")
-    @Guard(roleConstraints(RolesEnum.OVERWATCH_ELITE))
+    @Guard(secureCommand)
     private async getModuleNames(command: CommandMessage): Promise<void> {
         const allModuleNames = await DiscordUtils.getAllClosableModules(command.guild.id);
         command.reply(`all available modules are: \n ${allModuleNames.join(", ")}`);

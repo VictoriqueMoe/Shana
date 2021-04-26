@@ -1,10 +1,10 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {ObjectUtil, StringUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import {DEFAULT_SETTINGS, SETTINGS} from "../../enums/SETTINGS";
 import {AbstractCommand} from "../AbstractCommand";
+import {secureCommand} from "../../guards/RoleConstraint";
 
 export class SettingsCommands extends AbstractCommand<any> {
 
@@ -36,7 +36,7 @@ export class SettingsCommands extends AbstractCommand<any> {
 
     //TODO change to setting sub-settings
     @Command("prefix")
-    @Guard(NotBot, AdminOnlyTask)
+    @Guard(NotBot, secureCommand)
     private async setPrefix(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 1 && argumentArray.length !== 0) {

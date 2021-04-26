@@ -2,14 +2,11 @@ import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, StringUtils, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {NotBot} from "../../../guards/NotABot";
-import {roleConstraints} from "../../../guards/RoleConstraint";
-import {Roles} from "../../../enums/Roles";
-import {BlockGuard} from "../../../guards/BlockGuard";
+import {secureCommand} from "../../../guards/RoleConstraint";
 import {GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {MuteSingleton} from "./MuteSingleton";
 import {AbstractCommand} from "../../AbstractCommand";
-import RolesEnum = Roles.RolesEnum;
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
@@ -66,7 +63,7 @@ export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
 
     @Command("mute")
     @Description(Mute.getMuteDescription())
-    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async mute(command: CommandMessage): Promise<void> {
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(command.guild.id);
         if (!mutedRole) {
@@ -154,7 +151,7 @@ export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
 
     @Command("muteTimeUnits")
     @Description(Mute.getMuteTimeUnitsDescription())
-    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async getTimeUnits(command: CommandMessage): Promise<void> {
         command.reply(`\n ${this.getMuteTimeOutStr()}`);
     }
@@ -162,7 +159,7 @@ export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
 
     @Command("viewAllMutes")
     @Description(Mute.getViewAllMuteDescription())
-    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async viewAllMutes(command: CommandMessage): Promise<MuteModel[]> {
         const currentBlocks = await MuteModel.findAll({
             where: {

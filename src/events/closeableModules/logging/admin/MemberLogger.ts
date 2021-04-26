@@ -4,7 +4,6 @@ import {MessageEmbed, User} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
 import {Roles} from "../../../../enums/Roles";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
-import RolesEnum = Roles.RolesEnum;
 
 /**
  * admin audit Logger for Admin Audit logging. this will log:
@@ -97,7 +96,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
                 }
             }
         }
-        const rolesArr = roles.filter(r => r.id !== RolesEnum.EVERYONE).map(role => `<@&${role.id}>`);
+        const rolesArr = roles.filter(r => r.name !== "@everyone").map(role => `<@&${role.id}>`);
         if (wasKicked) {
             userJoinEmbed = new MessageEmbed()
                 .setColor('#FF470F')

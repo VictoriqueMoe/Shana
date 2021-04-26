@@ -1,14 +1,10 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {roleConstraints} from "../../guards/RoleConstraint";
-import {BlockGuard} from "../../guards/BlockGuard";
-import {Roles} from "../../enums/Roles";
+import {secureCommand} from "../../guards/RoleConstraint";
 import {ObjectUtil} from "../../utils/Utils";
 import {AbstractCommand} from "../AbstractCommand";
-import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {Main} from "../../Main";
 import {GuildChannel} from "discord.js";
-import RolesEnum = Roles.RolesEnum;
 
 
 type AgeType = {
@@ -80,7 +76,7 @@ export abstract class AccountAge extends AbstractCommand<any> {
     }
 
     @Command("serverAge")
-    @Guard(NotBot, AdminOnlyTask)
+    @Guard(NotBot, secureCommand)
     private async serverAge(command: CommandMessage): Promise<void> {
         const guildId = command.guild.id;
         const guild = await Main.client.guilds.fetch(guildId);
@@ -89,7 +85,7 @@ export abstract class AccountAge extends AbstractCommand<any> {
     }
 
     @Command("channelAge")
-    @Guard(NotBot, AdminOnlyTask)
+    @Guard(NotBot, secureCommand)
     private async channelAge(command: CommandMessage): Promise<void> {
         const channelsInMessage = command.mentions.channels;
         if (channelsInMessage.size !== 1) {
@@ -103,7 +99,7 @@ export abstract class AccountAge extends AbstractCommand<any> {
 
 
     @Command("age")
-    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async getAccountAge(command: CommandMessage): Promise<void> {
         const mentions = command.mentions;
         if (mentions.users.size != 1) {

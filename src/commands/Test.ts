@@ -1,5 +1,5 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
-import {AdminOnlyTask} from "../guards/AdminOnlyTask";
+import {secureCommand} from "../guards/RoleConstraint";
 
 const Discord = require('discord.js');
 const Canvas = require('canvas');
@@ -7,7 +7,7 @@ const Canvas = require('canvas');
 export class Test {
 
     @Command("test")
-    @Guard(AdminOnlyTask)
+    @Guard(secureCommand)
     private async test(command: CommandMessage): Promise<void> {
         const applyText = (canvas, text) => {
             const ctx = canvas.getContext('2d');

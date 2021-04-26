@@ -1,6 +1,5 @@
 import {ImageFun} from "../../model/Impl/ImageFun/ImageFun";
 import {Command, CommandMessage, Guard, Rules} from "@typeit/discord";
-import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {NotBot} from "../../guards/NotABot";
 import {ObjectUtil, StringUtils} from "../../utils/Utils";
 import {
@@ -12,6 +11,7 @@ import {
 import {AssertionError} from "assert";
 import {getPrefix} from "../../discord/WeebBot";
 import {AbstractCommand} from "../AbstractCommand";
+import {secureCommand} from "../../guards/RoleConstraint";
 
 export abstract class Meme extends AbstractCommand<any> {
 
@@ -813,7 +813,7 @@ export abstract class Meme extends AbstractCommand<any> {
     }
 
     @Command("generateEndpoints")
-    @Guard(AdminOnlyTask)
+    @Guard(secureCommand)
     private async generateEndpoints(command: CommandMessage): Promise<void> {
         const resp = await this.handler.getEndpointsGenerate();
         const formatted = JSON.stringify(resp, null, 4);

@@ -88,7 +88,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
             const {commands} = commandClass.commandDescriptors;
             for (const commandDescriptor of commands) {
                 const {name} = commandDescriptor;
-                if (commandName !== name) {
+                if (commandName.toUpperCase() !== name.toUpperCase()) {
                     continue;
                 }
                 const command = allCommands.find(command => command.commandName === name);

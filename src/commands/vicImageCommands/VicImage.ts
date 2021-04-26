@@ -1,13 +1,9 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
-import {Roles} from "../../enums/Roles";
-import {roleConstraints} from "../../guards/RoleConstraint";
+import {secureCommand} from "../../guards/RoleConstraint";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {WeebBot} from "../../discord/WeebBot";
 import {NotBot} from "../../guards/NotABot";
-import {BlockGuard} from "../../guards/BlockGuard";
-import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {AbstractCommand} from "../AbstractCommand";
-import RolesEnum = Roles.RolesEnum;
 
 export abstract class VicImage extends AbstractCommand<any> {
 
@@ -36,7 +32,7 @@ export abstract class VicImage extends AbstractCommand<any> {
 
     @Command("vicImage")
     @Description(VicImage.getVicImageDescription())
-    @Guard(NotBot, roleConstraints(RolesEnum.ZOMBIES, RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async vicImage(command: CommandMessage): Promise<void> {
         const findingMessage = await command.channel.send("Finding image...");
         const randomImageMetadata = VicDropbox.instance.randomImage;
@@ -59,7 +55,7 @@ export abstract class VicImage extends AbstractCommand<any> {
 
     @Command("vicReIndex")
     @Description(VicImage.getIndexDescription())
-    @Guard(NotBot, AdminOnlyTask, BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async vicReIndex(command: CommandMessage): Promise<void> {
         await VicDropbox.instance.index();
         command.channel.send(`Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`);

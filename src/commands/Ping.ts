@@ -1,6 +1,6 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
-import {BlockGuard} from "../guards/BlockGuard";
 import {AbstractCommand} from "./AbstractCommand";
+import {secureCommand} from "../guards/RoleConstraint";
 
 export abstract class Ping extends AbstractCommand<any> {
 
@@ -22,7 +22,7 @@ export abstract class Ping extends AbstractCommand<any> {
     }
 
     @Command("ping")
-    @Guard(BlockGuard)
+    @Guard(secureCommand)
     private ping(command: CommandMessage): void {
         command.reply(`Websocket heartbeat: ${command.client.ws.ping}ms.`);
     }

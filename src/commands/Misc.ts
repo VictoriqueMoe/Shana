@@ -8,6 +8,7 @@ import {TimedSet} from "../model/Impl/TimedSet";
 import {Typeings} from "../model/types/Typeings";
 import {AnimeTractApi} from "../model/anime/AnimeTractApi";
 import {Response} from "../model/anime/AnimeTypings";
+import {secureCommand} from "../guards/RoleConstraint";
 import AnimeEntry = Typeings.AnimeEntry;
 
 const Anilist = require('anilist-node');
@@ -60,7 +61,7 @@ export class Misc extends AbstractCommand<any> {
     }
 
     @Command("findAnime")
-    @Guard(NotBot)
+    @Guard(NotBot, secureCommand)
     private async findAnime(command: CommandMessage): Promise<void> {
         const freshHold = 0.86;
         const messaheUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(command);
@@ -171,7 +172,7 @@ export class Misc extends AbstractCommand<any> {
 
 
     @Command("findSource")
-    @Guard(NotBot)
+    @Guard(NotBot, secureCommand)
     private async imageSearch(command: CommandMessage): Promise<void> {
         type GoogleImageResult = {
             url?: string,

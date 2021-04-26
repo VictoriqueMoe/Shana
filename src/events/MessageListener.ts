@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import {PremiumChannelOnlyCommand} from "../guards/PremiumChannelOnlyCommand";
 import {BlockGuard} from "../guards/BlockGuard";
 import {Roles} from "../enums/Roles";
-import {DiscordUtils, GuildUtils, ObjectUtil} from "../utils/Utils";
+import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil} from "../utils/Utils";
 import {BannedAttachmentsModel} from "../model/DB/BannedAttachments.model";
 import {Main} from "../Main";
 import {Message, User} from "discord.js";
@@ -168,9 +168,7 @@ export abstract class MessageListener {
         if (!member) {
             return;
         }
-        if (Roles.isMemberStaff(member) && !Main.testMode) {
-            return;
-        }
+        message = await message.fetch(true);
         const attachments = message.attachments;
         const messageContent = message.content;
         const arratchmentUrl: string[] = attachments.map(attachmentObject => attachmentObject.attachment as string);
@@ -179,6 +177,14 @@ export abstract class MessageListener {
             const urlsInMessage = getUrls(messageContent);
             if (urlsInMessage && urlsInMessage.size > 0) {
                 arratchmentUrl.push(...urlsInMessage.values());
+            }
+        }
+        const embeds = message.embeds;
+        if (ArrayUtils.isValidArray(embeds)) {
+            for (const embed of embeds) {
+                if (embed.video) {
+                    arratchmentUrl.push(embed.video.url);
+                }
             }
         }
         let shouldDelete = false;

@@ -1,10 +1,9 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {ChronException, ChronUtils, DiscordUtils, StringUtils} from "../../utils/Utils";
 import {TextChannel} from "discord.js";
-import {AdminOnlyTask} from "../../guards/AdminOnlyTask";
 import {MessageScheduler} from "../../model/scheduler/impl/MessageScheduler";
-import {BlockGuard} from "../../guards/BlockGuard";
 import {AbstractCommand} from "../AbstractCommand";
+import {secureCommand} from "../../guards/RoleConstraint";
 
 export abstract class AMessageScheduler extends AbstractCommand<any> {
 
@@ -32,8 +31,7 @@ export abstract class AMessageScheduler extends AbstractCommand<any> {
     }
 
     @Command("scheduleMessage")
-    @Guard(AdminOnlyTask, BlockGuard)
-    //TODO: add help description ~help
+    @Guard(secureCommand)
     private scheduleMessage(command: CommandMessage): void {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 4) {
@@ -64,14 +62,14 @@ export abstract class AMessageScheduler extends AbstractCommand<any> {
     }
 
     @Command("cancelAllScheduledMessages")
-    @Guard(AdminOnlyTask, BlockGuard)
+    @Guard(secureCommand)
     private cancelAllScheduledMessages(command: CommandMessage): void {
         MessageScheduler.getInstance().cancelAllJobs();
         command.reply("All scheduled posts have been cancelled");
     }
 
     @Command("cancelScheduledMessage")
-    @Guard(AdminOnlyTask, BlockGuard)
+    @Guard(secureCommand)
     private cancelScheduledMessage(command: CommandMessage): void {
         const names = StringUtils.splitCommandLine(command.content);
         for (const name of names) {
@@ -82,7 +80,7 @@ export abstract class AMessageScheduler extends AbstractCommand<any> {
     }
 
     @Command("getAllScheduledMessages")
-    @Guard(AdminOnlyTask, BlockGuard)
+    @Guard(secureCommand)
     private getAllScheduledMessages(command: CommandMessage): void {
         const allJobs = MessageScheduler.getInstance().jobs;
         if (allJobs.length === 0) {

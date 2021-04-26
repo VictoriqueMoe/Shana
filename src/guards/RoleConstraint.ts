@@ -1,20 +1,21 @@
-import {Roles} from "../enums/Roles";
-import {GuildUtils} from "../utils/Utils";
-import RolesEnum = Roles.RolesEnum;
+import {ObjectUtil} from "../utils/Utils";
+import {GuardFunction} from "@typeit/discord";
+import {getPrefix} from "../discord/WeebBot";
+import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 
-export const roleConstraints = (...roles: RolesEnum[]) => async ([message], client, next) => {
-    const member = await message.member.fetch();
-    const memberRoles = member.roles.cache;
-    if (GuildUtils.isMemberAdmin(message.member)) {
-        await next();
+export const secureCommand: GuardFunction<"message"> = async (
+    [message],
+    client,
+    next
+) => {
+    const prefix = await getPrefix(message);
+    const commandName = message.content.split(prefix)[1].split(" ")[0];
+    if (!ObjectUtil.validString(commandName)) {
         return;
     }
-    for (const [, role] of memberRoles) {
-        const id = role.id;
-        if (roles.includes(id as RolesEnum)) {
-            await next();
-            return;
-        }
+    const canRun = await CommandSecurityManager.instance.canRunCommand(message.member, commandName);
+    if (canRun) {
+        return await next();
     }
     message.reply("you do not have permissions to use this command");
 };

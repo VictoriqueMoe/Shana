@@ -8,6 +8,7 @@ import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {Typeings} from "../model/types/Typeings";
+import {secureCommand} from "../guards/RoleConstraint";
 
 export class Help extends AbstractCommand<any> {
     constructor() {
@@ -49,7 +50,7 @@ export class Help extends AbstractCommand<any> {
     }
 
     @Command("help")
-    @Guard(NotBot)
+    @Guard(NotBot, secureCommand)
     private async help(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 3 && argumentArray.length !== 2 && argumentArray.length !== 1 && argumentArray.length !== 0) {

@@ -1,14 +1,11 @@
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {roleConstraints} from "../../guards/RoleConstraint";
-import {BlockGuard} from "../../guards/BlockGuard";
-import {Roles} from "../../enums/Roles";
+import {secureCommand} from "../../guards/RoleConstraint";
 import {DiscordUtils, StringUtils} from "../../utils/Utils";
 import {GuildMember} from "discord.js";
 import {AbstractCommand} from "../AbstractCommand";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
-import RolesEnum = Roles.RolesEnum;
 
 export abstract class Username extends AbstractCommand<UsernameModel> {
 
@@ -73,7 +70,7 @@ export abstract class Username extends AbstractCommand<UsernameModel> {
 
     @Command("viewUsernames")
     @Description(Username.viewDescriptionForSetUsernames())
-    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async ViewAllSetUsernames(command: CommandMessage): Promise<void> {
         const allModels = await UsernameModel.findAll({
             where: {
@@ -102,7 +99,7 @@ export abstract class Username extends AbstractCommand<UsernameModel> {
 
     @Command("removeUsername")
     @Description(Username.removeDescriptionForSetUsername())
-    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async removeSetUsername(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 1) {
@@ -127,7 +124,7 @@ export abstract class Username extends AbstractCommand<UsernameModel> {
 
     @Command("username")
     @Description(Username.getDescriptionForSetUsername())
-    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async setUsername(command: CommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(command.content);
         if (argumentArray.length !== 2 && argumentArray.length !== 3) {

@@ -1,8 +1,6 @@
 import {ArgsOf, Client, Command, CommandMessage, Description, Guard, On} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {roleConstraints} from "../../guards/RoleConstraint";
-import {BlockGuard} from "../../guards/BlockGuard";
-import {Roles} from "../../enums/Roles";
+import {secureCommand} from "../../guards/RoleConstraint";
 import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {DirResult} from "tmp";
@@ -16,7 +14,6 @@ const tmp = require('tmp');
 const getUrls = require('get-urls');
 const md5 = require('md5');
 import ffmpeg = require("ffmpeg");
-import RolesEnum = Roles.RolesEnum;
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
 const {basename, join} = require('path');
@@ -51,7 +48,7 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
     private static readonly MAX_SIZE_BYTES: number = 10485760;
 
     @Command("banEmoji")
-    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE))
+    @Guard(NotBot, secureCommand)
     private async banEmoji(command: CommandMessage): Promise<void> {
         const repliedMessageLink = command.reference;
         if (!repliedMessageLink) {
@@ -174,10 +171,19 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
         if (Main.testMode && message.member.id !== "697417252320051291") {
             return;
         }
+        message = await message.fetch(true);
         const messageContent = message.content;
         let urlsInMessage: Set<string> = new Set();
         if (ObjectUtil.validString(messageContent)) {
             urlsInMessage = getUrls(messageContent);
+        }
+        const embeds = message.embeds;
+        if (ArrayUtils.isValidArray(embeds)) {
+            for (const embed of embeds) {
+                if (embed.video) {
+                    urlsInMessage.add(embed.video.url);
+                }
+            }
         }
         const attatchmentArray = message.attachments || new Collection();
         if (attatchmentArray.size === 0 && urlsInMessage.size === 0) {
@@ -197,6 +203,7 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
                 if (!isVideo(urlToAttachment)) {
                     continue;
                 }
+
                 let fail = false;
                 let attachment: Buffer;
                 try {
@@ -294,7 +301,7 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
 
     @Command("banAttachment")
     @Description(ResourceBanner.viewDescriptionForSetUsernames())
-    @Guard(NotBot, roleConstraints(RolesEnum.CIVIL_PROTECTION, RolesEnum.OVERWATCH_ELITE), BlockGuard)
+    @Guard(NotBot, secureCommand)
     private async banAttachment(command: CommandMessage): Promise<void> {
         const repliedMessageRef = command.reference;
         if (!repliedMessageRef) {
