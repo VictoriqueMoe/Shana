@@ -18,5 +18,4 @@ export class CloseOptionModel extends Model implements ICloseOption, IGuildAware
 
     @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
     guildableModel: GuildableModel;
-
 }

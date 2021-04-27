@@ -19,7 +19,7 @@ import {CommandMessage} from "@typeit/discord";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
-import {Sequelize} from "sequelize-typescript";
+import {Model, Sequelize} from "sequelize-typescript";
 import {defaults} from "request";
 import {glob} from "glob";
 import * as path from "path";
@@ -683,5 +683,53 @@ export class EnumEx {
     private static getObjValues(e: any): Array<number | string> {
 
         return Object.keys(e).map(k => e[k]);
+    }
+}
+
+export namespace ModelUtils {
+
+    export namespace EventSecurityConstraintUtils {
+
+        export function getRoles(this: Model, prop: string): Role[] {
+            const value: string | null = this.getDataValue(prop);
+            if (!ObjectUtil.validString(value)) {
+                return [];
+            }
+            const guild = getGuild.call(this);
+            const roleIds = value.split(",");
+            return roleIds.map(roleId => guild.roles.cache.get(roleId));
+        }
+
+        export function setRoles(this: Model, roles: Role[], prop: string): void {
+            if (!ArrayUtils.isValidArray(roles)) {
+                this.setDataValue(prop, null);
+                return;
+            }
+            const roleArray = roles.map(role => role.id);
+            this.setDataValue(prop, roleArray.join(","));
+        }
+
+        export function getChannels(this: Model, prop: string): GuildChannel[] {
+            const value: string | null = this.getDataValue(prop);
+            if (!ObjectUtil.validString(value)) {
+                return [];
+            }
+            const guild = getGuild.call(this);
+            const channels = value.split(",");
+            return channels.map(channelId => guild.channels.cache.get(channelId));
+        }
+
+        export function setChannels(this: Model, channels: GuildChannel[], prop: string): void {
+            if (!ArrayUtils.isValidArray(channels)) {
+                this.setDataValue(prop, null);
+                return;
+            }
+            const channelArray = channels.map(guild => guild.id);
+            this.setDataValue(prop, channelArray.join(","));
+        }
+    }
+
+    function getGuild(this: Model): Guild {
+        return Main.client.guilds.cache.get(this.getDataValue("guildId"));
     }
 }

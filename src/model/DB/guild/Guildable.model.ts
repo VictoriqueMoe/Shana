@@ -8,6 +8,7 @@ import {BannedAttachmentsModel} from "../BannedAttachments.model";
 import {SettingsModel} from "../Settings.model";
 import {PostableChannelModel} from "./PostableChannel.model";
 import {CommandSecurityModel} from "./CommandSecurity.model";
+import {AutoResponderModel} from "../autoMod/impl/AutoResponder.model";
 
 @Table
 export class GuildableModel extends Model implements IGuildAware {
@@ -38,4 +39,7 @@ export class GuildableModel extends Model implements IGuildAware {
 
     @HasMany(() => CommandSecurityModel)
     public commandSecurityModel: CommandSecurityModel[];
+
+    @HasMany(() => AutoResponderModel)
+    public autoResponderModel: AutoResponderModel[];
 }

@@ -3,15 +3,21 @@
   "parser": "@typescript-eslint/parser",
   "rules": {
     "@typescript-eslint/no-namespace": "off",
-    "no-empty": ["warn", { "allowEmptyCatch": true }],
+    "no-empty": [
+      "warn",
+      {
+        "allowEmptyCatch": true
+      }
+    ],
     "no-shadow-restricted-names": "off",
     "@typescript-eslint/no-var-requires": 0,
-    "@typescript-eslint/ban-ts-comment":"off",
+    "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-empty-interface": "off",
     "semi": "error",
     "@typescript-eslint/no-empty-function": "off",
     "no-debugger": "off",
-    "no-prototype-builtins":"off"
+    "no-prototype-builtins": "off",
+    "no-inner-declarations": "off"
   },
   "env": {
     "node": true
