@@ -1,7 +1,7 @@
-import {Controller, Get, Post} from "@overnightjs/core";
+import {ChildControllers, Controller, Get, Post} from "@overnightjs/core";
 import {Request, Response} from 'express';
 import {Main} from "../../../Main";
-import {AbstractController} from "../AbstractController";
+import {baseController} from "../BaseController";
 import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {Channel, Guild, GuildMember} from "discord.js";
 import {StatusCodes} from "http-status-codes";
@@ -9,9 +9,15 @@ import {SETTINGS} from "../../../enums/SETTINGS";
 import {SettingsManager} from "../../../model/settings/SettingsManager";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
+import {AutoResponderController} from "./modules/impl/AutoResponderController";
+import {InjectController} from "../../../model/decorators/InjectController";
 
+@InjectController
 @Controller("api/bot")
-export class BotController extends AbstractController {
+@ChildControllers([
+    new AutoResponderController()
+])
+export class BotController extends baseController {
 
     @Post("unMuteMembers")
     private async unMuteMembers(req: Request, res: Response) {
@@ -245,6 +251,19 @@ export class BotController extends AbstractController {
         }
     }
 
+    @Get('getAllChannels')
+    private async getAllChannels(req: Request, res: Response) {
+        let guild: Guild = null;
+        try {
+            guild = await this.getGuild(req);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.NOT_FOUND);
+        }
+        const allChannels = guild.channels.cache.array();
+        const ret = allChannels.map(channel => channel.toJSON());
+        return super.ok(res, ret);
+    }
+
 
     @Get('getGuild')
     private async getGuildFromId(req: Request, res: Response) {
@@ -254,25 +273,6 @@ export class BotController extends AbstractController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
-    }
-
-    private async getGuild(req: Request): Promise<Guild> {
-        const id = req.query.id as string;
-        if (!ObjectUtil.validString(id)) {
-            throw new Error("Please supply an ID");
-        }
-        let guild: Guild = null;
-        let guildFound: boolean;
-        try {
-            guild = await Main.client.guilds.fetch(id);
-            guildFound = true;
-        } catch {
-            guildFound = false;
-        }
-        if (!guildFound) {
-            throw new Error(`Guild with ID: ${id} not found`);
-        }
-        return guild;
     }
 
     private async getChannelObject(req: Request, guild: Guild): Promise<Channel> {

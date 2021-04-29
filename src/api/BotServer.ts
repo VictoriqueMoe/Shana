@@ -3,7 +3,7 @@ import {Main} from "../Main";
 import * as bodyParser from 'body-parser';
 import * as path from "path";
 import {glob} from "glob";
-import {AbstractController} from "./controllers/AbstractController";
+import {baseController} from "./controllers/BaseController";
 import {Logger} from "@overnightjs/logger";
 import PromiseRouter from "express-promise-router";
 import * as http from "http";
@@ -14,10 +14,16 @@ export class BotServer extends Server {
 
     private readonly classesToLoad = `${__dirname}/controllers/**/*.ts`;
 
+    private controllers: baseController[];
+
     constructor() {
         super(Main.testMode);
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({extended: true}));
+    }
+
+    public addController(controller: baseController): void {
+        super.addControllers(controller, PromiseRouter);
     }
 
     public static async getInstance(): Promise<BotServer> {
@@ -42,7 +48,11 @@ export class BotServer extends Server {
         const files = glob.sync(this.classesToLoad) || [];
         const pArr = files.map(filePath => import(path.resolve(filePath)));
         return Promise.all(pArr).then(modules => {
-            const instances: AbstractController[] = [];
+            for (const module of modules) {
+                console.log(`load ${Object.keys(module)[0]}`);
+            }
+
+            /*const instances: AbstractController[] = [];
             for (const module of modules) {
                 for (const clazzProp in module) {
                     if (!module.hasOwnProperty(clazzProp)) {
@@ -58,7 +68,7 @@ export class BotServer extends Server {
                     }
                 }
             }
-            super.addControllers(instances, PromiseRouter);
+            super.addControllers(instances, PromiseRouter);*/
         });
     }
 }

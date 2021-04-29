@@ -49,3 +49,17 @@ export namespace Typeings {
         episode: number
     }
 }
+export type AutoResponderPayload = {
+    title: string,
+    responseType: "message" | "reaction" | "delete",
+    wildCard?: boolean,
+    response?: string,
+    emojiReactions?: string[],
+    guildId: string
+} & EventSecurityConstraintType;
+export type EventSecurityConstraintType = {
+    allowedChannels?: string[],
+    allowedRoles?: string[],
+    ignoredChannels?: string[],
+    ignoredRoles?: string[],
+}

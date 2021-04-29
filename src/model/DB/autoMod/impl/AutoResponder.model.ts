@@ -8,7 +8,7 @@ import {ArrayUtils, ModelUtils, ObjectUtil} from "../../../../utils/Utils";
 @Table
 export class AutoResponderModel extends Model implements IGuildAware, IEventSecurityConstraint {
 
-    @Column({allowNull: false})
+    @Column({allowNull: false, unique: true})
     public title: string;
 
     @Column({type: DataType.ENUM("message", "reaction", "delete"), defaultValue: "message", allowNull: false})
