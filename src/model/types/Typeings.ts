@@ -55,7 +55,8 @@ export type AutoResponderPayload = {
     wildCard?: boolean,
     response?: string,
     emojiReactions?: string[],
-    guildId: string
+    guildId: string,
+    useRegex: boolean
 } & EventSecurityConstraintType;
 export type EventSecurityConstraintType = {
     allowedChannels?: string[],

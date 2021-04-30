@@ -2,7 +2,7 @@ import {AbstractRoleApplier} from "../RoleApplier/AbstractRoleApplier";
 import {ArgsOf, Client, On} from "@typeit/discord";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
+import {GuildUtils} from "../../../utils/Utils";
 import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
 
 
@@ -19,7 +19,6 @@ export abstract class MuteRoleListener extends AbstractRoleApplier {
         if (didRemove) {
             try {
                 await MuteSingleton.instance.doRemove(newUser.id, newUser.guild.id, mutedRole.id, true);
-                DiscordUtils.postToLog(`User: "<@${newUser.id}> has been un-muted"`, newUser.guild.id);
             } catch {
             }
         }

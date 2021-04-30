@@ -144,6 +144,10 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
 
             }
         }
+        try {
+            DiscordUtils.postToLog(`User: "<@${userId}>" has been un-muted`, guildId);
+        } catch {
+        }
     }
 
     public createTimeout(userId: string, username: string, millis: number, guild: Guild, muteRoleId: string): void {

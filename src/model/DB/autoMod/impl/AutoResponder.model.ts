@@ -8,6 +8,9 @@ import {ArrayUtils, ModelUtils, ObjectUtil} from "../../../../utils/Utils";
 @Table
 export class AutoResponderModel extends Model implements IGuildAware, IEventSecurityConstraint {
 
+    @Column({allowNull: false, defaultValue: false})
+    public useRegex: boolean;
+
     @Column({allowNull: false, unique: true})
     public title: string;
 
