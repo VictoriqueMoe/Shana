@@ -50,7 +50,7 @@ export class AutoResponder extends TriggerConstraint {
                 }
             }
             if (!shouldTrigger) {
-                return;
+                continue;
             }
             const {responseType} = autoResponder;
             switch (responseType) {
