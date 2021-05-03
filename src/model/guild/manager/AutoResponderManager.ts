@@ -19,6 +19,14 @@ export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
         return super.commitToDatabase(obj);
     }
 
+    public async getAllAutoResponders(guildId: string): Promise<AutoResponderModel[]> {
+        return AutoResponderModel.findAll({
+            where: {
+                guildId
+            }
+        });
+    }
+
     public async getAutoResponderFromTitle(title: string, guildId: string): Promise<AutoResponderModel | null> {
         const fromDb = await AutoResponderModel.findOne({
             where: {

@@ -31,9 +31,22 @@ export class AutoResponderController extends AbstractModuleController {
         return super.ok(res, {});
     }
 
-    @Get("getAutoResponder")
-    private async getAutoResponder(req: Request, res: Response) {
-        return super.ok(res, {});
+    @Get("getAutoResponders")
+    private async getAutoResponders(req: Request, res: Response) {
+        let guild: Guild;
+        try {
+            guild = await this.getGuild(req);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.NOT_FOUND);
+        }
+        try {
+            const responders = await AutoResponderManager.instance.getAllAutoResponders(guild.id);
+            return super.ok(res, responders);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.INTERNAL_SERVER_ERROR);
+        }
+
+
     }
 
     @Delete("deleteAutoResponder")

@@ -49,7 +49,7 @@ export class AutoResponderModel extends Model implements IGuildAware, IEventSecu
         get(): GuildChannel[] {
             return ModelUtils.EventSecurityConstraintUtils.getChannels.call(this, "allowedChannels");
         },
-        set(channels: GuildChannel[]) {
+        set(channels: string[]) {
             ModelUtils.EventSecurityConstraintUtils.setChannels.call(this, channels, "allowedChannels");
         }
     })
@@ -61,7 +61,7 @@ export class AutoResponderModel extends Model implements IGuildAware, IEventSecu
         get(): Role[] {
             return ModelUtils.EventSecurityConstraintUtils.getRoles.call(this, "allowedRoles");
         },
-        set(roles: Role[]) {
+        set(roles: string[]) {
             ModelUtils.EventSecurityConstraintUtils.setRoles.call(this, roles, "allowedRoles");
         }
     })
@@ -74,7 +74,7 @@ export class AutoResponderModel extends Model implements IGuildAware, IEventSecu
         get(): GuildChannel[] {
             return ModelUtils.EventSecurityConstraintUtils.getChannels.call(this, "ignoredChannels");
         },
-        set(channels: GuildChannel[]) {
+        set(channels: string[]) {
             ModelUtils.EventSecurityConstraintUtils.setChannels.call(this, channels, "ignoredChannels");
         }
     })
@@ -86,7 +86,7 @@ export class AutoResponderModel extends Model implements IGuildAware, IEventSecu
         get(): Role[] {
             return ModelUtils.EventSecurityConstraintUtils.getRoles.call(this, "ignoredRoles");
         },
-        set(roles: Role[]) {
+        set(roles: string[]) {
             ModelUtils.EventSecurityConstraintUtils.setRoles.call(this, roles, "ignoredRoles");
         }
     })

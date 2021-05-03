@@ -700,13 +700,12 @@ export namespace ModelUtils {
             return roleIds.map(roleId => guild.roles.cache.get(roleId));
         }
 
-        export function setRoles(this: Model, roles: Role[], prop: string): void {
+        export function setRoles(this: Model, roles: string[], prop: string): void {
             if (!ArrayUtils.isValidArray(roles)) {
                 this.setDataValue(prop, null);
                 return;
             }
-            const roleArray = roles.map(role => role.id);
-            this.setDataValue(prop, roleArray.join(","));
+            this.setDataValue(prop, roles.join(","));
         }
 
         export function getChannels(this: Model, prop: string): GuildChannel[] {
@@ -719,13 +718,12 @@ export namespace ModelUtils {
             return channels.map(channelId => guild.channels.cache.get(channelId));
         }
 
-        export function setChannels(this: Model, channels: GuildChannel[], prop: string): void {
+        export function setChannels(this: Model, channels: string[], prop: string): void {
             if (!ArrayUtils.isValidArray(channels)) {
                 this.setDataValue(prop, null);
                 return;
             }
-            const channelArray = channels.map(guild => guild.id);
-            this.setDataValue(prop, channelArray.join(","));
+            this.setDataValue(prop, channels.join(","));
         }
     }
 
