@@ -12,6 +12,29 @@ import {AutoResponderManager} from "../../../../../model/guild/manager/AutoRespo
 @Controller("module/autoResponder")
 export class AutoResponderController extends AbstractModuleController {
 
+
+    @Post("editAutoResponder")
+    @Middleware(EventSecurityConstraintTypeValidator)
+    private async editAutoResponder(req: Request, res: Response) {
+        type Edit = AutoResponderPayload & {
+            currentTitle: string;
+        };
+        let guild: Guild;
+        try {
+            guild = await this.getGuild(req);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.NOT_FOUND);
+        }
+        const requestObject: Edit = req.body;
+        requestObject.guildId = guild.id;
+        try {
+            await AutoResponderManager.instance.editAutoResponder(new AutoResponderModel(requestObject), requestObject.currentTitle);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.BAD_REQUEST);
+        }
+        return super.ok(res, {});
+    }
+
     @Post("addAutoResponder")
     @Middleware(EventSecurityConstraintTypeValidator)
     private async addAutoResponder(req: Request, res: Response) {
@@ -45,12 +68,21 @@ export class AutoResponderController extends AbstractModuleController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.INTERNAL_SERVER_ERROR);
         }
-
-
     }
 
     @Delete("deleteAutoResponder")
     private async deleteAutoResponder(req: Request, res: Response) {
-
+        let guild: Guild;
+        try {
+            guild = await this.getGuild(req);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.NOT_FOUND);
+        }
+        const responderTitle = req.body.title;
+        const didDelete = await AutoResponderManager.instance.deleteAutoResponse(guild.id, responderTitle);
+        if (didDelete) {
+            return super.ok(res, {});
+        }
+        return super.doError(res, `Unable to delete ${responderTitle}`, StatusCodes.BAD_REQUEST);
     }
 }

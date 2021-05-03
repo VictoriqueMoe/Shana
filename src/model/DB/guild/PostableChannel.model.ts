@@ -5,11 +5,14 @@ import {GuildableModel} from "./Guildable.model";
 @Table
 export class PostableChannelModel extends Model implements IGuildAware {
 
-    @Column({unique: true})
+    @Column({unique: true, defaultValue: null, allowNull: true})
     public logChannel: string;
 
-    @Column({unique: true})
+    @Column({unique: true, defaultValue: null, allowNull: true})
     public AdminLogchannel: string;
+
+    @Column({unique: true, defaultValue: null, allowNull: true})
+    public JailChannel: string;
 
     @ForeignKey(() => GuildableModel)
     @Column

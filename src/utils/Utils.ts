@@ -97,8 +97,9 @@ export namespace GuildUtils {
         }
     }
 
-    export async function sendToJail(member: GuildMember): Promise<void> {
-        const jailRole = await GuildUtils.RoleUtils.getJailRole(member.guild.id);
+    export async function sendToJail(member: GuildMember, reason: string): Promise<void> {
+        const guildId = member.guild.id;
+        const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
         if (!jailRole) {
             return;
         }
@@ -111,7 +112,15 @@ export namespace GuildUtils {
             } catch {
             }
         }
-        member.roles.add(jailRole);
+        await member.roles.add(jailRole);
+        const jailChannel = await ChannelManager.instance.getJailChannel(guildId);
+        if (!jailChannel) {
+            return;
+        }
+        jailChannel.send(`<@${member.id}>`);
+        setTimeout(() => {
+            jailChannel.send(`<@${member.id}>, ${reason}`);
+        }, 6000);
     }
 
 

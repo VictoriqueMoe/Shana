@@ -1,5 +1,5 @@
 import {Message} from "discord.js";
-import {ISubModule} from "./ISubModule";
+import {ISubModule} from "../ISubModule";
 import {ACTION} from "../../../../enums/ACTION";
 
 /**

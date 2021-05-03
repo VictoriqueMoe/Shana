@@ -1,6 +1,6 @@
 import * as Immutable from 'immutable';
 import {ICloseableModule} from "../ICloseableModule";
-import {ISubModule} from "../dynoAutoMod/subModules/ISubModule";
+import {ISubModule} from "../subModules/ISubModule";
 
 export class SubModuleManager {
 

@@ -1,4 +1,4 @@
-import {ISubModule} from "./dynoAutoMod/subModules/ISubModule";
+import {ISubModule} from "./subModules/ISubModule";
 import * as Immutable from "immutable";
 
 /**

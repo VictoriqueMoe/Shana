@@ -1,6 +1,6 @@
-import {IDynoAutoModFilter} from "../closeableModules/dynoAutoMod/subModules/IDynoAutoModFilter";
+import {IDynoAutoModFilter} from "../closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
 import {DIService} from "@typeit/discord";
-import {ISubModule} from "../closeableModules/dynoAutoMod/subModules/ISubModule";
+import {ISubModule} from "../closeableModules/subModules/ISubModule";
 import {ICloseableModule} from "../closeableModules/ICloseableModule";
 import {CloseableModule} from "../closeableModules/impl/CloseableModule";
 

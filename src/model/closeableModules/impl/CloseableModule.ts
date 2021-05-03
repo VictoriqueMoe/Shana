@@ -2,7 +2,7 @@ import {BaseDAO} from "../../../DAO/BaseDAO";
 import {ICloseOption} from "../../DB/autoMod/ICloseOption";
 import {Main} from "../../../Main";
 import {ICloseableModule} from "../ICloseableModule";
-import {ISubModule} from "../dynoAutoMod/subModules/ISubModule";
+import {ISubModule} from "../subModules/ISubModule";
 import * as Immutable from "immutable";
 import {SubModuleManager} from "../manager/SubModuleManager";
 

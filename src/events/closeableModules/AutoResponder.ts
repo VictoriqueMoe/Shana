@@ -56,6 +56,11 @@ export class AutoResponder extends TriggerConstraint {
             switch (responseType) {
                 case "message":
                     channel.send(autoResponder.response);
+                    break;
+                case "delete":
+                    if (message.deletable) {
+                        message.delete();
+                    }
             }
         }
     }

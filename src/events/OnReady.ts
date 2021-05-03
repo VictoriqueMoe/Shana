@@ -13,6 +13,7 @@ import {BotServer} from "../api/BotServer";
 import {GuildableModel} from "../model/DB/guild/Guildable.model";
 import {CommandSecurityModel} from "../model/DB/guild/CommandSecurity.model";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
+import {PostableChannelModel} from "../model/DB/guild/PostableChannel.model";
 
 /**
  * TODO: couple this class to appropriate classes
@@ -58,6 +59,7 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(this.populateClosableEvents());
         pArr.push(Main.setDefaultSettings());
         pArr.push(this.populateCommandSecurity());
+        pArr.push(this.populatePostableChannels());
         return pArr;
     }
 
@@ -194,5 +196,27 @@ export class OnReady extends BaseDAO<any> {
                 return CommandSecurityModel.bulkCreate(models);
             });
         }
+    }
+
+    private async populatePostableChannels(): Promise<void> {
+        const guildModels = await GuildableModel.findAll({
+            include: [CommandSecurityModel]
+        });
+        const currentModels = await PostableChannelModel.findAll();
+        const models: {
+            guildId: string
+        }[] = [];
+        await Main.dao.transaction(async t => {
+            for (const guildModel of guildModels) {
+                const guildId = guildModel.guildId;
+                if (currentModels.some(m => m.guildId === guildId)) {
+                    continue;
+                }
+                models.push({
+                    guildId
+                });
+            }
+            return PostableChannelModel.bulkCreate(models);
+        });
     }
 }
