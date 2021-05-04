@@ -19,7 +19,7 @@ import {PostableChannelModel} from "../model/DB/guild/PostableChannel.model";
  * TODO: couple this class to appropriate classes
  */
 export class OnReady extends BaseDAO<any> {
-    private readonly classesToLoad = [`${__dirname}/../model/closeableModules/dynoAutoMod/subModules/impl/*.ts`];
+    private readonly classesToLoad = [`${__dirname}/../model/closeableModules/subModules/dynoAutoMod/impl/*.ts`];
 
     private static async initiateMuteTimers(): Promise<void> {
         const mutesWithTimers = await MuteModel.findAll({
