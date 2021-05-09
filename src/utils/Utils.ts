@@ -28,6 +28,7 @@ import {ChannelManager} from "../model/guild/manager/ChannelManager";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
+import {IncomingMessage} from "http";
 
 const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
@@ -254,7 +255,7 @@ export namespace ChronUtils {
 
 export namespace DiscordUtils {
     export type EmojiInfo = {
-        "buffer": Buffer,
+        "buffer"?: Buffer,
         "url": string,
         "id": string
     };
@@ -264,7 +265,7 @@ export namespace DiscordUtils {
         return guild.me;
     }
 
-    export async function getEmojiInfo(emojiId: string): Promise<EmojiInfo> {
+    export async function getEmojiInfo(emojiId: string, includeBuffer = true): Promise<EmojiInfo> {
         let emojiInfo: EmojiInfo = null;
         const tryExtensions = ["gif", "png"];
         for (let i = 0; i < tryExtensions.length; i++) {
@@ -274,10 +275,12 @@ export namespace DiscordUtils {
                 const emojiImageBuffer = await DiscordUtils.loadResourceFromURL(url);
                 if (emojiImageBuffer.length > 0) {
                     emojiInfo = {
-                        buffer: emojiImageBuffer,
                         url: url,
                         id: emojiId
                     };
+                    if (includeBuffer) {
+                        emojiInfo["buffer"] = emojiImageBuffer;
+                    }
                     break;
                 }
             } catch {
@@ -435,10 +438,14 @@ export namespace DiscordUtils {
 
     export function loadResourceFromURL(url: string): Promise<Buffer> {
         return new Promise((resolve, reject) => {
-            request.get(url, function (err, resp, buffer) {
+            request.get(url, function (err: string, resp: IncomingMessage, buffer: Buffer) {
                 if (err) {
                     console.error(err, url);
                     reject(err);
+                    return;
+                }
+                if (resp.statusCode !== 200) {
+                    reject(buffer.toString("utf-8"));
                     return;
                 }
                 resolve(buffer);

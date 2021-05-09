@@ -316,13 +316,19 @@ export class BotController extends baseController {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
         const emojiManager = guild.emojis;
-        const pArr = emojiManager.cache.array().map(emoji => DiscordUtils.getEmojiInfo(emoji.id));
+        const pArr = emojiManager.cache.array().map(async emoji => {
+            const emojiInfo = await DiscordUtils.getEmojiInfo(emoji.id, false);
+            emojiInfo["name"] = emoji.name;
+            return emojiInfo;
+        });
         const emojis = await Promise.all(pArr).then(values => {
             return values.map(v => {
                 return {
-                    "buffer": v.buffer.toString("base64"),
+                    /* "buffer": v.buffer.toString("base64"),*/
                     "url": v.url,
-                    "id": v.id
+                    "id": v.id,
+                    // @ts-ignore
+                    "name": v.name
                 };
             });
         });

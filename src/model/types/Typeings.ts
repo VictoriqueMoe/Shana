@@ -56,6 +56,7 @@ export type AutoResponderPayload = {
     response?: string,
     emojiReactions?: string[],
     guildId: string,
+    publicDeletre: boolean,
     useRegex: boolean
 } & EventSecurityConstraintType;
 export type EventSecurityConstraintType = {

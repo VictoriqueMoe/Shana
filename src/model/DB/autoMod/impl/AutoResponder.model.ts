@@ -20,6 +20,9 @@ export class AutoResponderModel extends Model implements IGuildAware, IEventSecu
     @Column({defaultValue: false, allowNull: false})
     public wildCard: boolean;
 
+    @Column({defaultValue: false, allowNull: false})
+    public publicDelete: boolean;
+
     @Column({type: DataType.TEXT, allowNull: true, defaultValue: null})
     public response: string;
 

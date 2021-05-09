@@ -34,14 +34,14 @@ export class AutoResponder extends TriggerConstraint {
                 continue;
             }
             const trigger = autoResponder.title;
-            const {wildCard, useRegex} = autoResponder;
+            const {wildCard, useRegex, publicDelete} = autoResponder;
             let shouldTrigger = false;
             if (wildCard) {
                 if (messageContent.includes(trigger.toLowerCase())) {
                     shouldTrigger = true;
                 }
             } else if (useRegex) {
-                const regex = new RegExp(trigger, 'giu');
+                const regex = new RegExp(trigger, 'gium');
                 if (regex.test(messageContent)) {
                     shouldTrigger = true;
                 }
@@ -57,6 +57,9 @@ export class AutoResponder extends TriggerConstraint {
             switch (responseType) {
                 case "message": {
                     const responseText: string = await this._parseVars(autoResponder.response, message);
+                    if (publicDelete) {
+                        message.delete();
+                    }
                     channel.send(responseText);
                     break;
                 }
@@ -64,6 +67,18 @@ export class AutoResponder extends TriggerConstraint {
                     if (message.deletable) {
                         message.delete();
                     }
+                    break;
+                case "reaction": {
+                    const emojis = autoResponder.emojiReactions;
+                    for (const emoji of emojis) {
+                        try {
+                            await message.react(emoji);
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                    break;
+                }
             }
         }
     }
@@ -79,7 +94,7 @@ export class AutoResponder extends TriggerConstraint {
     private async _parseVars(response: string, {channel, guild, member}: Message): Promise<string> {
         let retStr = String(response);
         const regex = new RegExp(/{([^{}]+)}/gm);
-        let result;
+        let result: RegExpExecArray;
         while ((result = regex.exec(response)) !== null) {
             for (let match of result) {
                 if (!ObjectUtil.validString(match)) {
@@ -124,18 +139,22 @@ export class AutoResponder extends TriggerConstraint {
                         break;
                     }
                     default:
-                        if (match === "user") {
-                            retStr = retStr.replace(`{${match}}`, `<@${member.id}>`);
-                            // mention user with tag
-                        } else if (match === "server") {
-                            retStr = retStr.replace(`{${match}}`, `${guild.name}`);
-                            // inject server name
-                        } else if (match === "channel") {
-                            retStr = retStr.replace(`{${match}}`, `<#${channel.id}>`);
-                            // inject channel
-                        } else {
-                            retStr = retStr.replace(`{${match}}`, `${member.user.username}`);
-                            // mention user without tag
+                        switch (match) {
+                            case "user":
+                                retStr = retStr.replace(`{${match}}`, `<@${member.id}>`);
+                                // mention user with tag
+                                break;
+                            case "server":
+                                retStr = retStr.replace(`{${match}}`, `${guild.name}`);
+                                // inject server name
+                                break;
+                            case "channel":
+                                retStr = retStr.replace(`{${match}}`, `<#${channel.id}>`);
+                                // inject channel
+                                break;
+                            default:
+                                retStr = retStr.replace(`{${match}}`, `${member.user.username}`);
+                                break;
                         }
                 }
             }
