@@ -271,9 +271,13 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
                 }
                 if (fail && !Main.testMode) {
                     await this.doBanAttachment(attachment, "Discord crash video", urlToAttachment, message.guild.id);
-                    await message.delete({
-                        reason: "Discord crash video"
-                    });
+                    try {
+                        await message.delete({
+                            reason: "Discord crash video"
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
                     didBan = true;
                 }
             }

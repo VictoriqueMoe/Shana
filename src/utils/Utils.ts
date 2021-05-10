@@ -284,7 +284,7 @@ export namespace DiscordUtils {
                     break;
                 }
             } catch {
-                console.log(`Emoji not found as: ${ext}`);
+
             }
         }
         if (!emojiInfo) {
