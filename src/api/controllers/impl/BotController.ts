@@ -9,13 +9,13 @@ import {SETTINGS} from "../../../enums/SETTINGS";
 import {SettingsManager} from "../../../model/settings/SettingsManager";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
-import {AutoResponderController} from "./modules/impl/AutoResponderController";
 import {InjectController} from "../../../model/decorators/InjectController";
+import {ModuleController} from "./modules/impl/ModuleController";
 
 @InjectController
 @Controller("api/bot")
 @ChildControllers([
-    new AutoResponderController()
+    new ModuleController()
 ])
 export class BotController extends baseController {
 

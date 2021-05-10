@@ -9,7 +9,7 @@ import {AutoResponderModel} from "../../../../../model/DB/autoMod/impl/AutoRespo
 import {AutoResponderManager} from "../../../../../model/guild/manager/AutoResponderManager";
 
 
-@Controller("module/autoResponder")
+@Controller("autoResponder")
 export class AutoResponderController extends AbstractModuleController {
 
 
