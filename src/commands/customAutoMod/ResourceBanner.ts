@@ -303,7 +303,7 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
                 embed.addField(`hex dump #${index + 1}`, value);
             });
             DiscordUtils.postToLog(embed, message.guild.id);
-            GuildUtils.sendToJail(messageMember, "you have bee placed here because you posted a discord crash video");
+            GuildUtils.sendToJail(messageMember, "you have been placed here because you posted a discord crash video");
         }
     }
 
