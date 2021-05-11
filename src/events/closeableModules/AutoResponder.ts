@@ -58,7 +58,7 @@ export class AutoResponder extends TriggerConstraint {
             const {responseType} = autoResponder;
             switch (responseType) {
                 case "message": {
-                    if (isUpdate) {
+                    if (typeof isUpdate === "boolean" && isUpdate) {
                         continue;
                     }
                     const responseText: string = await this._parseVars(autoResponder.response, message);
