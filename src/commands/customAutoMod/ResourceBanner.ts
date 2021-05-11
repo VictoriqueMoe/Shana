@@ -8,6 +8,7 @@ import {Main} from "../../Main";
 import {Collection, Message, MessageEmbed, Snowflake} from "discord.js";
 import * as fs from 'fs';
 import {AbstractCommand} from "../AbstractCommand";
+import {MessageEventEditTrigger} from "../../model/decorators/MessageEventEditTrigger";
 
 const isVideo = require('is-video');
 const tmp = require('tmp');
@@ -165,6 +166,7 @@ export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsMo
         }
     }
 
+    @MessageEventEditTrigger
     @On("message")
     @Guard(NotBot)
     private async discordMessageCrash([message]: ArgsOf<"message">, client: Client): Promise<void> {

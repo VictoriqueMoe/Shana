@@ -9,6 +9,7 @@ import {BannedAttachmentsModel} from "../model/DB/BannedAttachments.model";
 import {Main} from "../Main";
 import {Message, User} from "discord.js";
 import {Op} from "sequelize";
+import {EditListenMethods, MessageEventEditTrigger} from "../model/decorators/MessageEventEditTrigger";
 import RolesEnum = Roles.RolesEnum;
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
@@ -147,6 +148,7 @@ export abstract class MessageListener {
         }
     }
 
+    @MessageEventEditTrigger
     @On("message")
     private async scanEmoji([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const member = message.member;
@@ -161,7 +163,18 @@ export abstract class MessageListener {
         this.doEmojiBan(emojiIds, message.member.user, message, false);
     }
 
+    @On("messageUpdate")
+    @Guard(NotBot)
+    private async messageUpdater([oldMessage, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
+        for (const [context, methods] of EditListenMethods) {
+            for (const method of methods) {
+                method.call(context, [newMessage as Message], client, true);
+            }
+        }
+    }
 
+
+    @MessageEventEditTrigger
     @On("message")
     private async scanAttachments([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const member = message.member;

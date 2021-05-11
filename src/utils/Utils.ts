@@ -99,6 +99,9 @@ export namespace GuildUtils {
     }
 
     export async function sendToJail(member: GuildMember, reason: string): Promise<void> {
+        if (GuildUtils.isMemberAdmin(member)) {
+            return;
+        }
         const guildId = member.guild.id;
         const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
         if (!jailRole) {
