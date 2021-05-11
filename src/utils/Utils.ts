@@ -107,6 +107,10 @@ export namespace GuildUtils {
         if (!jailRole) {
             return;
         }
+        const isAlreadyInJail = member.roles.cache.has(jailRole.id);
+        if (isAlreadyInJail) {
+            return;
+        }
         for (const [roleId] of member.roles.cache) {
             try {
                 if (roleId === jailRole.id) {
