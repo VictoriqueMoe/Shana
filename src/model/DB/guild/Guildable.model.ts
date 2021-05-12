@@ -42,4 +42,7 @@ export class GuildableModel extends Model implements IGuildAware {
 
     @HasMany(() => AutoResponderModel)
     public autoResponderModel: AutoResponderModel[];
+/*
+    @HasMany(() => SubModuleModel)
+    public subModuleModel: SubModuleModel[];*/
 }

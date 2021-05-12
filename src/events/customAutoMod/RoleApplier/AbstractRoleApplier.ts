@@ -1,9 +1,7 @@
-import {Roles} from "../../../enums/Roles";
 import {GuildMember, Role, User} from "discord.js";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
-import RolesEnum = Roles.RolesEnum;
 
 export abstract class AbstractRoleApplier {
 
@@ -141,11 +139,16 @@ export abstract class AbstractRoleApplier {
         // is the executor dyno AND was it headcrab?
         const wasBot = (await GuildUtils.getAutoBotIds(member.guild.id)).includes(executor.id);
         if (wasBot) {
-            const wasHeadCrab = member.roles.cache.has(RolesEnum.HEADCRABS);
-            if (wasHeadCrab) {
+            const autoRole = await GuildUtils.RoleUtils.getAutoRole(member.guild.id);
+            if (!autoRole) {
+                return;
+            }
+            const {id} = autoRole;
+            const wasAutoRole = member.roles.cache.has(id);
+            if (wasAutoRole) {
                 // remove it
                 try {
-                    await member.roles.remove(RolesEnum.HEADCRABS);
+                    await member.roles.remove(id);
                 } catch (e) {
                     console.error(e);
                 }

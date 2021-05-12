@@ -168,7 +168,7 @@ export abstract class MessageListener {
     private async messageUpdater([oldMessage, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
         for (const [context, methods] of EditListenMethods) {
             for (const method of methods) {
-                method.call(context, [newMessage as Message], client, true);
+                method.call(context, [newMessage as Message], client, {}, true);
             }
         }
     }

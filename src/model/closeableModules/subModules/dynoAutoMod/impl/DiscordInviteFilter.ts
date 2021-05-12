@@ -29,6 +29,8 @@ export class DiscordInviteFilter extends AbstractFilter {
     }
 
     public doFilter(content: Message): boolean {
-        return !content.content.includes('discord.gg/' || 'discordapp.com/invite/' || 'discord.com/invite');
+        const messageContent = content.content;
+        const regex = /(discord\.gg|discordapp\.com\/invite\/|discord\.com\/invite)/gmi;
+        return !regex.test(messageContent);
     }
 }

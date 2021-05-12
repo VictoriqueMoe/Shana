@@ -19,7 +19,7 @@ export class AutoResponder extends TriggerConstraint {
     @MessageEventEditTrigger
     @On("message")
     @Guard(NotBot, EnabledGuard("AutoResponder"))
-    private async process([message]: ArgsOf<"message">, client: Client, isUpdate = false): Promise<void> {
+    private async process([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate = false): Promise<void> {
         const guildId = message.guild.id;
         const channel = message.channel;
         const allRespondObjects = await AutoResponderModel.findAll({
@@ -58,7 +58,7 @@ export class AutoResponder extends TriggerConstraint {
             const {responseType} = autoResponder;
             switch (responseType) {
                 case "message": {
-                    if (typeof isUpdate === "boolean" && isUpdate) {
+                    if (isUpdate) {
                         continue;
                     }
                     const responseText: string = await this._parseVars(autoResponder.response, message);

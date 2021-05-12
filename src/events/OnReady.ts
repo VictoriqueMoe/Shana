@@ -6,7 +6,6 @@ import {Op} from "sequelize";
 import {ArrayUtils, GuildUtils, loadClasses, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
-import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
 import {MuteSingleton} from "../commands/customAutoMod/userBlock/MuteSingleton";
 import {BotServer} from "../api/BotServer";
@@ -14,6 +13,9 @@ import {GuildableModel} from "../model/DB/guild/Guildable.model";
 import {CommandSecurityModel} from "../model/DB/guild/CommandSecurity.model";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {PostableChannelModel} from "../model/DB/guild/PostableChannel.model";
+import {IBannedWordDynoAutoModFilter} from "../model/closeableModules/subModules/dynoAutoMod/IBannedWordDynoAutoModFilter";
+import {ISubModule} from "../model/closeableModules/subModules/ISubModule";
+import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 
 /**
  * TODO: couple this class to appropriate classes
@@ -60,6 +62,8 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(Main.setDefaultSettings());
         pArr.push(this.populateCommandSecurity());
         pArr.push(this.populatePostableChannels());
+
+
         return pArr;
     }
 
@@ -71,7 +75,7 @@ export class OnReady extends BaseDAO<any> {
                 status: "idle"
             });
         } else {
-            await Main.client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
+            await Main.client.user.setActivity('Portal 2', {type: 'PLAYING'});
         }
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
@@ -139,9 +143,42 @@ export class OnReady extends BaseDAO<any> {
                             }
                         }
                     }
+                    /*const subModules = module.submodules;
+                    for (const subModule of subModules) {
+                        const subModulePercisted = await SubModuleModel.findOne({
+                            where: {
+                                subMuldeId: subModule.id,
+                                guildId
+                            }
+                        });
+                        if (subModulePercisted) {
+                            continue;
+                        }
+                        const autoMod = new SubModuleModel({
+                            "subMuldeId": subModule.id,
+                            "isActive": false,
+                            guildId,
+                            "moduleId": module.moduleId
+                        });
+                        try {
+                            await super.commitToDatabase(autoMod);
+                        } catch (e) {
+                            if (!(e instanceof UniqueViolationError)) {
+                                throw e;
+                            }
+                        }
+                    }*/
                 }
             });
         }
+        /*const foo = await SubModuleModel.findAll();
+        const bar = await CloseOptionModel.findAll();
+        const b = bar[8].submodules;
+        console.log("foo");*/
+    }
+
+    private isIBannedWordDynoAutoModFilter(module: ISubModule): module is IBannedWordDynoAutoModFilter {
+        return "bannedWords" in module;
     }
 
     private async startServer(): Promise<void> {

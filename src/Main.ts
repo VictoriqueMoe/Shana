@@ -37,7 +37,7 @@ export class Main {
 
     private static _client: Client;
 
-    public static testMode = false;
+    public static testMode = true;
 
     private static _dao: Sequelize;
 

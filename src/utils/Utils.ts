@@ -479,9 +479,8 @@ export namespace DiscordUtils {
         const emojiArray = messageText.match(regex) || [];
         if (includeDefaultEmoji) {
             const emoJiRexp = emojiRegex();
-            let match;
-            // eslint-disable-next-line no-cond-assign
-            while (match = emoJiRexp.exec(messageText)) {
+            let match: string[];
+            while ((match = emoJiRexp.exec(messageText)) !== null) {
                 const emoji = match[0];
                 emojiArray.push(emoji);
             }
@@ -637,7 +636,7 @@ export class ObjectUtil {
                 continue;
             }
             // @ts-ignore
-            returntext += ' ' + levels[i][0] + ' ' + (levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]);
+            returntext += ` ${levels[i][0]} ${levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]}`;
         }
         return returntext.trim();
     }

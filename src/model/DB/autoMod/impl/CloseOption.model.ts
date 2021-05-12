@@ -6,16 +6,19 @@ import {GuildableModel} from "../../guild/Guildable.model";
 @Table
 export class CloseOptionModel extends Model implements ICloseOption, IGuildAware {
 
-    @Column({unique: false, allowNull: false})
+    @Column({unique: "uniqueConstraint", allowNull: false})
     public moduleId: string;
 
     @Column({allowNull: false, defaultValue: false})
     public status: boolean;
 
     @ForeignKey(() => GuildableModel)
-    @Column
+    @Column({unique: "uniqueConstraint"})
     guildId: string;
 
     @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
     guildableModel: GuildableModel;
+
+    /*@HasMany(() => SubModuleModel, {onDelete: "cascade", foreignKey: "moduleId"})
+    public submodules: SubModuleModel[];*/
 }

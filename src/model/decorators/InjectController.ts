@@ -1,7 +1,7 @@
 import {baseController} from "../../api/controllers/BaseController";
 import {BotServer} from "../../api/BotServer";
 
-export function InjectController<T extends typeof baseController>(constructor: T) {
+export function InjectController<T extends typeof baseController>(constructor: T): void {
 
     // @ts-ignore
     const instance: baseController = new constructor();
