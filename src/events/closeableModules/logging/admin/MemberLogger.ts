@@ -12,6 +12,7 @@ import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
  * Member kick
  * Member leave
  * Member unBanned
+ * Member username changed
  */
 export class MemberLogger extends AbstractAdminAuditLogger {
 
@@ -19,6 +20,42 @@ export class MemberLogger extends AbstractAdminAuditLogger {
 
     constructor() {
         super(MemberLogger._uid);
+    }
+
+    @On("guildMemberUpdate")
+    @Guard(EnabledGuard("AdminLog"))
+    private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
+        const {id, user} = newUser;
+        const {tag} = user;
+        const oldNickname = oldUser.nickname;
+        const newNickname = newUser.nickname;
+        const didNicknameChange = oldNickname !== newNickname;
+        const guildId = newUser.guild.id;
+        if (!didNicknameChange) {
+            return;
+        }
+        const avatarUrl = user.displayAvatarURL({format: 'jpg'});
+        const embed = new MessageEmbed()
+            .setColor('#337FD5')
+            .setTitle('Member Nickname changed')
+            .setAuthor(tag, avatarUrl)
+            .setThumbnail(avatarUrl)
+            .setTimestamp()
+            .setFooter(`${user.id}`);
+        if (newNickname == null) {
+            embed.setDescription("Nickname reset");
+        } else {
+            embed.setDescription("Nickname updated");
+            embed.addField("Before", `${ObjectUtil.validString(oldUser.nickname) ? oldUser.nickname : "none"}`);
+            embed.addField("After", newUser.nickname);
+        }
+        const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_UPDATE", newUser.guild);
+        if (auditEntry) {
+            if (auditEntry.target instanceof User && auditEntry.target.id === id) {
+                embed.addField("Nickname changed by", auditEntry.executor.tag);
+            }
+        }
+        super.postToLog(embed, newUser.guild.id);
     }
 
     @On("guildBanRemove")
@@ -144,23 +181,26 @@ export class MemberLogger extends AbstractAdminAuditLogger {
             .setColor('#FF470F')
             .setTitle('Member banned')
             .setAuthor(`Member banned`, avatarUrl)
-            .setDescription(`<@${user.id}> ${user.username}`)
+            .setDescription(`<@${user.id}> ${user.tag}`)
             .setThumbnail(avatarUrl)
             .setTimestamp()
             .setFooter(`${user.id}`);
         const res = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_ADD", guild);
         if (res) {
-            if (user.id === res.id) {
-                userBanned.addFields(
-                    {
-                        name: "Banned by",
-                        value: res.executor.tag
-                    },
-                    {
-                        name: "Reason",
-                        value: ObjectUtil.validString(res.reason) ? res.reason : "No reason provided"
-                    }
-                );
+            const target = res.target;
+            if (target instanceof User) {
+                if (user.id === target.id) {
+                    userBanned.addFields(
+                        {
+                            name: "Banned by",
+                            value: res.executor.tag
+                        },
+                        {
+                            name: "Reason",
+                            value: ObjectUtil.validString(res.reason) ? res.reason : "No reason provided"
+                        }
+                    );
+                }
             }
         }
         super.postToLog(userBanned, guild.id);

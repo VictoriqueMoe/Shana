@@ -4,7 +4,9 @@ import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
 import {MessageEmbed, User} from "discord.js";
 import {Main} from "../../../../Main";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
+import {Imgur} from "../../../../model/Imgur";
 
+const isImageFast = require('is-image-fast');
 /**
  * Message Edited
  * Messaged Deleted
@@ -12,6 +14,7 @@ import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
  */
 export class MessageLogger extends AbstractAdminAuditLogger {
     private static _uid = ObjectUtil.guid();
+    private imgur = new Imgur();
 
     constructor() {
         super(MessageLogger._uid);
@@ -48,16 +51,17 @@ export class MessageLogger extends AbstractAdminAuditLogger {
                 })
             .setTimestamp()
             .setFooter(`${member.id}`);
-        super.postToLog(embed, member.guild.id);
+        super.postToLog(embed, member.guild.id, newMessage.member);
     }
 
 
     @On("messageDelete")
     @Guard(EnabledGuard("AdminLog"))
     private async messageDeleted([message]: ArgsOf<"messageDelete">, client: Client): Promise<void> {
-        if (message.member.id === Main.client.user.id) {
+        if (!Main.testMode && message.member && message.member.id === Main.client.user.id) {
             return;
         }
+        const attatchments = message.attachments;
         const limit = 2048;
         const truncate = (input) => input.length > limit ? `${input.substring(0, limit - 3)}...` : input;
         const member = message.member;
@@ -70,6 +74,20 @@ export class MessageLogger extends AbstractAdminAuditLogger {
             .setDescription(description)
             .setTimestamp()
             .setFooter(`${member.id}`);
+        if (attatchments.size === 1) {
+            const messageAttachment = attatchments.first();
+            const url = messageAttachment.attachment as string;
+            try {
+                if (ObjectUtil.validString(url)) {
+                    const isImage: boolean = await isImageFast(url);
+                    if (isImage) {
+                        const newUrl = await this.imgur.uploadImageFromUrl(url);
+                        embed.setImage(newUrl);
+                    }
+                }
+            } catch {
+            }
+        }
         try {
             const deleteMessageLog = await DiscordUtils.getAuditLogEntry("MESSAGE_DELETE", message.guild);
             const target = deleteMessageLog.target;
@@ -80,8 +98,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
             }
         } catch {
         }
-
-        super.postToLog(embed, message.guild.id);
+        super.postToLog(embed, message.guild.id, message.member);
     }
 
     @On("messageDeleteBulk")

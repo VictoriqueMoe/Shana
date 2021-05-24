@@ -1,7 +1,7 @@
 import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
 import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
-import {Message, MessageEmbed} from "discord.js";
-import {DiscordUtils} from "../../../../utils/Utils";
+import {GuildMember, Message, MessageEmbed} from "discord.js";
+import {DiscordUtils, GuildUtils} from "../../../../utils/Utils";
 
 export abstract class AbstractAdminAuditLogger extends CloseableModule {
 
@@ -17,7 +17,12 @@ export abstract class AbstractAdminAuditLogger extends CloseableModule {
         return "AdminLog";
     }
 
-    protected postToLog(content: MessageEmbed | string, guildId: string): Promise<Message> {
+    protected postToLog(content: MessageEmbed | string, guildId: string, trigger?: GuildMember): Promise<Message> {
+        if (trigger) {
+            if (GuildUtils.isMemberAdmin(trigger)) {
+                return;
+            }
+        }
         return DiscordUtils.postToLog(content, guildId, true);
     }
 }

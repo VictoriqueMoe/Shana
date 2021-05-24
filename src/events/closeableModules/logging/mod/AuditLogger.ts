@@ -32,6 +32,7 @@ export class AuditLogger extends CloseableModule {
     private async memberLeaves([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const memberLeft = member.id;
         const memberUsername = member.user.username;
+        const memeberTag = member.user.tag;
         const guild = member.guild;
         const banLog = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_ADD", guild);
         if (banLog) {
@@ -51,15 +52,19 @@ export class AuditLogger extends CloseableModule {
             if (target instanceof User) {
                 if (target.id === memberLeft) {
                     if (kickLog.createdAt >= member.joinedAt) {
-                        const personWhoDidKick = banLog.executor;
-                        const reason = banLog.reason;
-                        DiscordUtils.postToLog(`"${memberUsername}" has been kicked by ${personWhoDidKick.username} for reason: "${reason}"`, member.guild.id);
+                        const personWhoDidKick = kickLog.executor;
+                        const reason = kickLog.reason;
+                        let prefix = "";
+                        if (ObjectUtil.validString(reason)) {
+                            prefix = `for reason: "${reason}"`;
+                        }
+                        DiscordUtils.postToLog(`"${memberUsername}" has been kicked by ${personWhoDidKick.username} ${prefix}`, member.guild.id);
                         return;
                     }
                 }
             }
         }
-        DiscordUtils.postToLog(`"${memberUsername}" has left the server`, member.guild.id);
+        DiscordUtils.postToLog(`${memeberTag} has left the server`, member.guild.id);
     }
 
     @On("guildBanAdd")
@@ -70,7 +75,11 @@ export class AuditLogger extends CloseableModule {
         if (res) {
             const personWhoDidBan = res.executor;
             const reason = res.reason;
-            DiscordUtils.postToLog(`<@${memberBanned}> has been BANNED by ${personWhoDidBan.username} for reason: "${reason}"`, guild.id);
+            let prefix = "";
+            if (ObjectUtil.validString(reason)) {
+                prefix = `for reason: "${reason}"`;
+            }
+            DiscordUtils.postToLog(`<@${memberBanned}> (${user.tag}) has been BANNED by ${personWhoDidBan.tag} ${prefix}"`, guild.id);
         }
     }
 

@@ -43,8 +43,9 @@ export class AutoResponder extends TriggerConstraint {
                     shouldTrigger = true;
                 }
             } else if (useRegex) {
+                const newContent = messageContent.replace(/[*_]/gi, "");
                 const regex = new RegExp(trigger, 'gium');
-                if (regex.test(messageContent)) {
+                if (regex.test(newContent)) {
                     shouldTrigger = true;
                 }
             } else {
