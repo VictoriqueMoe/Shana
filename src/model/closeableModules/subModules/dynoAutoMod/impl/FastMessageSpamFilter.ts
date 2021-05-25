@@ -67,6 +67,10 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
         const arr = this._cooldownArray.rawSet;
         return arr.find(value => value.userId === userId && value.guildId === guildId);
     }
+
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Message spam", message);
+    }
 }
 
 class MessageSpamEntry {

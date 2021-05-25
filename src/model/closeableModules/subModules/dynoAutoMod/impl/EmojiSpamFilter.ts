@@ -40,4 +40,8 @@ export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoA
     public get priority(): number {
         return PRIORITY.LAST;
     }
+
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Too many emojis", message);
+    }
 }

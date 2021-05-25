@@ -1,4 +1,4 @@
-import {ArgsOf, Client} from "@typeit/discord";
+import {ArgsOf, Client, DIService} from "@typeit/discord";
 
 type EditType = ([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate: boolean) => Promise<void>;
 export const EditListenMethods: Map<any, EditType[]> = new Map();
@@ -13,9 +13,13 @@ export const EditListenMethods: Map<any, EditType[]> = new Map();
 export const MessageEventEditTrigger = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     console.log(`Adding: "${target.constructor.name}.${propertyKey}" to listeners for message editing`);
     const method: EditType = target[propertyKey];
-    if (EditListenMethods.has(target)) {
-        EditListenMethods.get(target).push(method);
+    const context: any = DIService.instance.getService(target.constructor);
+    if (!context) {
+        throw new Error(`No context for: "${target.constructor.name}"`);
+    }
+    if (EditListenMethods.has(context)) {
+        EditListenMethods.get(context).push(method);
     } else {
-        EditListenMethods.set(target, [method]);
+        EditListenMethods.set(context, [method]);
     }
 };

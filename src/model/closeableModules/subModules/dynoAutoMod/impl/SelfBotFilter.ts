@@ -38,4 +38,8 @@ export class SelfBotFilter extends AbstractFilter {
     public get priority(): number {
         return PRIORITY.LAST;
     }
+
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Self bot detection", message);
+    }
 }

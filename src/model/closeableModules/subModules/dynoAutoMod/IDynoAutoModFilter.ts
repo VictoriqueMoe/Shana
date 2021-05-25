@@ -26,4 +26,11 @@ export interface IDynoAutoModFilter extends ISubModule {
      * @param content
      */
     doFilter(content: Message): boolean;
+
+    /**
+     * Do any additional processing like posting to logs
+     * @param member
+     */
+    postProcess(member: Message): Promise<void>;
+
 }

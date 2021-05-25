@@ -12,7 +12,7 @@ const getUrls = require('get-urls');
 
 @InjectDynoSubModule(DynoAutoMod)
 export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
-    private _cooldownArray: TimedSet<LinkCooldownEntry>;
+    private readonly _cooldownArray: TimedSet<LinkCooldownEntry>;
 
     private constructor(parentFilter: ICloseableModule) {
         super(parentFilter);
@@ -25,6 +25,10 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
 
     public get isActive(): boolean {
         return true;
+    }
+
+    public get cooldownArray(): TimedSet<LinkCooldownEntry> {
+        return this._cooldownArray;
     }
 
     /**
@@ -43,9 +47,11 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
             let fromArray = this.getFromArray(memberId, guildId);
             if (!fromArray) {
                 fromArray = new LinkCooldownEntry(memberId, guildId);
+                fromArray.messageArray.push(content);
                 this._cooldownArray.add(fromArray);
                 return true;
             }
+            fromArray.messageArray.push(content);
             this._cooldownArray.refresh(fromArray);
             return false;
         }
@@ -64,13 +70,20 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
         return PRIORITY.LAST;
     }
 
-    private getFromArray(userId: string, guildId: string): LinkCooldownEntry {
+    public getFromArray(userId: string, guildId: string): LinkCooldownEntry {
         const arr = this._cooldownArray.rawSet;
         return arr.find(value => value.userId === userId && value.guildId === guildId);
+    }
+
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Link cooldown", message);
     }
 }
 
 class LinkCooldownEntry {
+
+    public messageArray: Message[] = [];
+
     constructor(public userId: string, public guildId: string) {
     }
 }

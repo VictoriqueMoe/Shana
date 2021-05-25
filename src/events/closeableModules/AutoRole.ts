@@ -49,9 +49,9 @@ export class AutoRole extends CloseableModule {
                     const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
                     const muteRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
                     if (jailRole && rolePersisted.id === jailRole.id) {
-                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as special (possible special evasion) \n <@697417252320051291> <@593208170869162031>`, member.guild.id);
+                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving in jail and has be re-jailed`, member.guild.id);
                     } else if (muteRole && rolePersisted.id === muteRole.id) {
-                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and because of this, has been re-muted.`, member.guild.id);
+                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and has been re-muted.`, member.guild.id);
                     }
                     return;
                 }

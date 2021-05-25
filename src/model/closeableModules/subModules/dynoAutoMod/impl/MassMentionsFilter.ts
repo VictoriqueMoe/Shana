@@ -40,4 +40,8 @@ export class MassMentionsFilter extends AbstractFilter implements IValueBackedDy
     public get priority(): number {
         return PRIORITY.LAST;
     }
+
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Mass Mentions", message);
+    }
 }

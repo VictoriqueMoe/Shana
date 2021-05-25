@@ -30,7 +30,7 @@ export class SubModuleManager {
         const returnSet: Set<ISubModule> = new Set();
         for (const subModule of this._subModules) {
             const subModuleParent = subModule.parentModule;
-            if (subModuleParent === parent) {
+            if (subModuleParent.uid === parent.uid) {
                 returnSet.add(subModule);
             }
         }

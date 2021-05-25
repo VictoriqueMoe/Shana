@@ -45,4 +45,8 @@ export class SpoilersFilter extends AbstractFilter {
     public get priority(): number {
         return PRIORITY.LAST;
     }
+
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Spoilers", message);
+    }
 }

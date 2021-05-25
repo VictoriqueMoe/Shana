@@ -41,4 +41,8 @@ export class ZalgoTextFilter extends AbstractFilter {
         const re = /%CC%/g;
         return re.test(encodeURIComponent(txt));
     }
+
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Zalgo", message);
+    }
 }

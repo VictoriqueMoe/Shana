@@ -14,6 +14,7 @@ import {MuteSingleton} from "../../commands/customAutoMod/userBlock/MuteSingleto
 import {Main} from "../../Main";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import * as Immutable from "immutable";
+import {MessageEventEditTrigger} from "../../model/decorators/MessageEventEditTrigger";
 
 export class DynoAutoMod extends CloseableModule {
 
@@ -25,6 +26,7 @@ export class DynoAutoMod extends CloseableModule {
         super(CloseOptionModel, DynoAutoMod._uid);
     }
 
+    @MessageEventEditTrigger
     @On("message")
     @Guard(NotBot, excludeGuard, EnabledGuard("DynoAutoMod"))
     private async process([message]: ArgsOf<"message">, client: Client): Promise<void> {
@@ -86,9 +88,22 @@ export class DynoAutoMod extends CloseableModule {
                             break;
                         }
                         case ACTION.DELETE: {
-                            await message.delete({
-                                reason: `Auto mod violation "${filter.id}"`
-                            });
+                            if ('cooldownArray' in filter) {
+                                // @ts-ignore
+                                const entry = filter.getFromArray(message.member.id, message.guild.id);
+                                const toDelete = entry.messageArray;
+                                for (const messageToDelete of toDelete) {
+                                    await messageToDelete.delete({
+                                        // @ts-ignore
+                                        reason: `Auto mod violation "${filter.id}"`
+                                    });
+                                }
+                                entry.messageArray = [];
+                            } else {
+                                await message.delete({
+                                    reason: `Auto mod violation "${filter.id}"`
+                                });
+                            }
                             break;
                         }
                     }
@@ -96,6 +111,7 @@ export class DynoAutoMod extends CloseableModule {
                         break outer;
                     }
                 }
+                filter.postProcess(message);
             }
     }
 

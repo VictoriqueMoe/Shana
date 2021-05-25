@@ -1,8 +1,9 @@
 import {IDynoAutoModFilter} from "./IDynoAutoModFilter";
-import {Message} from "discord.js";
+import {Message, MessageEmbed} from "discord.js";
 import {SubModuleManager} from "../../manager/SubModuleManager";
 import {ACTION} from "../../../../enums/ACTION";
 import {ICloseableModule} from "../../ICloseableModule";
+import {DiscordUtils} from "../../../../utils/Utils";
 
 export abstract class AbstractFilter implements IDynoAutoModFilter {
 
@@ -38,13 +39,32 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
         return 15; //  hard-coded for now
     }
 
+    protected postToLog(reason: string, message: Message): Promise<Message | null> {
+        if (!this.actions.includes(ACTION.DELETE)) {
+            return null;
+        }
+        const {member} = message;
+        const avatarUrl = member.user.displayAvatarURL({format: 'jpg', size: 1024});
+        const embed = new MessageEmbed()
+            .setColor(member.roles.highest.hexColor)
+            .setAuthor(member.user.tag, avatarUrl)
+            .setThumbnail(avatarUrl)
+            .setTimestamp()
+            .setDescription(`**Message sent by <@${member.id}> deleted in <#${message.channel.id}>** \n ${message.content}`)
+            .addField("Reason", reason)
+            .setFooter(`${member.user.id}`);
+        return DiscordUtils.postToLog(embed, message.guild.id, false);
+    }
+
     // eslint-disable-next-line no-undef
     abstract readonly actions: ACTION[];
     abstract readonly id: string;
     abstract readonly isActive: boolean;
     abstract readonly warnMessage: string;
 
-    abstract doFilter(content: Message): boolean;
+    public abstract postProcess(member: Message): Promise<void>;
+
+    public abstract doFilter(content: Message): boolean;
 
     abstract readonly priority: number;
 }

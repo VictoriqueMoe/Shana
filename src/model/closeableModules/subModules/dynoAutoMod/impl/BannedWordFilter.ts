@@ -57,4 +57,7 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
         return true;
     }
 
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Banned words", message);
+    }
 }
