@@ -24,7 +24,7 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
     }
 
     public get isActive(): boolean {
-        return true;
+        return false;
     }
 
     public get cooldownArray(): TimedSet<LinkCooldownEntry> {

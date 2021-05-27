@@ -8,7 +8,9 @@ import {DiscordUtils} from "../../../../utils/Utils";
 export abstract class AbstractFilter implements IDynoAutoModFilter {
 
     protected constructor(protected _parentModule: ICloseableModule) {
-        SubModuleManager.instance.addSubModules(this);
+        if (_parentModule != null) {
+            SubModuleManager.instance.addSubModules(this);
+        }
     }
 
     public get parentModule(): ICloseableModule {

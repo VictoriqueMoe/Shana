@@ -1,10 +1,11 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
-import {Message} from "discord.js";
+import {GuildMember, Message} from "discord.js";
 import {BannedWordEntryies, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
 import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
+import {GuildUtils} from "../../../../../utils/Utils";
 
 @InjectDynoSubModule(DynoAutoMod)
 export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoAutoModFilter {
@@ -18,6 +19,18 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
             "exactWord": ["retard", "retarded", "tard", "tards", "retards", "fag", "fags", "faggot", "faggots", "nigger"],
             "WildCardWords": ["nigger", "cunt", "nigga", "lambda.it.cx", "taciturasa", "gljfizd8xKgsSrU7dafuw", "fmqdWC-eVqc", "chng.it"]
         };
+    }
+
+    /**
+     * return true if user was sent to jail
+     * @param member
+     */
+    public async checkUsername(member: GuildMember): Promise<boolean> {
+        if (!this.doesNotFailValidation(member.displayName)) {
+            await GuildUtils.sendToJail(member, "You have been placed here because your display name voilates our rules, Please change it");
+            return true;
+        }
+        return false;
     }
 
     public get id(): string {
@@ -37,10 +50,14 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
     }
 
     doFilter(content: Message): boolean {
+        return this.doesNotFailValidation(content.content);
+    }
+
+    private doesNotFailValidation(content: string): boolean {
         const badWordObj = this.bannedWords;
         const exactArry = badWordObj.exactWord;
         const inStringArray = badWordObj.WildCardWords;
-        const messageContent = content.content.trim().toLowerCase();
+        const messageContent = content.trim().toLowerCase();
         const splitMessage = messageContent.split(" ");
         for (const exactWord of exactArry) {
             const volutesExactWord = splitMessage.indexOf(exactWord.toLowerCase()) > -1;

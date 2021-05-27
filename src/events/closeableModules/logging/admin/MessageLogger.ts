@@ -65,6 +65,9 @@ export class MessageLogger extends AbstractAdminAuditLogger {
         const limit = 2048;
         const truncate = (input) => input.length > limit ? `${input.substring(0, limit - 3)}...` : input;
         const member = message.member;
+        if (!member.user) {
+            return;
+        }
         const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
         const messageContent = message.content;
         const description = truncate(`Message sent by <@${member.id}> deleted in <#${message.channel.id}> \n ${messageContent}`);

@@ -1,7 +1,7 @@
 import {GuildMember, Role, User} from "discord.js";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
+import {DiscordUtils} from "../../../utils/Utils";
 
 export abstract class AbstractRoleApplier {
 
@@ -37,16 +37,6 @@ export abstract class AbstractRoleApplier {
                 }
             });
             return rowCount > 0;
-        }
-
-        const dbEntry = await model.findOne({
-            where: {
-                userId,
-                roleId
-            }
-        });
-        if (dbEntry) {
-            await this.applyAfterDyno(change.newUser as GuildMember);
         }
         return false;
     }
@@ -120,39 +110,5 @@ export abstract class AbstractRoleApplier {
             });
         }
         return null;
-    }
-
-    private async applyAfterDyno(member: GuildMember): Promise<void> {
-        // step 1 get the last role edit
-        let roleLog = null;
-        try {
-            roleLog = await DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", member.guild);
-        } catch (e) {
-            //   console.error(e);
-        }
-        if (!roleLog) {
-            return;
-        }
-        // get the executor of the role edit
-        const executor = roleLog.executor;
-
-        // is the executor dyno AND was it headcrab?
-        const wasBot = (await GuildUtils.getAutoBotIds(member.guild.id)).includes(executor.id);
-        if (wasBot) {
-            const autoRole = await GuildUtils.RoleUtils.getAutoRole(member.guild.id);
-            if (!autoRole) {
-                return;
-            }
-            const {id} = autoRole;
-            const wasAutoRole = member.roles.cache.has(id);
-            if (wasAutoRole) {
-                // remove it
-                try {
-                    await member.roles.remove(id);
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-        }
     }
 }

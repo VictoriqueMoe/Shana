@@ -8,10 +8,16 @@ import {GuildMember, Role} from "discord.js";
 import {RolePersistenceModel} from "../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
+import {UniqueViolationError} from "../../DAO/BaseDAO";
+import {BannedWordFilter} from "../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
 
 class RoleProxy extends AbstractRoleApplier {
     public async applyRole(role: Role, member: GuildMember, reason?: string): Promise<void> {
         return super.applyRole(role, member, reason);
+    }
+
+    public async roleLeaves(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<RolePersistenceModel> {
+        return super.roleLeaves(role, member, model);
     }
 }
 
@@ -29,12 +35,18 @@ export class AutoRole extends CloseableModule {
     @Guard(EnabledGuard("AutoRole"))
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const now = Date.now();
-        const seventySeconds = 70000;
-        const toAddRole = now + seventySeconds;
+        const oneMin = 60000;
+        const toAddRole = now + oneMin;
         const d = new Date(toAddRole);
         //TODO use scheduler
         schedule.scheduleJob(`enable ${member.user.username}`, d, async () => {
             const guildId = member.guild.id;
+            const module = DiscordUtils.getModule("DynoAutoMod");
+            const filter: BannedWordFilter = module.submodules.find(m => m instanceof BannedWordFilter) as BannedWordFilter;
+            if (filter.isActive && await filter.checkUsername(member)) {
+                return;
+            }
+
             const persistedRole = await RolePersistenceModel.findOne({
                 where: {
                     userId: member.id,
@@ -62,6 +74,28 @@ export class AutoRole extends CloseableModule {
                 await this._roleApplier.applyRole(autoRole, member, "added via VicBot");
             }
         });
+    }
+
+    @On("guildMemberRemove")
+    private async specialLeave([member]: ArgsOf<"guildMemberRemove">, client: Client): Promise<void> {
+        if (!this.isEnabled) {
+            return;
+        }
+        const jailRole = await GuildUtils.RoleUtils.getJailRole(member.guild.id);
+        if (!jailRole) {
+            return;
+        }
+        const model = await this._roleApplier.roleLeaves(jailRole, member as GuildMember, RolePersistenceModel);
+        if (model) {
+            try {
+                // @ts-ignore
+                await super.commitToDatabase(model, {}, true);
+            } catch (e) {
+                if (e instanceof UniqueViolationError) {
+                    return;
+                }
+            }
+        }
     }
 
 
