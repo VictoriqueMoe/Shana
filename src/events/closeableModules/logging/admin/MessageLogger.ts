@@ -1,12 +1,13 @@
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {EnabledGuard} from "../../../../guards/EnabledGuard";
-import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
-import {MessageEmbed, User} from "discord.js";
+import {GuildUtils, ObjectUtil} from "../../../../utils/Utils";
+import {MessageEmbed} from "discord.js";
 import {Main} from "../../../../Main";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {Imgur} from "../../../../model/Imgur";
 
 const isImageFast = require('is-image-fast');
+
 /**
  * Message Edited
  * Messaged Deleted
@@ -61,11 +62,12 @@ export class MessageLogger extends AbstractAdminAuditLogger {
         if (!Main.testMode && message.member && message.member.id === Main.client.user.id) {
             return;
         }
+        const dateDeleted = new Date();
         const attatchments = message.attachments;
         const limit = 2048;
         const truncate = (input) => input.length > limit ? `${input.substring(0, limit - 3)}...` : input;
         const member = message.member;
-        if (!member.user) {
+        if (!member || !member.user) {
             return;
         }
         const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
@@ -90,16 +92,6 @@ export class MessageLogger extends AbstractAdminAuditLogger {
                 }
             } catch {
             }
-        }
-        try {
-            const deleteMessageLog = await DiscordUtils.getAuditLogEntry("MESSAGE_DELETE", message.guild);
-            const target = deleteMessageLog.target;
-            if (target instanceof User) {
-                if (target.id === member.user.id) {
-                    embed.addField("deleted by", `${deleteMessageLog.executor.tag}`);
-                }
-            }
-        } catch {
         }
         super.postToLog(embed, message.guild.id, message.member);
     }

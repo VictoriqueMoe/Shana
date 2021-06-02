@@ -16,7 +16,7 @@ import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import * as Immutable from "immutable";
 import {MessageEventEditTrigger} from "../../model/decorators/MessageEventEditTrigger";
 
-export class DynoAutoMod extends CloseableModule {
+export class DynoAutoMod extends CloseableModule<null> {
 
     private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
 

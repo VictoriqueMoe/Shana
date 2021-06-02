@@ -7,7 +7,7 @@ import {CloseableModule} from "../closeableModules/impl/CloseableModule";
 export function InjectDynoSubModule(parentModule: typeof CloseableModule) {
     // @ts-ignore
     return (constructor: typeof ISubModule) => {
-        const parentFilter: ICloseableModule = DIService.instance.getService(parentModule);
+        const parentFilter: ICloseableModule<never> = DIService.instance.getService(parentModule);
         if (parentFilter == null) {
             throw new Error(`Unable to find any module for ${parentModule}`);
         }

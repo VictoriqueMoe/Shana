@@ -3,8 +3,9 @@ import {ITriggerConstraint} from "../ITriggerConstraint";
 import {IEventSecurityConstraint} from "../../DB/IEventSecurityConstraint";
 import {GuildChannel, Message} from "discord.js";
 import {ArrayUtils} from "../../../utils/Utils";
+import {ModuleSettings} from "../ModuleSettings";
 
-export abstract class TriggerConstraint extends CloseableModule implements ITriggerConstraint {
+export abstract class TriggerConstraint<T extends ModuleSettings> extends CloseableModule<T> implements ITriggerConstraint {
 
     canTrigger(obj: IEventSecurityConstraint, message: Message): boolean {
         const member = message.member;

@@ -9,8 +9,8 @@ import * as http from "http";
 
 dotenv.config({path: __dirname + '/../.env'});
 
-export class CloseableModuleSet extends Set<CloseableModule> {
-    add(value: CloseableModule): this {
+export class CloseableModuleSet extends Set<CloseableModule<any>> {
+    add(value: CloseableModule<any>): this {
         for (const v of this.values()) {
             if (v.uid === value.uid) {
                 super.delete(v);
@@ -21,7 +21,7 @@ export class CloseableModuleSet extends Set<CloseableModule> {
         return this;
     }
 
-    has(value: CloseableModule): boolean {
+    has(value: CloseableModule<any>): boolean {
         for (const v of this.values()) {
             if (v.uid === value.uid) {
                 return true;

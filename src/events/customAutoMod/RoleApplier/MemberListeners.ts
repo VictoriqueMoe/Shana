@@ -2,7 +2,7 @@ import {ArgsOf, Client, On} from "@typeit/discord";
 import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {BaseDAO, UniqueViolationError} from "../../../DAO/BaseDAO";
+import {BaseDAO} from "../../../DAO/BaseDAO";
 import {GuildMember, Role} from "discord.js";
 import {AbstractRoleApplier} from "./AbstractRoleApplier";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
@@ -42,24 +42,6 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
             try {
                 await MuteSingleton.instance.doRemove(newUser.id, newUser.guild.id, mutedRole.id, true);
             } catch {
-            }
-        }
-    }
-
-    @On("guildMemberRemove")
-    private async specialLeave([member]: ArgsOf<"guildMemberRemove">, client: Client): Promise<void> {
-        const jailRole = await GuildUtils.RoleUtils.getJailRole(member.guild.id);
-        if (!jailRole) {
-            return;
-        }
-        const model = await new SpecialProxy().roleLeaves(jailRole, member as GuildMember, RolePersistenceModel);
-        if (model) {
-            try {
-                await super.commitToDatabase(model, {}, true);
-            } catch (e) {
-                if (e instanceof UniqueViolationError) {
-                    return;
-                }
             }
         }
     }

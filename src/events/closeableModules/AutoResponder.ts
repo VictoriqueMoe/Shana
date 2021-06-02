@@ -8,7 +8,7 @@ import {AutoResponderModel} from "../../model/DB/autoMod/impl/AutoResponder.mode
 import {Message} from "discord.js";
 import {MessageEventEditTrigger} from "../../model/decorators/MessageEventEditTrigger";
 
-export class AutoResponder extends TriggerConstraint {
+export class AutoResponder extends TriggerConstraint<null> {
 
     private static _uid = ObjectUtil.guid();
 

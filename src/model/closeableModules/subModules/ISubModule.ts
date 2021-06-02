@@ -18,5 +18,5 @@ export interface ISubModule {
     /**
      * Get the parent module this belongs to
      */
-    readonly parentModule: ICloseableModule;
+    readonly parentModule: ICloseableModule<any>;
 }

@@ -14,4 +14,9 @@ export interface ICloseOption extends Model {
      * is this module enabled
      */
     status: boolean;
+
+    /**
+     * Get the settings object for this module. this iss a JSON object
+     */
+    settings: Record<string, unknown>;
 }

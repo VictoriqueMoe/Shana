@@ -60,6 +60,7 @@ export class Misc extends AbstractCommand<any> {
         });
     }
 
+
     @Command("findAnime")
     @Guard(NotBot, secureCommand)
     private async findAnime(command: CommandMessage): Promise<void> {

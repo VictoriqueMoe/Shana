@@ -71,19 +71,22 @@ export namespace GuildUtils {
             return false;
         }
 
-        export async function getJailRole(guildId: string): Promise<Role | null> {
+        export function getJailRole(guildId: string): Promise<Role | null> {
             return getRole(guildId, SETTINGS.JAIL_ROLE);
         }
 
-        export async function getMuteRole(guildId: string): Promise<Role | null> {
+        export function getYoungAccountRole(guildId: string): Promise<Role | null> {
+            return getRole(guildId, SETTINGS.YOUNG_ACCOUNT_ROLE);
+        }
+
+        export function getMuteRole(guildId: string): Promise<Role | null> {
             return getRole(guildId, SETTINGS.MUTE_ROLE);
         }
 
-        export async function getAutoRole(guildId: string): Promise<Role | null> {
+        export function getAutoRole(guildId: string): Promise<Role | null> {
             return getRole(guildId, SETTINGS.AUTO_ROLE);
         }
 
-        // eslint-disable-next-line no-inner-declarations
         async function getRole(guildId: string, setting: SETTINGS): Promise<Role | null> {
             const role = await SettingsManager.instance.getSetting(setting, guildId);
             if (!ObjectUtil.validString(role)) {
@@ -96,6 +99,21 @@ export namespace GuildUtils {
                 return null;
             }
         }
+    }
+
+    export async function applyYoungAccountConstraint(member: GuildMember, timeout: string): Promise<void> {
+        if (GuildUtils.isMemberAdmin(member)) {
+            return;
+        }
+        const guildId = member.guild.id;
+        const youngAccountRole = await GuildUtils.RoleUtils.getYoungAccountRole(guildId);
+        if (!youngAccountRole) {
+            return;
+        }
+        await member.roles.set([youngAccountRole]);
+        const guild = await GuildManager.instance.getGuild(guildId);
+        DiscordUtils.postToLog(`Member <@${member.id}> ${member.user.tag} has been applied the ${youngAccountRole.name} role`, guildId);
+        await member.send(`Hello, as your Discord account is less than ${timeout} old and because of recent scams, we must verify your account before you can access the ${guild.name} Discord Server`);
     }
 
     export async function sendToJail(member: GuildMember, reason: string): Promise<void> {
@@ -565,7 +583,7 @@ export namespace DiscordUtils {
         return allModules.map(m => m.moduleId);
     }
 
-    export function getModule(moduleId: string): CloseableModule {
+    export function getModule(moduleId: string): CloseableModule<any> {
         const modules = Main.closeableModules;
         for (const module of modules) {
             if (module.moduleId === moduleId) {
@@ -575,9 +593,9 @@ export namespace DiscordUtils {
         return null;
     }
 
-    export function getDynoReplacementModules(): CloseableModule[] {
+    export function getDynoReplacementModules(): CloseableModule<any>[] {
         const modules = Main.closeableModules;
-        const returnArr: CloseableModule[] = [];
+        const returnArr: CloseableModule<any>[] = [];
         for (const module of modules) {
             if (module.isDynoReplacement) {
                 returnArr.push(module);

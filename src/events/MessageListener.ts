@@ -38,7 +38,7 @@ export abstract class MessageListener {
     @On("message")
     @Guard(NotBot)
     private async replier([message]: ArgsOf<"message">, client: Client): Promise<void> {
-        if (message.channel.id === "815042892120457216") {
+        if (message.channel.id === "815042892120457216" || message.member.id === "323890636166135808") {
             return;
         }
         const repliedMessage = message.reference;

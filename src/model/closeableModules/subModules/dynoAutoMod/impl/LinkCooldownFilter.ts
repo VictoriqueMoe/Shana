@@ -14,7 +14,7 @@ const getUrls = require('get-urls');
 export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
     private readonly _cooldownArray: TimedSet<LinkCooldownEntry>;
 
-    private constructor(parentFilter: ICloseableModule) {
+    private constructor(parentFilter: ICloseableModule<any>) {
         super(parentFilter);
         this._cooldownArray = new TimedSet(Number.parseInt(this.value) * 1000);
     }

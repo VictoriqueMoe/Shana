@@ -3,7 +3,7 @@ import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.mo
 import {GuildMember, Message, MessageEmbed} from "discord.js";
 import {DiscordUtils, GuildUtils} from "../../../../utils/Utils";
 
-export abstract class AbstractAdminAuditLogger extends CloseableModule {
+export abstract class AbstractAdminAuditLogger extends CloseableModule<null> {
 
     protected constructor(uid: string) {
         super(CloseOptionModel, uid);

@@ -1,6 +1,7 @@
 import * as Immutable from 'immutable';
 import {ICloseableModule} from "../ICloseableModule";
 import {ISubModule} from "../subModules/ISubModule";
+import {ModuleSettings} from "../ModuleSettings";
 
 export class SubModuleManager {
 
@@ -26,7 +27,7 @@ export class SubModuleManager {
         return Immutable.Set.of(...this._subModules.values());
     }
 
-    public getSubModulesFromParent(parent: ICloseableModule): Immutable.Set<ISubModule> {
+    public getSubModulesFromParent(parent: ICloseableModule<ModuleSettings>): Immutable.Set<ISubModule> {
         const returnSet: Set<ISubModule> = new Set();
         for (const subModule of this._subModules) {
             const subModuleParent = subModule.parentModule;

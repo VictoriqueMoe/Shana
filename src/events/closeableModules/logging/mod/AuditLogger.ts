@@ -12,7 +12,7 @@ import {User} from "discord.js";
  * Member kick
  * Member leave
  */
-export class AuditLogger extends CloseableModule {
+export class AuditLogger extends CloseableModule<null> {
 
     private static _uid = ObjectUtil.guid();
 
@@ -90,9 +90,5 @@ export class AuditLogger extends CloseableModule {
 
     public get isDynoReplacement(): boolean {
         return true;
-    }
-
-    get isEnabled(): boolean {
-        return false;
     }
 }
