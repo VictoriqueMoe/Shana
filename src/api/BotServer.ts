@@ -12,7 +12,7 @@ export class BotServer extends Server {
 
     private static _instance: BotServer;
 
-    private readonly classesToLoad = `${__dirname}/controllers/**/*.ts`;
+    private readonly classesToLoad = `${__dirname}/controllers/**/*.{ts,js}`;
 
     private controllers: baseController[];
 

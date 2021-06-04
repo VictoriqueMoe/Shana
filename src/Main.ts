@@ -62,7 +62,7 @@ export class Main {
                 }
             },
             storage: 'database.sqlite',
-            models: [__dirname + '/model/DB/**/*.model.ts'],
+            models: [__dirname + '/model/DB/**/*.model.{ts,js}'],
             modelMatch: (filename, member) => {
                 return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
             }

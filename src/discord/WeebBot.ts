@@ -5,7 +5,7 @@ import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 
 export async function getPrefix(message: Message | string, client?: Client) {
-    let guildId = "~";
+    let guildId = null;
     try{
         if(typeof message === "string"){
             guildId = message;
@@ -13,13 +13,13 @@ export async function getPrefix(message: Message | string, client?: Client) {
             guildId = message.guild.id;
         }
     }catch (e){
-        console.error(e);
+        return "~";
     }
     return SettingsManager.instance.getSetting(SETTINGS.PREFIX, guildId);
 }
 
 @Discord(getPrefix, {
-    import: `${__dirname}/../{commands,events}/**/*.ts`
+    import: `${__dirname}/../{commands,events}/**/*.{ts,js}`
 })
 export abstract class WeebBot {
 

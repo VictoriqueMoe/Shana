@@ -21,7 +21,7 @@ import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
  * TODO: couple this class to appropriate classes
  */
 export class OnReady extends BaseDAO<any> {
-    private readonly classesToLoad = [`${__dirname}/../model/closeableModules/subModules/dynoAutoMod/impl/*.ts`];
+    private readonly classesToLoad = [`${__dirname}/../model/closeableModules/subModules/dynoAutoMod/impl/*.{ts,js}`];
 
     private static async initiateMuteTimers(): Promise<void> {
         const mutesWithTimers = await MuteModel.findAll({
@@ -62,6 +62,7 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(Main.setDefaultSettings());
         pArr.push(this.populateCommandSecurity());
         pArr.push(this.populatePostableChannels());
+        pArr.push(this.cleanUpGuilds());
         return pArr;
     }
 
@@ -86,6 +87,7 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(this.startServer());
         return Promise.all(pArr).then(() => {
             console.log("Bot logged in.");
+            process.send('ready');
         });
     }
 
@@ -254,5 +256,24 @@ export class OnReady extends BaseDAO<any> {
             }
             return PostableChannelModel.bulkCreate(models);
         });
+    }
+
+    private async cleanUpGuilds(): Promise<void> {
+        const guildsJoined = Main.client.guilds.cache.keyArray();
+        for (const guildsJoinedId of guildsJoined) {
+            const guildModels = await GuildableModel.findOne({
+                where: {
+                    "guildId": guildsJoinedId
+                }
+            });
+            if (!guildModels) {
+                await GuildableModel.destroy({
+                    cascade: true,
+                    where: {
+                        guildId: guildsJoinedId
+                    }
+                });
+            }
+        }
     }
 }

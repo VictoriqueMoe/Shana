@@ -24,6 +24,9 @@ export class MessageLogger extends AbstractAdminAuditLogger {
     @On("messageUpdate")
     @Guard(EnabledGuard("AdminLog"))
     private async messageEdited([oldMessage, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
+        if (!newMessage.member) {
+            return;
+        }
         if (newMessage.member.id === Main.client.user.id) {
             return;
         }
@@ -37,6 +40,9 @@ export class MessageLogger extends AbstractAdminAuditLogger {
             return;
         }
         const member = newMessage.member;
+        if (!member) {
+            return;
+        }
         const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
         const embed = new MessageEmbed()
             .setColor('#337FD5')

@@ -8,7 +8,7 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "allowJs": true,
-    "noEmit": true,
+    "noEmit": false,
     "forceConsistentCasingInFileNames": true,
     "lib": [
       "es2020",
@@ -18,6 +18,9 @@
     "outDir": "./build",
     "allowSyntheticDefaultImports": true
   },
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules",
     "./build"
