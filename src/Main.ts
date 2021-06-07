@@ -6,6 +6,9 @@ import {EnumEx, ObjectUtil} from "./utils/Utils";
 import {DEFAULT_SETTINGS, SETTINGS} from "./enums/SETTINGS";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import * as http from "http";
+import * as fs from 'fs';
+
+const io = require('@pm2/io');
 
 dotenv.config({path: __dirname + '/../.env'});
 
@@ -68,11 +71,22 @@ export class Main {
             }
         });
         await Main.dao.sync({force: false});
+        this.loadCustomActions();
         await this._client.login(
             process.env.token,
             `${__dirname}/discord/*.ts`,
             `${__dirname}/discord/*.js`,
         );
+    }
+
+    private static loadCustomActions(): void {
+        io.action('getLogs', async (cb) => {
+            const url = `${__dirname}/../logs/combined.log`;
+            const log = fs.readFileSync(url, {
+                encoding: 'utf8'
+            });
+            return cb(log);
+        });
     }
 
     public static async setDefaultSettings(): Promise<void> {

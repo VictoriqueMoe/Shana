@@ -7,7 +7,10 @@
     "start": "ts-node src/Main.ts",
     "lint": "eslint . --ext .ts --fix",
     "build": "tsc",
-    "prod": "node build/Main.js"
+    "prod": "node build/Main.js",
+    "restart_p2": "pm2 restart 0 ecosystem.config.js",
+    "start_p2": "pm2 restart 0 ecosystem.config.js",
+    "build_and_start": "npm run build & npm run restart_p2"
   },
   "repository": {
     "type": "git",
@@ -20,8 +23,7 @@
   },
   "dependencies": {
     "@overnightjs/core": "^1.7.5",
-    "@overnightjs/jwt": "^1.2.0",
-    "@overnightjs/logger": "^1.2.0",
+    "@pm2/io": "^5.0.0",
     "@typeit/discord": "^4.0.9",
     "anilist-node": "^1.7.0",
     "bufferutil": "^4.0.3",
@@ -49,6 +51,7 @@
     "immutable": "^4.0.0-rc.12",
     "is-image-fast": "^1.0.0",
     "is-video": "^1.0.1",
+    "jet-logger": "^1.0.6",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "mime-types": "^2.1.30",

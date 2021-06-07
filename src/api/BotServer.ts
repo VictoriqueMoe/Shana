@@ -4,9 +4,9 @@ import * as bodyParser from 'body-parser';
 import * as path from "path";
 import {glob} from "glob";
 import {baseController} from "./controllers/BaseController";
-import {Logger} from "@overnightjs/logger";
 import PromiseRouter from "express-promise-router";
 import * as http from "http";
+import Logger from "jet-logger";
 
 export class BotServer extends Server {
 
@@ -49,7 +49,7 @@ export class BotServer extends Server {
         const pArr = files.map(filePath => import(path.resolve(filePath)));
         return Promise.all(pArr).then(modules => {
             for (const module of modules) {
-                console.log(`load ${Object.keys(module)[0]}`);
+                Logger.Imp(`load ${Object.keys(module)[0]}`);
             }
 
             /*const instances: AbstractController[] = [];
