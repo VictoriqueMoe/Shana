@@ -9,8 +9,11 @@
     "build": "tsc",
     "prod": "node build/Main.js",
     "restart_p2": "pm2 restart 0 ecosystem.config.js",
-    "start_p2": "pm2 restart 0 ecosystem.config.js",
-    "build_and_start": "npm run build & npm run restart_p2"
+    "restart_p2_debug": "pm2 restart 0 ecosystem.config.js -- -debug",
+    "start_p2": "pm2 start 0 ecosystem.config.js",
+    "start_p2_debug": "pm2 start 0 ecosystem.config.js -- -debug",
+    "build_and_start": "npm run build & npm run restart_p2",
+    "build_and_start_debug": "npm run build & npm run restart_p2_debug"
   },
   "repository": {
     "type": "git",

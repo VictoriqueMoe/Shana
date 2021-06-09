@@ -43,7 +43,8 @@ export const EnabledGuard = (moduleId: string) => async (args, client, next) => 
     const module = await CloseOptionModel.findOne({
         where: {
             moduleId,
-            guildId
+            guildId,
+            status: true
         }
     });
     if (module && module.status) {

@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
     apps: [{
         name: "ShanaBot",
         script: "build/Main.js",
@@ -9,7 +9,7 @@ module.exports = {
         source_map_support: true,
         wait_ready: true,
         watch: ["build"],
-        node_args: "--max-http-header-size=80000 --trace-warnings --max-old-space-size=4096",
+        node_args: "",
         max_memory_restart: "4G",
         env: {
             NODE_ENV: "development",
@@ -19,3 +19,21 @@ module.exports = {
         }
     }]
 };
+const defaultNodeArgs = "--max-http-header-size=80000 --trace-warnings --max-old-space-size=4096";
+let debug_mode = false;
+for (const arg of process.argv) {
+    if (arg === '-debug') {
+        debug_mode = true;
+        break;
+    }
+}
+
+if (debug_mode) {
+    console.log('== launching in debug mode ==');
+    config.apps[0].node_args = `${defaultNodeArgs} --inspect`;
+} else {
+    console.log('== launching in production mode ==');
+    config.apps[0].node_args = `${defaultNodeArgs}`;
+}
+
+module.exports = config;

@@ -37,12 +37,15 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
     @Guard(EnabledGuard("AutoRole"))
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const guildId = member.guild.id;
+        if (!await this.isEnabled(guildId)) {
+            return;
+        }
         let settings = await this.getSettings(guildId);
         if (!ObjectUtil.isValidObject(settings)) {
             settings = {};
         }
         if (settings.minAccountAge > 0) {
-            const convertedTime = TimeUtils.convertToMilli(this._settings.minAccountAge, TIME_UNIT.days);
+            const convertedTime = TimeUtils.convertToMilli(settings.minAccountAge, TIME_UNIT.days);
             const memberCreated = member.user.createdAt.getTime();
             const now = Date.now();
             const accountAge = now - memberCreated;

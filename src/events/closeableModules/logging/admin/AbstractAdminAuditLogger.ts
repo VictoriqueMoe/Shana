@@ -18,11 +18,16 @@ export abstract class AbstractAdminAuditLogger extends CloseableModule<null> {
     }
 
     protected postToLog(content: MessageEmbed | string, guildId: string, trigger?: GuildMember): Promise<Message> {
-        if (trigger) {
-            if (GuildUtils.isMemberAdmin(trigger)) {
+        return this.isEnabled(guildId).then(isEnabled => {
+            if (!isEnabled) {
                 return;
             }
-        }
-        return DiscordUtils.postToLog(content, guildId, true);
+            if (trigger) {
+                if (GuildUtils.isMemberAdmin(trigger)) {
+                    return;
+                }
+            }
+            return DiscordUtils.postToLog(content, guildId, true);
+        });
     }
 }

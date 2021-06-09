@@ -30,6 +30,9 @@ export class DynoAutoMod extends CloseableModule<null> {
     @On("message")
     @Guard(NotBot, excludeGuard, EnabledGuard("DynoAutoMod"))
     private async process([message]: ArgsOf<"message">, client: Client): Promise<void> {
+        if (!await this.isEnabled(message.guild.id)) {
+            return;
+        }
         const filters = this.submodules;
         const violatedFilters: IDynoAutoModFilter[] = [];
         if (!message.member) {
@@ -111,6 +114,8 @@ export class DynoAutoMod extends CloseableModule<null> {
                         break outer;
                     }
                 }
+                const enabled = await this.isEnabled(member.guild.id);
+                console.log(`message from server ${member.guild.name} (${member.guild.id}) violated filter ${filter.id}. Filter status is ${enabled}`);
                 filter.postProcess(message);
             }
     }

@@ -58,7 +58,6 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
         return DiscordUtils.postToLog(embed, message.guild.id, false);
     }
 
-    // eslint-disable-next-line no-undef
     abstract readonly actions: ACTION[];
     abstract readonly id: string;
     abstract readonly isActive: boolean;

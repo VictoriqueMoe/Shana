@@ -10,14 +10,16 @@ import {ObjectUtil} from "../../../utils/Utils";
 
 export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<ICloseOption> implements ICloseableModule<T> {
 
-    private _isEnabled: boolean | null = null;
+    private _isEnabled: Map<string, boolean | null>;
 
-    protected _settings: T | null;
+    private _settings: Map<string, T | null>;
 
     // @ts-ignore
     protected constructor(private _model: typeof ICloseOption, private _uid: string) {
         super();
         Main.closeableModules.add(this);
+        this._settings = new Map();
+        this._isEnabled = new Map();
     }
 
     public async saveSettings(guildId: string, setting: T, merge = false): Promise<void> {
@@ -37,12 +39,12 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
                 }
             }
         );
-        this._settings = obj;
+        this._settings.set(guildId, obj);
     }
 
     public async getSettings(guildId: string): Promise<T | null> {
-        if (this._settings) {
-            return this._settings;
+        if (this._settings.has(guildId)) {
+            return this._settings.get(guildId);
         }
         const model: ICloseOption = await this._model.findOne({
             attributes: ["settings"],
@@ -54,8 +56,8 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         if (!model || !ObjectUtil.isValidObject(model.settings)) {
             return null;
         }
-        this._settings = model.settings as T;
-        return this._settings;
+        this._settings.set(guildId, model.settings as T);
+        return this._settings.get(guildId);
     }
 
     public abstract get moduleId(): string;
@@ -85,7 +87,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
                 }
             }
         );
-        this._isEnabled = m[0] === 1;
+        this._isEnabled.set(guildId, m[0] === 1);
         console.log(`Module: ${this.moduleId} disabled`);
         return m[0] === 1;
     }
@@ -105,13 +107,13 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
                 }
             }
         );
-        this._isEnabled = m[0] === 1;
+        this._isEnabled.set(guildId, m[0] === 1);
         console.log(`Module: ${this.moduleId} enabled`);
         return m[0] === 1;
     }
 
     public async isEnabled(guildId: string): Promise<boolean> {
-        if (this._isEnabled === null) {
+        if (!this._isEnabled.has(guildId)) {
             const model: ICloseOption = await this._model.findOne({
                 attributes: ["status"],
                 where: {
@@ -119,8 +121,8 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
                     guildId
                 }
             });
-            this._isEnabled = model.status;
+            this._isEnabled.set(guildId, model.status);
         }
-        return this._isEnabled;
+        return this._isEnabled.get(guildId);
     }
 }

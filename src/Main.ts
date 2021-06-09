@@ -9,7 +9,10 @@ import * as http from "http";
 import * as fs from 'fs';
 
 const io = require('@pm2/io');
-
+io.init({
+    transactions: true,// will enable the transaction tracing
+    http: true // will enable metrics about the http server (optional)
+});
 dotenv.config({path: __dirname + '/../.env'});
 
 export class CloseableModuleSet extends Set<CloseableModule<any>> {
@@ -55,6 +58,7 @@ export class Main {
     }
 
     public static async start(): Promise<void> {
+        console.log(process.execArgv);
         this._client = new Client();
         Main._dao = new Sequelize('database', '', '', {
             host: 'localhost',

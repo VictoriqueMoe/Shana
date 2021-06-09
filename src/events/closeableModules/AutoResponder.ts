@@ -21,6 +21,9 @@ export class AutoResponder extends TriggerConstraint<null> {
     @Guard(NotBot, EnabledGuard("AutoResponder"))
     private async process([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate = false): Promise<void> {
         const guildId = message.guild.id;
+        if (!await this.isEnabled(guildId)) {
+            return;
+        }
         const channel = message.channel;
         const allRespondObjects = await AutoResponderModel.findAll({
             where: {

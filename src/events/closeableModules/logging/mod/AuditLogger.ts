@@ -23,6 +23,9 @@ export class AuditLogger extends CloseableModule<null> {
     @On("guildMemberAdd")
     @Guard(EnabledGuard("userLog"))
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
+        if (!await this.isEnabled(member.guild.id)) {
+            return;
+        }
         const memberJoined = member.id;
         DiscordUtils.postToLog(`<@${memberJoined}> has joined the server`, member.guild.id);
     }
@@ -34,6 +37,9 @@ export class AuditLogger extends CloseableModule<null> {
         const memberUsername = member.user.username;
         const memeberTag = member.user.tag;
         const guild = member.guild;
+        if (!await this.isEnabled(guild.id)) {
+            return;
+        }
         const banLog = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_ADD", guild);
         if (banLog) {
             const target = banLog.target;
@@ -70,6 +76,9 @@ export class AuditLogger extends CloseableModule<null> {
     @On("guildBanAdd")
     @Guard(EnabledGuard("userLog"))
     private async memberBanned([guild, user]: ArgsOf<"guildBanAdd">, client: Client): Promise<void> {
+        if (!await this.isEnabled(guild.id)) {
+            return;
+        }
         const memberBanned = user.id;
         const res = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_ADD", guild);
         if (res) {

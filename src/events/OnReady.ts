@@ -87,7 +87,9 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(this.startServer());
         return Promise.all(pArr).then(() => {
             console.log("Bot logged in.");
-            process.send('ready');
+            if (process.send) {
+                process.send('ready');
+            }
         });
     }
 
@@ -118,7 +120,7 @@ export class OnReady extends BaseDAO<any> {
         const allModules = Main.closeableModules;
         for (const module of allModules) {
             await Main.dao.transaction(async t => {
-                for (const [guildId] of Main.client.guilds.cache) {
+                for (const [guildId, guild] of Main.client.guilds.cache) {
                     const moduleId = module.moduleId;
                     const modelPercisted = await CloseOptionModel.findOne({
                         where: {
@@ -129,7 +131,7 @@ export class OnReady extends BaseDAO<any> {
                     if (modelPercisted) {
                         if (modelPercisted.status) {
                             const moduleName = ObjectUtil.validString(module.constructor.name) ? module.constructor.name : "";
-                            console.log(`Module: ${modelPercisted.moduleId} (${moduleName}) enabled`);
+                            console.log(`Module: ${modelPercisted.moduleId} (${moduleName})for guild "${guild.name}" (${guildId}) enabled`);
                         }
                     } else {
                         const m = new CloseOptionModel({

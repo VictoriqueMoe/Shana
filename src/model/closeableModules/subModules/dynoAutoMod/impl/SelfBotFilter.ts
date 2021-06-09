@@ -13,7 +13,7 @@ export class SelfBotFilter extends AbstractFilter {
     }
 
     public get isActive(): boolean {
-        return true;
+        return false;
     }
 
     public doFilter(content: Message): boolean {
@@ -32,7 +32,7 @@ export class SelfBotFilter extends AbstractFilter {
     }
 
     public get warnMessage(): string {
-        return `Ritch embeds are only allowed from bots, This smells like a self embed, please stop`;
+        return `Rich embeds are only allowed from bots, This smells like a self embed, please stop`;
     }
 
     public get priority(): number {
