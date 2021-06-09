@@ -1,7 +1,6 @@
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
-import {ArgsOf, Client, Guard, On} from "@typeit/discord";
-import {EnabledGuard} from "../../../../guards/EnabledGuard";
+import {ArgsOf, Client, On} from "@typeit/discord";
 import {MessageEmbed, Role, User} from "discord.js";
 import {MemberRoleChange} from "../../../../modules/automod/MemberRoleChange";
 import {GuildManager} from "../../../../model/guild/manager/GuildManager";
@@ -22,7 +21,6 @@ export class RoleLogger extends AbstractAdminAuditLogger {
     }
 
     @On("guildMemberUpdate")
-    @Guard(EnabledGuard("AdminLog"))
     private async roleGiven([oldMember, newMember]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
         const oldRolesMan = oldMember.roles;
         const newRolesMan = newMember.roles;
@@ -76,7 +74,6 @@ export class RoleLogger extends AbstractAdminAuditLogger {
     }
 
     @On("roleUpdate")
-    @Guard(EnabledGuard("AdminLog"))
     private async roleUpdated([oldRole, newRole]: ArgsOf<"roleUpdate">, client: Client): Promise<void> {
         const roleChange = DiscordUtils.getRoleChanges(oldRole, newRole);
         const guildId = newRole.guild.id;
@@ -146,7 +143,6 @@ export class RoleLogger extends AbstractAdminAuditLogger {
     }
 
     @On("roleCreate")
-    @Guard(EnabledGuard("AdminLog"))
     private async roleCreated([role]: ArgsOf<"roleCreate">, client: Client): Promise<void> {
         const roleAuditLogEntry = await DiscordUtils.getAuditLogEntry("ROLE_CREATE", role.guild);
         const {executor, target} = roleAuditLogEntry;
@@ -168,7 +164,6 @@ export class RoleLogger extends AbstractAdminAuditLogger {
     }
 
     @On("roleDelete")
-    @Guard(EnabledGuard("AdminLog"))
     private async roleDeleted([role]: ArgsOf<"roleDelete">, client: Client): Promise<void> {
         const guildId = role.guild.id;
         const roleAuditLogEntry = await DiscordUtils.getAuditLogEntry("ROLE_DELETE", role.guild);

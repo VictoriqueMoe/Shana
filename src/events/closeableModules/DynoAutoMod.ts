@@ -2,8 +2,6 @@ import {CloseableModule} from "../../model/closeableModules/impl/CloseableModule
 import {CloseOptionModel} from "../../model/DB/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {excludeGuard} from "../../guards/ExcludeGuard";
-import {EnabledGuard} from "../../guards/EnabledGuard";
 import {TimedSet} from "../../model/Impl/TimedSet";
 import {AbstractFilter} from "../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
 import {ACTION} from "../../enums/ACTION";
@@ -28,9 +26,9 @@ export class DynoAutoMod extends CloseableModule<null> {
 
     @MessageEventEditTrigger
     @On("message")
-    @Guard(NotBot, excludeGuard, EnabledGuard("DynoAutoMod"))
+    @Guard(NotBot)
     private async process([message]: ArgsOf<"message">, client: Client): Promise<void> {
-        if (!await this.isEnabled(message.guild.id)) {
+        if (!await this.canRun(message.guild.id, message.member, message.channel)) {
             return;
         }
         const filters = this.submodules;

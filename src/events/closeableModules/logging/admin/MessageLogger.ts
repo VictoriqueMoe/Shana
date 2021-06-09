@@ -1,5 +1,4 @@
-import {ArgsOf, Client, Guard, On} from "@typeit/discord";
-import {EnabledGuard} from "../../../../guards/EnabledGuard";
+import {ArgsOf, Client, On} from "@typeit/discord";
 import {GuildUtils, ObjectUtil} from "../../../../utils/Utils";
 import {MessageEmbed} from "discord.js";
 import {Main} from "../../../../Main";
@@ -22,7 +21,6 @@ export class MessageLogger extends AbstractAdminAuditLogger {
     }
 
     @On("messageUpdate")
-    @Guard(EnabledGuard("AdminLog"))
     private async messageEdited([oldMessage, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
         if (!newMessage.member) {
             return;
@@ -63,7 +61,6 @@ export class MessageLogger extends AbstractAdminAuditLogger {
 
 
     @On("messageDelete")
-    @Guard(EnabledGuard("AdminLog"))
     private async messageDeleted([message]: ArgsOf<"messageDelete">, client: Client): Promise<void> {
         if (!Main.testMode && message.member && message.member.id === Main.client.user.id) {
             return;
@@ -103,7 +100,6 @@ export class MessageLogger extends AbstractAdminAuditLogger {
     }
 
     @On("messageDeleteBulk")
-    @Guard(EnabledGuard("AdminLog"))
     private async bulkDelete([collection]: ArgsOf<"messageDeleteBulk">, client: Client): Promise<void> {
         const len = collection.size;
         const channelSet: Set<string> = new Set();

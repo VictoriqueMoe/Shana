@@ -5,6 +5,7 @@ import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
 
+const getUrls = require('get-urls');
 @InjectDynoSubModule(DynoAutoMod)
 export class SelfBotFilter extends AbstractFilter {
 
@@ -13,12 +14,16 @@ export class SelfBotFilter extends AbstractFilter {
     }
 
     public get isActive(): boolean {
-        return false;
+        return true;
     }
 
     public doFilter(content: Message): boolean {
         const embeds = content.embeds;
         for (const embed of embeds) {
+            const embedUrl = embed.url;
+            if (embedUrl.includes("twitter")) {
+                return true;
+            }
             if (embed.type === "rich") {
                 return false;
             }

@@ -1,6 +1,5 @@
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
-import {ArgsOf, Client, Guard, On} from "@typeit/discord";
-import {EnabledGuard} from "../../../guards/EnabledGuard";
+import {ArgsOf, Client, On} from "@typeit/discord";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
 import * as schedule from "node-schedule";
 import {AbstractRoleApplier} from "../../customAutoMod/RoleApplier/AbstractRoleApplier";
@@ -34,10 +33,9 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
     }
 
     @On("guildMemberAdd")
-    @Guard(EnabledGuard("AutoRole"))
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const guildId = member.guild.id;
-        if (!await this.isEnabled(guildId)) {
+        if (!await this.canRun(guildId, null, null)) {
             return;
         }
         let settings = await this.getSettings(guildId);

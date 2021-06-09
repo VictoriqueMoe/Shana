@@ -1,5 +1,4 @@
-import {ArgsOf, Client, Guard, On} from "@typeit/discord";
-import {EnabledGuard} from "../../../../guards/EnabledGuard";
+import {ArgsOf, Client, On} from "@typeit/discord";
 import {MessageEmbed, User} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
 import {Roles} from "../../../../enums/Roles";
@@ -23,7 +22,6 @@ export class MemberLogger extends AbstractAdminAuditLogger {
     }
 
     @On("guildMemberUpdate")
-    @Guard(EnabledGuard("AdminLog"))
     private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
         const {id, user} = newUser;
         const {tag} = user;
@@ -59,7 +57,6 @@ export class MemberLogger extends AbstractAdminAuditLogger {
     }
 
     @On("guildBanRemove")
-    @Guard(EnabledGuard("AdminLog"))
     private async banRemoved([guild, user]: ArgsOf<"guildBanRemove">, client: Client): Promise<void> {
         const memberBannedId = user.id;
         const MemberBannedTag = user.tag;
@@ -80,7 +77,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
     }
 
     @On("guildMemberAdd")
-    @Guard(EnabledGuard("AdminLog"))
+
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const memberJoinedId = member.id;
         const memberJoinedTag = member.user.tag;
@@ -100,7 +97,6 @@ export class MemberLogger extends AbstractAdminAuditLogger {
     }
 
     @On("guildMemberRemove")
-    @Guard(EnabledGuard("AdminLog"))
     private async memberLeaves([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const guild = member.guild;
         const banLog = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_ADD", guild);
@@ -173,7 +169,6 @@ export class MemberLogger extends AbstractAdminAuditLogger {
     }
 
     @On("guildBanAdd")
-    @Guard(EnabledGuard("AdminLog"))
     private async memberBanned([guild, user]: ArgsOf<"guildBanAdd">, client: Client): Promise<void> {
 
         const avatarUrl = user.displayAvatarURL({format: 'jpg'});

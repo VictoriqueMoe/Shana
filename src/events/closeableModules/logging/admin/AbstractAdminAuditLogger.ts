@@ -18,8 +18,8 @@ export abstract class AbstractAdminAuditLogger extends CloseableModule<null> {
     }
 
     protected postToLog(content: MessageEmbed | string, guildId: string, trigger?: GuildMember): Promise<Message> {
-        return this.isEnabled(guildId).then(isEnabled => {
-            if (!isEnabled) {
+        return this.canRun(guildId, trigger, null).then(canRun => {
+            if (!canRun) {
                 return;
             }
             if (trigger) {

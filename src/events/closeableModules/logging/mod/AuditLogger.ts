@@ -1,9 +1,8 @@
 import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
-import {ArgsOf, Client, Guard, On} from "@typeit/discord";
-import {EnabledGuard} from "../../../../guards/EnabledGuard";
+import {ArgsOf, Client, On} from "@typeit/discord";
 import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
 import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
-import {User} from "discord.js";
+import {Message, MessageEmbed, User} from "discord.js";
 
 /**
  * Non admin audit Logger for quick logs. this will log:
@@ -21,17 +20,15 @@ export class AuditLogger extends CloseableModule<null> {
     }
 
     @On("guildMemberAdd")
-    @Guard(EnabledGuard("userLog"))
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         if (!await this.isEnabled(member.guild.id)) {
             return;
         }
         const memberJoined = member.id;
-        DiscordUtils.postToLog(`<@${memberJoined}> has joined the server`, member.guild.id);
+        this.postToLog(`<@${memberJoined}> has joined the server`, member.guild.id);
     }
 
     @On("guildMemberRemove")
-    @Guard(EnabledGuard("userLog"))
     private async memberLeaves([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const memberLeft = member.id;
         const memberUsername = member.user.username;
@@ -64,17 +61,16 @@ export class AuditLogger extends CloseableModule<null> {
                         if (ObjectUtil.validString(reason)) {
                             prefix = `for reason: "${reason}"`;
                         }
-                        DiscordUtils.postToLog(`"${memberUsername}" has been kicked by ${personWhoDidKick.username} ${prefix}`, member.guild.id);
+                        this.postToLog(`"${memberUsername}" has been kicked by ${personWhoDidKick.username} ${prefix}`, member.guild.id);
                         return;
                     }
                 }
             }
         }
-        DiscordUtils.postToLog(`${memeberTag} has left the server`, member.guild.id);
+        this.postToLog(`${memeberTag} has left the server`, member.guild.id);
     }
 
     @On("guildBanAdd")
-    @Guard(EnabledGuard("userLog"))
     private async memberBanned([guild, user]: ArgsOf<"guildBanAdd">, client: Client): Promise<void> {
         if (!await this.isEnabled(guild.id)) {
             return;
@@ -88,8 +84,17 @@ export class AuditLogger extends CloseableModule<null> {
             if (ObjectUtil.validString(reason)) {
                 prefix = `for reason: "${reason}"`;
             }
-            DiscordUtils.postToLog(`<@${memberBanned}> (${user.tag}) has been BANNED by ${personWhoDidBan.tag} ${prefix}"`, guild.id);
+            this.postToLog(`<@${memberBanned}> (${user.tag}) has been BANNED by ${personWhoDidBan.tag} ${prefix}"`, guild.id);
         }
+    }
+
+    private postToLog(content: MessageEmbed | string, guildId: string): Promise<Message> {
+        return this.canRun(guildId, null, null).then(canRun => {
+            if (!canRun) {
+                return;
+            }
+            return DiscordUtils.postToLog(content, guildId);
+        });
     }
 
 

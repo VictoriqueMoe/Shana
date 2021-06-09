@@ -1,6 +1,5 @@
 import {ArgsOf, Client, Guard, On} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {EnabledGuard} from "../../guards/EnabledGuard";
 import {ArrayUtils, ObjectUtil} from "../../utils/Utils";
 import {CloseOptionModel} from "../../model/DB/autoMod/impl/CloseOption.model";
 import {TriggerConstraint} from "../../model/closeableModules/impl/TriggerConstraint";
@@ -18,13 +17,13 @@ export class AutoResponder extends TriggerConstraint<null> {
 
     @MessageEventEditTrigger
     @On("message")
-    @Guard(NotBot, EnabledGuard("AutoResponder"))
+    @Guard(NotBot)
     private async process([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate = false): Promise<void> {
         const guildId = message.guild.id;
-        if (!await this.isEnabled(guildId)) {
+        const channel = message.channel;
+        if (!await this.canRun(guildId, null, channel)) {
             return;
         }
-        const channel = message.channel;
         const allRespondObjects = await AutoResponderModel.findAll({
             where: {
                 guildId
@@ -83,7 +82,7 @@ export class AutoResponder extends TriggerConstraint<null> {
                         try {
                             await message.react(emoji);
                         } catch (e) {
-                            console.error(e);
+                            console.warn(e);
                         }
                     }
                     break;

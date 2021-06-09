@@ -6,7 +6,11 @@ import {ISubModule} from "../subModules/ISubModule";
 import * as Immutable from "immutable";
 import {SubModuleManager} from "../manager/SubModuleManager";
 import {ModuleSettings} from "../ModuleSettings";
-import {ObjectUtil} from "../../../utils/Utils";
+import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
+import {Channel, GuildMember, TextChannel} from "discord.js";
+import {Roles} from "../../../enums/Roles";
+import {CloseOptionModel} from "../../DB/autoMod/impl/CloseOption.model";
+import RolesEnum = Roles.RolesEnum;
 
 export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<ICloseOption> implements ICloseableModule<T> {
 
@@ -124,5 +128,51 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
             this._isEnabled.set(guildId, model.status);
         }
         return this._isEnabled.get(guildId);
+    }
+
+    /**
+     * Will check if:
+     * Current user is able to trigger this module
+     * is this module enabled
+     * @param guildId
+     * @param member
+     * @param channel
+     * @protected
+     */
+    protected async canRun(guildId: string, member: GuildMember | null, channel: Channel | null): Promise<boolean> {
+        if (!ObjectUtil.validString(guildId)) {
+            throw new Error("Unable to find guild");
+        }
+        const enabled = await this.isEnabled(guildId);
+        if (!enabled) {
+            return false;
+        }
+
+        if (member) {
+            //TODO remove when i figure out how to get all closeable modules to implement ITriggerConstraint
+            if (GuildUtils.isMemberAdmin(member)) {
+                return false;
+            }
+            const memberRoles = member.roles.cache;
+            const hardCodedImmunes = [RolesEnum.OVERWATCH_ELITE, RolesEnum.CIVIL_PROTECTION, RolesEnum.ZOMBIES];
+            for (const immuneRoles of hardCodedImmunes) {
+                if (memberRoles.has(immuneRoles)) {
+                    return false;
+                }
+            }
+        }
+        if (channel) {
+            if (!(channel instanceof TextChannel)) {
+                return false;
+            }
+        }
+        const module = await CloseOptionModel.findOne({
+            where: {
+                moduleId: this.moduleId,
+                guildId,
+                status: true
+            }
+        });
+        return module && module.status;
     }
 }
