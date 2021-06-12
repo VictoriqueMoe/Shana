@@ -113,7 +113,12 @@ export namespace GuildUtils {
         await member.roles.set([youngAccountRole]);
         const guild = await GuildManager.instance.getGuild(guildId);
         DiscordUtils.postToLog(`Member <@${member.id}> ${member.user.tag} has been applied the ${youngAccountRole.name} role`, guildId);
-        await member.send(`Hello, as your Discord account is less than ${timeout} old and because of recent scams, we must verify your account before you can access the ${guild.name} Discord Server`);
+        let message = `Hello, as your Discord account is less than ${timeout} old and because of recent scams, we must verify your account before you can access the ${guild.name} Discord Server`;
+        const jailChannel = await ChannelManager.instance.getJailChannel(guild.id);
+        if (jailChannel) {
+            message += `\nPlease post in the #${jailChannel.name} channel for faster verification process`;
+        }
+        await member.send(message);
     }
 
     export async function sendToJail(member: GuildMember, reason: string): Promise<void> {
