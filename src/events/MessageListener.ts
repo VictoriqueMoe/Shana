@@ -7,9 +7,10 @@ import {Roles} from "../enums/Roles";
 import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil} from "../utils/Utils";
 import {BannedAttachmentsModel} from "../model/DB/BannedAttachments.model";
 import {Main} from "../Main";
-import {Message, User} from "discord.js";
+import {GuildMember, Message, User} from "discord.js";
 import {Op} from "sequelize";
 import {EditListenMethods, MessageEventEditTrigger} from "../model/decorators/MessageEventEditTrigger";
+import {GuildManager} from "../model/guild/manager/GuildManager";
 import RolesEnum = Roles.RolesEnum;
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
@@ -32,6 +33,37 @@ export abstract class MessageListener {
             fetch(`https://api.lovense.com/api/lan/command?token=${process.env.loveSenseToken}&uid=${process.env.uid}&command=${command}&v=${v}&t=${process.env.toyId}&sec=${sec}`, {
                 method: 'post'
             });
+        }
+    }
+
+
+    @On("message")
+    private async logDMs([message]: ArgsOf<"message">, client: Client): Promise<void> {
+        if (message.author.bot) {
+            return;
+        }
+        if (message.channel.type === "dm") {
+            const user = message.author;
+            const {id} = user;
+            try {
+                const guilds = await GuildManager.instance.getGuilds();
+                for (const guild of guilds) {
+                    let member: GuildMember = null;
+                    try {
+                        member = await guild.members.fetch(id);
+                    } catch {
+                    }
+                    if (!member) {
+                        continue;
+                    }
+                    const messageToPost = `<@${member.id}> send a message in DM: "${message.content}"`;
+                    await DiscordUtils.postToLog(messageToPost, guild.id);
+                    break;
+                }
+            } catch {
+            }
+            console.log(`<@${user.id}> send a message in DM: "${message.content}"`);
+            return;
         }
     }
 

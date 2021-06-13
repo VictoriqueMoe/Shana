@@ -19,8 +19,8 @@ export class AutoResponder extends TriggerConstraint<null> {
     @On("message")
     @Guard(NotBot)
     private async process([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate = false): Promise<void> {
-        const guildId = message.guild.id;
         const channel = message.channel;
+        const guildId = message.guild.id;
         if (!await this.canRun(guildId, null, channel)) {
             return;
         }

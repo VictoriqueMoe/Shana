@@ -5,7 +5,7 @@ export const NotBot: GuardFunction<"message"> = async (
     client,
     next
 ) => {
-    if (!message.author.bot) {
+    if (message.channel.type !== "dm" && !message.author.bot) {
         await next();
         return;
     }

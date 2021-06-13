@@ -21,7 +21,7 @@ export class SelfBotFilter extends AbstractFilter {
         const embeds = content.embeds;
         for (const embed of embeds) {
             const embedUrl = embed.url;
-            if (embedUrl.includes("twitter")) {
+            if (embedUrl && embedUrl.includes("twitter")) {
                 return true;
             }
             if (embed.type === "rich") {

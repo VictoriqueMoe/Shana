@@ -70,6 +70,10 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             if (filter.isActive && await filter.checkUsername(member)) {
                 return;
             }
+            const memberHasRole = member.roles.cache.size > 0;
+            if (memberHasRole) {
+                return;
+            }
             const autoRole = await GuildUtils.RoleUtils.getAutoRole(guildId);
             const persistedRole = await RolePersistenceModel.findOne({
                 where: {
