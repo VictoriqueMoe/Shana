@@ -1,8 +1,11 @@
+import {ArgsOf, Client} from "@typeit/discord";
+import {Message} from "discord.js";
+
 export namespace Typeings {
     export type CommandArgs = {
-        module:{
-            name:string,
-            description:string
+        module: {
+            name: string,
+            description: string
         },
         commands: Command[]
     };
@@ -65,3 +68,6 @@ export type EventSecurityConstraintType = {
     ignoredChannels?: string[],
     ignoredRoles?: string[],
 }
+
+export type EditType = ([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate: boolean) => Promise<void>;
+export type EventTriggerCondition = (message: Message) => Promise<boolean>;

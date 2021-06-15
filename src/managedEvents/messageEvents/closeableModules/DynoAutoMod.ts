@@ -1,18 +1,17 @@
-import {CloseableModule} from "../../model/closeableModules/impl/CloseableModule";
-import {CloseOptionModel} from "../../model/DB/autoMod/impl/CloseOption.model";
-import {ArgsOf, Client, Guard, On} from "@typeit/discord";
-import {NotBot} from "../../guards/NotABot";
-import {TimedSet} from "../../model/Impl/TimedSet";
-import {AbstractFilter} from "../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
-import {ACTION} from "../../enums/ACTION";
-import {IDynoAutoModFilter} from "../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
+import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
+import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
+import {ArgsOf, Client} from "@typeit/discord";
+import {TimedSet} from "../../../model/Impl/TimedSet";
+import {AbstractFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
+import {ACTION} from "../../../enums/ACTION";
+import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
 import {GuildMember} from "discord.js";
-import {MuteModel} from "../../model/DB/autoMod/impl/Mute.model";
-import {MuteSingleton} from "../../commands/customAutoMod/userBlock/MuteSingleton";
-import {Main} from "../../Main";
-import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
+import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
+import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
+import {Main} from "../../../Main";
+import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import * as Immutable from "immutable";
-import {MessageEventEditTrigger} from "../../model/decorators/MessageEventEditTrigger";
+import {MessageListenerDecorator, notBot} from "../../../model/decorators/messageListenerDecorator";
 
 export class DynoAutoMod extends CloseableModule<null> {
 
@@ -24,9 +23,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         super(CloseOptionModel, DynoAutoMod._uid);
     }
 
-    @MessageEventEditTrigger
-    @On("message")
-    @Guard(NotBot)
+    @MessageListenerDecorator(true, notBot)
     private async process([message]: ArgsOf<"message">, client: Client): Promise<void> {
         if (!await this.canRun(message.guild.id, message.member, message.channel)) {
             return;

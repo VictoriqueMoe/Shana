@@ -1,6 +1,7 @@
-import {ArgsOf, Client, DIService} from "@typeit/discord";
+import {DIService} from "@typeit/discord";
+import {EditType} from "../types/Typeings";
 
-type EditType = ([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate: boolean) => Promise<void>;
+
 export const EditListenMethods: Map<any, EditType[]> = new Map();
 
 /**

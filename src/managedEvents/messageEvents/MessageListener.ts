@@ -1,17 +1,12 @@
-import {ArgsOf, Client, Guard, On} from "@typeit/discord";
-import {NotBot} from "../guards/NotABot";
+import {ArgsOf, Client} from "@typeit/discord";
 import fetch from "node-fetch";
-import {PremiumChannelOnlyCommand} from "../guards/PremiumChannelOnlyCommand";
-import {BlockGuard} from "../guards/BlockGuard";
-import {Roles} from "../enums/Roles";
-import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil} from "../utils/Utils";
-import {BannedAttachmentsModel} from "../model/DB/BannedAttachments.model";
-import {Main} from "../Main";
+import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
+import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
+import {Main} from "../../Main";
 import {GuildMember, Message, User} from "discord.js";
 import {Op} from "sequelize";
-import {EditListenMethods, MessageEventEditTrigger} from "../model/decorators/MessageEventEditTrigger";
-import {GuildManager} from "../model/guild/manager/GuildManager";
-import RolesEnum = Roles.RolesEnum;
+import {GuildManager} from "../../model/guild/manager/GuildManager";
+import {MessageListenerDecorator, notBot} from "../../model/decorators/messageListenerDecorator";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
 const getUrls = require('get-urls');
@@ -21,7 +16,7 @@ const md5 = require('md5');
 
 export abstract class MessageListener {
 
-    @On("message")
+    /*@On("message")
     @Guard(NotBot, PremiumChannelOnlyCommand, BlockGuard)
     private activateVibrator([message]: ArgsOf<"message">, client: Client): void {
         const hasPingedRole = message.mentions.roles.has(RolesEnum.WEEB_OVERLORD); // whore role
@@ -34,10 +29,42 @@ export abstract class MessageListener {
                 method: 'post'
             });
         }
+    }*/
+
+    @MessageListenerDecorator(true, notBot)
+    private async moeLoliDestroyer([message]: ArgsOf<"message">, client: Client): Promise<void> {
+        if (!message.member) {
+            return;
+        }
+        if (message.member.id === "270632394137010177") {
+            const banned = ["ì", "|", "lol", "loli", "l0l"];
+            let messageContent = message.content.replace(/\s/g, '').toLocaleLowerCase();
+            messageContent = messageContent.replace(/[ ,.-]/g, "");
+            let shouldBlock = false;
+            for (const ban of banned) {
+                if (messageContent.includes(ban.toLocaleLowerCase())) {
+                    shouldBlock = true;
+                    break;
+                }
+            }
+            if (shouldBlock) {
+                this.doPoser(message);
+                return;
+            }
+        }
+    }
+
+    private doPoser(message: Message): void {
+        message.reply("Poser").then(value => {
+            setTimeout(() => {
+                value.delete();
+            }, 3000);
+        });
+        message.delete();
     }
 
 
-    @On("message")
+    @MessageListenerDecorator()
     private async logDMs([message]: ArgsOf<"message">, client: Client): Promise<void> {
         if (message.author.bot) {
             return;
@@ -67,8 +94,7 @@ export abstract class MessageListener {
         }
     }
 
-    @On("message")
-    @Guard(NotBot)
+    @MessageListenerDecorator(false, notBot)
     private async replier([message]: ArgsOf<"message">, client: Client): Promise<void> {
         if (!message.member) {
             return;
@@ -111,37 +137,8 @@ export abstract class MessageListener {
         message.channel.send(reply.output);
     }
 
-    @On("message")
-    @Guard(NotBot)
-    private async iLoveCocks([message]: ArgsOf<"message">, client: Client): Promise<void> {
-        const atttchments = message.attachments;
-        const imgHash = "40d2949f7479d0f2ada3b178c1e1bcbd";
-        for (const [, atttchmentObj] of atttchments) {
-            const attachment = await DiscordUtils.loadResourceFromURL((atttchmentObj.attachment as string));
-            const attachmentHash = md5(attachment);
-            if (attachmentHash === imgHash) {
-                message.channel.send("<@697417252320051291> does");
-                return;
-            }
-        }
-    }
 
-    @On("messageReactionAdd")
-    private async scanEmojiReactAdd([reaction, user]: ArgsOf<"messageReactionAdd">, client: Client): Promise<void> {
-        const emjiFromReaction = reaction.emoji;
-        const emojiId = emjiFromReaction.id;
-        if (!(user instanceof User)) {
-            try {
-                user = (await reaction.message.guild.members.fetch(user.id)).user;
-            } catch (e) {
-                console.error(e);
-                return;
-            }
-        }
-        this.doEmojiBan([emojiId], user, reaction.message, true);
-    }
-
-    private async doEmojiBan(emojiIds: string[], user: User, message: Message, isReaction: boolean): Promise<void> {
+    public static async doEmojiBan(emojiIds: string[], user: User, message: Message, isReaction: boolean): Promise<void> {
         for (const emoji of emojiIds) {
             let bannedEmojiInfo: EmojiInfo = null;
             try {
@@ -183,8 +180,7 @@ export abstract class MessageListener {
         }
     }
 
-    @MessageEventEditTrigger
-    @On("message")
+    @MessageListenerDecorator(true)
     private async scanEmoji([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const member = message.member;
         if (!member) {
@@ -195,22 +191,11 @@ export abstract class MessageListener {
         }
         const emojis = DiscordUtils.getEmojiFromMessage(message, false);
         const emojiIds = emojis.map(emoji => emoji.split(":").pop().slice(0, -1));
-        this.doEmojiBan(emojiIds, message.member.user, message, false);
-    }
-
-    @On("messageUpdate")
-    @Guard(NotBot)
-    private async messageUpdater([oldMessage, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
-        for (const [context, methods] of EditListenMethods) {
-            for (const method of methods) {
-                method.call(context, [newMessage as Message], client, {}, true);
-            }
-        }
+        MessageListener.doEmojiBan(emojiIds, message.member.user, message, false);
     }
 
 
-    @MessageEventEditTrigger
-    @On("message")
+    @MessageListenerDecorator(true)
     private async scanAttachments([message]: ArgsOf<"message">, client: Client): Promise<void> {
         const member = message.member;
         if (!member) {

@@ -3,11 +3,22 @@ import {DIService} from "@typeit/discord";
 import {ISubModule} from "../closeableModules/subModules/ISubModule";
 import {ICloseableModule} from "../closeableModules/ICloseableModule";
 import {CloseableModule} from "../closeableModules/impl/CloseableModule";
+import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventDispatcher";
 
 export function InjectDynoSubModule(parentModule: typeof CloseableModule) {
     // @ts-ignore
     return (constructor: typeof ISubModule) => {
-        const parentFilter: ICloseableModule<never> = DIService.instance.getService(parentModule);
+        let parentFilter: ICloseableModule<any> = DIService.instance.getService(parentModule);
+        if (parentFilter == null) {
+            const map = MessageEventDispatcher.messageListenerMap;
+            for (const [_context,] of map) {
+                if (_context.constructor === parentModule) {
+                    parentFilter = _context;
+                    break;
+                }
+            }
+        }
+
         if (parentFilter == null) {
             throw new Error(`Unable to find any module for ${parentModule}`);
         }

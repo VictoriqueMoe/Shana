@@ -7,7 +7,7 @@ import {ObjectUtil} from "../../../../../utils/Utils";
 import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {ICloseableModule} from "../../../ICloseableModule";
-import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
+import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 
 @InjectDynoSubModule(DynoAutoMod)
 export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {

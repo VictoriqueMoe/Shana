@@ -1,5 +1,5 @@
 import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
-import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
+import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {PRIORITY} from "../../../../../enums/PRIORITY";

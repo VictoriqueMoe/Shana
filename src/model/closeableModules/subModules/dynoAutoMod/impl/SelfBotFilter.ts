@@ -3,7 +3,7 @@ import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
 import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
+import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 
 const getUrls = require('get-urls');
 @InjectDynoSubModule(DynoAutoMod)

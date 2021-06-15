@@ -19,7 +19,7 @@ const config = {
         }
     }]
 };
-const defaultNodeArgs = "--max-http-header-size=80000 --trace-warnings --max-old-space-size=4096";
+const defaultNodeArgs = "--max-http-header-size=80000 --trace-warnings --max_old_space_size=4096 --max-old-space-size=4096";
 let debug_mode = false;
 for (const arg of process.argv) {
     if (arg === '-debug') {

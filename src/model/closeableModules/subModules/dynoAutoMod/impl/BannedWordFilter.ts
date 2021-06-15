@@ -4,7 +4,7 @@ import {GuildMember, Message} from "discord.js";
 import {BannedWordEntryies, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
 import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {DynoAutoMod} from "../../../../../events/closeableModules/DynoAutoMod";
+import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {GuildUtils} from "../../../../../utils/Utils";
 
 @InjectDynoSubModule(DynoAutoMod)
@@ -66,7 +66,8 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
             }
         }
         for (const wildCardString of inStringArray) {
-            const violatesExactWord = messageContent.includes(wildCardString.toLowerCase());
+            const localString = messageContent.replace(/\s/gim, "");
+            const violatesExactWord = localString.includes(wildCardString.toLowerCase());
             if (violatesExactWord) {
                 return false;
             }

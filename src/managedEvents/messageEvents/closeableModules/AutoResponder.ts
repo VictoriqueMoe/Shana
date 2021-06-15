@@ -1,11 +1,10 @@
-import {ArgsOf, Client, Guard, On} from "@typeit/discord";
-import {NotBot} from "../../guards/NotABot";
-import {ArrayUtils, ObjectUtil} from "../../utils/Utils";
-import {CloseOptionModel} from "../../model/DB/autoMod/impl/CloseOption.model";
-import {TriggerConstraint} from "../../model/closeableModules/impl/TriggerConstraint";
-import {AutoResponderModel} from "../../model/DB/autoMod/impl/AutoResponder.model";
+import {ArgsOf, Client} from "@typeit/discord";
+import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
+import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
+import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint";
+import {AutoResponderModel} from "../../../model/DB/autoMod/impl/AutoResponder.model";
 import {Message} from "discord.js";
-import {MessageEventEditTrigger} from "../../model/decorators/MessageEventEditTrigger";
+import {MessageListenerDecorator, notBot} from "../../../model/decorators/messageListenerDecorator";
 
 export class AutoResponder extends TriggerConstraint<null> {
 
@@ -15,9 +14,7 @@ export class AutoResponder extends TriggerConstraint<null> {
         super(CloseOptionModel, AutoResponder._uid);
     }
 
-    @MessageEventEditTrigger
-    @On("message")
-    @Guard(NotBot)
+    @MessageListenerDecorator(true, notBot)
     private async process([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate = false): Promise<void> {
         const channel = message.channel;
         const guildId = message.guild.id;

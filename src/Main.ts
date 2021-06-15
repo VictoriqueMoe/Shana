@@ -6,7 +6,7 @@ import {EnumEx, ObjectUtil} from "./utils/Utils";
 import {DEFAULT_SETTINGS, SETTINGS} from "./enums/SETTINGS";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import * as http from "http";
-import * as fs from 'fs';
+import * as v8 from "v8";
 
 const io = require('@pm2/io');
 io.init({
@@ -59,6 +59,7 @@ export class Main {
 
     public static async start(): Promise<void> {
         console.log(process.execArgv);
+        console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         this._client = new Client();
         Main._dao = new Sequelize('database', '', '', {
             host: 'localhost',
@@ -75,7 +76,6 @@ export class Main {
             }
         });
         await Main.dao.sync({force: false});
-        this.loadCustomActions();
         await this._client.login(
             process.env.token,
             `${__dirname}/discord/*.ts`,
@@ -83,15 +83,6 @@ export class Main {
         );
     }
 
-    private static loadCustomActions(): void {
-        io.action('getLogs', async (cb) => {
-            const url = `${__dirname}/../logs/combined.log`;
-            const log = fs.readFileSync(url, {
-                encoding: 'utf8'
-            });
-            return cb(log);
-        });
-    }
 
     public static async setDefaultSettings(): Promise<void> {
         const guilds = this.client.guilds;
