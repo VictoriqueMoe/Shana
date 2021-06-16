@@ -6,14 +6,10 @@ import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {Collection, Message, Snowflake} from "discord.js";
 import {AbstractCommand} from "../AbstractCommand";
 
-const isVideo = require('is-video');
-const tmp = require('tmp');
 const getUrls = require('get-urls');
 const md5 = require('md5');
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
-const {basename, join} = require('path');
-const sanitize = require('sanitize-filename');
 
 export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsModel> {
 

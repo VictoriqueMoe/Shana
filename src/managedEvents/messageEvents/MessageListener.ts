@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {Main} from "../../Main";
-import {GuildMember, Message, User} from "discord.js";
+import {GuildMember, Message, Role, User} from "discord.js";
 import {Op} from "sequelize";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {MessageListenerDecorator, notBot} from "../../model/decorators/messageListenerDecorator";
@@ -66,7 +66,7 @@ export abstract class MessageListener {
 
     @MessageListenerDecorator()
     private async logDMs([message]: ArgsOf<"message">, client: Client): Promise<void> {
-        if (message.author.bot) {
+        if (message.author.bot || !ObjectUtil.validString(message.content)) {
             return;
         }
         if (message.channel.type === "dm") {
@@ -76,11 +76,14 @@ export abstract class MessageListener {
                 const guilds = await GuildManager.instance.getGuilds();
                 for (const guild of guilds) {
                     let member: GuildMember = null;
+                    let youngAccountRole: Role = null;
                     try {
                         member = await guild.members.fetch(id);
+                        youngAccountRole = await GuildUtils.RoleUtils.getYoungAccountRole(guild.id);
                     } catch {
+                        continue;
                     }
-                    if (!member) {
+                    if (!youngAccountRole || !member || !member.roles.cache.has(youngAccountRole.id)) {
                         continue;
                     }
                     const messageToPost = `<@${member.id}> send a message in DM: "${message.content}"`;
