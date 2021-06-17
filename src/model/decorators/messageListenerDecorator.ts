@@ -7,6 +7,12 @@ export async function notBot(message: Message): Promise<boolean> {
     return message.channel.type !== "dm" && !message.author.bot;
 }
 
+/**
+ * Singles this method to be triggered on a message event.
+ * @param triggerOnEdit
+ * @param conditions
+ * @constructor
+ */
 export function MessageListenerDecorator(triggerOnEdit = false, ...conditions: EventTriggerCondition[]) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
         console.log(`Adding: "${target.constructor.name}.${propertyKey}" to listeners for messages`);

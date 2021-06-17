@@ -4,10 +4,10 @@ import {NotBot} from "../../guards/NotABot";
 import {secureCommand} from "../../guards/RoleConstraint";
 import {DiscordUtils, StringUtils} from "../../utils/Utils";
 import {GuildMember} from "discord.js";
-import {AbstractCommand} from "../AbstractCommand";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
+import {AbstractCommandModule} from "../AbstractCommandModule";
 
-export abstract class Username extends AbstractCommand<UsernameModel> {
+export abstract class Username extends AbstractCommandModule<UsernameModel> {
 
     constructor() {
         super({

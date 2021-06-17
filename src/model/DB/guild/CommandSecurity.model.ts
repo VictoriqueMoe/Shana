@@ -9,6 +9,9 @@ export class CommandSecurityModel extends Model implements IGuildAware {
     @Column({unique: false, allowNull: false})
     public commandName: string;
 
+    @Column({unique: false, defaultValue: true})
+    public enabled: boolean;
+
     @Column({
         type: DataType.TEXT,
         allowNull: true,

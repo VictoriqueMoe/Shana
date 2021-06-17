@@ -24,6 +24,11 @@ export namespace Typeings {
         }
     };
 
+    export type UpdateCommandSettings = {
+        roles: string[],
+        enabled: boolean
+    };
+
     export type AnimeEntry = {
         averageScore: number,
         coverImage: {

@@ -2,9 +2,9 @@ import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
 import {secureCommand} from "../../guards/RoleConstraint";
 import {ObjectUtil} from "../../utils/Utils";
-import {AbstractCommand} from "../AbstractCommand";
 import {Main} from "../../Main";
 import {GuildChannel} from "discord.js";
+import {AbstractCommandModule} from "../AbstractCommandModule";
 
 
 type AgeType = {
@@ -16,7 +16,7 @@ interface Dateable {
     createdAt: Date
 }
 
-export abstract class AccountAge extends AbstractCommand<any> {
+export abstract class AccountAge extends AbstractCommandModule<any> {
 
     constructor() {
         super({

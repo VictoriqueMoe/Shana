@@ -11,6 +11,9 @@ import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
 import {InjectController} from "../../../model/decorators/InjectController";
 import {ModuleController} from "./modules/impl/ModuleController";
+import {CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager";
+import {Typeings} from "../../../model/types/Typeings";
+import CommandArgs = Typeings.CommandArgs;
 
 @InjectController
 @Controller("api/bot")
@@ -115,6 +118,27 @@ export class BotController extends baseController {
             return super.doError(res, e.message, StatusCodes.BAD_REQUEST);
         }
         return super.ok(res, {});
+    }
+
+    @Get('allCommands')
+    private async allCommands(req: Request, res: Response) {
+        let guild: Guild;
+        try {
+            guild = await this.getGuild(req);
+        } catch (e) {
+            return super.doError(res, e.message, StatusCodes.NOT_FOUND);
+        }
+        const commandClasses = CommandSecurityManager.instance.runnableCommands;
+        const retObj: CommandArgs[] = [];
+        for (const commandModule of commandClasses) {
+            const {commandDescriptors} = commandModule;
+            for (const command of commandDescriptors.commands) {
+                const {name} = command;
+                command["enabled"] = await CommandSecurityManager.instance.isEnabled(name, guild.id);
+            }
+            retObj.push(commandDescriptors);
+        }
+        return super.ok(res, retObj);
     }
 
     @Get('allGuilds')

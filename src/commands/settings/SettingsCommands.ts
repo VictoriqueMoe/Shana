@@ -3,14 +3,14 @@ import {NotBot} from "../../guards/NotABot";
 import {ObjectUtil, StringUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import {DEFAULT_SETTINGS, SETTINGS} from "../../enums/SETTINGS";
-import {AbstractCommand} from "../AbstractCommand";
 import {secureCommand} from "../../guards/RoleConstraint";
 import {ICloseableModule} from "../../model/closeableModules/ICloseableModule";
 import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
 import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole";
+import {AbstractCommandModule} from "../AbstractCommandModule";
 
 
-export class SettingsCommands extends AbstractCommand<any> {
+export class SettingsCommands extends AbstractCommandModule<any> {
 
     constructor() {
         super({

@@ -1,13 +1,13 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
-import {AbstractCommand} from "./AbstractCommand";
 import {secureCommand} from "../guards/RoleConstraint";
+import {AbstractCommandModule} from "./AbstractCommandModule";
 
-export abstract class Ping extends AbstractCommand<any> {
+export abstract class Ping extends AbstractCommandModule<any> {
 
     constructor() {
         super({
-            module:{
-                name:"Ping",
+            module: {
+                name: "Ping",
                 description: "Commands to check the status and health of this bot"
             },
             commands: [

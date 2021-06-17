@@ -3,8 +3,21 @@ import {secureCommand} from "../guards/RoleConstraint";
 
 const Discord = require('discord.js');
 const Canvas = require('canvas');
+const {MessageButton} = require('discord-buttons');
 
 export class Test {
+
+    @Command("button")
+    @Guard(secureCommand)
+    private async button(command: CommandMessage): Promise<void> {
+        require('discord-buttons')(command.client);
+        const button = new MessageButton()
+            .setLabel("Vote")
+            .setStyle("url")
+            .setEmoji("🍔")
+            .setURL("https://discord-buttons.js.org");
+        await command.channel.send(`Ayo`, button);
+    }
 
     @Command("test")
     @Guard(secureCommand)

@@ -10,18 +10,18 @@ import {
 } from "../../model/Impl/ImageFun/Typeings";
 import {AssertionError} from "assert";
 import {getPrefix} from "../../discord/WeebBot";
-import {AbstractCommand} from "../AbstractCommand";
 import {secureCommand} from "../../guards/RoleConstraint";
+import {AbstractCommandModule} from "../AbstractCommandModule";
 
-export abstract class Meme extends AbstractCommand<any> {
+export abstract class Meme extends AbstractCommandModule<any> {
 
     private handler = ImageFun.instance;
 
     constructor() {
         super(
             {
-                module:{
-                    name:"Memes",
+                module: {
+                    name: "Memes",
                     description: "Commands generate memes. All commands that are marked as type 'attachment' can take both an uploaded image (has to be jpg) OR a mention"
                 },
                 "commands": [

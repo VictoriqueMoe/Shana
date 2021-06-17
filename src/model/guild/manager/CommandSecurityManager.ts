@@ -2,11 +2,14 @@ import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
 import {GuildMember} from "discord.js";
 import {DIService} from "@typeit/discord";
-import {AbstractCommand} from "../../../commands/AbstractCommand";
 import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
+import {AbstractCommandModule} from "../../../commands/AbstractCommandModule";
+import {Typeings} from "../../types/Typeings";
+import {Sequelize} from "sequelize-typescript";
+import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
-    private readonly commandClasses: AbstractCommand<any> [];
+    private readonly commandClasses: AbstractCommandModule<any> [];
 
     private constructor() {
         super();
@@ -14,7 +17,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         const allCommands: Map = DIService.instance._services;
         this.commandClasses = [];
         for (const [, instance] of allCommands) {
-            if (instance instanceof AbstractCommand) {
+            if (instance instanceof AbstractCommandModule) {
                 if (!ObjectUtil.isValidObject(instance.commandDescriptors)) {
                     continue;
                 }
@@ -32,7 +35,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         return CommandSecurityManager._instance;
     }
 
-    public get runnableCommands(): AbstractCommand<any>[] {
+    public get runnableCommands(): AbstractCommandModule<any>[] {
         return this.commandClasses;
     }
 
@@ -40,11 +43,11 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
      * Change to return JSON object with modules and commands for the user
      * @param member
      */
-    public async getCommandModulesForMember(member: GuildMember): Promise<AbstractCommand<any> []> {
+    public async getCommandModulesForMember(member: GuildMember): Promise<AbstractCommandModule<any> []> {
         if (GuildUtils.isMemberAdmin(member)) {
             return this.commandClasses;
         }
-        const retArray: AbstractCommand<any>[] = [];
+        const retArray: AbstractCommandModule<any>[] = [];
         const memberRoles = member.roles.cache.keyArray();
         const allCommands = await CommandSecurityModel.findAll({
             where: {
@@ -72,6 +75,29 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
                 }
             }
         return retArray;
+    }
+
+    public async updateCommand(commandName: string, guildId: string, settings: UpdateCommandSettings): Promise<boolean> {
+        return (await CommandSecurityModel.update({
+            allowedRoles: settings.roles,
+            enabled: settings.enabled
+        }, {
+            where: {
+                guildId,
+                commandName
+            }
+        }))[0] === 1;
+    }
+
+    public async isEnabled(commandName: string, guildId: string): Promise<boolean> {
+        const command = await CommandSecurityModel.findOne({
+            attributes: ["enabled"],
+            where: {
+                guildId,
+                "commandName": Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('commandName')), 'LIKE', `%${commandName}%`)
+            }
+        });
+        return command.enabled;
     }
 
     public async canRunCommand(member: GuildMember, commandName: string): Promise<boolean> {

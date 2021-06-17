@@ -17,7 +17,6 @@ import {isValidCron} from 'cron-validator';
 import {Main} from "../Main";
 import {CommandMessage} from "@typeit/discord";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
-import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {Model, Sequelize} from "sequelize-typescript";
 import {defaults} from "request";
@@ -29,6 +28,7 @@ import {GuildManager} from "../model/guild/manager/GuildManager";
 import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 import {IncomingMessage} from "http";
+import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
 
 const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
@@ -588,7 +588,7 @@ export namespace DiscordUtils {
         return allModules.map(m => m.moduleId);
     }
 
-    export function getModule(moduleId: string): CloseableModule<any> {
+    export function getModule(moduleId: string): ICloseableModule<any> {
         const modules = Main.closeableModules;
         for (const module of modules) {
             if (module.moduleId === moduleId) {
@@ -598,9 +598,9 @@ export namespace DiscordUtils {
         return null;
     }
 
-    export function getDynoReplacementModules(): CloseableModule<any>[] {
+    export function getDynoReplacementModules(): ICloseableModule<any>[] {
         const modules = Main.closeableModules;
-        const returnArr: CloseableModule<any>[] = [];
+        const returnArr: ICloseableModule<any>[] = [];
         for (const module of modules) {
             if (module.isDynoReplacement) {
                 returnArr.push(module);

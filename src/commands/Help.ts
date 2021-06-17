@@ -1,5 +1,4 @@
-import {AbstractCommand} from "./AbstractCommand";
-import {Command, CommandMessage, DIService, Guard} from "@typeit/discord";
+import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {NotBot} from "../guards/NotABot";
 import {ArrayUtils, ObjectUtil, StringUtils} from "../utils/Utils";
 import {GuildMember, MessageEmbed} from "discord.js";
@@ -9,8 +8,9 @@ import {SETTINGS} from "../enums/SETTINGS";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {Typeings} from "../model/types/Typeings";
 import {secureCommand} from "../guards/RoleConstraint";
+import {AbstractCommandModule} from "./AbstractCommandModule";
 
-export class Help extends AbstractCommand<any> {
+export class Help extends AbstractCommandModule<any> {
     constructor() {
         super({
             module: {
@@ -56,17 +56,6 @@ export class Help extends AbstractCommand<any> {
         if (argumentArray.length !== 3 && argumentArray.length !== 2 && argumentArray.length !== 1 && argumentArray.length !== 0) {
             command.reply('Invalid arguments, please supply <"moduleName"> <"command from module OR page number">');
             return;
-        }
-        // @ts-ignore
-        const allCommands: Map = DIService.instance._services;
-        const commandClasses: AbstractCommand<any> [] = [];
-        for (const [, instance] of allCommands) {
-            if (instance instanceof AbstractCommand) {
-                if (!ObjectUtil.isValidObject(instance.commandDescriptors)) {
-                    continue;
-                }
-                commandClasses.push(instance);
-            }
         }
         const member = command.member;
         const botImage = Main.client.user.displayAvatarURL({dynamic: true});

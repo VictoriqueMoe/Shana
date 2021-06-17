@@ -2,15 +2,15 @@ import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {ChronException, ChronUtils, DiscordUtils, StringUtils} from "../../utils/Utils";
 import {TextChannel} from "discord.js";
 import {MessageScheduler} from "../../model/scheduler/impl/MessageScheduler";
-import {AbstractCommand} from "../AbstractCommand";
 import {secureCommand} from "../../guards/RoleConstraint";
+import {AbstractCommandModule} from "../AbstractCommandModule";
 
-export abstract class AMessageScheduler extends AbstractCommand<any> {
+export abstract class AMessageScheduler extends AbstractCommandModule<any> {
 
     constructor() {
         super({
-            module:{
-                name:"MessageScheduler",
+            module: {
+                name: "MessageScheduler",
                 description: "Commands to schedule messages to send every x or at x"
             },
             commands: [

@@ -3,14 +3,14 @@ import {secureCommand} from "../../guards/RoleConstraint";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {WeebBot} from "../../discord/WeebBot";
 import {NotBot} from "../../guards/NotABot";
-import {AbstractCommand} from "../AbstractCommand";
+import {AbstractCommandModule} from "../AbstractCommandModule";
 
-export abstract class VicImage extends AbstractCommand<any> {
+export abstract class VicImage extends AbstractCommandModule<any> {
 
     constructor() {
         super({
-            module:{
-                name:"VicImage",
+            module: {
+                name: "VicImage",
                 description: "Commands to obtain images of <@697417252320051291>"
             },
             commands: [

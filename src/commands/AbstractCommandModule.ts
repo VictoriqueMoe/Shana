@@ -6,7 +6,7 @@ import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityMana
 import CommandArgs = Typeings.CommandArgs;
 import Command = Typeings.Command;
 
-export abstract class AbstractCommand<T extends Model> extends BaseDAO<T> {
+export abstract class AbstractCommandModule<T extends Model> extends BaseDAO<T> {
     protected constructor(private _commands: CommandArgs) {
         super();
     }

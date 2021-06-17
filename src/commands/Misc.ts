@@ -1,4 +1,3 @@
-import {AbstractCommand} from "./AbstractCommand";
 import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {NotBot} from "../guards/NotABot";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../utils/Utils";
@@ -9,6 +8,7 @@ import {Typeings} from "../model/types/Typeings";
 import {AnimeTractApi} from "../model/anime/AnimeTractApi";
 import {Response} from "../model/anime/AnimeTypings";
 import {secureCommand} from "../guards/RoleConstraint";
+import {AbstractCommandModule} from "./AbstractCommandModule";
 import AnimeEntry = Typeings.AnimeEntry;
 
 const Anilist = require('anilist-node');
@@ -16,7 +16,7 @@ const reverseImageSearch = require("node-reverse-image-search");
 const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
 
-export class Misc extends AbstractCommand<any> {
+export class Misc extends AbstractCommandModule<any> {
     private readonly animeTractApi = new AnimeTractApi();
     private readonly anilist = new Anilist();
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
@@ -55,8 +55,40 @@ export class Misc extends AbstractCommand<any> {
                             }
                         ]
                     }
+                },
+                {
+                    name: "avatar",
+                    description: {
+                        text: "Display a users avatar",
+                        args: [
+                            {
+                                name: "user",
+                                type: "mention",
+                                description: "The user to get",
+                                optional: false
+                            }
+                        ]
+                    }
                 }
             ]
+        });
+    }
+
+    @Command("avatar")
+    @Guard(NotBot, secureCommand)
+    private async avatar(command: CommandMessage): Promise<void> {
+        const {mentions} = command;
+        if (mentions.members.size !== 1) {
+            command.reply("Please mention a user");
+            return;
+        }
+        const mentionUser = mentions.members.array()[0];
+        const avatarUrl = mentionUser.user.displayAvatarURL({
+            dynamic: true,
+            size: 1024
+        });
+        command.channel.send({
+            files: [avatarUrl]
         });
     }
 

@@ -6,10 +6,10 @@ import {secureCommand} from "../../../guards/RoleConstraint";
 import {GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {MuteSingleton} from "./MuteSingleton";
-import {AbstractCommand} from "../../AbstractCommand";
+import {AbstractCommandModule} from "../../AbstractCommandModule";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
-export abstract class Mute extends AbstractCommand<RolePersistenceModel> {
+export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
 
     public constructor() {
         super({

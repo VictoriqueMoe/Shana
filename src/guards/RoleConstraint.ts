@@ -14,7 +14,8 @@ export const secureCommand: GuardFunction<"message"> = async (
         return;
     }
     const canRun = await CommandSecurityManager.instance.canRunCommand(message.member, commandName);
-    if (canRun) {
+    const isEnabled = await CommandSecurityManager.instance.isEnabled(commandName, message.guild.id);
+    if (canRun && isEnabled) {
         return await next();
     }
     message.reply("you do not have permissions to use this command");

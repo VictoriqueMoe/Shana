@@ -1,14 +1,14 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {DiscordUtils, StringUtils} from "../utils/Utils";
 import {secureCommand} from "../guards/RoleConstraint";
-import {AbstractCommand} from "./AbstractCommand";
+import {AbstractCommandModule} from "./AbstractCommandModule";
 
-export abstract class ModuleEngine extends AbstractCommand<any> {
+export abstract class ModuleEngine extends AbstractCommandModule<any> {
 
     constructor() {
         super({
-            module:{
-                name:"closeableModules",
+            module: {
+                name: "closeableModules",
                 description: "Commands to enable or disable features"
             },
             commands: [

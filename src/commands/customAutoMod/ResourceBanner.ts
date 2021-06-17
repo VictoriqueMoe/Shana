@@ -4,14 +4,14 @@ import {secureCommand} from "../../guards/RoleConstraint";
 import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {Collection, Message, Snowflake} from "discord.js";
-import {AbstractCommand} from "../AbstractCommand";
+import {AbstractCommandModule} from "../AbstractCommandModule";
 
 const getUrls = require('get-urls');
 const md5 = require('md5');
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
 
-export abstract class ResourceBanner extends AbstractCommand<BannedAttachmentsModel> {
+export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachmentsModel> {
 
     constructor() {
         super({
