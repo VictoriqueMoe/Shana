@@ -109,7 +109,8 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             if (member.deleted) {
                 return;
             }
-            if (await this.doPanic(member, settings)) {
+            const _settings = await this.getSettings(guildId, true);
+            if (await this.doPanic(member, _settings)) {
                 return;
             }
             const module = DiscordUtils.getModule("DynoAutoMod");
@@ -131,12 +132,12 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                     const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
                     const muteRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
                     if (jailRole && rolePersisted.id === jailRole.id) {
-                        if (settings.autoJail) {
+                        if (_settings.autoJail) {
                             DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving in jail and has be re-jailed`, member.guild.id);
                             await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
                         }
                     } else if (muteRole && rolePersisted.id === muteRole.id) {
-                        if (settings.autoMute) {
+                        if (_settings.autoMute) {
                             DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and has been re-muted.`, member.guild.id);
                             await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
                         }

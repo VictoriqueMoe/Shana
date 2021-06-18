@@ -46,8 +46,8 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         this._settings.set(guildId, obj);
     }
 
-    public async getSettings(guildId: string): Promise<T | null> {
-        if (this._settings.has(guildId)) {
+    public async getSettings(guildId: string, force = false): Promise<T | null> {
+        if (!force && this._settings.has(guildId)) {
             return this._settings.get(guildId);
         }
         const model: ICloseOption = await this._model.findOne({
