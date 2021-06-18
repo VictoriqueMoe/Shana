@@ -69,6 +69,30 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                             type: "boolean"
                         }]
                     }
+                },
+                {
+                    name: "panicMode",
+                    description: {
+                        text: "Enabling this will auto apply the 'unverified' role to everyone who joins",
+                        args: [{
+                            name: "enabled",
+                            description: "true or false",
+                            optional: false,
+                            type: "boolean"
+                        }]
+                    }
+                },
+                {
+                    name: "massJoinProtection",
+                    description: {
+                        text: "Set the mac mass joins in 10 seconds, if this is limit is hit, then panicMode is enabled",
+                        args: [{
+                            name: "value",
+                            description: "number of joins in 10 seconds",
+                            optional: false,
+                            type: "number"
+                        }]
+                    }
                 }
             ]
         });
@@ -164,5 +188,53 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             await SettingsManager.instance.saveOrUpdateSetting(SETTINGS.PREFIX, prefix, command.guild.id);
             command.reply(`Prefix has been changed to "${prefix}"`);
         }
+    }
+
+    @Command("panicMode")
+    @Guard(NotBot, secureCommand)
+    private async panicMode(command: CommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(command.content);
+        if (argumentArray.length !== 1) {
+            command.reply("Please supply true or false");
+            return;
+        }
+        const panicMode = argumentArray[0] === "true";
+        const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
+        const setting = {
+            panicMode
+        };
+        try {
+            await autoRole.saveSettings(command.guild.id, setting, true);
+        } catch (e) {
+            command.reply(e.message);
+            return;
+        }
+        command.reply("Setting saved");
+    }
+
+    @Command("massJoinProtection")
+    @Guard(NotBot, secureCommand)
+    private async massJoinProtection(command: CommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(command.content);
+        if (argumentArray.length !== 1) {
+            command.reply("Please supply a number");
+            return;
+        }
+        const massJoinProtection = parseInt(argumentArray[0]);
+        if (isNaN(massJoinProtection)) {
+            command.reply("Please supply a number");
+            return;
+        }
+        const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
+        const setting = {
+            massJoinProtection
+        };
+        try {
+            await autoRole.saveSettings(command.guild.id, setting, true);
+        } catch (e) {
+            command.reply(e.message);
+            return;
+        }
+        command.reply("Setting saved");
     }
 }

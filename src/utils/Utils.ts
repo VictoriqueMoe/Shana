@@ -101,6 +101,25 @@ export namespace GuildUtils {
         }
     }
 
+    export async function applyPanicModeRole(member: GuildMember): Promise<void> {
+        if (GuildUtils.isMemberAdmin(member)) {
+            return;
+        }
+        const guildId = member.guild.id;
+        const unverifiedAccountRole = await GuildUtils.RoleUtils.getYoungAccountRole(guildId);
+        if (!unverifiedAccountRole) {
+            return;
+        }
+        await member.roles.set([unverifiedAccountRole]);
+        const guild = await GuildManager.instance.getGuild(guildId);
+        let message = `Hello, we have detected unusual mass joins on our server recently, we must verify your account before you can access the ${guild.name} Discord Server`;
+        const jailChannel = await ChannelManager.instance.getJailChannel(guild.id);
+        if (jailChannel) {
+            message += `\nPlease post in the #${jailChannel.name} channel for faster verification process`;
+        }
+        await member.send(message);
+    }
+
     export async function applyYoungAccountConstraint(member: GuildMember, timeout: string): Promise<void> {
         if (GuildUtils.isMemberAdmin(member)) {
             return;

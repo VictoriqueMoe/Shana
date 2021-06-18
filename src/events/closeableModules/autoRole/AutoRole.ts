@@ -10,6 +10,7 @@ import {GuildManager} from "../../../model/guild/manager/GuildManager";
 import {UniqueViolationError} from "../../../DAO/BaseDAO";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
 import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings";
+import {TimedSet} from "../../../model/Impl/TimedSet";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 class RoleProxy extends AbstractRoleApplier {
@@ -22,14 +23,36 @@ class RoleProxy extends AbstractRoleApplier {
     }
 }
 
+class JoinEntry {
+    constructor(public joinCount: number) {
+    }
+
+    public increment(): void {
+        this.joinCount++;
+    }
+}
+
 export class AutoRole extends CloseableModule<AutoRoleSettings> {
 
     private _roleApplier = new RoleProxy();
 
     private static _uid = ObjectUtil.guid();
 
+    private static joinTimedSet = new TimedSet<JoinEntry>(10000);
+
     constructor() {
         super(CloseOptionModel, AutoRole._uid);
+    }
+
+    private async doPanic(member: GuildMember, settings: AutoRoleSettings): Promise<boolean> {
+        if (settings.panicMode) {
+            try {
+                await GuildUtils.applyPanicModeRole(member);
+                return true;
+            } catch {
+            }
+            return false;
+        }
     }
 
     @On("guildMemberAdd")
@@ -41,6 +64,27 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         let settings = await this.getSettings(guildId);
         if (!ObjectUtil.isValidObject(settings)) {
             settings = {};
+        }
+
+        if (settings.massJoinProtection > 0 && !settings.panicMode) {
+            if (AutoRole.joinTimedSet.isEmpty()) {
+                const entry = new JoinEntry(1);
+                AutoRole.joinTimedSet.add(entry);
+            } else {
+                const entry: JoinEntry = AutoRole.joinTimedSet.rawSet.keys().next().value;
+                AutoRole.joinTimedSet.refresh(entry);
+                entry.increment();
+                if (entry.joinCount > settings.massJoinProtection) {
+                    DiscordUtils.postToLog(`More than ${settings.massJoinProtection} has joined this server in 10 seconds, panic mode is enabled`, guildId);
+                    await this.saveSettings(guildId, {
+                        panicMode: true
+                    }, true);
+                    settings.panicMode = true;
+                }
+            }
+        }
+        if (await this.doPanic(member, settings)) {
+            return;
         }
         if (settings.minAccountAge > 0) {
             const convertedTime = TimeUtils.convertToMilli(settings.minAccountAge, TIME_UNIT.days);
@@ -63,6 +107,9 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         const d = new Date(toAddRole);
         schedule.scheduleJob(`enable ${member.user.tag}`, d, async () => {
             if (member.deleted) {
+                return;
+            }
+            if (await this.doPanic(member, settings)) {
                 return;
             }
             const module = DiscordUtils.getModule("DynoAutoMod");
