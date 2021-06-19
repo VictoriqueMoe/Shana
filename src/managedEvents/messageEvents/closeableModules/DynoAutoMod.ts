@@ -86,21 +86,33 @@ export class DynoAutoMod extends CloseableModule<null> {
                             break;
                         }
                         case ACTION.DELETE: {
+                            try {
+
+                            } catch {
+
+                            }
                             if ('cooldownArray' in filter) {
                                 // @ts-ignore
                                 const entry = filter.getFromArray(message.member.id, message.guild.id);
                                 const toDelete = entry.messageArray;
                                 for (const messageToDelete of toDelete) {
-                                    await messageToDelete.delete({
-                                        // @ts-ignore
-                                        reason: `Auto mod violation "${filter.id}"`
-                                    });
+                                    try {
+                                        await messageToDelete.delete({
+                                            // @ts-ignore
+                                            reason: `Auto mod violation "${filter.id}"`
+                                        });
+                                    } catch {
+                                    }
                                 }
                                 entry.messageArray = [];
                             } else {
-                                await message.delete({
-                                    reason: `Auto mod violation "${filter.id}"`
-                                });
+                                try {
+                                    await message.delete({
+                                        reason: `Auto mod violation "${filter.id}"`
+                                    });
+                                } catch {
+
+                                }
                             }
                             break;
                         }

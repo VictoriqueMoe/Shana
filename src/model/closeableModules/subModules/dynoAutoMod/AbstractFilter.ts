@@ -28,7 +28,7 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
      * How long (in seconds) are members muted for if they violate "mute" filters according to the autoMuteViolationCount
      */
     public static get autoMuteTimeout(): number {
-        return 300; //  hard-coded for now
+        return 1800; //  hard-coded for now
     }
 
     /**
