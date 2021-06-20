@@ -98,7 +98,6 @@ export class DynoAutoMod extends CloseableModule<null> {
                                 for (const messageToDelete of toDelete) {
                                     try {
                                         await messageToDelete.delete({
-                                            // @ts-ignore
                                             reason: `Auto mod violation "${filter.id}"`
                                         });
                                     } catch {

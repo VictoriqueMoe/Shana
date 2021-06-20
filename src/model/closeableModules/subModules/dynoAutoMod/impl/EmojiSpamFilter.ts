@@ -26,7 +26,7 @@ export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoA
     }
 
     public doFilter(content: Message): boolean {
-        return DiscordUtils.getEmojiFromMessage(content).length < Number.parseInt(this.value);
+        return DiscordUtils.getEmojiFromMessage(content).length <= Number.parseInt(this.value);
     }
 
     public get id(): string {
