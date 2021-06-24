@@ -26,6 +26,28 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         return MuteSingleton._instance;
     }
 
+    public async isMuted(user: GuildMember): Promise<boolean> {
+        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(user.guild.id);
+        if (!mutedRole) {
+            return false;
+        }
+        const muteRoleId = mutedRole.id;
+        if (user.roles.cache.has(muteRoleId)) {
+            return true;
+        }
+
+        const has = await MuteModel.findOne({
+            where: {
+                userId: user.id,
+                guildId: user.guild.id
+            }
+        });
+        if (has) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Mute a user from the server with an optional timeout
      * @param user - the User to mute
@@ -38,6 +60,9 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(user.guild.id);
         if (!mutedRole) {
             return;
+        }
+        if (await this.isMuted(user)) {
+            return null;
         }
         const muteRoleId = mutedRole.id;
         const prevRolesArr = Array.from(user.roles.cache.values());

@@ -19,9 +19,12 @@ export abstract class baseController {
     }
 
     protected async getGuild(req: Request): Promise<Guild> {
-        const id = req.query.id as string;
+        let id = req.query.id as string;
         if (!ObjectUtil.validString(id)) {
             throw new Error("Please supply an ID");
+        }
+        if (id.includes("?")) {
+            id = id.split("?").shift();
         }
         let guild: Guild = null;
         let guildFound: boolean;

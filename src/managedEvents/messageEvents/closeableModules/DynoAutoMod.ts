@@ -57,7 +57,10 @@ export class DynoAutoMod extends CloseableModule<null> {
                     switch (action) {
                         case ACTION.MUTE: {
                             if (!mutedRole) {
-                                return;
+                                continue;
+                            }
+                            if (await MuteSingleton.instance.isMuted(member)) {
+                                continue;
                             }
                             let fromArray = this.getFromArray(userId, member.guild.id);
                             if (fromArray) {
@@ -129,7 +132,9 @@ export class DynoAutoMod extends CloseableModule<null> {
     private async muteUser(violationObj: MuteViolation, user: GuildMember, reason: string, creatorID: string, seconds?: number): Promise<MuteModel> {
         const model = await MuteSingleton.instance.muteUser(user, reason, creatorID, seconds);
         this._muteTimeoutArray.delete(violationObj);
-        await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${ObjectUtil.secondsToHuman(seconds)}`, user.guild.id);
+        if (model) {
+            await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${ObjectUtil.secondsToHuman(seconds)}`, user.guild.id);
+        }
         return model;
     }
 
