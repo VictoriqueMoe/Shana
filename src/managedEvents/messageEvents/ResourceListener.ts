@@ -26,7 +26,7 @@ export class ResourceListener {
             return;
         }
         try {
-            message = await message.fetch(true);
+            message = await message.fetch();
         } catch {
 
         }

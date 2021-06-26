@@ -102,37 +102,32 @@ export namespace GuildUtils {
     }
 
     export async function applyPanicModeRole(member: GuildMember): Promise<void> {
-        if (GuildUtils.isMemberAdmin(member)) {
-            return;
-        }
         const guildId = member.guild.id;
-        const unverifiedAccountRole = await GuildUtils.RoleUtils.getYoungAccountRole(guildId);
-        if (!unverifiedAccountRole) {
-            return;
-        }
-        await member.roles.set([unverifiedAccountRole]);
         const guild = await GuildManager.instance.getGuild(guildId);
-        let message = `Hello, we have detected unusual mass joins on our server recently, we must verify your account before you can access the ${guild.name} Discord Server`;
-        const jailChannel = await ChannelManager.instance.getJailChannel(guild.id);
-        if (jailChannel) {
-            message += `\nPlease post in the #${jailChannel.name} channel for faster verification process`;
-        }
-        await member.send(message);
+        return applyUnverified(member, `Hello, we have detected unusual mass joins on our server recently, we must verify your account before you can access the ${guild.name} Discord Server`, guild, true);
     }
 
     export async function applyYoungAccountConstraint(member: GuildMember, timeout: string): Promise<void> {
+        const guildId = member.guild.id;
+        const guild = await GuildManager.instance.getGuild(guildId);
+        return applyUnverified(member, `Hello, as your Discord account is less than ${timeout} old and because of recent scams, we must verify your account before you can access the ${guild.name} Discord Server`, guild);
+    }
+
+    async function applyUnverified(member: GuildMember, dmStr: string, guild: Guild, panicMode = false): Promise<void> {
         if (GuildUtils.isMemberAdmin(member)) {
             return;
         }
-        const guildId = member.guild.id;
-        const youngAccountRole = await GuildUtils.RoleUtils.getYoungAccountRole(guildId);
-        if (!youngAccountRole) {
+        const guildId = guild.id;
+        const unverifiedRole = await GuildUtils.RoleUtils.getYoungAccountRole(guildId);
+        if (!unverifiedRole) {
             return;
         }
-        await member.roles.set([youngAccountRole]);
-        const guild = await GuildManager.instance.getGuild(guildId);
-        DiscordUtils.postToLog(`Member <@${member.id}> ${member.user.tag} has been applied the ${youngAccountRole.name} role`, guildId);
-        let message = `Hello, as your Discord account is less than ${timeout} old and because of recent scams, we must verify your account before you can access the ${guild.name} Discord Server`;
+        await member.roles.set([unverifiedRole]);
+        if (!panicMode) {
+            DiscordUtils.postToLog(`Member <@${member.id}> ${member.user.tag} has been applied the ${unverifiedRole.name} role`, guildId);
+        }
+
+        let message = dmStr;
         const jailChannel = await ChannelManager.instance.getJailChannel(guild.id);
         if (jailChannel) {
             message += `\nPlease post in the #${jailChannel.name} channel for faster verification process`;
@@ -572,14 +567,10 @@ export namespace DiscordUtils {
      */
     export async function canUserPreformBlock(command: CommandMessage): Promise<boolean> {
         const userToBlockCollection = command.mentions.members;
-        let userToBlock = userToBlockCollection.values().next().value as GuildMember;
-        userToBlock = await userToBlock.fetch(true);
+        const userToBlock = userToBlockCollection.values().next().value as GuildMember;
         const userToBlockHighestRole = userToBlock.roles.highest;
-
-        let userPreformingCommand = await command.member.fetch(true);
-        userPreformingCommand = await userPreformingCommand.fetch(true);
+        const userPreformingCommand = await command.member;
         const userPreformingActionHigestRole = userPreformingCommand.roles.highest;
-
         return userPreformingActionHigestRole.position > userToBlockHighestRole.position;
     }
 

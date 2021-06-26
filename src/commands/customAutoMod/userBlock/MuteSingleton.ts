@@ -1,22 +1,22 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {IScheduledJob} from "../../../model/scheduler/IScheduledJob";
 import {Guild, GuildMember} from "discord.js";
 import {Main} from "../../../Main";
-import {Scheduler} from "../../../model/scheduler/impl/Scheduler";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {GuildManager} from "../../../model/guild/manager/GuildManager";
+import * as schedule from "node-schedule";
+import {Job} from "node-schedule";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
     private static _instance: MuteSingleton;
 
-    private readonly _timeOutMap: Map<string, IScheduledJob> = new Map();
+    private readonly _mutes: Set<Job>;
 
     private constructor() {
         super();
-        this._timeOutMap = new Map();
+        this._mutes = new Set();
     }
 
     public static get instance(): MuteSingleton {
@@ -34,6 +34,12 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         const muteRoleId = mutedRole.id;
         if (user.roles.cache.has(muteRoleId)) {
             return true;
+        }
+
+        for (const job of this._mutes) {
+            if (job.name === user.id) {
+                return true;
+            }
         }
 
         const has = await MuteModel.findOne({
@@ -94,12 +100,6 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         let userObject: GuildMember = null;
         let savedModel: MuteModel = null;
         userObject = await user.guild.members.fetch(blockedUserId);
-        for (const [roleId] of userObject.roles.cache) {
-            try {
-                await userObject.roles.remove(roleId);
-            } catch {
-            }
-        }
         try {
             savedModel = await Main.dao.transaction(async t => {
                 const m = await super.commitToDatabase(model) as MuteModel;
@@ -108,6 +108,12 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
             }) as MuteModel;
         } catch {
             return null;
+        }
+        for (const [roleId] of userObject.roles.cache) {
+            try {
+                await userObject.roles.remove(roleId);
+            } catch {
+            }
         }
         await userObject.roles.add(muteRoleId);
         if (hasTimeout) {
@@ -139,17 +145,17 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
                 throw new Error("Unknown error occurred, error is a synchronisation issue between the Persistence model and the Mute Model ");
             }
         }
-        const timeoutMap = this.timeOutMap;
-        let hasTimer = false;
-        for (const [_userId, timeOutFunction] of timeoutMap) {
-            if (userId === _userId) {
-                console.log(`cleared timeout for ${_userId}`);
-                Scheduler.getInstance().cancelJob(timeOutFunction.name);
-                hasTimer = true;
+        let job: Job = null;
+        for (const _job of this._mutes) {
+            const {name} = _job;
+            if (userId === name) {
+                console.log(`cleared timeout for ${name}`);
+                _job.cancel();
+                job = _job;
             }
         }
-        if (hasTimer) {
-            this.timeOutMap.delete(userId);
+        if (job) {
+            this._mutes.delete(job);
         }
         const guild = await Main.client.guilds.fetch(guildId);
         let member;
@@ -179,18 +185,21 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         const now = Date.now();
         const future = now + millis;
         const newDate = new Date(future);
-        const job = Scheduler.getInstance().register(userId, newDate, async () => {
-            await Main.dao.transaction(async t => {
-                await MuteSingleton.instance.doRemove(userId, guild.id, muteRoleId);
+        for (const mute of this._mutes) {
+            if (mute.name === userId) {
+                return;
+            }
+        }
+        try {
+            const job = schedule.scheduleJob(userId, newDate, async () => {
+                await Main.dao.transaction(async t => {
+                    await MuteSingleton.instance.doRemove(userId, guild.id, muteRoleId);
+                });
+                DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);
             });
-            DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);
-        });
-        // set the User ID to the job
-        this._timeOutMap.set(userId, job);
-    }
-
-    public get timeOutMap(): Map<string, IScheduledJob> {
-        return this._timeOutMap;
+            this._mutes.add(job);
+        } catch {
+        }
     }
 
     private addRolePersist(user: GuildMember, muteRoleId: string): Promise<RolePersistenceModel> {

@@ -294,10 +294,9 @@ export class OnReady extends BaseDAO<any> {
         for (const guildModel of guildModels) {
             const guildId = guildModel.guildId;
             const guild = await GuildManager.instance.getGuild(guildId);
-            const autoRole = await GuildUtils.RoleUtils.getAutoRole(guildId);
             const autoRoleModule: AutoRole = DIService.instance.getService(AutoRole);
             const enabled = await autoRoleModule.isEnabled(guildId);
-            if (autoRole && enabled) {
+            if (enabled) {
                 const membersApplied: string[] = [];
                 const members = await guild.members.fetch({
                     force: true
@@ -311,11 +310,10 @@ export class OnReady extends BaseDAO<any> {
                     }
                     return true;
                 });
-
                 for (const noRole of noRoles) {
                     console.log(`setting roles for ${noRole.user.tag} as they have no roles`);
                     membersApplied.push(noRole.user.tag);
-                    await noRole.roles.set([autoRole.id]);
+                    await autoRoleModule.applyRole(noRole, guildId);
                 }
                 retMap.set(guild, membersApplied);
             }

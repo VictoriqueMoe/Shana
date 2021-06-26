@@ -61,11 +61,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (!await this.canRun(guildId, null, null)) {
             return;
         }
-        let settings = await this.getSettings(guildId);
-        if (!ObjectUtil.isValidObject(settings)) {
-            settings = {};
-        }
-
+        const settings = await this.getSettings(guildId);
         if (settings.massJoinProtection > 0 && !settings.panicMode) {
             if (AutoRole.joinTimedSet.isEmpty()) {
                 const entry = new JoinEntry(1);
@@ -100,61 +96,64 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                 return;
             }
         }
-
         const now = Date.now();
         const oneMin = 60000;
         const toAddRole = now + oneMin;
         const d = new Date(toAddRole);
         schedule.scheduleJob(`enable ${member.user.tag}`, d, async () => {
-            if (member.deleted) {
-                return;
-            }
-            const _settings = await this.getSettings(guildId, true);
-            if (await this.doPanic(member, _settings)) {
-                return;
-            }
-            const module = DiscordUtils.getModule("DynoAutoMod");
-            const filter: BannedWordFilter = module.submodules.find(m => m instanceof BannedWordFilter) as BannedWordFilter;
-            if (filter.isActive && await filter.checkUsername(member)) {
-                return;
-            }
-            const autoRole = await GuildUtils.RoleUtils.getAutoRole(guildId);
-            const persistedRole = await RolePersistenceModel.findOne({
-                where: {
-                    userId: member.id,
-                    guildId
-                }
-            });
-            try {
-                if (persistedRole) {
-                    const guild = await GuildManager.instance.getGuild(guildId);
-                    const rolePersisted = await guild.roles.fetch(persistedRole.roleId);
-                    const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
-                    const muteRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
-                    if (jailRole && rolePersisted.id === jailRole.id) {
-                        if (_settings.autoJail) {
-                            DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving in jail and has be re-jailed`, member.guild.id);
-                            await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
-                        }
-                    } else if (muteRole && rolePersisted.id === muteRole.id) {
-                        if (_settings.autoMute) {
-                            DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and has been re-muted.`, member.guild.id);
-                            await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
-                        }
-                    } else {
-                        await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
-                    }
-                    return;
-                }
-            } catch {
-            }
-            if (autoRole) {
-                try {
-                    await this._roleApplier.applyRole(autoRole, member, "added via VicBot");
-                } catch {
-                }
+            await this.applyRole(member, guildId, true);
+        });
+    }
+
+    public async applyRole(member: GuildMember, guildId: string, isTimed = false): Promise<void> {
+        if (member.deleted) {
+            return;
+        }
+        const settings = await this.getSettings(guildId, isTimed);
+        if (await this.doPanic(member, settings)) {
+            return;
+        }
+        const module = DiscordUtils.getModule("DynoAutoMod");
+        const filter: BannedWordFilter = module.submodules.find(m => m instanceof BannedWordFilter) as BannedWordFilter;
+        if (filter.isActive && await filter.checkUsername(member)) {
+            return;
+        }
+        const autoRole = await GuildUtils.RoleUtils.getAutoRole(guildId);
+        const persistedRole = await RolePersistenceModel.findOne({
+            where: {
+                userId: member.id,
+                guildId
             }
         });
+        try {
+            if (persistedRole) {
+                const guild = await GuildManager.instance.getGuild(guildId);
+                const rolePersisted = await guild.roles.fetch(persistedRole.roleId);
+                const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
+                const muteRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
+                if (jailRole && rolePersisted.id === jailRole.id) {
+                    if (settings.autoJail) {
+                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving in jail and has be re-jailed`, member.guild.id);
+                        await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
+                    }
+                } else if (muteRole && rolePersisted.id === muteRole.id) {
+                    if (settings.autoMute) {
+                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and has been re-muted.`, member.guild.id);
+                        await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
+                    }
+                } else {
+                    await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
+                }
+                return;
+            }
+        } catch {
+        }
+        if (autoRole) {
+            try {
+                await this._roleApplier.applyRole(autoRole, member, "added via VicBot");
+            } catch {
+            }
+        }
     }
 
     @On("guildMemberRemove")

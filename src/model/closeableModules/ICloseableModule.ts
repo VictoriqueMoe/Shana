@@ -31,7 +31,7 @@ export interface ICloseableModule<T extends ModuleSettings> {
      * Get the settings object of this module, may be null
      * @param guildId
      */
-    getSettings(guildId: string): Promise<T | null>;
+    getSettings(guildId: string): Promise<T | Record<string, never>>;
 
     /**
      * Save the setting for this module, this will overwrite the current settings. if merge is passed only the keys in the settings object will be updated

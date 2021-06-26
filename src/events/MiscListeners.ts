@@ -17,4 +17,9 @@ export class MiscListeners {
         }
         MessageListener.doEmojiBan([emojiId], user, reaction.message, true);
     }
+
+    @On("rateLimit")
+    private async rateLimit([rateLimitData]: ArgsOf<"rateLimit">, client: Client): Promise<void> {
+        console.warn(rateLimitData);
+    }
 }

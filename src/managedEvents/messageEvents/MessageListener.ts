@@ -205,7 +205,7 @@ export abstract class MessageListener {
             return;
         }
         try {
-            message = await message.fetch(true);
+            message = await message.fetch();
         } catch {
 
         }

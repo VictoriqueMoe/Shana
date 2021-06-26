@@ -46,7 +46,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         this._settings.set(guildId, obj);
     }
 
-    public async getSettings(guildId: string, force = false): Promise<T | null> {
+    public async getSettings(guildId: string, force = false): Promise<T | Record<string, never>> {
         if (!force && this._settings.has(guildId)) {
             return this._settings.get(guildId);
         }
@@ -58,7 +58,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
             }
         });
         if (!model || !ObjectUtil.isValidObject(model.settings)) {
-            return null;
+            return {};
         }
         this._settings.set(guildId, model.settings as T);
         return this._settings.get(guildId);

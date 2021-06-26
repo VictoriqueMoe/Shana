@@ -7,7 +7,8 @@ import {DEFAULT_SETTINGS, SETTINGS} from "./enums/SETTINGS";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import * as http from "http";
 import * as v8 from "v8";
-
+// const https = require('http-debug').https;
+// https.debug = 1;
 const io = require('@pm2/io');
 io.init({
     transactions: true,// will enable the transaction tracing
