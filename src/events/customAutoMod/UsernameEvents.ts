@@ -8,7 +8,6 @@ export abstract class UsernameEvents {
     @On("guildMemberUpdate")
     public async onMemberUpdate([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
         const isNickChange = oldUser.nickname !== newUser.nickname;
-        const guildId = newUser.guild.id;
         if (isNickChange) {
             const userId = newUser.id;
             const guildId = newUser.guild.id;
@@ -39,7 +38,7 @@ export abstract class UsernameEvents {
                     } else {
                         await UsernameModel.update(
                             {
-                                "usernameToPersist": newUser.nickname
+                                "usernameToPersist": newNick
                             },
                             {
                                 where: {
@@ -49,10 +48,10 @@ export abstract class UsernameEvents {
                             }
                         );
                     }
-                    if (newUser.nickname == null) {
-                        DiscordUtils.postToLog(`User "${newUser.user.username}" has been reset and removed from database`, guildId);
+                    if (newNick === null) {
+                        DiscordUtils.postToLog(`User "${newUser.user.tag}" has had their username remove from persistence`, guildId);
                     } else {
-                        DiscordUtils.postToLog(`User "${newUser.user.username}" has a persisted nickname of "${modelObj.usernameToPersist}", howerver, this has been updated to "${newUser.nickname === null ? newUser.user.username : newUser.nickname}"`, guildId);
+                        DiscordUtils.postToLog(`User "${newUser.user.tag}" has a persisted nickname of "${modelObj.usernameToPersist}", howerver, this has been updated to "${(newNick)}"`, guildId);
                     }
                     return;
                 }
