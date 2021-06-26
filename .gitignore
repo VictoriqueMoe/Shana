@@ -110,3 +110,4 @@ config.json
 *.sqlite
 node-gyp
 /.clinic/
+**.clinic/**
