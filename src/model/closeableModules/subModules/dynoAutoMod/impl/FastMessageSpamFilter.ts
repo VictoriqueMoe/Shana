@@ -27,7 +27,7 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
     }
 
     public get actions(): ACTION[] {
-        return [ACTION.DELETE, ACTION.WARN, ACTION.MUTE];
+        return [ACTION.DELETE, ACTION.MUTE];
     }
 
     public get id(): string {

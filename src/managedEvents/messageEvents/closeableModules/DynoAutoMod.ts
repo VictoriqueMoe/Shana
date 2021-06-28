@@ -5,7 +5,7 @@ import {TimedSet} from "../../../model/Impl/TimedSet";
 import {AbstractFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
 import {ACTION} from "../../../enums/ACTION";
 import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
-import {GuildMember} from "discord.js";
+import {GuildMember, TextChannel} from "discord.js";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
 import {Main} from "../../../Main";
@@ -72,7 +72,12 @@ export class DynoAutoMod extends CloseableModule<null> {
                             }
                             if (fromArray.hasViolationLimitReached) {
                                 try {
-                                    await this.muteUser(fromArray, member, "Auto mod violation limit reached", Main.client.user.id, AbstractFilter.autoMuteTimeout);
+                                    let textChannel: TextChannel = null;
+                                    const channel = message.channel;
+                                    if (channel instanceof TextChannel) {
+                                        textChannel = channel;
+                                    }
+                                    await this.muteUser(fromArray, member, "Auto mod violation limit reached", Main.client.user.id, textChannel, AbstractFilter.autoMuteTimeout);
                                     didPreformTerminaloperation = true;
                                 } catch (e) {
                                     console.error(e);
@@ -129,11 +134,15 @@ export class DynoAutoMod extends CloseableModule<null> {
             }
     }
 
-    private async muteUser(violationObj: MuteViolation, user: GuildMember, reason: string, creatorID: string, seconds?: number): Promise<MuteModel> {
+    private async muteUser(violationObj: MuteViolation, user: GuildMember, reason: string, creatorID: string, channel?: TextChannel, seconds?: number): Promise<MuteModel> {
         const model = await MuteSingleton.instance.muteUser(user, reason, creatorID, seconds);
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
-            await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${ObjectUtil.secondsToHuman(seconds)}`, user.guild.id);
+            const humanMuted = ObjectUtil.secondsToHuman(seconds);
+            await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${humanMuted}`, user.guild.id);
+            if (channel) {
+                await channel.send(`<@${user.id}>, you have been muted for ${humanMuted} due to the violation of the ${violationObj.filterId}`);
+            }
         }
         return model;
     }

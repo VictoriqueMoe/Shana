@@ -84,7 +84,7 @@ export class AuditLogger extends CloseableModule<null> {
             if (ObjectUtil.validString(reason)) {
                 prefix = `for reason: "${reason}"`;
             }
-            this.postToLog(`<@${memberBanned}> (${user.tag}) has been BANNED by ${personWhoDidBan.tag} ${prefix}"`, guild.id);
+            this.postToLog(`<@${memberBanned}> (${user.tag}) has been BANNED by ${personWhoDidBan.tag} ${prefix}`, guild.id);
         }
     }
 
