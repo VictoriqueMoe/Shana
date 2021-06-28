@@ -94,11 +94,6 @@ export class DynoAutoMod extends CloseableModule<null> {
                             break;
                         }
                         case ACTION.DELETE: {
-                            try {
-
-                            } catch {
-
-                            }
                             if ('cooldownArray' in filter) {
                                 // @ts-ignore
                                 const entry = filter.getFromArray(message.member.id, message.guild.id);
@@ -109,6 +104,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                                             reason: `Auto mod violation "${filter.id}"`
                                         });
                                     } catch {
+                                        continue outer;
                                     }
                                 }
                                 entry.messageArray = [];
@@ -118,7 +114,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                                         reason: `Auto mod violation "${filter.id}"`
                                     });
                                 } catch {
-
+                                    continue outer;
                                 }
                             }
                             break;

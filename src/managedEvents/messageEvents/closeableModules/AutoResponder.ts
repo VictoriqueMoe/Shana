@@ -70,7 +70,11 @@ export class AutoResponder extends TriggerConstraint<null> {
                 }
                 case "delete":
                     if (message.deletable) {
-                        message.delete();
+                        try {
+                            message.delete();
+                        } catch {
+
+                        }
                     }
                     break;
                 case "reaction": {
