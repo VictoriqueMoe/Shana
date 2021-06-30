@@ -48,7 +48,7 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
         }
         const channelId = model.logChannel;
         const guild = await GuildManager.instance.getGuild(guildId);
-        const channel = await guild.channels.resolve(channelId);
+        const channel = guild.channels.resolve(channelId);
         if (channel instanceof TextChannel) {
             return channel;
         }

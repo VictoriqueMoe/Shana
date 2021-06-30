@@ -1,7 +1,7 @@
 import {ImageFun} from "../../model/Impl/ImageFun/ImageFun";
 import {Command, CommandMessage, Guard, Rules} from "@typeit/discord";
 import {NotBot} from "../../guards/NotABot";
-import {ObjectUtil, StringUtils} from "../../utils/Utils";
+import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {
     additionalGenGetArgs,
     GENERATE_ENDPOINT,
@@ -852,10 +852,9 @@ export abstract class Meme extends AbstractCommandModule<any> {
                 return;
             }
         }
-        const attachments = command.attachments.array();
-        if (attachments.length === 1) {
-            const attachment = attachments[0];
-            const url = attachment.attachment as string;
+        const urls = await DiscordUtils.getImageUrlsFromMessageOrReference(command);
+        if (urls.size === 1) {
+            const url = urls.values().next().value;
             avatarOverride["avatar"] = url;
             canOverride = true;
         }
