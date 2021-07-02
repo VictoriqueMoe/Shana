@@ -26,7 +26,7 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
                 guildId
             }
         });
-        if (result[0] === 9) {
+        if (result[0] === 0) {
             return null;
         }
         return result[1];
@@ -80,6 +80,6 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
         if (channel instanceof TextChannel) {
             return channel;
         }
-        throw new Error("Jail Channel channel is NOT text channel");
+        throw new Error("Jail Channel is NOT text channel");
     }
 }

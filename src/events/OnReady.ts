@@ -229,8 +229,7 @@ export class OnReady extends BaseDAO<any> {
                 }[] = [];
                 for (const commandCLazz of allCommands) {
                     const {commands} = commandCLazz.commandDescriptors;
-                    for (const commandDescriptor of commands) {
-                        const {name} = commandDescriptor;
+                    for (const {name} of commands) {
                         const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName === name);
                         if (!inArray) {
                             models.push({

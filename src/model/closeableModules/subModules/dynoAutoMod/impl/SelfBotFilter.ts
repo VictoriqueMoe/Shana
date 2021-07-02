@@ -4,6 +4,7 @@ import {Message} from "discord.js";
 import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
+import {ObjectUtil} from "../../../../../utils/Utils";
 
 const getUrls = require('get-urls');
 @InjectDynoSubModule(DynoAutoMod)
@@ -21,7 +22,7 @@ export class SelfBotFilter extends AbstractFilter {
         const embeds = content.embeds;
         for (const embed of embeds) {
             const embedUrl = embed.url;
-            if (embedUrl && embedUrl.includes("twitter")) {
+            if (ObjectUtil.validString(embedUrl)) {
                 return true;
             }
             if (embed.type === "rich") {
