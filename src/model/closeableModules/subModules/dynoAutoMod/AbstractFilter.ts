@@ -42,7 +42,7 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
     }
 
     protected postToLog(reason: string, message: Message): Promise<Message | null> {
-        if (!this.actions.includes(ACTION.DELETE)) {
+        if (!this.actions.includes(ACTION.DELETE) || !message.member.user) {
             return null;
         }
         const {member} = message;

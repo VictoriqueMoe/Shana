@@ -4,12 +4,10 @@ import {ArrayUtils, DiscordUtils, ObjectUtil} from "../utils/Utils";
 import {MessageEmbed} from "discord.js";
 import {Main} from "../Main";
 import {TimedSet} from "../model/Impl/TimedSet";
-import {Typeings} from "../model/types/Typeings";
 import {AnimeTractApi} from "../model/anime/AnimeTractApi";
 import {Response} from "../model/anime/AnimeTypings";
 import {secureCommand} from "../guards/RoleConstraint";
 import {AbstractCommandModule} from "./AbstractCommandModule";
-import AnimeEntry = Typeings.AnimeEntry;
 
 const Anilist = require('anilist-node');
 const reverseImageSearch = require("node-reverse-image-search");
@@ -122,39 +120,39 @@ export class Misc extends AbstractCommandModule<any> {
             console.error(e);
         }
 
-        if (!ObjectUtil.isValidObject(resp) || !ArrayUtils.isValidArray(resp.docs)) {
+        if (!ObjectUtil.isValidObject(resp) || ObjectUtil.validString(resp.error)) {
             replyMessage.delete();
-            command.reply("No results found...");
+            command.reply(resp.error);
             return;
         }
         const {
+            anilist,
+            video,
             episode,
-            anilist_id,
-            title,
-            tokenthumb,
             similarity,
-            is_adult,
-            at,
-            filename,
-            title_english
-        } = resp.docs[0];
-        if (is_adult || similarity < freshHold) {
+            from
+        } = resp.result[0];
+        const aniDbRes = await this.anilist.media.anime(anilist);
+        const {
+            isAdult,
+            title
+        } = aniDbRes;
+        const botAvarar = Main.client.user.displayAvatarURL({dynamic: true});
+        const humanAt = new Date(from * 1000).toISOString().substr(11, 8);
+        if (isAdult || similarity < freshHold) {
             replyMessage.delete();
             command.reply("No results found...");
             return;
         }
-        const aniDbRes = await this.anilist.media.anime(anilist_id) as AnimeEntry;
-        const botAvarar = Main.client.user.displayAvatarURL({dynamic: true});
-        const humanAt = new Date(at * 1000).toISOString().substr(11, 8);
         const embed = new MessageEmbed()
-            .setTitle(`${title}`)
+            .setTitle(`${title.romaji}`)
             .setAuthor(`${Main.client.user.username}`, botAvarar)
             .setThumbnail(url)
             .setColor('#0099ff')
             .addField("Episode and timestamp this scene is from", `Episode: ${episode} at: ${humanAt}`)
             .setTimestamp();
-        if (ObjectUtil.validString(title_english)) {
-            embed.setTitle(`${title_english} [${title}]`);
+        if (ObjectUtil.validString(title.english)) {
+            embed.setTitle(`${title.english} [${title.romaji}]`);
         }
         if (ObjectUtil.isValidObject(aniDbRes)) {
             const coverImage = aniDbRes.coverImage;
@@ -188,7 +186,7 @@ export class Misc extends AbstractCommandModule<any> {
             }
         }
         try {
-            const previewBuffer = await this.animeTractApi.fetchPreview(anilist_id, at, filename, tokenthumb);
+            const previewBuffer = await this.animeTractApi.fetchPreview(video);
             embed.attachFiles([{
                 attachment: previewBuffer,
                 name: `${ObjectUtil.guid()}.mp4`

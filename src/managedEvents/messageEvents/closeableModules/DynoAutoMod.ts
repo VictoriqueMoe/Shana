@@ -131,6 +131,9 @@ export class DynoAutoMod extends CloseableModule<null> {
     }
 
     private async muteUser(violationObj: MuteViolation, user: GuildMember, reason: string, creatorID: string, channel?: TextChannel, seconds?: number): Promise<MuteModel> {
+        if (!user) {
+            return;
+        }
         const model = await MuteSingleton.instance.muteUser(user, reason, creatorID, seconds);
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
