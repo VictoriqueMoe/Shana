@@ -122,7 +122,9 @@ export class Misc extends AbstractCommandModule<any> {
 
         if (!ObjectUtil.isValidObject(resp) || ObjectUtil.validString(resp.error)) {
             replyMessage.delete();
-            command.reply(resp.error);
+            if (ObjectUtil.isValidObject(resp)) {
+                command.reply(resp.error);
+            }
             return;
         }
         const {
