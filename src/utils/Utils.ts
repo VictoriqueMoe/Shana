@@ -1,5 +1,6 @@
 import {
     Guild,
+    GuildAuditLogs,
     GuildAuditLogsAction,
     GuildAuditLogsEntry,
     GuildAuditLogsFetchOptions,
@@ -218,6 +219,10 @@ export namespace StringUtils {
         const paramArray = mangledParamArray.map((mangledParam) => mangledParam.replace(RegExp(spaceMarker, 'g'), ' '));
         paramArray.shift();
         return paramArray;
+    }
+
+    export function truncate(str: string, limit: number): string {
+        return str.length > limit ? `${str.substring(0, limit - 3)}...` : str;
     }
 }
 
@@ -548,16 +553,30 @@ export namespace DiscordUtils {
      * @param guild
      */
     export async function getAuditLogEntry(type: GuildAuditLogsAction, guild: Guild): Promise<GuildAuditLogsEntry> {
-        const fetchObj: GuildAuditLogsFetchOptions = {
-            limit: 1,
-            type
-        };
-        const fetchedAuditLog = await guild.fetchAuditLogs(fetchObj);
+        const fetchedAuditLog = await getAuditLogEntries(type, guild);
         const logEntry = fetchedAuditLog.entries.first();
         if (!logEntry) {
             return null;
         }
         return logEntry;
+    }
+
+    /**
+     * Get all entries from the audit log with optinal limit
+     * @param type
+     * @param guild
+     * @param limit
+     */
+    export async function getAuditLogEntries(type: GuildAuditLogsAction, guild: Guild, limit = 1): Promise<GuildAuditLogs> {
+        const fetchObj: GuildAuditLogsFetchOptions = {
+            limit,
+            type
+        };
+        try {
+            return await guild.fetchAuditLogs(fetchObj);
+        } catch {
+            return new GuildAuditLogs(guild, {});
+        }
     }
 
     /**

@@ -1,6 +1,6 @@
 import {ArgsOf, Client, On} from "@typeit/discord";
-import {GuildUtils, ObjectUtil} from "../../../../utils/Utils";
-import {MessageEmbed} from "discord.js";
+import {DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils";
+import {MessageEmbed, Util} from "discord.js";
 import {Main} from "../../../../Main";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {Imgur} from "../../../../model/Imgur";
@@ -15,6 +15,7 @@ const isImageFast = require('is-image-fast');
 export class MessageLogger extends AbstractAdminAuditLogger {
     private static _uid = ObjectUtil.guid();
     private imgur = new Imgur();
+    private static messageLimit = 1024;
 
     constructor() {
         super(MessageLogger._uid);
@@ -48,11 +49,11 @@ export class MessageLogger extends AbstractAdminAuditLogger {
             .setDescription(`Message edited in <#${newMessage.channel.id}> [Jump to Message](${newMessage.url})`)
             .addFields({
                     name: "before",
-                    value: ObjectUtil.validString(messageBefore) ? messageBefore : "none"
+                    value: ObjectUtil.validString(messageBefore) ? StringUtils.truncate(messageBefore, MessageLogger.messageLimit) : "none"
                 },
                 {
                     name: "After",
-                    value: ObjectUtil.validString(messageAfter) ? messageAfter : "none"
+                    value: ObjectUtil.validString(messageAfter) ? StringUtils.truncate(messageAfter, MessageLogger.messageLimit) : "none"
                 })
             .setTimestamp()
             .setFooter(`${member.id}`);
@@ -65,23 +66,38 @@ export class MessageLogger extends AbstractAdminAuditLogger {
         if (!Main.testMode && message.member && message.member.id === Main.client.user.id) {
             return;
         }
-        const dateDeleted = new Date();
+        const dateNow = Date.now();
         const attatchments = message.attachments;
-        const limit = 2048;
-        const truncate = (input) => input.length > limit ? `${input.substring(0, limit - 3)}...` : input;
         const member = message.member;
         if (!member || !member.user) {
             return;
         }
+        await Util.delayFor(900);
+        const fetchedLogs = await DiscordUtils.getAuditLogEntries("MESSAGE_DELETE", message.guild, 6);
+        let executor = null;
+        if (fetchedLogs) {
+            const auditEntry = fetchedLogs.entries.find(auditEntry => {
+                    const d = dateNow - auditEntry.createdTimestamp;
+                    const dateConstraint = d < 40000;
+                    // @ts-ignore
+                    return auditEntry.target.id === message.author.id && auditEntry.extra.channel.id === message.channel.id && dateConstraint;
+                }
+            );
+            executor = auditEntry ? auditEntry.executor.tag : 'Unknown';
+        }
+
         const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
         const messageContent = message.content;
-        const description = truncate(`Message sent by <@${member.id}> deleted in <#${message.channel.id}> \n ${messageContent}`);
+        const description = StringUtils.truncate(`Message sent by <@${member.id}> deleted in <#${message.channel.id}> \n ${messageContent}`, MessageLogger.messageLimit);
         const embed = new MessageEmbed()
             .setColor('#FF470F')
             .setAuthor(`${member.user.tag}`, avatarUrl)
             .setDescription(description)
             .setTimestamp()
             .setFooter(`${member.id}`);
+        if (ObjectUtil.validString(executor)) {
+            embed.addField("Deleted by", executor);
+        }
         if (attatchments.size === 1) {
             const messageAttachment = attatchments.first();
             const url = messageAttachment.attachment as string;
