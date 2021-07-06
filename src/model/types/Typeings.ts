@@ -56,6 +56,16 @@ export namespace Typeings {
         airingAt: number,
         episode: number
     }
+
+    export namespace DEEP_AI {
+        type MainOb = {
+            id: string,
+        }
+        export type SenimentTypes = "very negative" | "negative" | "neutral" | "positive" | "very positive";
+        export type SentimentAnalysisResponse =
+            MainOb
+            & { output: [SenimentTypes] };
+    }
 }
 export type AutoResponderPayload = {
     title: string,

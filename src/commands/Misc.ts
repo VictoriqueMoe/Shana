@@ -1,6 +1,6 @@
 import {Command, CommandMessage, Guard} from "@typeit/discord";
 import {NotBot} from "../guards/NotABot";
-import {ArrayUtils, DiscordUtils, ObjectUtil} from "../utils/Utils";
+import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../utils/Utils";
 import {MessageEmbed} from "discord.js";
 import {Main} from "../Main";
 import {TimedSet} from "../model/Impl/TimedSet";
@@ -8,12 +8,12 @@ import {AnimeTractApi} from "../model/anime/AnimeTractApi";
 import {Response} from "../model/anime/AnimeTypings";
 import {secureCommand} from "../guards/RoleConstraint";
 import {AbstractCommandModule} from "./AbstractCommandModule";
+import {DeepAPI} from "../model/DeepAPI";
 
 const Anilist = require('anilist-node');
 const reverseImageSearch = require("node-reverse-image-search");
 const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
-
 export class Misc extends AbstractCommandModule<any> {
     private readonly animeTractApi = new AnimeTractApi();
     private readonly anilist = new Anilist();
@@ -67,9 +67,45 @@ export class Misc extends AbstractCommandModule<any> {
                             }
                         ]
                     }
+                },
+                {
+                    name: "posOrNeg",
+                    description: {
+                        text: "This algorithm classifies each sentence in the input as very negative, negative, neutral, positive, or very positive",
+                        args: [
+                            {
+                                name: "text",
+                                type: "text",
+                                description: "the text to analyse",
+                                optional: false
+                            }
+                        ]
+                    }
                 }
             ]
         });
+    }
+
+    @Command("posOrNeg")
+    @Guard(NotBot, secureCommand)
+    private async posOrNeg(command: CommandMessage): Promise<void> {
+        const reference = command.reference;
+        let text = "";
+        if (reference) {
+            const repliedMessageObj = await command.channel.messages.fetch(reference.messageID);
+            if (ObjectUtil.validString(repliedMessageObj.content)) {
+                text = repliedMessageObj.content;
+            }
+        } else {
+            const argumentArray = StringUtils.splitCommandLine(command.content);
+            text = argumentArray[0];
+        }
+        if (!ObjectUtil.validString(text)) {
+            command.reply(`Command arguments wrong, usage: ~posOrNeg "text" or reference a message with text`);
+            return;
+        }
+        const resp = await DeepAPI.instance.sentimentAnalysis(text);
+        command.reply(`This message is ${resp}`);
     }
 
     @Command("avatar")
