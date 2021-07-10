@@ -19,6 +19,14 @@ export class AuditLogger extends CloseableModule<null> {
         super(CloseOptionModel, AuditLogger._uid);
     }
 
+    public get moduleId(): string {
+        return "userLog";
+    }
+
+    public get isDynoReplacement(): boolean {
+        return true;
+    }
+
     @On("guildMemberAdd")
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         if (!await this.isEnabled(member.guild.id)) {
@@ -95,14 +103,5 @@ export class AuditLogger extends CloseableModule<null> {
             }
             return DiscordUtils.postToLog(content, guildId);
         });
-    }
-
-
-    public get moduleId(): string {
-        return "userLog";
-    }
-
-    public get isDynoReplacement(): boolean {
-        return true;
     }
 }

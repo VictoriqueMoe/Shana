@@ -5,11 +5,11 @@ const deepai = require('deepai');
 
 export class DeepAPI {
 
-    private static _instance: DeepAPI;
-
     private constructor() {
         deepai.setApiKey(process.env.deepapi);
     }
+
+    private static _instance: DeepAPI;
 
     public static get instance(): DeepAPI {
         if (!DeepAPI._instance) {

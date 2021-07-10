@@ -14,10 +14,11 @@ const Anilist = require('anilist-node');
 const reverseImageSearch = require("node-reverse-image-search");
 const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
+
 export class Misc extends AbstractCommandModule<any> {
+    private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
     private readonly animeTractApi = new AnimeTractApi();
     private readonly anilist = new Anilist();
-    private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
 
     constructor() {
         super({
@@ -267,7 +268,7 @@ export class Misc extends AbstractCommandModule<any> {
                 messageAttachments = repliedMessageAttachments;
             }
         }
-        if(command.attachments && command.attachments.size === 1){
+        if (command.attachments && command.attachments.size === 1) {
             messageAttachments = command.attachments;
         }
         if (messageAttachments && messageAttachments.size === 1) {

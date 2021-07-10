@@ -14,8 +14,8 @@ const isImageFast = require('is-image-fast');
  */
 export class MessageLogger extends AbstractAdminAuditLogger {
     private static _uid = ObjectUtil.guid();
-    private imgur = new Imgur();
     private static messageLimit = 1024;
+    private imgur = new Imgur();
 
     constructor() {
         super(MessageLogger._uid);

@@ -7,14 +7,16 @@ import {DiscordUtils} from "../../../../utils/Utils";
 
 export abstract class AbstractFilter implements IDynoAutoModFilter {
 
+    abstract readonly actions: ACTION[];
+    abstract readonly id: string;
+    abstract readonly isActive: boolean;
+    abstract readonly warnMessage: string;
+    abstract readonly priority: number;
+
     protected constructor(protected _parentModule: ICloseableModule<null>) {
         if (_parentModule != null) {
             SubModuleManager.instance.addSubModules(this);
         }
-    }
-
-    public get parentModule(): ICloseableModule<null> {
-        return this._parentModule;
     }
 
     /**
@@ -41,6 +43,14 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
         return 15; //  hard-coded for now
     }
 
+    public get parentModule(): ICloseableModule<null> {
+        return this._parentModule;
+    }
+
+    public abstract postProcess(member: Message): Promise<void>;
+
+    public abstract doFilter(content: Message): boolean;
+
     protected postToLog(reason: string, message: Message): Promise<Message | null> {
         if (!this.actions.includes(ACTION.DELETE) || !message.member.user) {
             return null;
@@ -57,15 +67,4 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
             .setFooter(`${member.user.id}`);
         return DiscordUtils.postToLog(embed, message.guild.id, false);
     }
-
-    abstract readonly actions: ACTION[];
-    abstract readonly id: string;
-    abstract readonly isActive: boolean;
-    abstract readonly warnMessage: string;
-
-    public abstract postProcess(member: Message): Promise<void>;
-
-    public abstract doFilter(content: Message): boolean;
-
-    abstract readonly priority: number;
 }

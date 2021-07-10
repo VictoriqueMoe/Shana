@@ -10,14 +10,14 @@ import {Job} from "node-schedule";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
-    private static _instance: MuteSingleton;
-
     private readonly _mutes: Set<Job>;
 
     private constructor() {
         super();
         this._mutes = new Set();
     }
+
+    private static _instance: MuteSingleton;
 
     public static get instance(): MuteSingleton {
         if (!MuteSingleton._instance) {

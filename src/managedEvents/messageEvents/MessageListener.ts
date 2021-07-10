@@ -31,6 +31,48 @@ export abstract class MessageListener {
         }
     }*/
 
+    public static async doEmojiBan(emojiIds: string[], user: User, message: Message, isReaction: boolean): Promise<void> {
+        for (const emoji of emojiIds) {
+            let bannedEmojiInfo: EmojiInfo = null;
+            try {
+                bannedEmojiInfo = await DiscordUtils.getEmojiInfo(emoji);
+            } catch {
+
+            }
+            if (!bannedEmojiInfo) {
+                return;
+            }
+            const emojiHash = md5(bannedEmojiInfo.buffer);
+            const exists = await BannedAttachmentsModel.findOne({
+                where: {
+                    guildId: message.guild.id,
+                    isEmoji: true,
+                    [Op.or]: [
+                        {
+                            attachmentHash: emojiHash
+                        }, {
+                            url: bannedEmojiInfo.url
+                        }
+                    ]
+                }
+            });
+            if (exists) {
+                const reasonToDel = exists.reason;
+                try {
+                    if (isReaction) {
+                        await message.reactions.cache.find(r => r.emoji.id == bannedEmojiInfo.id).users.remove(user);
+                    } else {
+                        await message.delete();
+                        message.channel.send(`Message contains a banned emoji`);
+                        DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a message that contained a banned emoji with reason: "${reasonToDel}"`, message.guild.id);
+                    }
+                } catch {
+                }
+                break;
+            }
+        }
+    }
+
     @MessageListenerDecorator(true, notBot)
     private async moeLoliDestroyer([message]: ArgsOf<"message">, client: Client): Promise<void> {
         if (!message.member) {
@@ -62,7 +104,6 @@ export abstract class MessageListener {
         });
         message.delete();
     }
-
 
     @MessageListenerDecorator()
     private async logDMs([message]: ArgsOf<"message">, client: Client): Promise<void> {
@@ -138,49 +179,6 @@ export abstract class MessageListener {
             return;
         }
         message.channel.send(reply.output);
-    }
-
-
-    public static async doEmojiBan(emojiIds: string[], user: User, message: Message, isReaction: boolean): Promise<void> {
-        for (const emoji of emojiIds) {
-            let bannedEmojiInfo: EmojiInfo = null;
-            try {
-                bannedEmojiInfo = await DiscordUtils.getEmojiInfo(emoji);
-            } catch {
-
-            }
-            if (!bannedEmojiInfo) {
-                return;
-            }
-            const emojiHash = md5(bannedEmojiInfo.buffer);
-            const exists = await BannedAttachmentsModel.findOne({
-                where: {
-                    guildId: message.guild.id,
-                    isEmoji: true,
-                    [Op.or]: [
-                        {
-                            attachmentHash: emojiHash
-                        }, {
-                            url: bannedEmojiInfo.url
-                        }
-                    ]
-                }
-            });
-            if (exists) {
-                const reasonToDel = exists.reason;
-                try {
-                    if (isReaction) {
-                        await message.reactions.cache.find(r => r.emoji.id == bannedEmojiInfo.id).users.remove(user);
-                    } else {
-                        await message.delete();
-                        message.channel.send(`Message contains a banned emoji`);
-                        DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a message that contained a banned emoji with reason: "${reasonToDel}"`, message.guild.id);
-                    }
-                } catch {
-                }
-                break;
-            }
-        }
     }
 
     @MessageListenerDecorator(true)

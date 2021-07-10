@@ -11,18 +11,25 @@ import fetch, {Headers} from "node-fetch";
 import {URLSearchParams} from "url";
 
 export class ImageFun {
-    private static _instance: ImageFun;
     private readonly token: string = process.env.amethysteToken;
     private readonly baseUrl: string = "https://v1.api.amethyste.moe";
 
     private constructor() {
     }
 
+    private static _instance: ImageFun;
+
     public static get instance(): ImageFun {
         if (!ImageFun._instance) {
             ImageFun._instance = new ImageFun();
         }
         return ImageFun._instance;
+    }
+
+    private get authHeader(): Headers {
+        return new Headers({
+            'Authorization': `Bearer ${this.token}`
+        });
     }
 
     public async generate(request: GenerateEndPointRequest): Promise<GenerateEndPointResponse> {
@@ -48,16 +55,6 @@ export class ImageFun {
         return wrapper.buffer();
     }
 
-    private eachRecursive(obj: additionalGenGetArgs, params: URLSearchParams) {
-        for (const k in obj) {
-            if (typeof obj[k] == "object" && obj[k] !== null) {
-                this.eachRecursive(obj[k], params);
-            } else {
-                params.append(k, obj[k]);
-            }
-        }
-    }
-
     public async image(request: ImageEndPointRequest): Promise<ImageEndPointResponse> {
         return null;
     }
@@ -78,10 +75,14 @@ export class ImageFun {
         return await wrapper.json();
     }
 
-    private get authHeader(): Headers {
-        return new Headers({
-            'Authorization': `Bearer ${this.token}`
-        });
+    private eachRecursive(obj: additionalGenGetArgs, params: URLSearchParams) {
+        for (const k in obj) {
+            if (typeof obj[k] == "object" && obj[k] !== null) {
+                this.eachRecursive(obj[k], params);
+            } else {
+                params.append(k, obj[k]);
+            }
+        }
     }
 
 }

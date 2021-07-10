@@ -5,12 +5,13 @@ import {ModuleSettings} from "../ModuleSettings";
 
 export class SubModuleManager {
 
-    private static _instance: SubModuleManager;
     private readonly _subModules: Set<ISubModule>;
 
     private constructor() {
         this._subModules = new Set();
     }
+
+    private static _instance: SubModuleManager;
 
     public static get instance(): SubModuleManager {
         if (!SubModuleManager._instance) {
@@ -19,12 +20,12 @@ export class SubModuleManager {
         return SubModuleManager._instance;
     }
 
-    public addSubModules(filter: ISubModule): void {
-        this._subModules.add(filter);
-    }
-
     public get allSubModules(): Immutable.Set<ISubModule> {
         return Immutable.Set.of(...this._subModules.values());
+    }
+
+    public addSubModules(filter: ISubModule): void {
+        this._subModules.add(filter);
     }
 
     public getSubModulesFromParent(parent: ICloseableModule<ModuleSettings>): Immutable.Set<ISubModule> {

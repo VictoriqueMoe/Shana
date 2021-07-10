@@ -14,6 +14,14 @@ export class AutoResponder extends TriggerConstraint<null> {
         super(CloseOptionModel, AutoResponder._uid);
     }
 
+    get isDynoReplacement(): boolean {
+        return false;
+    }
+
+    get moduleId(): string {
+        return "AutoResponder";
+    }
+
     @MessageListenerDecorator(true, notBot)
     private async process([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate = false): Promise<void> {
         const channel = message.channel;
@@ -90,14 +98,6 @@ export class AutoResponder extends TriggerConstraint<null> {
                 }
             }
         }
-    }
-
-    get isDynoReplacement(): boolean {
-        return false;
-    }
-
-    get moduleId(): string {
-        return "AutoResponder";
     }
 
     private async _parseVars(response: string, {channel, guild, member}: Message): Promise<string> {

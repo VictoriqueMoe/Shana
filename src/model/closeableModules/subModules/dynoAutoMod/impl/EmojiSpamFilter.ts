@@ -25,10 +25,6 @@ export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoA
         return "6";
     }
 
-    public doFilter(content: Message): boolean {
-        return DiscordUtils.getEmojiFromMessage(content).length <= Number.parseInt(this.value);
-    }
-
     public get id(): string {
         return "Emoji Spam Filter";
     }
@@ -39,6 +35,10 @@ export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoA
 
     public get priority(): number {
         return PRIORITY.LAST;
+    }
+
+    public doFilter(content: Message): boolean {
+        return DiscordUtils.getEmojiFromMessage(content).length <= Number.parseInt(this.value);
     }
 
     public async postProcess(message: Message): Promise<void> {

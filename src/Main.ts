@@ -41,21 +41,19 @@ export class CloseableModuleSet extends Set<CloseableModule<any>> {
 
 export class Main {
     public static closeableModules: CloseableModuleSet = new CloseableModuleSet();
+    public static testMode = false;
+    public static botServer: http.Server;
 
     private static _client: Client;
 
-    public static testMode = false;
+    static get client(): Client {
+        return this._client;
+    }
 
     private static _dao: Sequelize;
 
-    public static botServer: http.Server;
-
     public static get dao(): Sequelize {
         return Main._dao;
-    }
-
-    static get client(): Client {
-        return this._client;
     }
 
     public static async start(): Promise<void> {

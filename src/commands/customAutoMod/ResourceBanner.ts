@@ -37,6 +37,30 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
         });
     }
 
+    public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji = false): Promise<BannedAttachmentsModel> {
+        const attachmentHash = md5(attachment);
+        const exists = await BannedAttachmentsModel.count({
+            where: {
+                attachmentHash,
+                guildId
+            }
+        }) === 1;
+        if (exists) {
+            return null;
+        }
+        const entry = new BannedAttachmentsModel({
+            attachmentHash,
+            url,
+            reason,
+            guildId,
+            isEmoji
+        });
+        return await entry.save();
+    }
+
+    private static viewDescriptionForSetUsernames() {
+        return "Ban the attachment that is contained in the linked messages \n usage: ~banAttachment <reason>";
+    }
 
     @Command("banEmoji")
     @Guard(NotBot, secureCommand)
@@ -109,27 +133,6 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
         repliedMessageObj.delete();
     }
 
-    public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji = false): Promise<BannedAttachmentsModel> {
-        const attachmentHash = md5(attachment);
-        const exists = await BannedAttachmentsModel.count({
-            where: {
-                attachmentHash,
-                guildId
-            }
-        }) === 1;
-        if (exists) {
-            return null;
-        }
-        const entry = new BannedAttachmentsModel({
-            attachmentHash,
-            url,
-            reason,
-            guildId,
-            isEmoji
-        });
-        return await entry.save();
-    }
-
     @Command("banAttachment")
     @Description(ResourceBanner.viewDescriptionForSetUsernames())
     @Guard(NotBot, secureCommand)
@@ -184,9 +187,5 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
         }
 
         command.reply("attachments extracted, any more messages with these attachments will be auto deleted");
-    }
-
-    private static viewDescriptionForSetUsernames() {
-        return "Ban the attachment that is contained in the linked messages \n usage: ~banAttachment <reason>";
     }
 }

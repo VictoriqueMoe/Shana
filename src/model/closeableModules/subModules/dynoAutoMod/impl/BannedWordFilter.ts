@@ -21,18 +21,6 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
         };
     }
 
-    /**
-     * return true if user was sent to jail
-     * @param member
-     */
-    public async checkUsername(member: GuildMember): Promise<boolean> {
-        if (!this.doesNotFailValidation(member.displayName)) {
-            await GuildUtils.sendToJail(member, "You have been placed here because your display name voilates our rules, Please change it");
-            return true;
-        }
-        return false;
-    }
-
     public get id(): string {
         return "Banned Word Filter";
     }
@@ -49,8 +37,24 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
         return "Watch your language!";
     }
 
+    /**
+     * return true if user was sent to jail
+     * @param member
+     */
+    public async checkUsername(member: GuildMember): Promise<boolean> {
+        if (!this.doesNotFailValidation(member.displayName)) {
+            await GuildUtils.sendToJail(member, "You have been placed here because your display name voilates our rules, Please change it");
+            return true;
+        }
+        return false;
+    }
+
     doFilter(content: Message): boolean {
         return this.doesNotFailValidation(content.content);
+    }
+
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Banned words", message);
     }
 
     private doesNotFailValidation(content: string): boolean {
@@ -73,9 +77,5 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
             }
         }
         return true;
-    }
-
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Banned words", message);
     }
 }

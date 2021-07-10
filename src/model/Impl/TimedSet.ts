@@ -20,6 +20,22 @@ export class TimedSet<T> implements ITimedSet<T> {
         this._map = new Map();
     }
 
+    public get size(): number {
+        return this._map.size;
+    }
+
+    /**
+     * GFet the raw underlying set backing this times array.
+     * NOTE; this set is Immutable
+     */
+    public get rawSet(): Immutable.Set<T> {
+        return Immutable.Set.of(...this._map.keys());
+    }
+
+    public get [Symbol.toStringTag](): string {
+        return "Set";
+    }
+
     public isEmpty(): boolean {
         return this._map.size === 0;
     }
@@ -44,10 +60,6 @@ export class TimedSet<T> implements ITimedSet<T> {
         return this._map.delete(key);
     }
 
-    public get size(): number {
-        return this._map.size;
-    }
-
     public refresh(key: T): boolean {
         if (!this._map.has(key)) {
             return false;
@@ -63,18 +75,6 @@ export class TimedSet<T> implements ITimedSet<T> {
             clearTimeout(value);
         }
         this._map = new Map();
-    }
-
-    /**
-     * GFet the raw underlying set backing this times array.
-     * NOTE; this set is Immutable
-     */
-    public get rawSet(): Immutable.Set<T> {
-        return Immutable.Set.of(...this._map.keys());
-    }
-
-    public get [Symbol.toStringTag](): string {
-        return "Set";
     }
 
     public [Symbol.iterator](): IterableIterator<T> {

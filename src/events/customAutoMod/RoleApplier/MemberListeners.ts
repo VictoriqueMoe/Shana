@@ -11,18 +11,6 @@ import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingl
 export class MemberListeners extends BaseDAO<RolePersistenceModel> {
 
     @On("guildMemberUpdate")
-    private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
-        const module = DiscordUtils.getModule("DynoAutoMod");
-        const filter: BannedWordFilter = module.submodules.find(m => m instanceof BannedWordFilter) as BannedWordFilter;
-        if (!filter.isActive) {
-            return;
-        }
-        if (oldUser.nickname !== newUser.nickname) {
-            await filter.checkUsername(newUser);
-        }
-    }
-
-    @On("guildMemberUpdate")
     public async jailRoleListener([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
         const jailRole = await GuildUtils.RoleUtils.getJailRole(newUser.guild.id);
         if (jailRole) {
@@ -43,6 +31,18 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
                 await MuteSingleton.instance.doRemove(newUser.id, newUser.guild.id, mutedRole.id, true);
             } catch {
             }
+        }
+    }
+
+    @On("guildMemberUpdate")
+    private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
+        const module = DiscordUtils.getModule("DynoAutoMod");
+        const filter: BannedWordFilter = module.submodules.find(m => m instanceof BannedWordFilter) as BannedWordFilter;
+        if (!filter.isActive) {
+            return;
+        }
+        if (oldUser.nickname !== newUser.nickname) {
+            await filter.checkUsername(newUser);
         }
     }
 }

@@ -16,6 +16,18 @@ export class SpoilersFilter extends AbstractFilter {
         return true;
     }
 
+    public get id(): string {
+        return "Spoilers Filter";
+    }
+
+    public get warnMessage(): string {
+        return `No Spoilers allowed`;
+    }
+
+    public get priority(): number {
+        return PRIORITY.LAST;
+    }
+
     public doFilter(content: Message): boolean {
         const regex = /\|{2}(.*)\|{2}/gm;
         const messageContent = content.content;
@@ -31,19 +43,6 @@ export class SpoilersFilter extends AbstractFilter {
             }
         }
         return true;
-    }
-
-
-    public get id(): string {
-        return "Spoilers Filter";
-    }
-
-    public get warnMessage(): string {
-        return `No Spoilers allowed`;
-    }
-
-    public get priority(): number {
-        return PRIORITY.LAST;
     }
 
     public async postProcess(message: Message): Promise<void> {

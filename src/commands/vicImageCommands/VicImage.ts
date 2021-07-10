@@ -30,6 +30,14 @@ export abstract class VicImage extends AbstractCommandModule<any> {
         });
     }
 
+    public static getVicImageDescription(): string {
+        return "Get random vic image";
+    }
+
+    private static getIndexDescription() {
+        return "Reindex the bot to add new images";
+    }
+
     @Command("vicImage")
     @Description(VicImage.getVicImageDescription())
     @Guard(NotBot, secureCommand)
@@ -59,13 +67,5 @@ export abstract class VicImage extends AbstractCommandModule<any> {
     private async vicReIndex(command: CommandMessage): Promise<void> {
         await VicDropbox.instance.index();
         command.channel.send(`Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`);
-    }
-
-    private static getIndexDescription() {
-        return "Reindex the bot to add new images";
-    }
-
-    public static getVicImageDescription(): string {
-        return "Get random vic image";
     }
 }

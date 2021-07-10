@@ -87,12 +87,12 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
         });
         let retRow = -1;
         let textPrefix = "";
-        if(await SettingsModel.count({
-            where:{
+        if (await SettingsModel.count({
+            where: {
                 guildId,
                 setting
             }
-        }) > 0){
+        }) > 0) {
             if (saveOnly) {
                 return 0;
             }
@@ -107,7 +107,7 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
             this.updateCache(setting, value, guildId);
             retRow = result[0];
             textPrefix = "Updated";
-        }else{
+        } else {
             await super.commitToDatabase(newModel, {}, true);
             this.updateCache(setting, value, guildId);
             retRow = 1;

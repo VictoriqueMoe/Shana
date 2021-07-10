@@ -61,6 +61,70 @@ export class OnReady extends BaseDAO<any> {
         }
     }
 
+    private static async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
+        const retMap: Map<Guild, string[]> = new Map();
+        const guildModels = await GuildableModel.findAll({
+            include: [CommandSecurityModel]
+        });
+        for (const guildModel of guildModels) {
+            const guildId = guildModel.guildId;
+            const guild = await GuildManager.instance.getGuild(guildId);
+            const autoRoleModule: AutoRole = DIService.instance.getService(AutoRole);
+            const enabled = await autoRoleModule.isEnabled(guildId);
+            if (enabled) {
+                const membersApplied: string[] = [];
+                const members = await guild.members.fetch({
+                    force: true
+                });
+                const noRoles = members.array().filter(member => {
+                    const roles = member.roles.cache.array();
+                    for (const role of roles) {
+                        if (role.name !== "@everyone") {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+                for (const noRole of noRoles) {
+                    console.log(`setting roles for ${noRole.user.tag} as they have no roles`);
+                    membersApplied.push(noRole.user.tag);
+                    await autoRoleModule.applyRole(noRole, guildId);
+                }
+                retMap.set(guild, membersApplied);
+            }
+        }
+        return retMap;
+    }
+
+    private static async loadCustomActions(): Promise<void> {
+        io.action('getLogs', async (cb) => {
+            const url = `${__dirname}/../../logs/combined.log`;
+            const log = fs.readFileSync(url, {
+                encoding: 'utf8'
+            });
+            return cb(log);
+        });
+
+        io.action('force member roles', async (cb) => {
+            const appliedMembers = await OnReady.applyEmptyRoles();
+            let message = "";
+            for (const [guild, members] of appliedMembers) {
+                if (members.length === 0) {
+                    continue;
+                }
+                message += `\n----- ${guild.name} ----`;
+                for (const member of members) {
+                    message += `\n${member}\n`;
+                }
+                message += `---------\n`;
+            }
+            if (!ObjectUtil.validString(message)) {
+                message = "No Members with no roles found";
+            }
+            return cb(message);
+        });
+    }
+
     public init(): Promise<any>[] {
         const pArr: Promise<any>[] = [];
         pArr.push(this.populateClosableEvents());
@@ -70,7 +134,6 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(this.cleanUpGuilds());
         return pArr;
     }
-
 
     @On("ready")
     private async initialize(): Promise<void> {
@@ -283,69 +346,5 @@ export class OnReady extends BaseDAO<any> {
                 });
             }
         }
-    }
-
-    private static async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
-        const retMap: Map<Guild, string[]> = new Map();
-        const guildModels = await GuildableModel.findAll({
-            include: [CommandSecurityModel]
-        });
-        for (const guildModel of guildModels) {
-            const guildId = guildModel.guildId;
-            const guild = await GuildManager.instance.getGuild(guildId);
-            const autoRoleModule: AutoRole = DIService.instance.getService(AutoRole);
-            const enabled = await autoRoleModule.isEnabled(guildId);
-            if (enabled) {
-                const membersApplied: string[] = [];
-                const members = await guild.members.fetch({
-                    force: true
-                });
-                const noRoles = members.array().filter(member => {
-                    const roles = member.roles.cache.array();
-                    for (const role of roles) {
-                        if (role.name !== "@everyone") {
-                            return false;
-                        }
-                    }
-                    return true;
-                });
-                for (const noRole of noRoles) {
-                    console.log(`setting roles for ${noRole.user.tag} as they have no roles`);
-                    membersApplied.push(noRole.user.tag);
-                    await autoRoleModule.applyRole(noRole, guildId);
-                }
-                retMap.set(guild, membersApplied);
-            }
-        }
-        return retMap;
-    }
-
-    private static async loadCustomActions(): Promise<void> {
-        io.action('getLogs', async (cb) => {
-            const url = `${__dirname}/../../logs/combined.log`;
-            const log = fs.readFileSync(url, {
-                encoding: 'utf8'
-            });
-            return cb(log);
-        });
-
-        io.action('force member roles', async (cb) => {
-            const appliedMembers = await OnReady.applyEmptyRoles();
-            let message = "";
-            for (const [guild, members] of appliedMembers) {
-                if (members.length === 0) {
-                    continue;
-                }
-                message += `\n----- ${guild.name} ----`;
-                for (const member of members) {
-                    message += `\n${member}\n`;
-                }
-                message += `---------\n`;
-            }
-            if (!ObjectUtil.validString(message)) {
-                message = "No Members with no roles found";
-            }
-            return cb(message);
-        });
     }
 }

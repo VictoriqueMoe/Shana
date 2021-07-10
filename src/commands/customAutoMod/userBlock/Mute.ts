@@ -61,6 +61,18 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         });
     }
 
+    private static getViewAllMuteDescription() {
+        return "View all the currently active mutes";
+    }
+
+    private static getMuteDescription() {
+        return `\n Block a user from sending any messages with reason \n usage: ~mute <"username"> <"reason"> [timeout in seconds] | ["timeout in seconds + time Unit"] \n example: ~mute "@SomeUser" "annoying" 20 = mute for 20 seconds \n ~mute "@SomeUser" "annoying" "2h" = mute for 2 hours \n make sure that the @ is blue before sending`;
+    }
+
+    private static getMuteTimeUnitsDescription() {
+        return "Get all the available time units you can use in mute";
+    }
+
     @Command("mute")
     @Description(Mute.getMuteDescription())
     @Guard(NotBot, secureCommand)
@@ -156,7 +168,6 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         command.reply(`\n ${this.getMuteTimeOutStr()}`);
     }
 
-
     @Command("viewAllMutes")
     @Description(Mute.getViewAllMuteDescription())
     @Guard(NotBot, secureCommand)
@@ -187,17 +198,5 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         }
         command.reply(replyStr);
         return currentBlocks;
-    }
-
-    private static getViewAllMuteDescription() {
-        return "View all the currently active mutes";
-    }
-
-    private static getMuteDescription() {
-        return `\n Block a user from sending any messages with reason \n usage: ~mute <"username"> <"reason"> [timeout in seconds] | ["timeout in seconds + time Unit"] \n example: ~mute "@SomeUser" "annoying" 20 = mute for 20 seconds \n ~mute "@SomeUser" "annoying" "2h" = mute for 2 hours \n make sure that the @ is blue before sending`;
-    }
-
-    private static getMuteTimeUnitsDescription() {
-        return "Get all the available time units you can use in mute";
     }
 }

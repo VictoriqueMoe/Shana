@@ -121,7 +121,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
                 if (!command) {
                     continue;
                 }
-                if(command.allowedRoles.includes("*")){
+                if (command.allowedRoles.includes("*")) {
                     return true;
                 }
                 const inArray = command.allowedRoles.some(value => memberRoles.includes(value));

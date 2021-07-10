@@ -49,12 +49,20 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
                 },
                 {
                     name: "getModuleNames",
-                    description:{
+                    description: {
                         text: "Return a list of all modules to use with the 'enableModule' command"
                     }
                 }
             ]
         });
+    }
+
+    private static getEnableModuleDescription() {
+        return '\n enable a module \n usage: ~enableModule <"moduleId"> <"enable"> \n example: ~enableModule "autoRole" "false" will disable the auto role module';
+    }
+
+    private static getEnableDynoReplaceDescription() {
+        return '\n enable all the modules needed to replace dyno functionality (curreonly only supports user join/leave/ban logging and auto role) \n usage: ~dynoReplace <"enable"> \n example: ~dynoReplace "true"';
     }
 
     @Command("dynoReplace")
@@ -112,13 +120,5 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
     private async getModuleNames(command: CommandMessage): Promise<void> {
         const allModuleNames = await DiscordUtils.getAllClosableModules(command.guild.id);
         command.reply(`all available modules are: \n ${allModuleNames.join(", ")}`);
-    }
-
-    private static getEnableModuleDescription() {
-        return '\n enable a module \n usage: ~enableModule <"moduleId"> <"enable"> \n example: ~enableModule "autoRole" "false" will disable the auto role module';
-    }
-
-    private static getEnableDynoReplaceDescription() {
-        return '\n enable all the modules needed to replace dyno functionality (curreonly only supports user join/leave/ban logging and auto role) \n usage: ~dynoReplace <"enable"> \n example: ~dynoReplace "true"';
     }
 }
