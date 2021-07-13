@@ -80,10 +80,10 @@ export class MessageLogger extends AbstractAdminAuditLogger {
                     const d = dateNow - auditEntry.createdTimestamp;
                     const dateConstraint = d < 40000;
                     // @ts-ignore
-                    return auditEntry.target.id === message.author.id && auditEntry.extra.channel.id === message.channel.id && dateConstraint;
+                return auditEntry.target && auditEntry.target.id === message.author.id && auditEntry.extra.channel.id === message.channel.id && dateConstraint;
                 }
             );
-            executor = auditEntry ? auditEntry.executor.tag : 'Unknown';
+            executor = auditEntry ? auditEntry.executor.tag : '';
         }
 
         const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});

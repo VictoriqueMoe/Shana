@@ -9,7 +9,7 @@ import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableM
 export class DiscordInviteFilter extends AbstractFilter {
 
     public get actions(): ACTION[] {
-        return [ACTION.DELETE];
+        return [ACTION.DELETE, ACTION.WARN];
     }
 
     public get id(): string {

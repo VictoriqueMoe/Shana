@@ -81,9 +81,41 @@ export class Misc extends AbstractCommandModule<any> {
                             }
                         ]
                     }
+                },
+                {
+                    name: "generateText",
+                    description: {
+                        text: "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text.",
+                        args: [
+                            {
+                                name: "text",
+                                type: "text",
+                                description: "the text to include",
+                                optional: false
+                            }
+                        ]
+                    }
                 }
             ]
         });
+    }
+
+    @Command("generateText")
+    @Guard(NotBot, secureCommand)
+    private async generateText(command: CommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(command.content);
+        if (argumentArray.length !== 1) {
+            command.reply(`Command arguments wrong, usage: ~generateText "text"`);
+            return;
+        }
+        const text = argumentArray[0];
+        if (!ObjectUtil.validString(text)) {
+            command.reply(`Command arguments wrong, usage: ~generateText "text"`);
+            return;
+        }
+        const message = await command.channel.send("Generating...");
+        const resp = await DeepAPI.instance.textGeneration(text);
+        message.edit(resp);
     }
 
     @Command("posOrNeg")

@@ -65,6 +65,14 @@ export namespace Typeings {
         export type SentimentAnalysisResponse =
             MainOb
             & { output: [SenimentTypes] };
+        export type ImageSimilarity = MainOb & {
+            output: {
+                distance: number
+            }
+        };
+        export type TextGeneration = MainOb & {
+            output: string
+        };
     }
 }
 export type AutoResponderPayload = {
