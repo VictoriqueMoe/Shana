@@ -6,13 +6,13 @@ import {SETTINGS} from "../enums/SETTINGS";
 
 export async function getPrefix(message: Message | string, client?: Client) {
     let guildId = null;
-    try{
-        if(typeof message === "string"){
+    try {
+        if (typeof message === "string") {
             guildId = message;
-        }else{
+        } else {
             guildId = message.guild.id;
         }
-    }catch (e){
+    } catch (e) {
         return "~";
     }
     return SettingsManager.instance.getSetting(SETTINGS.PREFIX, guildId);
@@ -29,13 +29,13 @@ export abstract class WeebBot {
         WeebBot.dbx = new Dropbox({accessToken: process.env.dropboxToken});
     }
 
+    public static get dropBox(): Dropbox {
+        return WeebBot.dbx;
+    }
+
     @CommandNotFound()
     private notFoundA(command: CommandMessage): void {
         console.log(`invalid ${command.content}`);
-    }
-
-    public static get dropBox(): Dropbox {
-        return WeebBot.dbx;
     }
 
 }

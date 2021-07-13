@@ -11,6 +11,6 @@ export interface ITimedSet<T> extends Set<T> {
     /**
      * checks if this set is empty
      */
-    isEmpty():boolean;
+    isEmpty(): boolean;
 
 }

@@ -1,5 +1,4 @@
 import {GuildMember, PartialGuildMember} from "discord.js";
-import {Roles} from "../../enums/Roles";
 
 export type RoleChangeType = {
     remove: string[],

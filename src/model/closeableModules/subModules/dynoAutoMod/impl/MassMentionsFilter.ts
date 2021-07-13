@@ -24,11 +24,6 @@ export class MassMentionsFilter extends AbstractFilter implements IValueBackedDy
         return "6";
     }
 
-    public doFilter(content: Message): boolean {
-        const mentions = content.mentions;
-        return mentions.members.size < Number.parseInt(this.value);
-    }
-
     public get id(): string {
         return "Mass Mentions Filter";
     }
@@ -39,6 +34,11 @@ export class MassMentionsFilter extends AbstractFilter implements IValueBackedDy
 
     public get priority(): number {
         return PRIORITY.LAST;
+    }
+
+    public doFilter(content: Message): boolean {
+        const mentions = content.mentions;
+        return mentions.members.size < Number.parseInt(this.value);
     }
 
     public async postProcess(message: Message): Promise<void> {

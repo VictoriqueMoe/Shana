@@ -64,13 +64,13 @@ export class ImageSpamFilter extends AbstractFilter implements IValueBackedDynoA
 
     }
 
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Image spam", message);
+    }
+
     private getFromArray(userId: string, guildId: string): MessageSpamEntry {
         const arr = this._cooldownArray.rawSet;
         return arr.find(value => value.userId === userId && value.guildId === guildId);
-    }
-
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Image spam", message);
     }
 }
 

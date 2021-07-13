@@ -3,7 +3,6 @@ import {files} from "dropbox";
 import * as _ from "lodash";
 
 export class VicDropbox {
-    private static _instance: VicDropbox;
     private isIndexed = false;
     private imageCache: files.FolderMetadataReference[];
 
@@ -29,6 +28,8 @@ export class VicDropbox {
         };
         return new Proxy(this, handler);
     }
+
+    private static _instance: VicDropbox;
 
     public static get instance(): VicDropbox {
         if (!VicDropbox._instance) {

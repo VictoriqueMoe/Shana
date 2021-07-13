@@ -15,12 +15,23 @@ import {MessageListenerDecorator, notBot} from "../../../model/decorators/messag
 
 export class DynoAutoMod extends CloseableModule<null> {
 
-    private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
-
     private static _uid = ObjectUtil.guid();
+    private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
 
     constructor() {
         super(CloseOptionModel, DynoAutoMod._uid);
+    }
+
+    public get isDynoReplacement(): boolean {
+        return true;
+    }
+
+    public get moduleId(): string {
+        return "DynoAutoMod";
+    }
+
+    public get submodules(): Immutable.Set<IDynoAutoModFilter> {
+        return super.submodules as Immutable.Set<IDynoAutoModFilter>;
     }
 
     @MessageListenerDecorator(true, notBot)
@@ -146,21 +157,9 @@ export class DynoAutoMod extends CloseableModule<null> {
         return model;
     }
 
-    public get isDynoReplacement(): boolean {
-        return true;
-    }
-
-    public get moduleId(): string {
-        return "DynoAutoMod";
-    }
-
     private getFromArray(userId: string, guildid: string): MuteViolation {
         const arr = this._muteTimeoutArray.rawSet;
         return arr.find(value => value.userId === userId && value._guildId === guildid);
-    }
-
-    public get submodules(): Immutable.Set<IDynoAutoModFilter> {
-        return super.submodules as Immutable.Set<IDynoAutoModFilter>;
     }
 
 }

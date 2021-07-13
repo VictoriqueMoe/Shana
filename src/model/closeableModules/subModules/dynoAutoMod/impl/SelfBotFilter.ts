@@ -7,6 +7,7 @@ import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableM
 import {ObjectUtil} from "../../../../../utils/Utils";
 
 const getUrls = require('get-urls');
+
 @InjectDynoSubModule(DynoAutoMod)
 export class SelfBotFilter extends AbstractFilter {
 
@@ -16,6 +17,18 @@ export class SelfBotFilter extends AbstractFilter {
 
     public get isActive(): boolean {
         return true;
+    }
+
+    public get id(): string {
+        return "Self Bot Detection";
+    }
+
+    public get warnMessage(): string {
+        return `Rich embeds are only allowed from bots, This smells like a self embed, please stop`;
+    }
+
+    public get priority(): number {
+        return PRIORITY.LAST;
     }
 
     public doFilter(content: Message): boolean {
@@ -30,19 +43,6 @@ export class SelfBotFilter extends AbstractFilter {
             }
         }
         return true;
-    }
-
-
-    public get id(): string {
-        return "Self Bot Detection";
-    }
-
-    public get warnMessage(): string {
-        return `Rich embeds are only allowed from bots, This smells like a self embed, please stop`;
-    }
-
-    public get priority(): number {
-        return PRIORITY.LAST;
     }
 
     public async postProcess(message: Message): Promise<void> {

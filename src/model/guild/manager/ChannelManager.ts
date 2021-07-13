@@ -18,6 +18,15 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
         return ChannelManager._instance;
     }
 
+    private static getModel(guildId: string, attra: "logChannel" | "AdminLogchannel" | "JailChannel"): Promise<PostableChannelModel> {
+        return PostableChannelModel.findOne({
+            attributes: [attra],
+            where: {
+                guildId
+            }
+        });
+    }
+
     public async setChannel(guildId: string, channelType: "logChannel" | "AdminLogchannel" | "JailChannel", value: string): Promise<PostableChannelModel[] | null> {
         const result = await PostableChannelModel.update({
             [channelType]: value
@@ -30,15 +39,6 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
             return null;
         }
         return result[1];
-    }
-
-    private static getModel(guildId: string, attra: "logChannel" | "AdminLogchannel" | "JailChannel"): Promise<PostableChannelModel> {
-        return PostableChannelModel.findOne({
-            attributes: [attra],
-            where: {
-                guildId
-            }
-        });
     }
 
     public async getLogChannel(guildId: string): Promise<TextChannel | null> {

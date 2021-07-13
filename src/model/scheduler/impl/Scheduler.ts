@@ -10,6 +10,16 @@ export class Scheduler {
 
     protected _jobs: IScheduledJob[] = [];
 
+    // @ts-ignore
+    public get jobs(): IScheduledJob[] {
+        return this._jobs;
+    }
+
+    // @ts-ignore
+    protected set jobs(jobs: IScheduledJob[]) {
+        this._jobs = jobs;
+    }
+
     public static getInstance(): Scheduler {
         if (!Scheduler.instance) {
             Scheduler.instance = new this();
@@ -42,22 +52,8 @@ export class Scheduler {
         return sJob;
     }
 
-    protected registerJob(name: string, job: schedule.Job): IScheduledJob {
-        return new ScheduledJob(name, job);
-    }
-
     public getJob(name: string): schedule.Job {
         return this.jobs.find(j => j.name === name)?.job;
-    }
-
-    // @ts-ignore
-    public get jobs(): IScheduledJob[] {
-        return this._jobs;
-    }
-
-    // @ts-ignore
-    protected set jobs(jobs: IScheduledJob[]) {
-        this._jobs = jobs;
     }
 
     public cancelJob(name: string): boolean {
@@ -75,6 +71,10 @@ export class Scheduler {
     public cancelAllJobs(): void {
         this.jobs.forEach(scheduledMessage => scheduledMessage.job.cancel());
         this.jobs = [];
+    }
+
+    protected registerJob(name: string, job: schedule.Job): IScheduledJob {
+        return new ScheduledJob(name, job);
     }
 }
 

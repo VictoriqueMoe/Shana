@@ -26,6 +26,18 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         this._isEnabled = new Map();
     }
 
+    public abstract get moduleId(): string;
+
+    public abstract get isDynoReplacement(): boolean;
+
+    public get submodules(): Immutable.Set<ISubModule> {
+        return SubModuleManager.instance.getSubModulesFromParent(this);
+    }
+
+    public get uid(): string {
+        return this._uid;
+    }
+
     public async saveSettings(guildId: string, setting: T, merge = false): Promise<void> {
         let obj = setting;
         if (merge) {
@@ -62,18 +74,6 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         }
         this._settings.set(guildId, model.settings as T);
         return this._settings.get(guildId);
-    }
-
-    public abstract get moduleId(): string;
-
-    public abstract get isDynoReplacement(): boolean;
-
-    public get submodules(): Immutable.Set<ISubModule> {
-        return SubModuleManager.instance.getSubModulesFromParent(this);
-    }
-
-    public get uid(): string {
-        return this._uid;
     }
 
     /**

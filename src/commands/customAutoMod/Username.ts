@@ -68,6 +68,18 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
         });
     }
 
+    private static getDescriptionForSetUsername() {
+        return 'Sets the username permanently for a user unless changed by staff \n usage: ~username <"username"> <"new username"> [block change]';
+    }
+
+    private static removeDescriptionForSetUsername() {
+        return 'remove the username persistence from the database \n usage: ~removeUsername <"username">';
+    }
+
+    private static viewDescriptionForSetUsernames() {
+        return 'View all the stored usernames in the database \n usage: ~viewUsernames';
+    }
+
     @Command("viewUsernames")
     @Description(Username.viewDescriptionForSetUsernames())
     @Guard(NotBot, secureCommand)
@@ -189,17 +201,5 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
         }
         await mentionMember.setNickname(usernameToPersist);
         command.reply(`user ${mentionMember.user.username} has been persisted to always be "${usernameToPersist}"`);
-    }
-
-    private static getDescriptionForSetUsername() {
-        return 'Sets the username permanently for a user unless changed by staff \n usage: ~username <"username"> <"new username"> [block change]';
-    }
-
-    private static removeDescriptionForSetUsername() {
-        return 'remove the username persistence from the database \n usage: ~removeUsername <"username">';
-    }
-
-    private static viewDescriptionForSetUsernames() {
-        return 'View all the stored usernames in the database \n usage: ~viewUsernames';
     }
 }

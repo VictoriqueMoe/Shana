@@ -22,16 +22,16 @@ export class BotServer extends Server {
         this.app.use(bodyParser.urlencoded({extended: true}));
     }
 
-    public addController(controller: baseController): void {
-        super.addControllers(controller, PromiseRouter);
-    }
-
     public static async getInstance(): Promise<BotServer> {
         if (!BotServer._instance) {
             BotServer._instance = new BotServer();
             await BotServer._instance.loadClasses();
         }
         return BotServer._instance;
+    }
+
+    public addController(controller: baseController): void {
+        super.addControllers(controller, PromiseRouter);
     }
 
     public start(port: number): http.Server {

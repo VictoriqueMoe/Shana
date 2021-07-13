@@ -38,6 +38,18 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
         return "5"; // hard coded for now
     }
 
+    public get id(): string {
+        return "Link Cooldown Filter";
+    }
+
+    public get warnMessage(): string {
+        return `Stop sending so many links! wait ${this.value} seconds`;
+    }
+
+    public get priority(): number {
+        return PRIORITY.LAST;
+    }
+
     public doFilter(content: Message): boolean {
         const messageContent = content.content;
         const urls = getUrls(messageContent);
@@ -56,18 +68,6 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
             return false;
         }
         return true;
-    }
-
-    public get id(): string {
-        return "Link Cooldown Filter";
-    }
-
-    public get warnMessage(): string {
-        return `Stop sending so many links! wait ${this.value} seconds`;
-    }
-
-    public get priority(): number {
-        return PRIORITY.LAST;
     }
 
     public getFromArray(userId: string, guildId: string): LinkCooldownEntry {

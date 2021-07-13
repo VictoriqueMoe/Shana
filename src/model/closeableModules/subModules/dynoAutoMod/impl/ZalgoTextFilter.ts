@@ -37,12 +37,12 @@ export class ZalgoTextFilter extends AbstractFilter {
         return !this.hasZalgo(message);
     }
 
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Zalgo", message);
+    }
+
     private hasZalgo(txt: string): boolean {
         const re = /%CC%/g;
         return re.test(encodeURIComponent(txt));
-    }
-
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Zalgo", message);
     }
 }

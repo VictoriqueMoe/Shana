@@ -7,6 +7,10 @@ import {ModuleSettings} from "../ModuleSettings";
 
 export abstract class TriggerConstraint<T extends ModuleSettings> extends CloseableModule<T> implements ITriggerConstraint {
 
+    public abstract get moduleId(): string;
+
+    public abstract get isDynoReplacement(): boolean;
+
     canTrigger(obj: IEventSecurityConstraint, message: Message): boolean {
         const member = message.member;
         if (!member) {
@@ -41,9 +45,5 @@ export abstract class TriggerConstraint<T extends ModuleSettings> extends Closea
         }
         return true;
     }
-
-    public abstract get moduleId(): string;
-
-    public abstract get isDynoReplacement(): boolean;
 
 }
