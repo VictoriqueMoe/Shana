@@ -50,7 +50,7 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
         return PRIORITY.LAST;
     }
 
-    public doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         const messageContent = content.content;
         const urls = getUrls(messageContent);
         if (urls && urls.size > 0) {

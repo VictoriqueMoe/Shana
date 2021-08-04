@@ -43,13 +43,13 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
      */
     public async checkUsername(member: GuildMember): Promise<boolean> {
         if (!this.doesNotFailValidation(member.displayName)) {
-            await GuildUtils.sendToJail(member, "You have been placed here because your display name voilates our rules, Please change it");
+            await GuildUtils.sendToJail(member, "You have been placed here because your display name violates our rules, Please change it");
             return true;
         }
         return false;
     }
 
-    doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         return this.doesNotFailValidation(content.content);
     }
 

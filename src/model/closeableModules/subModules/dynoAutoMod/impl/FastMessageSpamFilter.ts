@@ -46,7 +46,7 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
         return "You are posting too fast, slow down!";
     }
 
-    public doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         if (!ObjectUtil.validString(content.content)) {
             return true;
         }

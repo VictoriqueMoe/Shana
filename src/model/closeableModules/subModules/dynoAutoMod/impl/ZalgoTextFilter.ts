@@ -29,7 +29,7 @@ export class ZalgoTextFilter extends AbstractFilter {
         return "Zalgo is not allowed on this server";
     }
 
-    public doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         const message = content.content;
         if (!ObjectUtil.validString(message)) {
             return true;

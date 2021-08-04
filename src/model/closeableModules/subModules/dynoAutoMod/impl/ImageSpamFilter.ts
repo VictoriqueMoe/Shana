@@ -45,7 +45,7 @@ export class ImageSpamFilter extends AbstractFilter implements IValueBackedDynoA
         return "You are posting too many images, slow down!";
     }
 
-    public doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         const memberId = content.member.id;
         const attachments = content.attachments;
         const guildId = content.member.guild.id;

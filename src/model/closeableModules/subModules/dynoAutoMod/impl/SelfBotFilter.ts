@@ -31,7 +31,7 @@ export class SelfBotFilter extends AbstractFilter {
         return PRIORITY.LAST;
     }
 
-    public doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         const embeds = content.embeds;
         for (const embed of embeds) {
             const embedUrl = embed.url;

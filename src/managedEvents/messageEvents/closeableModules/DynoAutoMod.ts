@@ -53,7 +53,7 @@ export class DynoAutoMod extends CloseableModule<null> {
             if (!filter.isActive) {
                 continue;
             }
-            const didPassFilter = filter.doFilter(message);
+            const didPassFilter = await filter.doFilter(message);
             if (!didPassFilter) {
                 violatedFilters.push(filter);
             }

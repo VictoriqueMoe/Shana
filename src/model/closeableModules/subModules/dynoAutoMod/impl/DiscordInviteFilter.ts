@@ -28,7 +28,7 @@ export class DiscordInviteFilter extends AbstractFilter {
         return "Your message can not contain discord invites";
     }
 
-    public doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         const messageContent = content.content;
         const regex = /(discord\.gg|discordapp\.com\/invite\/|discord\.com\/invite)/gmi;
         return !regex.test(messageContent);

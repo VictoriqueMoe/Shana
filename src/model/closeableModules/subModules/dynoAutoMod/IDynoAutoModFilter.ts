@@ -25,7 +25,7 @@ export interface IDynoAutoModFilter extends ISubModule {
      * Do the actual filter and return true if it passes or false otherwise
      * @param content
      */
-    doFilter(content: Message): boolean;
+    doFilter(content: Message): Promise<boolean>;
 
     /**
      * Do any additional processing like posting to logs

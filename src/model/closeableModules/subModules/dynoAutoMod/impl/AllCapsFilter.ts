@@ -29,7 +29,7 @@ export class AllCapsFilter extends AbstractFilter {
         return "Your message contains too many caps";
     }
 
-    public doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         return ObjectUtil.getAmountOfCapsAsPercentage(content.content) < 70;
     }
 

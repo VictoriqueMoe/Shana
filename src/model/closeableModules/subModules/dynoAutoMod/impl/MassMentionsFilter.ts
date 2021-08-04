@@ -36,7 +36,7 @@ export class MassMentionsFilter extends AbstractFilter implements IValueBackedDy
         return PRIORITY.LAST;
     }
 
-    public doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         const mentions = content.mentions;
         return mentions.members.size < Number.parseInt(this.value);
     }

@@ -28,7 +28,7 @@ export class SpoilersFilter extends AbstractFilter {
         return PRIORITY.LAST;
     }
 
-    public doFilter(content: Message): boolean {
+    public async doFilter(content: Message): Promise<boolean> {
         const regex = /\|{2}(.*)\|{2}/gm;
         const messageContent = content.content;
         if (regex.test(messageContent)) {

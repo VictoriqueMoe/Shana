@@ -49,7 +49,7 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
 
     public abstract postProcess(member: Message): Promise<void>;
 
-    public abstract doFilter(content: Message): boolean;
+    public abstract doFilter(content: Message): Promise<boolean>;
 
     protected postToLog(reason: string, message: Message): Promise<Message | null> {
         if (!this.actions.includes(ACTION.DELETE) || !message.member.user) {
