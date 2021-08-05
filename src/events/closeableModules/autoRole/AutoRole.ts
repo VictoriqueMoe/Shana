@@ -14,11 +14,11 @@ import {TimedSet} from "../../../model/Impl/TimedSet";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 class RoleProxy extends AbstractRoleApplier {
-    public async applyRole(role: Role, member: GuildMember, reason?: string): Promise<void> {
+    public override async applyRole(role: Role, member: GuildMember, reason?: string): Promise<void> {
         return super.applyRole(role, member, reason);
     }
 
-    public async roleLeaves(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<RolePersistenceModel> {
+    public override async roleLeaves(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<RolePersistenceModel> {
         return super.roleLeaves(role, member, model);
     }
 }
@@ -148,9 +148,9 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                 const accountAgeHuman = ObjectUtil.secondsToHuman(convertedTime / 1000);
                 try {
                     await GuildUtils.applyYoungAccountConstraint(member, accountAgeHuman);
+                    return;
                 } catch {
                 }
-                return;
             }
         }
         const now = Date.now();

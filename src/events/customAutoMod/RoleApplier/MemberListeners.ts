@@ -48,11 +48,11 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
 }
 
 class SpecialProxy extends AbstractRoleApplier {
-    public async roleLeaves(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<RolePersistenceModel> {
+    public override async roleLeaves(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<RolePersistenceModel> {
         return super.roleLeaves(role, member, model);
     }
 
-    public async onChange(role: Role, change: MemberRoleChange, model: typeof RolePersistenceModel): Promise<boolean> {
+    public override async onChange(role: Role, change: MemberRoleChange, model: typeof RolePersistenceModel): Promise<boolean> {
         return super.onChange(role, change, model);
     }
 }

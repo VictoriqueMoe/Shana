@@ -121,7 +121,7 @@ export namespace GuildUtils {
         const guildId = guild.id;
         const unverifiedRole = await GuildUtils.RoleUtils.getYoungAccountRole(guildId);
         if (!unverifiedRole) {
-            return;
+            throw new Error("Unable to find Unverified account role");
         }
         await member.roles.set([unverifiedRole]);
         if (!panicMode) {

@@ -28,6 +28,10 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
         return SettingsManager._instance;
     }
 
+    public refresh(): void {
+        this._cache.clear();
+    }
+
     /**
      * Get an object of ALL settings valid for this guild
      * @param guildId

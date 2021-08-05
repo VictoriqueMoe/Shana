@@ -30,7 +30,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         return "DynoAutoMod";
     }
 
-    public get submodules(): Immutable.Set<IDynoAutoModFilter> {
+    public override get submodules(): Immutable.Set<IDynoAutoModFilter> {
         return super.submodules as Immutable.Set<IDynoAutoModFilter>;
     }
 

@@ -2,9 +2,9 @@ import {ArgsOf, Client} from "@typeit/discord";
 import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint";
-import {AutoResponderModel} from "../../../model/DB/autoMod/impl/AutoResponder.model";
 import {Message} from "discord.js";
 import {MessageListenerDecorator, notBot} from "../../../model/decorators/messageListenerDecorator";
+import {AutoResponderManager} from "../../../model/guild/manager/AutoResponderManager";
 
 export class AutoResponder extends TriggerConstraint<null> {
 
@@ -29,11 +29,7 @@ export class AutoResponder extends TriggerConstraint<null> {
         if (!await this.canRun(guildId, null, channel)) {
             return;
         }
-        const allRespondObjects = await AutoResponderModel.findAll({
-            where: {
-                guildId
-            }
-        });
+        const allRespondObjects = await AutoResponderManager.instance.getAllAutoResponders(guildId);
         const messageContent = message.content?.trim().toLowerCase();
         if (!ObjectUtil.validString(messageContent) || !ArrayUtils.isValidArray(allRespondObjects)) {
             return;

@@ -7,9 +7,9 @@ import {ModuleSettings} from "../ModuleSettings";
 
 export abstract class TriggerConstraint<T extends ModuleSettings> extends CloseableModule<T> implements ITriggerConstraint {
 
-    public abstract get moduleId(): string;
+    public abstract override get moduleId(): string;
 
-    public abstract get isDynoReplacement(): boolean;
+    public abstract override get isDynoReplacement(): boolean;
 
     canTrigger(obj: IEventSecurityConstraint, message: Message): boolean {
         const member = message.member;

@@ -17,7 +17,7 @@ io.init({
 dotenv.config({path: __dirname + '/../.env'});
 
 export class CloseableModuleSet extends Set<CloseableModule<any>> {
-    add(value: CloseableModule<any>): this {
+    override add(value: CloseableModule<any>): this {
         for (const v of this.values()) {
             if (v.uid === value.uid) {
                 super.delete(v);
@@ -28,7 +28,7 @@ export class CloseableModuleSet extends Set<CloseableModule<any>> {
         return this;
     }
 
-    has(value: CloseableModule<any>): boolean {
+    override has(value: CloseableModule<any>): boolean {
         for (const v of this.values()) {
             if (v.uid === value.uid) {
                 return true;

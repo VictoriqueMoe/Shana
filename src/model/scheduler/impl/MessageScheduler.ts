@@ -12,7 +12,7 @@ export class MessageScheduler extends Scheduler {
         super();
     }
 
-    protected _jobs: IScheduledMessageJob[] = [];
+    protected override _jobs: IScheduledMessageJob[] = [];
 
     // @ts-ignore
     public get jobs(): IScheduledMessageJob[] {
@@ -24,16 +24,16 @@ export class MessageScheduler extends Scheduler {
         this._jobs = jobs;
     }
 
-    public static getInstance(): MessageScheduler {
+    public static override getInstance(): MessageScheduler {
         return super.getInstance() as MessageScheduler;
     }
 
-    public register(name: string, chron: string, callBack: () => void, channel?: GuildChannel): IScheduledMessageJob {
+    public override register(name: string, chron: string, callBack: () => void, channel?: GuildChannel): IScheduledMessageJob {
         this.channel = channel;
         return super.register(name, chron, callBack) as IScheduledMessageJob;
     }
 
-    protected registerJob(name: string, job: schedule.Job): IScheduledMessageJob {
+    protected override registerJob(name: string, job: schedule.Job): IScheduledMessageJob {
         return new ScheduledMessageJob(name, job, this.channel);
     }
 

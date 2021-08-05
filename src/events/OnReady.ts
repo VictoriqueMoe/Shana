@@ -19,6 +19,7 @@ import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {AutoRole} from "./closeableModules/autoRole/AutoRole";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import * as fs from 'fs';
+import {SettingsManager} from "../model/settings/SettingsManager";
 
 const io = require('@pm2/io');
 
@@ -103,6 +104,11 @@ export class OnReady extends BaseDAO<any> {
                 encoding: 'utf8'
             });
             return cb(log);
+        });
+
+        io.action('Refresh settings cache', async (cb) => {
+            SettingsManager.instance.refresh();
+            return cb("Settings refreshed");
         });
 
         io.action('force member roles', async (cb) => {
