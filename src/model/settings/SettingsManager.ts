@@ -124,7 +124,7 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
     }
 
     private getFromCache(setting: SETTINGS, guildId: string): string | null {
-        return (this._cache.get(guildId)?.[setting]) || null;
+        return (this._cache.get(guildId)?.[setting]) ?? null;
     }
 
     private updateCache(setting: SETTINGS, value: string, guildId: string): void {

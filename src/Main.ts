@@ -43,7 +43,6 @@ export class Main {
     public static closeableModules: CloseableModuleSet = new CloseableModuleSet();
     public static testMode = false;
     public static botServer: http.Server;
-
     private static _client: Client;
 
     static get client(): Client {
