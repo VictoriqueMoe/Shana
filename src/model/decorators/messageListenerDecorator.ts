@@ -8,7 +8,7 @@ export async function notBot(message: Message): Promise<boolean> {
 }
 
 /**
- * Singles this method to be triggered on a message event.
+ * signals this method to be triggered on a message event.
  * @param triggerOnEdit
  * @param conditions
  * @constructor

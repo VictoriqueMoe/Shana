@@ -18,7 +18,8 @@
     "no-debugger": "off",
     "no-prototype-builtins": "off",
     "no-inner-declarations": "off",
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
   },
   "env": {
     "node": true
