@@ -1,7 +1,7 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
 import {GuildMember} from "discord.js";
-import {DIService} from "@typeit/discord";
+import {DIService} from "discordx";
 import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {AbstractCommandModule} from "../../../commands/AbstractCommandModule";
 import {Typeings} from "../../types/Typeings";
@@ -15,6 +15,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         super();
         // @ts-ignore
         const allCommands: Map = DIService.instance._services;
+        //TODO: maybe use MetadataStorage.instance.applicationCommands
         this.commandClasses = [];
         for (const [, instance] of allCommands) {
             if (instance instanceof AbstractCommandModule) {
@@ -48,7 +49,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
             return this.commandClasses;
         }
         const retArray: AbstractCommandModule<any>[] = [];
-        const memberRoles = member.roles.cache.keyArray();
+        const memberRoles = [...member.roles.cache.keys()];
         const allCommands = await CommandSecurityModel.findAll({
             where: {
                 guildId: member.guild.id
@@ -109,7 +110,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
                 guildId: member.guild.id
             }
         });
-        const memberRoles = member.roles.cache.keyArray();
+        const memberRoles = [...member.roles.cache.keys()];
         for (const commandClass of this.commandClasses) {
             const {commands} = commandClass.commandDescriptors;
             for (const commandDescriptor of commands) {

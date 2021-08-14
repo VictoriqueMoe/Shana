@@ -1,4 +1,4 @@
-import {ArgsOf, Client} from "@typeit/discord";
+import {ArgsOf, Client} from "discordx";
 import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {Collection, MessageEmbed} from "discord.js";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
@@ -126,9 +126,7 @@ export class ResourceListener {
                 if (fail && !Main.testMode) {
                     await ResourceBanner.doBanAttachment(attachment, "Discord crash video", urlToAttachment, message.guild.id);
                     try {
-                        await message.delete({
-                            reason: "Discord crash video"
-                        });
+                        await message.delete();
                     } catch (e) {
                         console.error(e);
                     }
@@ -145,7 +143,7 @@ export class ResourceListener {
             const descriptionPostfix = `that contains suspicious code in <#${message.channel.id}>, this is a discord crash video. the first 10 errors are as shown below: `;
             const embed = new MessageEmbed()
                 .setColor('#337FD5')
-                .setAuthor(messageMember, GuildUtils.getGuildIconUrl(message.guild.id))
+                .setAuthor(messageMember.user.tag, GuildUtils.getGuildIconUrl(message.guild.id))
                 .setDescription(`someone posted a video ${descriptionPostfix}`)
                 .setTimestamp();
             if (messageMember) {
@@ -156,7 +154,7 @@ export class ResourceListener {
             errors.slice(0, 10).forEach((value, index) => {
                 embed.addField(`hex dump #${index + 1}`, value);
             });
-            DiscordUtils.postToLog(embed, message.guild.id);
+            DiscordUtils.postToLog([embed], message.guild.id);
             GuildUtils.sendToJail(messageMember, "you have been placed here because you posted a discord crash video");
         }
     }

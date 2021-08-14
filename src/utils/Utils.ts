@@ -16,7 +16,6 @@ import {
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {Main} from "../Main";
-import {CommandMessage} from "@typeit/discord";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {Model, Sequelize} from "sequelize-typescript";
@@ -30,6 +29,8 @@ import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 import {IncomingMessage} from "http";
 import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
+import {CommandMessage} from "discordx";
+import {Typeings} from "../model/types/Typeings";
 
 const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
@@ -60,7 +61,7 @@ export namespace GuildUtils {
         export async function isValidRole(guildId: string, role: string | Role): Promise<boolean> {
             const guild = await GuildManager.instance.getGuild(guildId);
             const roleId = typeof role === "string" ? role : role.id;
-            const guildRoles = guild.roles.cache.array();
+            const guildRoles = [...guild.roles.cache.values()];
             for (const guildRole of guildRoles) {
                 if (guildRole.id === roleId) {
                     if (guildRole.managed) {
@@ -388,7 +389,7 @@ export namespace DiscordUtils {
             const repliedMessageRef = command.reference;
             const urlMessageSet = new Set<string>();
             if (repliedMessageRef) {
-                const repliedMessageID = repliedMessageRef.messageID;
+                const repliedMessageID = repliedMessageRef.messageId;
                 const repliedMessageObj = await command.channel.messages.fetch(repliedMessageID);
                 const repliedMessageContent = repliedMessageObj.content;
                 const repliedMessageAttatch = (repliedMessageObj.attachments && repliedMessageObj.attachments.size > 0) ? repliedMessageObj.attachments : null;
@@ -475,7 +476,7 @@ export namespace DiscordUtils {
         return retObj;
     }
 
-    export function findChannelByName(channelName: string, guildId: string): GuildChannel {
+    export function findChannelByName(channelName: string, guildId: string): Typeings.AbstractChannel {
         const channels = Main.client.guilds.cache.get(guildId).channels;
         for (const [, channel] of channels.cache) {
             if (channel.name === channelName) {
@@ -530,7 +531,7 @@ export namespace DiscordUtils {
         return emojiArray;
     }
 
-    export async function postToLog(message: MessageEmbed | string, guildId: string, adminLog = false): Promise<Message | null> {
+    export async function postToLog(message: MessageEmbed[] | string, guildId: string, adminLog = false): Promise<Message | null> {
         let channel: TextChannel;
         if (Main.testMode) {
             const guild = await Main.client.guilds.fetch(guildId);
@@ -544,7 +545,11 @@ export namespace DiscordUtils {
         if (channel == null) {
             return Promise.resolve(null);
         }
-        return await channel.send(message);
+        if (ArrayUtils.isValidArray(message)) {
+            return await channel.send({embeds: message as MessageEmbed[]});
+        } else {
+            return await channel.send(message as string);
+        }
     }
 
     /**
@@ -567,7 +572,7 @@ export namespace DiscordUtils {
      * @param guild
      * @param limit
      */
-    export async function getAuditLogEntries(type: GuildAuditLogsAction, guild: Guild, limit = 1): Promise<GuildAuditLogs> {
+    export async function getAuditLogEntries(type: GuildAuditLogsAction, guild: Guild, limit = 1): Promise<GuildAuditLogs | null> {
         const fetchObj: GuildAuditLogsFetchOptions = {
             limit,
             type
@@ -575,7 +580,7 @@ export namespace DiscordUtils {
         try {
             return await guild.fetchAuditLogs(fetchObj);
         } catch {
-            return new GuildAuditLogs(guild, {});
+            return null;
         }
     }
 

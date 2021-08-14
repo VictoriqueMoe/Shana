@@ -1,5 +1,5 @@
-import {ArgsOf, Client} from "@typeit/discord";
-import {Message} from "discord.js";
+import {ArgsOf, Client} from "discordx";
+import {GuildChannel, Message, ThreadChannel} from "discord.js";
 
 export namespace Typeings {
     export type CommandArgs = {
@@ -23,6 +23,7 @@ export namespace Typeings {
             }[]
         }
     };
+    export type AbstractChannel = GuildChannel | ThreadChannel;
 
     export type UpdateCommandSettings = {
         roles: string[],

@@ -1,5 +1,5 @@
-import {WeebBot} from "../../discord/WeebBot";
 import {files} from "dropbox";
+import {Main} from "../../Main";
 
 export class VicDropbox {
     private isIndexed = false;
@@ -54,7 +54,7 @@ export class VicDropbox {
 
     public async index(): Promise<void> {
         console.log("Indexing images...");
-        this.imageCache = ((await WeebBot.dropBox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
+        this.imageCache = ((await Main.dropBox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
         console.log(`Indexed ${this.imageCache.length} images`);
         this.isIndexed = true;
     }

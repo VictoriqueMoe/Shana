@@ -182,7 +182,7 @@ export class BotController extends baseController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
-        let roleArray = guild.roles.cache.array();
+        let roleArray = [...guild.roles.cache.values()];
         roleArray = roleArray.filter(role => {
             const bot = guild.me;
             const botHighestRole = bot.roles.highest.position;
@@ -202,7 +202,7 @@ export class BotController extends baseController {
         }
         const roleRequested = req.query.roleId as string;
         const roles = await guild.roles.fetch(roleRequested);
-        const objArr = roles.members.array().map(member => {
+        const objArr = [...roles.members.values()].map(member => {
             const json = member.toJSON();
             json["username"] = member.user.tag;
             return json;
@@ -269,7 +269,7 @@ export class BotController extends baseController {
         try {
             const guild = await this.getGuild(req);
             const channel = await this.getChannelObject(req, guild);
-            return super.ok(res, channel.toJSON());
+            return super.ok(res, channel.toJSON() as Record<string, any>);
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
@@ -283,8 +283,8 @@ export class BotController extends baseController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
-        const allChannels = guild.channels.cache.array();
-        const ret = allChannels.map(channel => channel.toJSON());
+        const allChannels = [...guild.channels.cache.values()];
+        const ret = allChannels.map(channel => channel.toJSON() as Record<string, any>);
         return super.ok(res, ret);
     }
 
@@ -293,7 +293,7 @@ export class BotController extends baseController {
     private async getGuildFromId(req: Request, res: Response) {
         try {
             const guild = await this.getGuild(req);
-            return super.ok(res, guild.toJSON());
+            return super.ok(res, guild.toJSON() as Record<string, any>);
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
@@ -327,7 +327,7 @@ export class BotController extends baseController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
-        return super.ok(res, botMemeber.toJSON());
+        return super.ok(res, botMemeber.toJSON() as Record<string, any>);
     }
 
 
@@ -340,7 +340,7 @@ export class BotController extends baseController {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
         const emojiManager = guild.emojis;
-        const pArr = emojiManager.cache.array().map(async emoji => {
+        const pArr = [...emojiManager.cache.values()].map(async emoji => {
             const emojiInfo = await DiscordUtils.getEmojiInfo(emoji.id, false);
             emojiInfo["name"] = emoji.name;
             return emojiInfo;

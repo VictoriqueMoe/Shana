@@ -16,13 +16,13 @@ export abstract class TriggerConstraint<T extends ModuleSettings> extends Closea
         if (!member) {
             return false;
         }
-        const roleIds = member.roles.cache.array().map(role => role.id);
+        const roleIds = [...member.roles.cache.values()].map(role => role.id);
         const channel = message.channel;
         if (!(channel instanceof GuildChannel)) {
             return false;
         }
         const channelId = channel.id;
-        const parentChannelId = channel.parentID;
+        const parentChannelId = channel.parentId;
         const {allowedChannels, allowedRoles, ignoredChannels, ignoredRoles} = obj;
         if (ArrayUtils.isValidArray(allowedChannels)) {
             if (!allowedChannels.some(chId => chId.id === channelId || chId.id === parentChannelId)) {

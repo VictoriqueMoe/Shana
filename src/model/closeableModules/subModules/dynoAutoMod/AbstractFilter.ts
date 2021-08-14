@@ -65,6 +65,6 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
             .setDescription(`**Message sent by <@${member.id}> deleted in <#${message.channel.id}>** \n ${message.content}`)
             .addField("Reason", reason)
             .setFooter(`${member.user.id}`);
-        return DiscordUtils.postToLog(embed, message.guild.id, false);
+        return DiscordUtils.postToLog([embed], message.guild.id, false);
     }
 }

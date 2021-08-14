@@ -1,6 +1,6 @@
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
-import {ArgsOf, Client} from "@typeit/discord";
+import {ArgsOf, Client} from "discordx";
 import {TimedSet} from "../../../model/Impl/TimedSet";
 import {AbstractFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
 import {ACTION} from "../../../enums/ACTION";
@@ -121,9 +121,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                                 entry.messageArray = [];
                             } else {
                                 try {
-                                    await message.delete({
-                                        reason: `Auto mod violation "${filter.id}"`
-                                    });
+                                    await message.delete();
                                 } catch {
                                     continue outer;
                                 }

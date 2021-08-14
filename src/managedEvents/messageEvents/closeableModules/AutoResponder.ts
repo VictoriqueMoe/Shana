@@ -1,4 +1,4 @@
-import {ArgsOf, Client} from "@typeit/discord";
+import {ArgsOf, Client} from "discordx";
 import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint";

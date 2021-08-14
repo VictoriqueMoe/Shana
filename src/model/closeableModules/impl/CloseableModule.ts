@@ -7,7 +7,7 @@ import * as Immutable from "immutable";
 import {SubModuleManager} from "../manager/SubModuleManager";
 import {ModuleSettings} from "../ModuleSettings";
 import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
-import {Channel, GuildMember, TextChannel} from "discord.js";
+import {GuildMember, TextBasedChannels} from "discord.js";
 import {Roles} from "../../../enums/Roles";
 import {CloseOptionModel} from "../../DB/autoMod/impl/CloseOption.model";
 import RolesEnum = Roles.RolesEnum;
@@ -139,7 +139,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
      * @param channel
      * @protected
      */
-    protected async canRun(guildId: string, member: GuildMember | null, channel: Channel | null): Promise<boolean> {
+    protected async canRun(guildId: string, member: GuildMember | null, channel: TextBasedChannels | null): Promise<boolean> {
         if (!ObjectUtil.validString(guildId)) {
             throw new Error("Unable to find guild");
         }
@@ -159,11 +159,6 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
                 if (memberRoles.has(immuneRoles)) {
                     return false;
                 }
-            }
-        }
-        if (channel) {
-            if (!(channel instanceof TextChannel)) {
-                return false;
             }
         }
         const module = await CloseOptionModel.findOne({

@@ -11,8 +11,8 @@ export class MemberRoleChange {
     }
 
     public get roleChanges(): RoleChangeType {
-        const oldRoles = this.oldUser.roles.cache.keyArray();
-        const newRoles = this.newUser.roles.cache.keyArray();
+        const oldRoles = [...this.oldUser.roles.cache.keys()];
+        const newRoles = [...this.newUser.roles.cache.keys()];
 
         const remove: string[] = oldRoles.filter(x => !newRoles.includes(x));
         const add: string[] = newRoles.filter(x => !oldRoles.includes(x));

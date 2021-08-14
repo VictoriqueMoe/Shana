@@ -1,9 +1,9 @@
-import {ArgsOf, Client} from "@typeit/discord";
+import {ArgsOf, Client} from "discordx";
 import fetch from "node-fetch";
 import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {Main} from "../../Main";
-import {GuildMember, Message, Role, User} from "discord.js";
+import {DMChannel, GuildMember, Message, Role, User} from "discord.js";
 import {Op} from "sequelize";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {MessageListenerDecorator, notBot} from "../../model/decorators/messageListenerDecorator";
@@ -110,7 +110,7 @@ export abstract class MessageListener {
         if (message.author.bot || !ObjectUtil.validString(message.content)) {
             return;
         }
-        if (message.channel.type === "dm") {
+        if (message.channel instanceof DMChannel) {
             const user = message.author;
             const {id} = user;
             try {
@@ -150,7 +150,7 @@ export abstract class MessageListener {
         if (!repliedMessage) {
             return;
         }
-        const repliedMessageId = repliedMessage.messageID;
+        const repliedMessageId = repliedMessage.messageId;
         let repliedMessageObj: Message;
         try {
             repliedMessageObj = await message.channel.messages.fetch(repliedMessageId);

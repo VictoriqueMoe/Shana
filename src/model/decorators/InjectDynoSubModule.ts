@@ -1,5 +1,5 @@
 import {IDynoAutoModFilter} from "../closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
-import {DIService} from "@typeit/discord";
+import {DIService} from "discordx";
 import {ISubModule} from "../closeableModules/subModules/ISubModule";
 import {ICloseableModule} from "../closeableModules/ICloseableModule";
 import {CloseableModule} from "../closeableModules/impl/CloseableModule";
