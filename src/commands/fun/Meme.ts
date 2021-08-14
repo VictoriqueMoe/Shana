@@ -9,9 +9,9 @@ import {
     GenerateEndPointResponse
 } from "../../model/Impl/ImageFun/Typeings";
 import {AssertionError} from "assert";
-import {getPrefix} from "../../discord/WeebBot";
 import {secureCommand} from "../../guards/RoleConstraint";
 import {AbstractCommandModule} from "../AbstractCommandModule";
+import {getPrefix} from "../../Main";
 
 export abstract class Meme extends AbstractCommandModule<any> {
 

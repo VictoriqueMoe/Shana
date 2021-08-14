@@ -1,7 +1,7 @@
 import {ObjectUtil} from "../utils/Utils";
 import {GuardFunction} from "@typeit/discord";
-import {getPrefix} from "../discord/WeebBot";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
+import {getPrefix} from "../Main";
 
 export const secureCommand: GuardFunction<"message"> = async (
     [message],
