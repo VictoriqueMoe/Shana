@@ -58,7 +58,7 @@ export async function getPrefix(message: Message | string) {
 
 export class Main {
     public static closeableModules: CloseableModuleSet = new CloseableModuleSet();
-    public static testMode = false;
+    public static testMode = true;
     public static botServer: http.Server;
     private static _client: Client;
     private static dbx: Dropbox;
@@ -81,11 +81,11 @@ export class Main {
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         Main.dbx = new Dropbox({accessToken: process.env.dropboxToken});
-        const client = new Client({
+        this._client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             prefix: getPrefix,
             classes: [
-                `${__dirname}/../{commands,events}/**/*.{ts,js}`
+                `${__dirname}/{commands,events}/**/*.{ts,js}`
             ],
             intents: [
                 Intents.FLAGS.GUILDS,
@@ -97,6 +97,7 @@ export class Main {
                 Intents.FLAGS.DIRECT_MESSAGES,
                 Intents.FLAGS.DIRECT_MESSAGE_REACTIONS
             ],
+            botGuilds: Main.testMode ? ["264429768219426819"] : undefined,
             silent: false,
         });
         Main._dao = new Sequelize('database', '', '', {
@@ -104,7 +105,7 @@ export class Main {
             dialect: 'sqlite',
             logging: (sql, timing) => {
                 if (Main.testMode) {
-                    console.log(sql, timing);
+                    // console.log(sql, timing);
                 }
             },
             storage: 'database.sqlite',
@@ -114,7 +115,7 @@ export class Main {
             }
         });
         await Main.dao.sync({force: false});
-        await client.login(process.env.token);
+        await this._client.login(process.env.token);
     }
 
     public static async setDefaultSettings(): Promise<void> {

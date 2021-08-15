@@ -1,13 +1,10 @@
 import {ObjectUtil} from "../utils/Utils";
-import {ArgsOf, GuardFunction} from "discordx";
+import {Client, Next} from "discordx";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {getPrefix} from "../Main";
+import {Message} from "discord.js";
 
-export const secureCommand: GuardFunction<ArgsOf<"message">> = async (
-    [message],
-    client,
-    next
-) => {
+export async function secureCommand(message: Message, client: Client, next: Next) {
     const prefix = await getPrefix(message);
     const commandName = message.content.split(prefix)[1].split(" ")[0];
     if (!ObjectUtil.validString(commandName)) {
@@ -19,4 +16,4 @@ export const secureCommand: GuardFunction<ArgsOf<"message">> = async (
         return await next();
     }
     message.reply("you do not have permissions to use this command");
-};
+}

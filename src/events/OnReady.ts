@@ -139,6 +139,11 @@ export class OnReady extends BaseDAO<any> {
         return pArr;
     }
 
+    @On("interactionCreate")
+    private async intersectionInit([interaction]: ArgsOf<"interactionCreate">): Promise<void> {
+        await Main.client.executeInteraction(interaction);
+    }
+
     @On("ready")
     private async initialize([client]: ArgsOf<"ready">): Promise<void> {
         if (Main.testMode) {
@@ -151,6 +156,8 @@ export class OnReady extends BaseDAO<any> {
         }
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
+        await Main.client.clearApplicationCommands("264429768219426819");
+        await Main.client.initApplicationCommands();
         pArr.push(VicDropbox.instance.index());
         pArr.push(OnReady.initiateMuteTimers());
         pArr.push(this.initUsernames());

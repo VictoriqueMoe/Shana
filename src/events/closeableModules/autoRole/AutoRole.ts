@@ -1,5 +1,5 @@
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
-import {ArgsOf, Client, On} from "discordx";
+import {ArgsOf, Client, Discord, On} from "discordx";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
 import * as schedule from "node-schedule";
 import {AbstractRoleApplier} from "../../customAutoMod/RoleApplier/AbstractRoleApplier";
@@ -32,6 +32,7 @@ class JoinEntry {
     }
 }
 
+@Discord()
 export class AutoRole extends CloseableModule<AutoRoleSettings> {
 
     private static _uid = ObjectUtil.guid();

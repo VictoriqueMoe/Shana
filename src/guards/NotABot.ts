@@ -1,8 +1,10 @@
-import {ArgsOf, GuardFunction} from "discordx";
+import {Client, Next} from "discordx";
 import {notBot} from "../model/decorators/messageListenerDecorator";
+import {Message} from "discord.js";
 
-export const NotBot: GuardFunction<ArgsOf<"message">> = async ([message], client, next) => {
+export async function NotBot(message: Message, client: Client, next: Next) {
     if (await notBot(message)) {
         await next();
     }
-};
+}
+

@@ -2,6 +2,7 @@ import {ArgsOf, Client, Discord, Guard, On} from "discordx";
 import {MessageEntry} from "./MessageEntry";
 import {NotBot} from "../../guards/NotABot";
 import {Message} from "discord.js";
+import {Main} from "../../Main";
 
 @Discord()
 export class MessageEventDispatcher {
@@ -12,8 +13,9 @@ export class MessageEventDispatcher {
         return MessageEventDispatcher._messageListenerMap;
     }
 
-    @On("message")
+    @On("messageCreate")
     private async eventTrigger([message]: ArgsOf<"message">, client: Client): Promise<void> {
+        await Main.client.executeCommand(message);
         return this.trigger(message, client, false);
     }
 
