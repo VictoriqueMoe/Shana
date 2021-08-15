@@ -4,7 +4,7 @@ import {DMChannel, Message} from "discord.js";
 import {MessageEntry} from "../../events/eventDispatcher/MessageEntry";
 
 export async function notBot(message: Message): Promise<boolean> {
-    return message.channel instanceof DMChannel && !message.author.bot;
+    return (!(message.channel instanceof DMChannel)) && !message.author.bot;
 }
 
 /**

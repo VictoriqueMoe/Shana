@@ -6,6 +6,7 @@ import {
     GuildAuditLogsFetchOptions,
     GuildChannel,
     GuildMember,
+    HexColorString,
     Message,
     MessageEmbed,
     Permissions,
@@ -439,8 +440,8 @@ export namespace DiscordUtils {
             after: string
         },
         colourChange?: {
-            before: string,
-            after: string
+            before: HexColorString,
+            after: HexColorString
         }
     };
 
