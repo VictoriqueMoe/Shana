@@ -104,6 +104,14 @@ export class OnReady extends BaseDAO<any> {
             return cb(log);
         });
 
+        io.action("Re init commands", async cb => {
+            for (const guild of await GuildManager.instance.getGuilds()) {
+                await Main.client.clearApplicationCommands(guild.id);
+            }
+            await OnReady.initAppCommands();
+            return cb("Slash Commands reset");
+        });
+
         io.action('Refresh settings cache', async (cb) => {
             SettingsManager.instance.refresh();
             return cb("Settings refreshed");
@@ -136,6 +144,7 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(this.populateCommandSecurity());
         pArr.push(this.populatePostableChannels());
         pArr.push(this.cleanUpGuilds());
+        pArr.push(OnReady.initAppCommands());
         return pArr;
     }
 
@@ -156,8 +165,6 @@ export class OnReady extends BaseDAO<any> {
         }
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
-        await Main.client.clearApplicationCommands("264429768219426819");
-        await Main.client.initApplicationCommands();
         pArr.push(VicDropbox.instance.index());
         pArr.push(OnReady.initiateMuteTimers());
         pArr.push(this.initUsernames());
@@ -172,6 +179,10 @@ export class OnReady extends BaseDAO<any> {
                 process.send('ready');
             }
         });
+    }
+
+    private static async initAppCommands(): Promise<void> {
+        return Main.client.initApplicationCommands();
     }
 
     private async initUsernames(): Promise<void> {

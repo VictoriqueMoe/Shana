@@ -1,10 +1,10 @@
 import {EditType, EventTriggerCondition} from "../types/Typeings";
 import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventDispatcher";
-import {DMChannel, Message} from "discord.js";
+import {CommandInteraction, DMChannel, Message} from "discord.js";
 import {MessageEntry} from "../../events/eventDispatcher/MessageEntry";
 
-export async function notBot(message: Message): Promise<boolean> {
-    return (!(message.channel instanceof DMChannel)) && !message.author.bot;
+export async function notBot(message: Message | CommandInteraction): Promise<boolean> {
+    return (!(message.channel instanceof DMChannel)) && !message.member.user.bot;
 }
 
 /**

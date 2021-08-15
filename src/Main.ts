@@ -97,7 +97,6 @@ export class Main {
                 Intents.FLAGS.DIRECT_MESSAGES,
                 Intents.FLAGS.DIRECT_MESSAGE_REACTIONS
             ],
-            botGuilds: Main.testMode ? ["264429768219426819"] : undefined,
             silent: false,
         });
         Main._dao = new Sequelize('database', '', '', {

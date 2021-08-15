@@ -1,6 +1,5 @@
-import {ArgsOf, Client, Discord, Guard, On} from "discordx";
+import {ArgsOf, Client, Discord, On} from "discordx";
 import {MessageEntry} from "./MessageEntry";
-import {NotBot} from "../../guards/NotABot";
 import {Message} from "discord.js";
 import {Main} from "../../Main";
 
@@ -21,8 +20,10 @@ export class MessageEventDispatcher {
 
 
     @On("messageUpdate")
-    @Guard(NotBot)
     private async messageUpdater([oldMessage, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
+        if (newMessage.author.bot) {
+            return;
+        }
         if (!(newMessage instanceof Message)) {
             try {
                 newMessage = await newMessage.fetch();
