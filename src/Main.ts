@@ -42,17 +42,8 @@ export class CloseableModuleSet extends Set<CloseableModule<any>> {
 
 }
 
-export async function getPrefix(message: Message | string) {
-    let guildId = null;
-    try {
-        if (typeof message === "string") {
-            guildId = message;
-        } else {
-            guildId = message.guild.id;
-        }
-    } catch (e) {
-        return "~";
-    }
+export async function getPrefix(message: Message) {
+    const guildId = message.guild.id;
     return SettingsManager.instance.getSetting(SETTINGS.PREFIX, guildId);
 }
 
