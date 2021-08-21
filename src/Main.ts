@@ -42,7 +42,7 @@ export class CloseableModuleSet extends Set<CloseableModule<any>> {
 
 }
 
-export async function getPrefix(message: Message) {
+export async function getPrefix(message: Message): Promise<string> {
     const guildId = message.guild.id;
     return SettingsManager.instance.getSetting(SETTINGS.PREFIX, guildId);
 }
@@ -94,14 +94,14 @@ export class Main {
         Main._dao = new Sequelize('database', '', '', {
             host: 'localhost',
             dialect: 'sqlite',
-            logging: (sql, timing) => {
+            logging: (sql: string, timing: number): void => {
                 if (Main.testMode) {
                     // console.log(sql, timing);
                 }
             },
             storage: 'database.sqlite',
             models: [__dirname + '/model/DB/**/*.model.{ts,js}'],
-            modelMatch: (filename, member) => {
+            modelMatch: (filename, member): boolean => {
                 return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
             }
         });
@@ -126,6 +126,6 @@ export class Main {
     }
 }
 
-((async () => {
+((async (): Promise<void> => {
     await Main.start();
 })());

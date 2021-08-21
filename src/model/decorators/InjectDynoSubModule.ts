@@ -7,7 +7,7 @@ import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventD
 
 export function InjectDynoSubModule(parentModule: typeof CloseableModule) {
     // @ts-ignore
-    return (constructor: typeof ISubModule) => {
+    return (constructor: typeof ISubModule): void => {
         let parentFilter: ICloseableModule<any> = DIService.instance.getService(parentModule);
         if (parentFilter == null) {
             const map = MessageEventDispatcher.messageListenerMap;

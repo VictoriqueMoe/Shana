@@ -7,7 +7,7 @@ export class MessageEntry {
     public constructor(private entryMethod: EditType, private triggerOnEdit: boolean, private conditions: EventTriggerCondition[] = []) {
     }
 
-    public async trigger(message: Message, client: Client, context: any, isEdit = false): Promise<void> {
+    public async trigger(message: Message, client: Client, context: any, isEdit: boolean = false): Promise<void> {
         if (isEdit && !this.triggerOnEdit) {
             return;
         }

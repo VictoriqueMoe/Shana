@@ -9,10 +9,10 @@ export class VicDropbox {
         this.imageCache = [];
         this.isIndexed = false;
         const handler = {
-            get(target, propKey, receiver) {
+            get(target: any, propKey: string, receiver: any): any {
                 if (typeof target[propKey] === 'function') {
                     return new Proxy(target[propKey], {
-                        apply(applyTarget, thisArg, args) {
+                        apply(applyTarget: any, thisArg: any, args: any[]): any {
                             const isIndexed = target.isIndexed;
                             const isIndexMethod = applyTarget.name === "index";
                             if (!isIndexMethod && !isIndexed) {

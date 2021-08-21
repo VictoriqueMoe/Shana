@@ -346,7 +346,7 @@ export class Misc extends AbstractCommandModule<any> {
 }
 
 class AnimeQuery {
-    public constructor(public timesQueries = 1) {
+    public constructor(public timesQueries: number = 1) {
     }
 
     public increment(): void {

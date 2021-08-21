@@ -5,7 +5,7 @@ import {ObjectUtil} from "../utils/Utils";
 
 export abstract class BaseDAO<T extends Model> {
 
-    protected async commitToDatabase(model: T, options?: SaveOptions, silentOnDupe = false): Promise<T> {
+    protected async commitToDatabase(model: T, options?: SaveOptions, silentOnDupe: boolean = false): Promise<T> {
         let errorStr = "";
         // hacky 'mc hack
         try {

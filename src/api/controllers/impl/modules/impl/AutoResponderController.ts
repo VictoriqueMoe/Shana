@@ -15,7 +15,7 @@ export class AutoResponderController extends AbstractModuleController {
 
     @Post("editAutoResponder")
     @Middleware(EventSecurityConstraintTypeValidator)
-    private async editAutoResponder(req: Request, res: Response) {
+    private async editAutoResponder(req: Request, res: Response): Promise<Response> {
         type Edit = AutoResponderPayload & {
             currentTitle: string;
         };
@@ -37,7 +37,7 @@ export class AutoResponderController extends AbstractModuleController {
 
     @Post("addAutoResponder")
     @Middleware(EventSecurityConstraintTypeValidator)
-    private async addAutoResponder(req: Request, res: Response) {
+    private async addAutoResponder(req: Request, res: Response): Promise<Response> {
         let guild: Guild;
         try {
             guild = await this.getGuild(req);
@@ -55,7 +55,7 @@ export class AutoResponderController extends AbstractModuleController {
     }
 
     @Get("getAutoResponders")
-    private async getAutoResponders(req: Request, res: Response) {
+    private async getAutoResponders(req: Request, res: Response): Promise<Response> {
         let guild: Guild;
         try {
             guild = await this.getGuild(req);
@@ -71,7 +71,7 @@ export class AutoResponderController extends AbstractModuleController {
     }
 
     @Delete("deleteAutoResponder")
-    private async deleteAutoResponder(req: Request, res: Response) {
+    private async deleteAutoResponder(req: Request, res: Response): Promise<Response> {
         let guild: Guild;
         try {
             guild = await this.getGuild(req);

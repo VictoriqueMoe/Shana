@@ -4,7 +4,7 @@ import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityMana
 import {getPrefix} from "../Main";
 import {Message} from "discord.js";
 
-export async function secureCommand(message: Message, client: Client, next: Next) {
+export async function secureCommand(message: Message, client: Client, next: Next): Promise<void> {
     const prefix = await getPrefix(message);
     const commandName = message.content.split(prefix)[1].split(" ")[0];
     if (!ObjectUtil.validString(commandName)) {

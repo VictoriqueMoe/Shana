@@ -51,7 +51,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         return true;
     }
 
-    public async applyRole(member: GuildMember, guildId: string, isTimed = false): Promise<void> {
+    public async applyRole(member: GuildMember, guildId: string, isTimed: boolean = false): Promise<void> {
         if (member.deleted) {
             return;
         }

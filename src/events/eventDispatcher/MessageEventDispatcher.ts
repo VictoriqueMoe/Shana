@@ -34,7 +34,7 @@ export class MessageEventDispatcher {
         return this.trigger(newMessage, client, true);
     }
 
-    private async trigger(message: Message, client: Client, isEdit = false): Promise<void> {
+    private async trigger(message: Message, client: Client, isEdit: boolean = false): Promise<void> {
         const retArr: Promise<void>[] = [];
         for (const [context, entries] of MessageEventDispatcher._messageListenerMap) {
             for (const entry of entries) {

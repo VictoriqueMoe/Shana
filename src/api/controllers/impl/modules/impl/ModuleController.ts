@@ -15,7 +15,7 @@ import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../../../../utils/Utils";
 export class ModuleController extends AbstractModuleController {
 
     @Get('getModules')
-    private async getModules(req: Request, res: Response) {
+    private async getModules(req: Request, res: Response): Promise<Response> {
         let guild: Guild;
         try {
             guild = await this.getGuild(req);
@@ -49,7 +49,7 @@ export class ModuleController extends AbstractModuleController {
     }
 
     @Post("changeModuleStatus")
-    private async changeModuleStatus(req: Request, res: Response) {
+    private async changeModuleStatus(req: Request, res: Response): Promise<Response> {
         let guild: Guild;
         try {
             guild = await this.getGuild(req);

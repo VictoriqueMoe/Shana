@@ -38,7 +38,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         return this._uid;
     }
 
-    public async saveSettings(guildId: string, setting: T, merge = false): Promise<void> {
+    public async saveSettings(guildId: string, setting: T, merge: boolean = false): Promise<void> {
         let obj = setting;
         if (merge) {
             const percistedSettings = await this.getSettings(guildId);
@@ -58,7 +58,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         this._settings.set(guildId, obj);
     }
 
-    public async getSettings(guildId: string, force = false): Promise<T | Record<string, never>> {
+    public async getSettings(guildId: string, force: boolean = false): Promise<T | Record<string, never>> {
         if (!force && this._settings.has(guildId)) {
             return this._settings.get(guildId);
         }

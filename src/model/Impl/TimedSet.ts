@@ -82,6 +82,7 @@ export class TimedSet<T> implements ITimedSet<T> {
         return {
             [Symbol.iterator](): IterableIterator<T> {
                 return this[Symbol.iterator];
+                // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
             }, next: () => {
                 counter++;
                 return {

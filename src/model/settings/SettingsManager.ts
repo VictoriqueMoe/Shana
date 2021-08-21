@@ -83,7 +83,7 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
      * @param guildId
      * @param saveOnly
      */
-    public async saveOrUpdateSetting(setting: SETTINGS, value: string, guildId: string, saveOnly = false): Promise<number> {
+    public async saveOrUpdateSetting(setting: SETTINGS, value: string, guildId: string, saveOnly: boolean = false): Promise<number> {
         const newModel = new SettingsModel({
             setting,
             value,

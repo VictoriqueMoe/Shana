@@ -58,14 +58,6 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
         });
     }
 
-    private static getEnableModuleDescription() {
-        return '\n enable a module \n usage: ~enableModule <"moduleId"> <"enable"> \n example: ~enableModule "autoRole" "false" will disable the auto role module';
-    }
-
-    private static getEnableDynoReplaceDescription() {
-        return '\n enable all the modules needed to replace dyno functionality (curreonly only supports user join/leave/ban logging and auto role) \n usage: ~dynoReplace <"enable"> \n example: ~dynoReplace "true"';
-    }
-
     @SimpleCommand("dynoReplace")
     @Guard(secureCommand)
     private async dynoReplace({message}: SimpleCommandMessage): Promise<void> {

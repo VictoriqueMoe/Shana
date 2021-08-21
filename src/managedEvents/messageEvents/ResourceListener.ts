@@ -172,7 +172,7 @@ export class ResourceListener {
         return retArray;
     }
 
-    private _cleanup(...paths: DirResult[]) {
+    private _cleanup(...paths: DirResult[]): void {
         for (const lPath of paths) {
             if (lPath) {
                 try {

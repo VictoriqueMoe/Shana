@@ -17,7 +17,6 @@ import {
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {Main} from "../Main";
-import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {Model, Sequelize} from "sequelize-typescript";
 import {defaults} from "request";
@@ -115,7 +114,7 @@ export namespace GuildUtils {
         return applyUnverified(member, `Hello, as your Discord account is less than ${timeout} old and because of recent scams, we must verify your account before you can access the ${guild.name} Discord Server`, guild);
     }
 
-    async function applyUnverified(member: GuildMember, dmStr: string, guild: Guild, panicMode = false): Promise<void> {
+    async function applyUnverified(member: GuildMember, dmStr: string, guild: Guild, panicMode: boolean = false): Promise<void> {
         if (GuildUtils.isMemberAdmin(member)) {
             return;
         }
@@ -315,7 +314,7 @@ export namespace DiscordUtils {
         return guild.me;
     }
 
-    export async function getEmojiInfo(emojiId: string, includeBuffer = true): Promise<EmojiInfo> {
+    export async function getEmojiInfo(emojiId: string, includeBuffer: boolean = true): Promise<EmojiInfo> {
         let emojiInfo: EmojiInfo = null;
         const tryExtensions = ["gif", "png"];
         for (let i = 0; i < tryExtensions.length; i++) {
@@ -503,7 +502,7 @@ export namespace DiscordUtils {
         });
     }
 
-    export function getAccountAge(user: User | GuildMember, format = false): number | string {
+    export function getAccountAge(user: User | GuildMember, format: boolean = false): number | string {
         if (user instanceof GuildMember) {
             user = user.user;
         }
@@ -516,7 +515,7 @@ export namespace DiscordUtils {
         }
     }
 
-    export function getEmojiFromMessage(message: Message, includeDefaultEmoji = true): string[] {
+    export function getEmojiFromMessage(message: Message, includeDefaultEmoji: boolean = true): string[] {
         const regex = new RegExp(/<(a?):(\w+):(\d+)>/, "g");
         const messageText = message.content;
         const emojiArray = messageText.match(regex) || [];
@@ -531,7 +530,7 @@ export namespace DiscordUtils {
         return emojiArray;
     }
 
-    export async function postToLog(message: MessageEmbed[] | string, guildId: string, adminLog = false): Promise<Message | null> {
+    export async function postToLog(message: MessageEmbed[] | string, guildId: string, adminLog: boolean = false): Promise<Message | null> {
         let channel: TextChannel;
         if (Main.testMode) {
             const guild = await Main.client.guilds.fetch(guildId);
@@ -572,7 +571,7 @@ export namespace DiscordUtils {
      * @param guild
      * @param limit
      */
-    export async function getAuditLogEntries(type: GuildAuditLogsAction, guild: Guild, limit = 1): Promise<GuildAuditLogs | null> {
+    export async function getAuditLogEntries(type: GuildAuditLogsAction, guild: Guild, limit: number = 1): Promise<GuildAuditLogs | null> {
         const fetchObj: GuildAuditLogsFetchOptions = {
             limit,
             type
@@ -596,16 +595,6 @@ export namespace DiscordUtils {
         const userPreformingCommand = await message.member;
         const userPreformingActionHigestRole = userPreformingCommand.roles.highest;
         return userPreformingActionHigestRole.position > userToBlockHighestRole.position;
-    }
-
-    export async function getUserBlocked(message: Message): Promise<MuteModel> {
-        const userWhoPosted = message.member.id;
-        return await MuteModel.findOne({
-            where: {
-                userId: userWhoPosted,
-                guildId: message.member.guild.id
-            }
-        });
     }
 
     export async function getAllClosableModules(guildId: string): Promise<string[]> {
@@ -739,7 +728,7 @@ export class EnumEx {
      * @param aName
      * @returns {string|null}
      */
-    public static loopBack<T>(e: any, aName: any, asValue = false): T {
+    public static loopBack<T>(e: any, aName: any, asValue: boolean = false): T {
         const keyValuePair: Array<{ name: T, value: any }> = EnumEx.getNamesAndValues(e) as Array<{ name: T, value: any }>;
         for (let i = 0; i < keyValuePair.length; i++) {
             const obj: { name: T, value: any } = keyValuePair[i];

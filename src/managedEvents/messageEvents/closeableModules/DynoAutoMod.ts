@@ -165,7 +165,7 @@ export class DynoAutoMod extends CloseableModule<null> {
 class MuteViolation {
     public muteViolations: number;
 
-    constructor(public userId, public filterId: string, public _guildId: string) {
+    constructor(public userId: string, public filterId: string, public _guildId: string) {
         this.muteViolations = 1;
     }
 

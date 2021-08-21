@@ -13,7 +13,7 @@ export async function notBot(message: Message | CommandInteraction): Promise<boo
  * @param conditions
  * @constructor
  */
-export function MessageListenerDecorator(triggerOnEdit = false, ...conditions: EventTriggerCondition[]) {
+export function MessageListenerDecorator(triggerOnEdit: boolean = false, ...conditions: EventTriggerCondition[]) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
         console.log(`Adding: "${target.constructor.name}.${propertyKey}" to listeners for messages`);
         const constructor = target.constructor;

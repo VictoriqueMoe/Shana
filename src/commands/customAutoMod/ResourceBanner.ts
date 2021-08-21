@@ -38,7 +38,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
         });
     }
 
-    public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji = false): Promise<BannedAttachmentsModel> {
+    public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false): Promise<BannedAttachmentsModel> {
         const attachmentHash = md5(attachment);
         const exists = await BannedAttachmentsModel.count({
             where: {

@@ -23,7 +23,7 @@ import CommandArgs = Typeings.CommandArgs;
 export class BotController extends baseController {
 
     @Post("unMuteMembers")
-    private async unMuteMembers(req: Request, res: Response) {
+    private async unMuteMembers(req: Request, res: Response): Promise<Response> {
         type payload = string[];
         let guild: Guild;
         try {
@@ -46,7 +46,7 @@ export class BotController extends baseController {
 
 
     @Post(/(banUsers|kickUsers)/)
-    private async banUsers(req: Request, res: Response) {
+    private async banUsers(req: Request, res: Response): Promise<Response> {
         type payload = {
             memberId: string,
             reason?: string
@@ -85,7 +85,7 @@ export class BotController extends baseController {
 
 
     @Post("setRolesForMembers")
-    private async add(req: Request, res: Response) {
+    private async add(req: Request, res: Response): Promise<Response> {
         type payload = {
             "userId": string,
             "roleIds": string[]
@@ -121,7 +121,7 @@ export class BotController extends baseController {
     }
 
     @Get('allCommands')
-    private async allCommands(req: Request, res: Response) {
+    private async allCommands(req: Request, res: Response): Promise<Response> {
         let guild: Guild;
         try {
             guild = await this.getGuild(req);
@@ -142,7 +142,7 @@ export class BotController extends baseController {
     }
 
     @Get('allGuilds')
-    private async getAllGuilds(req: Request, res: Response) {
+    private async getAllGuilds(req: Request, res: Response): Promise<Response> {
         const guilds = Main.client.guilds.cache;
         const obj = {};
         for (const [guildId, guild] of guilds) {
@@ -152,7 +152,7 @@ export class BotController extends baseController {
     }
 
     @Get('getSetting')
-    private async getSetting(req: Request, res: Response) {
+    private async getSetting(req: Request, res: Response): Promise<Response> {
         let setting = req.query.setting as string;
         if (!ObjectUtil.validString(setting)) {
             return super.doError(res, `Please supply a setting`, StatusCodes.BAD_REQUEST);
@@ -175,7 +175,7 @@ export class BotController extends baseController {
     }
 
     @Get('getAllRoles')
-    private async getAllRoles(req: Request, res: Response) {
+    private async getAllRoles(req: Request, res: Response): Promise<Response> {
         let guild: Guild;
         try {
             guild = await this.getGuild(req);
@@ -193,7 +193,7 @@ export class BotController extends baseController {
     }
 
     @Get('getUsersFromRoles')
-    private async getUsersFromRoles(req: Request, res: Response) {
+    private async getUsersFromRoles(req: Request, res: Response): Promise<Response> {
         let guild: Guild;
         try {
             guild = await this.getGuild(req);
@@ -211,7 +211,7 @@ export class BotController extends baseController {
     }
 
     @Get('getMutes')
-    private async getMutes(req: Request, res: Response) {
+    private async getMutes(req: Request, res: Response): Promise<Response> {
         let guild: Guild;
         try {
             guild = await this.getGuild(req);
@@ -265,7 +265,7 @@ export class BotController extends baseController {
     }
 
     @Get('getChannel')
-    private async getChannel(req: Request, res: Response) {
+    private async getChannel(req: Request, res: Response): Promise<Response> {
         try {
             const guild = await this.getGuild(req);
             const channel = await this.getChannelObject(req, guild);
@@ -276,7 +276,7 @@ export class BotController extends baseController {
     }
 
     @Get('getAllChannels')
-    private async getAllChannels(req: Request, res: Response) {
+    private async getAllChannels(req: Request, res: Response): Promise<Response> {
         let guild: Guild = null;
         try {
             guild = await this.getGuild(req);
@@ -290,7 +290,7 @@ export class BotController extends baseController {
 
 
     @Get('getGuild')
-    private async getGuildFromId(req: Request, res: Response) {
+    private async getGuildFromId(req: Request, res: Response): Promise<Response> {
         try {
             const guild = await this.getGuild(req);
             return super.ok(res, guild.toJSON() as Record<string, any>);
@@ -314,7 +314,7 @@ export class BotController extends baseController {
     }
 
     @Get('getBotInfo')
-    private async getBotInfo(req: Request, res: Response) {
+    private async getBotInfo(req: Request, res: Response): Promise<Response> {
         const bot = Main.client.user;
         if (!bot) {
             return super.doError(res, "Unable to fdind client", StatusCodes.INTERNAL_SERVER_ERROR);
@@ -332,7 +332,7 @@ export class BotController extends baseController {
 
 
     @Get('getEmojis')
-    private async getEmojis(req: Request, res: Response) {
+    private async getEmojis(req: Request, res: Response): Promise<Response> {
         let guild: Guild = null;
         try {
             guild = await this.getGuild(req);

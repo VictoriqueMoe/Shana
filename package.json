@@ -1,5 +1,5 @@
 {
-  "name": "ShanaBot",
+  "name": "shanabot",
   "version": "2.0.0",
   "description": "Notice me",
   "main": "./build/Main.js",

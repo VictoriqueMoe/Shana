@@ -138,7 +138,7 @@ export class Help extends AbstractCommandModule<any> {
         return r;
     }
 
-    private async populatePagedFields(pageNumber: number, commands: Typeings.Command[], embed: MessageEmbed, member: GuildMember, prefix: string) {
+    private async populatePagedFields(pageNumber: number, commands: Typeings.Command[], embed: MessageEmbed, member: GuildMember, prefix: string): Promise<void> {
         const chunks = this.chunk(commands, 24);
         const maxPage = chunks.length;
         if (pageNumber > maxPage) {

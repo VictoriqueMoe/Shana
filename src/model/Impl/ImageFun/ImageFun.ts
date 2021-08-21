@@ -75,7 +75,7 @@ export class ImageFun {
         return await wrapper.json();
     }
 
-    private eachRecursive(obj: additionalGenGetArgs, params: URLSearchParams) {
+    private eachRecursive(obj: additionalGenGetArgs, params: URLSearchParams): void {
         for (const k in obj) {
             if (typeof obj[k] == "object" && obj[k] !== null) {
                 this.eachRecursive(obj[k], params);

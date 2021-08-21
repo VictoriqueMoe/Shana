@@ -122,7 +122,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         return savedModel;
     }
 
-    public async doRemove(userId: string, guildId: string, muteRoleId: string, skipPersistence = false): Promise<void> {
+    public async doRemove(userId: string, guildId: string, muteRoleId: string, skipPersistence: boolean = false): Promise<void> {
         const whereClaus = {
             where: {
                 userId,
