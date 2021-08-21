@@ -8,7 +8,7 @@ export type ALL_SETTINGS_TYPE = {
 }
 
 /**
- * idealy this will user super dao for retrieving and saving  settings
+ * ideally this will user super dao for retrieving and saving settings
  */
 export class SettingsManager extends BaseDAO<SettingsModel> {
     private readonly _cache: Map<string, ALL_SETTINGS_TYPE>;
