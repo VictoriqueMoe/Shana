@@ -1,4 +1,4 @@
-import {CommandMessage, Discord, Guard, SimpleCommand} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {NotBot} from "../guards/NotABot";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../utils/Utils";
 import {MessageEmbed} from "discord.js";
@@ -104,50 +104,50 @@ export class Misc extends AbstractCommandModule<any> {
 
     @SimpleCommand("generateText")
     @Guard(NotBot, secureCommand)
-    private async generateText(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async generateText({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply(`Command arguments wrong, usage: ~generateText "text"`);
+            message.reply(`Command arguments wrong, usage: ~generateText "text"`);
             return;
         }
         const text = argumentArray[0];
         if (!ObjectUtil.validString(text)) {
-            command.reply(`Command arguments wrong, usage: ~generateText "text"`);
+            message.reply(`Command arguments wrong, usage: ~generateText "text"`);
             return;
         }
-        const message = await command.channel.send("Generating...");
+        const command = await message.channel.send("Generating...");
         const resp = await DeepAPI.instance.textGeneration(text);
-        message.edit(resp);
+        command.edit(resp);
     }
 
     @SimpleCommand("posOrNeg")
     @Guard(NotBot, secureCommand)
-    private async posOrNeg(command: CommandMessage): Promise<void> {
-        const reference = command.reference;
+    private async posOrNeg({message}: SimpleCommandMessage): Promise<void> {
+        const reference = message.reference;
         let text = "";
         if (reference) {
-            const repliedMessageObj = await command.channel.messages.fetch(reference.messageId);
+            const repliedMessageObj = await message.channel.messages.fetch(reference.messageId);
             if (ObjectUtil.validString(repliedMessageObj.content)) {
                 text = repliedMessageObj.content;
             }
         } else {
-            const argumentArray = StringUtils.splitCommandLine(command.content);
+            const argumentArray = StringUtils.splitCommandLine(message.content);
             text = argumentArray[0];
         }
         if (!ObjectUtil.validString(text)) {
-            command.reply(`Command arguments wrong, usage: ~posOrNeg "text" or reference a message with text`);
+            message.reply(`Command arguments wrong, usage: ~posOrNeg "text" or reference a message with text`);
             return;
         }
         const resp = await DeepAPI.instance.sentimentAnalysis(text);
-        command.reply(`This message is ${resp}`);
+        message.reply(`This message is ${resp}`);
     }
 
     @SimpleCommand("avatar")
     @Guard(NotBot, secureCommand)
-    private async avatar(command: CommandMessage): Promise<void> {
-        const {mentions} = command;
+    private async avatar({message}: SimpleCommandMessage): Promise<void> {
+        const {mentions} = message;
         if (mentions.members.size !== 1) {
-            command.reply("Please mention a user");
+            message.reply("Please mention a user");
             return;
         }
         const mentionUser = [...mentions.members.values()][0];
@@ -155,7 +155,7 @@ export class Misc extends AbstractCommandModule<any> {
             dynamic: true,
             size: 1024
         });
-        command.channel.send({
+        message.channel.send({
             files: [avatarUrl]
         });
     }
@@ -163,11 +163,11 @@ export class Misc extends AbstractCommandModule<any> {
 
     @SimpleCommand("findAnime")
     @Guard(NotBot, secureCommand)
-    private async findAnime(command: CommandMessage): Promise<void> {
+    private async findAnime({message}: SimpleCommandMessage): Promise<void> {
         const freshHold = 0.86;
-        const messaheUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(command);
+        const messaheUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(message);
         if (messaheUrls.size > 1) {
-            command.reply("Please only supply ONE image");
+            message.reply("Please only supply ONE image");
             return;
         }
         if (Misc.coolDown.isEmpty()) {
@@ -177,11 +177,11 @@ export class Misc extends AbstractCommandModule<any> {
             const entry = Misc.coolDown.values().next().value as AnimeQuery;
             entry.increment();
             if (entry.timesQueries >= 10) {
-                command.reply("Please wait 1 min before using this command again");
+                message.reply("Please wait 1 min before using this command again");
                 return;
             }
         }
-        const replyMessage = await command.reply("Finding anime, please wait...");
+        const replyMessage = await message.reply("Finding anime, please wait...");
         let resp: Response = null;
         const url: string = messaheUrls.values().next().value;
         try {
@@ -193,7 +193,7 @@ export class Misc extends AbstractCommandModule<any> {
         if (!ObjectUtil.isValidObject(resp) || ObjectUtil.validString(resp.error)) {
             replyMessage.delete();
             if (ObjectUtil.isValidObject(resp)) {
-                command.reply(resp.error);
+                message.reply(resp.error);
             }
             return;
         }
@@ -213,7 +213,7 @@ export class Misc extends AbstractCommandModule<any> {
         const humanAt = new Date(from * 1000).toISOString().substr(11, 8);
         if (isAdult || similarity < freshHold) {
             replyMessage.delete();
-            command.reply("No results found...");
+            message.reply("No results found...");
             return;
         }
         const embed = new MessageEmbed()
@@ -260,7 +260,7 @@ export class Misc extends AbstractCommandModule<any> {
         try {
             const previewBuffer = await this.animeTractApi.fetchPreview(video);
             await replyMessage.delete();
-            await command.reply({
+            await message.reply({
                 embeds: [embed],
                 files: [previewBuffer]
             });
@@ -275,7 +275,7 @@ export class Misc extends AbstractCommandModule<any> {
 
     @SimpleCommand("findSource")
     @Guard(NotBot, secureCommand)
-    private async imageSearch(command: CommandMessage): Promise<void> {
+    private async imageSearch({message}: SimpleCommandMessage): Promise<void> {
         type GoogleImageResult = {
             url?: string,
             title: string
@@ -284,12 +284,12 @@ export class Misc extends AbstractCommandModule<any> {
             return new Promise((resolve, reject) => reverseImageSearch(url, resolve));
         };
 
-        const messageReference = command.reference;
+        const messageReference = message.reference;
         let messageAttachments = null;
         let imageUrl: string = null;
 
         if (messageReference) {
-            const repliedMessageObj = await command.channel.messages.fetch(messageReference.messageId);
+            const repliedMessageObj = await message.channel.messages.fetch(messageReference.messageId);
             const repliedMessageContent = repliedMessageObj.content;
             const repliedMessageAttachments = repliedMessageObj.attachments;
 
@@ -300,31 +300,31 @@ export class Misc extends AbstractCommandModule<any> {
                 messageAttachments = repliedMessageAttachments;
             }
         }
-        if (command.attachments && command.attachments.size === 1) {
-            messageAttachments = command.attachments;
+        if (message.attachments && message.attachments.size === 1) {
+            messageAttachments = message.attachments;
         }
         if (messageAttachments && messageAttachments.size === 1) {
             const firstAttach = messageAttachments.array()[0];
             imageUrl = firstAttach.attachment as string;
-        } else if (ObjectUtil.validString(command.content)) {
-            const messageContentUrl = getUrls(command.content);
+        } else if (ObjectUtil.validString(message.content)) {
+            const messageContentUrl = getUrls(message.content);
             if (messageContentUrl && messageContentUrl.size === 1) {
                 imageUrl = messageContentUrl.values().next().value;
             }
         }
 
         if (!ObjectUtil.validString(imageUrl)) {
-            command.reply("Please make sure you supply ONE image, if you are replying to a message, please make sure that message only has a single image");
+            message.reply("Please make sure you supply ONE image, if you are replying to a message, please make sure that message only has a single image");
             return;
         }
         const isImage: boolean = await isImageFast(imageUrl);
         if (!isImage) {
-            command.reply("Attachment was not an image");
+            message.reply("Attachment was not an image");
             return;
         }
         const result = await promiseWrapper(imageUrl);
         if (result.length === 0 || result.length === 1) {
-            command.reply("No results found for this image");
+            message.reply("No results found for this image");
             return;
         }
         const title = result[0].title;
@@ -339,7 +339,7 @@ export class Misc extends AbstractCommandModule<any> {
             const entry = result[i];
             embed.addField(entry.title, entry.url);
         }
-        command.reply({
+        message.reply({
             embeds: [embed]
         });
     }

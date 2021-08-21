@@ -30,7 +30,6 @@ import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 import {IncomingMessage} from "http";
 import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
-import {CommandMessage} from "discordx";
 import {Typeings} from "../model/types/Typeings";
 
 const getUrls = require('get-urls');
@@ -352,8 +351,8 @@ export namespace DiscordUtils {
      * reference message
      * @param command
      */
-    export async function getImageUrlsFromMessageOrReference(command: CommandMessage): Promise<Set<string>> {
-        const messageAttachments = command.attachments;
+    export async function getImageUrlsFromMessageOrReference(message: Message): Promise<Set<string>> {
+        const messageAttachments = message.attachments;
         if (messageAttachments && messageAttachments.size > 0) {
             const attachmentUrls: string[] = messageAttachments.map(value => value.attachment).filter(attachment => ObjectUtil.validString(attachment)) as string[];
             const urlMessageSet = new Set<string>();
@@ -370,7 +369,7 @@ export namespace DiscordUtils {
         }
 
         // message URL
-        const messageContent = command.content;
+        const messageContent = message.content;
         if (ObjectUtil.validString(messageContent)) {
             const urlsInMessage = getUrls(messageContent);
             if (urlsInMessage && urlsInMessage.size > 0) {
@@ -387,11 +386,11 @@ export namespace DiscordUtils {
         }
         // replied attachment
         {
-            const repliedMessageRef = command.reference;
+            const repliedMessageRef = message.reference;
             const urlMessageSet = new Set<string>();
             if (repliedMessageRef) {
                 const repliedMessageID = repliedMessageRef.messageId;
-                const repliedMessageObj = await command.channel.messages.fetch(repliedMessageID);
+                const repliedMessageObj = await message.channel.messages.fetch(repliedMessageID);
                 const repliedMessageContent = repliedMessageObj.content;
                 const repliedMessageAttatch = (repliedMessageObj.attachments && repliedMessageObj.attachments.size > 0) ? repliedMessageObj.attachments : null;
                 if (repliedMessageAttatch) {
@@ -590,11 +589,11 @@ export namespace DiscordUtils {
      * @param command
      * @private
      */
-    export async function canUserPreformBlock(command: CommandMessage): Promise<boolean> {
-        const userToBlockCollection = command.mentions.members;
+    export async function canUserPreformBlock(message: Message): Promise<boolean> {
+        const userToBlockCollection = message.mentions.members;
         const userToBlock = userToBlockCollection.values().next().value as GuildMember;
         const userToBlockHighestRole = userToBlock.roles.highest;
-        const userPreformingCommand = await command.member;
+        const userPreformingCommand = await message.member;
         const userPreformingActionHigestRole = userPreformingCommand.roles.highest;
         return userPreformingActionHigestRole.position > userToBlockHighestRole.position;
     }

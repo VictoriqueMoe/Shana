@@ -1,4 +1,4 @@
-import {CommandMessage, Discord, DIService, Guard, SimpleCommand} from "discordx";
+import {Discord, DIService, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {NotBot} from "../../guards/NotABot";
 import {ObjectUtil, StringUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
@@ -101,10 +101,10 @@ export class SettingsCommands extends AbstractCommandModule<any> {
 
     @SimpleCommand("AutoRoleAutoMute")
     @Guard(NotBot, secureCommand)
-    private async AutoRoleAutoMute(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async AutoRoleAutoMute({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply("Please supply true or false");
+            message.reply("Please supply true or false");
             return;
         }
         const autoMute = argumentArray[0] === "true";
@@ -113,20 +113,20 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             autoMute
         };
         try {
-            await autoRole.saveSettings(command.guild.id, setting, true);
+            await autoRole.saveSettings(message.guild.id, setting, true);
         } catch (e) {
-            command.reply(e.message);
+            message.reply(e.message);
             return;
         }
-        command.reply("Setting saved");
+        message.reply("Setting saved");
     }
 
     @SimpleCommand("AutoAutoJail")
     @Guard(NotBot, secureCommand)
-    private async AutoAutoJail(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async AutoAutoJail({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply("Please supply true or false");
+            message.reply("Please supply true or false");
             return;
         }
         const autoJail = argumentArray[0] === "true";
@@ -135,25 +135,25 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             autoJail
         };
         try {
-            await autoRole.saveSettings(command.guild.id, setting, true);
+            await autoRole.saveSettings(message.guild.id, setting, true);
         } catch (e) {
-            command.reply(e.message);
+            message.reply(e.message);
             return;
         }
-        command.reply("Setting saved");
+        message.reply("Setting saved");
     }
 
     @SimpleCommand("AutoRoleMinAccountAge")
     @Guard(NotBot, secureCommand)
-    private async AutoRoleMinAccountAge(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async AutoRoleMinAccountAge({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply("Please supply a number");
+            message.reply("Please supply a number");
             return;
         }
         const minAccountAge = parseInt(argumentArray[0]);
         if (isNaN(minAccountAge)) {
-            command.reply("Please supply a number");
+            message.reply("Please supply a number");
             return;
         }
         const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
@@ -161,42 +161,42 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             minAccountAge
         };
         try {
-            await autoRole.saveSettings(command.guild.id, setting, true);
+            await autoRole.saveSettings(message.guild.id, setting, true);
         } catch (e) {
-            command.reply(e.message);
+            message.reply(e.message);
             return;
         }
-        command.reply("Setting saved");
+        message.reply("Setting saved");
     }
 
     @SimpleCommand("prefix")
     @Guard(NotBot, secureCommand)
-    private async setPrefix(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async setPrefix({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1 && argumentArray.length !== 0) {
-            command.reply("Please supply one or zero argument(s) only");
+            message.reply("Please supply one or zero argument(s) only");
             return;
         }
         const [prefix] = argumentArray;
         if (ObjectUtil.isNumeric(prefix)) {
-            command.reply("Prefix can not be a number");
+            message.reply("Prefix can not be a number");
             return;
         }
         if (!ObjectUtil.validString(prefix)) {
-            await SettingsManager.instance.saveOrUpdateSetting(SETTINGS.PREFIX, DEFAULT_SETTINGS.PREFIX, command.guild.id);
-            command.reply(`Prefix has been reset to "${DEFAULT_SETTINGS.PREFIX}"`);
+            await SettingsManager.instance.saveOrUpdateSetting(SETTINGS.PREFIX, DEFAULT_SETTINGS.PREFIX, message.guild.id);
+            message.reply(`Prefix has been reset to "${DEFAULT_SETTINGS.PREFIX}"`);
         } else {
-            await SettingsManager.instance.saveOrUpdateSetting(SETTINGS.PREFIX, prefix, command.guild.id);
-            command.reply(`Prefix has been changed to "${prefix}"`);
+            await SettingsManager.instance.saveOrUpdateSetting(SETTINGS.PREFIX, prefix, message.guild.id);
+            message.reply(`Prefix has been changed to "${prefix}"`);
         }
     }
 
     @SimpleCommand("panicMode")
     @Guard(NotBot, secureCommand)
-    private async panicMode(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async panicMode({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply("Please supply true or false");
+            message.reply("Please supply true or false");
             return;
         }
         const panicMode = argumentArray[0] === "true";
@@ -205,25 +205,25 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             panicMode
         };
         try {
-            await autoRole.saveSettings(command.guild.id, setting, true);
+            await autoRole.saveSettings(message.guild.id, setting, true);
         } catch (e) {
-            command.reply(e.message);
+            message.reply(e.message);
             return;
         }
-        command.reply("Setting saved");
+        message.reply("Setting saved");
     }
 
     @SimpleCommand("massJoinProtection")
     @Guard(NotBot, secureCommand)
-    private async massJoinProtection(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async massJoinProtection({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply("Please supply a number");
+            message.reply("Please supply a number");
             return;
         }
         const massJoinProtection = parseInt(argumentArray[0]);
         if (isNaN(massJoinProtection)) {
-            command.reply("Please supply a number");
+            message.reply("Please supply a number");
             return;
         }
         const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
@@ -231,11 +231,11 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             massJoinProtection
         };
         try {
-            await autoRole.saveSettings(command.guild.id, setting, true);
+            await autoRole.saveSettings(message.guild.id, setting, true);
         } catch (e) {
-            command.reply(e.message);
+            message.reply(e.message);
             return;
         }
-        command.reply("Setting saved");
+        message.reply("Setting saved");
     }
 }

@@ -1,4 +1,4 @@
-import {CommandMessage, Discord, Guard, SimpleCommand} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {NotBot} from "../guards/NotABot";
 import {ArrayUtils, ObjectUtil, StringUtils} from "../utils/Utils";
 import {GuildMember, MessageEmbed} from "discord.js";
@@ -52,13 +52,13 @@ export class Help extends AbstractCommandModule<any> {
 
     @SimpleCommand("help")
     @Guard(NotBot, secureCommand)
-    private async help(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async help({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 3 && argumentArray.length !== 2 && argumentArray.length !== 1 && argumentArray.length !== 0) {
-            command.reply('Invalid arguments, please supply <"moduleName"> <"command from module OR page number">');
+            message.reply('Invalid arguments, please supply <"moduleName"> <"command from module OR page number">');
             return;
         }
-        const member = command.member;
+        const member = message.member;
         const botImage = Main.client.user.displayAvatarURL({dynamic: true});
         const prefix = await SettingsManager.instance.getSetting(SETTINGS.PREFIX, member.guild.id);
         const highestRoleColour = member.roles.highest.hexColor;
@@ -80,7 +80,7 @@ export class Help extends AbstractCommandModule<any> {
             const [moduleName, pageNumberOrCommand] = argumentArray;
             const moduleRequested = availableModules.find(m => m.commandDescriptors.module.name.toLowerCase() === moduleName.toLowerCase());
             if (!moduleRequested) {
-                command.reply(`Invalid module: "${moduleName}" please run '${prefix}help' for a list of modules`);
+                message.reply(`Invalid module: "${moduleName}" please run '${prefix}help' for a list of modules`);
                 return;
             }
             let commandName = null;
@@ -96,11 +96,11 @@ export class Help extends AbstractCommandModule<any> {
             if (commandName) {
                 const commandObj = await moduleRequested.getCommand(commandName, member);
                 if (commandObj == null) {
-                    command.reply(`Invalid command name: "${commandName}" Please run '${prefix}${moduleName}' for a list of commands`);
+                    message.reply(`Invalid command name: "${commandName}" Please run '${prefix}${moduleName}' for a list of commands`);
                     return;
                 }
                 // eslint-disable-next-line prefer-const
-                let {name, depricated, description: {args, examples, text}} = commandObj;
+                let {name, deprecated, description: {args, examples, text}} = commandObj;
                 embed.setTitle(`${prefix}${name}`);
                 if (!ObjectUtil.validString(text)) {
                     text = "No description";
@@ -125,7 +125,7 @@ export class Help extends AbstractCommandModule<any> {
                 await this.populatePagedFields(pageNumber, commands, embed, member, prefix);
             }
         }
-        command.reply({
+        message.reply({
             embeds: [embed]
         });
     }
@@ -151,7 +151,7 @@ export class Help extends AbstractCommandModule<any> {
         embed.addField('Commands:', '\u200b');
         const resultOfPage = chunks[pageNumber - 1];
         for (const command of resultOfPage) {
-            const {name, description, depricated} = command;
+            const {name, description, deprecated} = command;
             if (!await CommandSecurityManager.instance.canRunCommand(member, name)) {
                 continue;
             }
@@ -159,7 +159,7 @@ export class Help extends AbstractCommandModule<any> {
             if (ObjectUtil.isValidObject(description) && ObjectUtil.validString(description.text)) {
                 fieldValue = description.text;
             }
-            if (depricated) {
+            if (deprecated) {
                 fieldValue += " \n\nThis command is deprecated and will be removed in the future";
             }
             if (ArrayUtils.isValidArray(description.args)) {

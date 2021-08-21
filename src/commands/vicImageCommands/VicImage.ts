@@ -1,4 +1,4 @@
-import {CommandMessage, Discord, Guard, SimpleCommand} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {secureCommand} from "../../guards/RoleConstraint";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBot} from "../../guards/NotABot";
@@ -33,13 +33,13 @@ export abstract class VicImage extends AbstractCommandModule<any> {
 
     @SimpleCommand("vicImage")
     @Guard(NotBot, secureCommand)
-    private async vicImage(command: CommandMessage): Promise<void> {
-        const findingMessage = await command.channel.send("Finding image...");
+    private async vicImage({message}: SimpleCommandMessage): Promise<void> {
+        const findingMessage = await message.channel.send("Finding image...");
         const randomImageMetadata = VicDropbox.instance.randomImage;
         const randomImage = (await Main.dropBox.filesDownload({"path": randomImageMetadata.path_lower})).result;
         const buffer: Buffer = (randomImage as any).fileBinary;
         try {
-            await command.channel.send({
+            await message.channel.send({
                 content: "Found one!",
                 files: [{
                     attachment: buffer,
@@ -47,7 +47,7 @@ export abstract class VicImage extends AbstractCommandModule<any> {
                 }]
             });
         } catch (e) {
-            command.channel.send("Failed to send, maybe image is too large?");
+            message.channel.send("Failed to send, maybe image is too large?");
             console.error(e);
             console.log(`Failed to send ${randomImage.name}`);
         }
@@ -56,8 +56,8 @@ export abstract class VicImage extends AbstractCommandModule<any> {
 
     @SimpleCommand("vicReIndex")
     @Guard(NotBot, secureCommand)
-    private async vicReIndex(command: CommandMessage): Promise<void> {
+    private async vicReIndex({message}: SimpleCommandMessage): Promise<void> {
         await VicDropbox.instance.index();
-        command.channel.send(`Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`);
+        message.channel.send(`Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`);
     }
 }

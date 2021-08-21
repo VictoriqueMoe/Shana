@@ -1,4 +1,4 @@
-import {CommandMessage, Discord, Guard, SimpleCommand} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, StringUtils, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {NotBot} from "../../../guards/NotABot";
@@ -64,46 +64,46 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
 
     @SimpleCommand("mute")
     @Guard(NotBot, secureCommand)
-    private async mute(command: CommandMessage): Promise<void> {
-        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(command.guild.id);
+    private async mute({message}: SimpleCommandMessage): Promise<void> {
+        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(message.guild.id);
         if (!mutedRole) {
-            command.reply("This command has not been configured or is disabled");
+            message.reply("This command has not been configured or is disabled");
         }
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 3 && argumentArray.length !== 2) {
-            command.reply(`Command arguments wrong, usage: ~mute <"username"> <"reason"> [timeout in seconds]`);
+            message.reply(`Command arguments wrong, usage: ~mute <"username"> <"reason"> [timeout in seconds]`);
             return;
         }
         const [, reason, timeout] = argumentArray;
-        const creatorID = command.member.id;
-        const mentionedUserCollection = command.mentions.users;
-        const mentionedMember: GuildMember = command.mentions.members.values().next().value;
+        const creatorID = message.member.id;
+        const mentionedUserCollection = message.mentions.users;
+        const mentionedMember: GuildMember = message.mentions.members.values().next().value;
         if (mentionedUserCollection.size !== 1) {
-            command.reply("You must specify ONE user in your arguments");
+            message.reply("You must specify ONE user in your arguments");
             return;
         }
         const blockedUserId = mentionedUserCollection.keys().next().value;
         const blockUserObject = mentionedUserCollection.get(blockedUserId);
         const didYouBlockABot = blockUserObject.bot;
-        const canBlock = await DiscordUtils.canUserPreformBlock(command);
-        const bot = await DiscordUtils.getBot(command.guild.id);
+        const canBlock = await DiscordUtils.canUserPreformBlock(message);
+        const bot = await DiscordUtils.getBot(message.guild.id);
         const botRole = bot.roles.highest;
         if (botRole.position <= mentionedMember.roles.highest.position) {
-            command.reply("You can not block a member whose role is above or on the same level as this bot!");
+            message.reply("You can not block a member whose role is above or on the same level as this bot!");
             return;
         }
 
         if (creatorID == blockedUserId) {
-            command.reply("You can not block yourself!");
+            message.reply("You can not block yourself!");
             return;
         }
 
         if (!canBlock) {
-            command.reply("You can not block a member whose role is above or on the same level as yours!");
+            message.reply("You can not block a member whose role is above or on the same level as yours!");
             return;
         }
         if (didYouBlockABot) {
-            command.reply("You can not block a bot");
+            message.reply("You can not block a bot");
             return;
         }
 
@@ -120,7 +120,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                     const numberValueStr = timeout.slice(0, -unit.length);
                     const timeEnum = EnumEx.loopBack(TIME_UNIT, unit, true) as TIME_UNIT;
                     if (!ObjectUtil.validString(timeEnum)) {
-                        command.reply(`invalid unit, '${unit}', available values are: \n ${this.getMuteTimeOutStr()}`);
+                        message.reply(`invalid unit, '${unit}', available values are: \n ${this.getMuteTimeOutStr()}`);
                         return;
                     }
                     const numValue = Number.parseInt(numberValueStr);
@@ -133,11 +133,11 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                 await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID);
             }
         } catch (e) {
-            command.reply(e.message);
+            message.reply(e.message);
             return;
         }
 
-        command.reply(replyMessage);
+        message.reply(replyMessage);
 
     }
 
@@ -151,20 +151,20 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
 
     @SimpleCommand("muteTimeUnits")
     @Guard(NotBot, secureCommand)
-    private async getTimeUnits(command: CommandMessage): Promise<void> {
-        command.reply(`\n ${this.getMuteTimeOutStr()}`);
+    private async getTimeUnits({message}: SimpleCommandMessage): Promise<void> {
+        message.reply(`\n ${this.getMuteTimeOutStr()}`);
     }
 
     @SimpleCommand("viewAllMutes")
     @Guard(NotBot, secureCommand)
-    private async viewAllMutes(command: CommandMessage): Promise<MuteModel[]> {
+    private async viewAllMutes({message}: SimpleCommandMessage): Promise<MuteModel[]> {
         const currentBlocks = await MuteModel.findAll({
             where: {
-                guildId: command.guild.id
+                guildId: message.guild.id
             }
         });
         if (currentBlocks.length === 0) {
-            command.reply("No members are muted");
+            message.reply("No members are muted");
             return;
         }
         let replyStr = `\n`;
@@ -182,7 +182,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                 replyStr += `, This user has also attempted to post ${block.violationRules} times while blocked`;
             }
         }
-        command.reply(replyStr);
+        message.reply(replyStr);
         return currentBlocks;
     }
 }

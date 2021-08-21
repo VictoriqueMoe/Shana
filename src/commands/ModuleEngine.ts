@@ -1,4 +1,4 @@
-import {CommandMessage, Discord, Guard, SimpleCommand} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {DiscordUtils, StringUtils} from "../utils/Utils";
 import {secureCommand} from "../guards/RoleConstraint";
 import {AbstractCommandModule} from "./AbstractCommandModule";
@@ -68,56 +68,56 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
 
     @SimpleCommand("dynoReplace")
     @Guard(secureCommand)
-    private async dynoReplace(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async dynoReplace({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply(`Command arguments wrong, usage: ~enableModule <"enable">`);
+            message.reply(`Command arguments wrong, usage: ~enableModule <"enable">`);
             return;
         }
         const isEnable = argumentArray[0].toLowerCase() === "true";
         const dynoModules = DiscordUtils.getDynoReplacementModules();
         for (const module of dynoModules) {
-            isEnable ? await module.open(command.guild.id) : await module.close(command.guild.id);
+            isEnable ? await module.open(message.guild.id) : await module.close(message.guild.id);
         }
         const modulesEnabled = dynoModules.map(d => {
             const subModules = d.submodules.filter(sm => sm.isActive);
             return subModules.size > 0 ? `${d.moduleId} (subModules: ${(subModules.map(s => s.id)).join(", ")})` : d.moduleId;
         });
         const str = `the following modules have been ${isEnable ? "enabled" : "disabled"}: \n ${modulesEnabled.join("\n ")}`;
-        command.reply(str);
+        message.reply(str);
     }
 
     @SimpleCommand("enableModule")
     @Guard(secureCommand)
-    private async enableModule(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async enableModule({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 2) {
-            command.reply(`Command arguments wrong, usage: ~enableModule <"moduleId"> <"enable">`);
+            message.reply(`Command arguments wrong, usage: ~enableModule <"moduleId"> <"enable">`);
             return;
         }
         const moduleId = argumentArray[0];
         const isEnable = argumentArray[1].toLowerCase() === "true";
-        const allModuleNames = await DiscordUtils.getAllClosableModules(command.guild.id);
+        const allModuleNames = await DiscordUtils.getAllClosableModules(message.guild.id);
         if (!allModuleNames.includes(moduleId)) {
-            command.reply(`Unable to find that module, all available modules are: \n ${allModuleNames.join(", ")}`);
+            message.reply(`Unable to find that module, all available modules are: \n ${allModuleNames.join(", ")}`);
             return;
         }
         const module = DiscordUtils.getModule(moduleId);
         const subModules = module.submodules.filter(sm => sm.isActive);
         const subModulesStr = (subModules.map(s => s.id)).join(", ");
         if (isEnable) {
-            const didOpen = await module.open(command.guild.id);
-            didOpen ? command.reply(`module ${moduleId} (subModules: ${subModulesStr}) has been enabled`) : command.reply(`module ${moduleId} (subModules: ${subModulesStr}) can not be enabled`);
+            const didOpen = await module.open(message.guild.id);
+            didOpen ? message.reply(`module ${moduleId} (subModules: ${subModulesStr}) has been enabled`) : message.reply(`module ${moduleId} (subModules: ${subModulesStr}) can not be enabled`);
         } else {
-            const didClose = await module.close(command.guild.id);
-            didClose ? command.reply(`module ${moduleId} (subModules: ${subModulesStr}) has been disabled`) : command.reply(`module ${moduleId} (subModules: ${subModulesStr}) can not be disabled`);
+            const didClose = await module.close(message.guild.id);
+            didClose ? message.reply(`module ${moduleId} (subModules: ${subModulesStr}) has been disabled`) : message.reply(`module ${moduleId} (subModules: ${subModulesStr}) can not be disabled`);
         }
     }
 
     @SimpleCommand("getModuleNames")
     @Guard(secureCommand)
-    private async getModuleNames(command: CommandMessage): Promise<void> {
-        const allModuleNames = await DiscordUtils.getAllClosableModules(command.guild.id);
-        command.reply(`all available modules are: \n ${allModuleNames.join(", ")}`);
+    private async getModuleNames({message}: SimpleCommandMessage): Promise<void> {
+        const allModuleNames = await DiscordUtils.getAllClosableModules(message.guild.id);
+        message.reply(`all available modules are: \n ${allModuleNames.join(", ")}`);
     }
 }

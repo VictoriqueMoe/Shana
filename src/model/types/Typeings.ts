@@ -11,7 +11,7 @@ export namespace Typeings {
     };
     export type Command = {
         name: string,
-        depricated?: boolean,
+        deprecated?: boolean,
         description?: {
             text?: string,
             examples?: string[],

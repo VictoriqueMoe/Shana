@@ -1,4 +1,4 @@
-import {CommandMessage, Discord, Guard, SimpleCommand} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {NotBot} from "../../guards/NotABot";
 import {secureCommand} from "../../guards/RoleConstraint";
 import {ObjectUtil} from "../../utils/Utils";
@@ -78,37 +78,37 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
 
     @SimpleCommand("serverAge")
     @Guard(NotBot, secureCommand)
-    private async serverAge(command: CommandMessage): Promise<void> {
-        const guildId = command.guild.id;
+    private async serverAge({message}: SimpleCommandMessage): Promise<void> {
+        const guildId = message.guild.id;
         const guild = await Main.client.guilds.fetch(guildId);
         const ageObject = this.getAge(guild);
-        command.reply(`Server is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
+        message.reply(`Server is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
     }
 
     @SimpleCommand("channelAge")
     @Guard(NotBot, secureCommand)
-    private async channelAge(command: CommandMessage): Promise<void> {
-        const channelsInMessage = command.mentions.channels;
+    private async channelAge({message}: SimpleCommandMessage): Promise<void> {
+        const channelsInMessage = message.mentions.channels;
         if (channelsInMessage.size !== 1) {
-            command.reply("Please make sure you mention 1 channel only");
+            message.reply("Please make sure you mention 1 channel only");
             return;
         }
         const channelMentioned = channelsInMessage.first() as GuildChannel;
         const ageObject = this.getAge(channelMentioned);
-        command.reply(`Channel is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
+        message.reply(`Channel is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
     }
 
 
     @SimpleCommand("age")
     @Guard(NotBot, secureCommand)
-    private async getAccountAge(command: CommandMessage): Promise<void> {
-        const mentions = command.mentions;
+    private async getAccountAge({message}: SimpleCommandMessage): Promise<void> {
+        const mentions = message.mentions;
         if (mentions.users.size != 1) {
-            command.reply("Please supply username");
+            message.reply("Please supply username");
             return;
         }
         const mention = mentions.users.first();
         const ageObject = this.getAge(mention);
-        command.reply(`Account is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
+        message.reply(`Account is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
     }
 }

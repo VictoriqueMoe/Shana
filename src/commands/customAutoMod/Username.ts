@@ -1,5 +1,5 @@
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
-import {CommandMessage, Discord, Guard, SimpleCommand} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {NotBot} from "../../guards/NotABot";
 import {secureCommand} from "../../guards/RoleConstraint";
 import {DiscordUtils, StringUtils} from "../../utils/Utils";
@@ -25,7 +25,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
                 },
                 {
                     name: "removeUsername",
-                    depricated: true,
+                    deprecated: true,
                     description: {
                         text: "This command is used to remove and reset the persisted entry. \n this command is the SAME as wiping the username using the discord 'change username' feature and will be removed in the future",
                         args: [
@@ -72,43 +72,43 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
 
     @SimpleCommand("viewUsernames")
     @Guard(NotBot, secureCommand)
-    private async ViewAllSetUsernames(command: CommandMessage): Promise<void> {
+    private async ViewAllSetUsernames({message}: SimpleCommandMessage): Promise<void> {
         const allModels = await UsernameModel.findAll({
             where: {
-                guildId: command.guild.id
+                guildId: message.guild.id
             }
         });
-        const guild = command.guild;
+        const guild = message.guild;
         if (allModels.length === 0) {
-            command.reply("No members in the database");
+            message.reply("No members in the database");
             return;
         }
-        let message = `\n`;
+        let messageDisplay = `\n`;
         for (const model of allModels) {
             try {
                 const member = await guild.members.fetch(model.userId);
-                message += `\n user: "${member.user.tag}" has a persisted username of "${model.usernameToPersist}"`;
+                messageDisplay += `\n user: "${member.user.tag}" has a persisted username of "${model.usernameToPersist}"`;
                 if (model.force) {
-                    message += ` Additionally, this user is not allowed to change it`;
+                    messageDisplay += ` Additionally, this user is not allowed to change it`;
                 }
             } catch {
 
             }
         }
-        command.reply(message);
+        message.reply(messageDisplay);
     }
 
     @SimpleCommand("removeUsername")
     @Guard(NotBot, secureCommand)
-    private async removeSetUsername(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async removeSetUsername({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply('Invalid arguments, please supply <"username">');
+            message.reply('Invalid arguments, please supply <"username">');
             return;
         }
-        const mentionMembers = command.mentions.members;
+        const mentionMembers = message.mentions.members;
         if (mentionMembers.size != 1) {
-            command.reply('Invalid arguments, Please supply ONE user in your arguments');
+            message.reply('Invalid arguments, Please supply ONE user in your arguments');
             return;
         }
         const mentionMember = mentionMembers.values().next().value as GuildMember;
@@ -119,15 +119,15 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
                 guildId: mentionMember.guild.id
             }
         });
-        rowCount === 1 ? command.reply("Member remove from Database") : command.reply("Member not found in database");
+        rowCount === 1 ? message.reply("Member remove from Database") : message.reply("Member not found in database");
     }
 
     @SimpleCommand("username")
     @Guard(NotBot, secureCommand)
-    private async setUsername(command: CommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+    private async setUsername({message}: SimpleCommandMessage): Promise<void> {
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 2 && argumentArray.length !== 3) {
-            command.reply('Invalid arguments, please supply <"username"> <"new username"> [block change]');
+            message.reply('Invalid arguments, please supply <"username"> <"new username"> [block change]');
             return;
         }
         const [, usernameToPersist] = argumentArray;
@@ -135,22 +135,22 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
         if (argumentArray.length === 3) {
             force = (argumentArray[2] == 'true');
         }
-        const mentionMembers = command.mentions.members;
+        const mentionMembers = message.mentions.members;
         if (mentionMembers.size != 1) {
-            command.reply('Invalid arguments, Please supply ONE user in your arguments');
+            message.reply('Invalid arguments, Please supply ONE user in your arguments');
             return;
         }
         const mentionMember = mentionMembers.values().next().value as GuildMember;
-        const guild = await GuildManager.instance.getGuild(command.guild.id);
+        const guild = await GuildManager.instance.getGuild(message.guild.id);
         const bot = await DiscordUtils.getBot(guild.id);
         const botHighestRole = bot.roles.highest;
         const roleOfMember = mentionMember.roles.highest;
         if (roleOfMember.position > botHighestRole.position) {
-            command.reply("You can not use this command against a member who's highest role is above this bots highest role");
+            message.reply("You can not use this command against a member who's highest role is above this bots highest role");
             return;
         }
-        if (roleOfMember.position >= command.member.roles.highest.position) {
-            command.reply("You can not use this command against a member who's role is higher than yours!");
+        if (roleOfMember.position >= message.member.roles.highest.position) {
+            message.reply("You can not use this command against a member who's role is higher than yours!");
             return;
         }
         const userId = mentionMember.id;
@@ -187,6 +187,6 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
             }
         }
         await mentionMember.setNickname(usernameToPersist);
-        command.reply(`user ${mentionMember.user.username} has been persisted to always be "${usernameToPersist}"`);
+        message.reply(`user ${mentionMember.user.username} has been persisted to always be "${usernameToPersist}"`);
     }
 }

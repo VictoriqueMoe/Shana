@@ -1,4 +1,4 @@
-import {CommandMessage, Discord, Guard, SimpleCommand} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {secureCommand} from "../guards/RoleConstraint";
 import {AbstractCommandModule} from "./AbstractCommandModule";
 
@@ -24,7 +24,7 @@ export abstract class Ping extends AbstractCommandModule<any> {
 
     @SimpleCommand("ping")
     @Guard(secureCommand)
-    private ping(command: CommandMessage): void {
-        command.reply(`Websocket heartbeat: ${command.client.ws.ping}ms.`);
+    private ping({message}: SimpleCommandMessage): void {
+        message.reply(`Websocket heartbeat: ${message.client.ws.ping}ms.`);
     }
 }

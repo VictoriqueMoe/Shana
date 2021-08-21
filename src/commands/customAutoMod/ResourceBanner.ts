@@ -1,4 +1,4 @@
-import {CommandMessage, Description, Discord, Guard, SimpleCommand} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {NotBot} from "../../guards/NotABot";
 import {secureCommand} from "../../guards/RoleConstraint";
 import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
@@ -59,29 +59,25 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
         return await entry.save();
     }
 
-    private static viewDescriptionForSetUsernames() {
-        return "Ban the attachment that is contained in the linked messages \n usage: ~banAttachment <reason>";
-    }
-
     @SimpleCommand("banEmoji")
     @Guard(NotBot, secureCommand)
-    private async banEmoji(command: CommandMessage): Promise<void> {
-        const repliedMessageLink = command.reference;
+    private async banEmoji({message}: SimpleCommandMessage): Promise<void> {
+        const repliedMessageLink = message.reference;
         if (!repliedMessageLink) {
-            command.reply("Please reply to a message");
+            message.reply("Please reply to a message");
             return;
         }
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply("Please supply a reason");
+            message.reply("Please supply a reason");
             return;
         }
         const reason: string = argumentArray[0];
         const repliedMessageID = repliedMessageLink.messageId;
-        const repliedMessageObj = await command.channel.messages.fetch(repliedMessageID);
+        const repliedMessageObj = await message.channel.messages.fetch(repliedMessageID);
         const emojisFromMessage = DiscordUtils.getEmojiFromMessage(repliedMessageObj, false);
         if (emojisFromMessage.length === 0) {
-            command.reply("Message contains no external emoji");
+            message.reply("Message contains no external emoji");
             return;
         }
         let emojiId: string = null;
@@ -97,20 +93,20 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
             emojiMap.forEach((value, key) => {
                 reply += `${key}: ${value} \n`;
             });
-            await command.reply(`What emoji would you like to ban: \n${reply}`);
+            await message.reply(`What emoji would you like to ban: \n${reply}`);
             const filter = (response: Message): boolean => {
-                if (!response.member || !command.member) {
+                if (!response.member || !message.member) {
                     return false;
                 }
-                return response.member.id === command.member.id && emojiMap.has(response.content.toUpperCase());
+                return response.member.id === message.member.id && emojiMap.has(response.content.toUpperCase());
             };
             let collected: Collection<Snowflake, Message> = null;
             try {
-                collected = await command.channel.awaitMessages({
+                collected = await message.channel.awaitMessages({
                     filter, max: 1, time: 10000, errors: ['time']
                 });
             } catch {
-                command.reply("Timout exceeded.");
+                message.reply("Timout exceeded.");
                 return;
             }
             const result = collected.first().content.toUpperCase();
@@ -120,39 +116,38 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
             emojiId = emojisFromMessage[0].split(":").pop().slice(0, -1);
         }
 
-        const findMessage = await command.reply("Please wait while i extract the emoji...");
+        const findMessage = await message.reply("Please wait while i extract the emoji...");
         let emojiInfo: EmojiInfo = null;
         try {
             emojiInfo = await DiscordUtils.getEmojiInfo(emojiId);
         } catch {
             await findMessage.delete();
-            command.reply("Error finding emoji");
+            message.reply("Error finding emoji");
             return;
         }
 
-        await ResourceBanner.doBanAttachment(emojiInfo.buffer, reason, emojiInfo.url, command.guild.id, true);
+        await ResourceBanner.doBanAttachment(emojiInfo.buffer, reason, emojiInfo.url, message.guild.id, true);
         await findMessage.delete();
-        await command.reply("Emoji added to ban database");
+        await message.reply("Emoji added to ban database");
         repliedMessageObj.delete();
     }
 
     @SimpleCommand("banAttachment")
-    @Description(ResourceBanner.viewDescriptionForSetUsernames())
     @Guard(NotBot, secureCommand)
-    private async banAttachment(command: CommandMessage): Promise<void> {
-        const repliedMessageRef = command.reference;
+    private async banAttachment({message}: SimpleCommandMessage): Promise<void> {
+        const repliedMessageRef = message.reference;
         if (!repliedMessageRef) {
-            command.reply("Please reply to a message that contains an attachment");
+            message.reply("Please reply to a message that contains an attachment");
             return;
         }
-        const argumentArray = StringUtils.splitCommandLine(command.content);
+        const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
-            command.reply("Please supply a reason");
+            message.reply("Please supply a reason");
             return;
         }
         const reason: string = argumentArray[0];
         const repliedMessageID = repliedMessageRef.messageId;
-        const repliedMessageObj = await command.channel.messages.fetch(repliedMessageID);
+        const repliedMessageObj = await message.channel.messages.fetch(repliedMessageID);
         let urlsInMessage: Set<string> = null;
         const repliedMessageContent = repliedMessageObj.content;
         if (ObjectUtil.validString(repliedMessageContent)) {
@@ -160,10 +155,10 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
         }
         const attatchmentArray = repliedMessageObj.attachments;
         if (attatchmentArray.size === 0 && urlsInMessage.size === 0) {
-            command.reply("Linked message contains no attachments");
+            message.reply("Linked message contains no attachments");
             return;
         }
-        const waitMessage = await command.channel.send("Extracting attachments...");
+        const waitMessage = await message.channel.send("Extracting attachments...");
         const urls = attatchmentArray.map(value => (value.attachment as string));
         if (urlsInMessage && urlsInMessage.size > 0) {
             urls.push(...urlsInMessage.values());
@@ -172,15 +167,15 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
         for (const urlToAttachment of urls) {
             try {
                 const attachment = await DiscordUtils.loadResourceFromURL(urlToAttachment);
-                await ResourceBanner.doBanAttachment(attachment, reason, urlToAttachment, command.guild.id);
+                await ResourceBanner.doBanAttachment(attachment, reason, urlToAttachment, message.guild.id);
                 successful++;
             } catch (e) {
-                await command.reply(`Error extracting attachment"`);
+                await message.reply(`Error extracting attachment"`);
                 console.error(e);
             }
         }
         if (successful === 0) {
-            command.reply("no attachments extracted, see above errors");
+            message.reply("no attachments extracted, see above errors");
             return;
         }
         try {
@@ -189,6 +184,6 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
         } catch {
         }
 
-        command.reply("attachments extracted, any more messages with these attachments will be auto deleted");
+        message.reply("attachments extracted, any more messages with these attachments will be auto deleted");
     }
 }
