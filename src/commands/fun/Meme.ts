@@ -627,6 +627,25 @@ export abstract class Meme extends AbstractCommandModule<any> {
                         }
                     },
                     {
+                        "name": "pornhub",
+                        "description": {
+                            "args": [
+                                {
+                                    "name": "Image",
+                                    "type": "attachment",
+                                    "optional": true,
+                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
+                                },
+                                {
+                                    "name": "Text to use",
+                                    "type": "text",
+                                    "optional": false,
+                                    "description": "The text to use on the pornhub page"
+                                }
+                            ]
+                        }
+                    },
+                    {
                         "name": "steamcard",
                         "description": {
                             "args": [
@@ -637,10 +656,10 @@ export abstract class Meme extends AbstractCommandModule<any> {
                                     "description": "The image to use for this meme (keep blank to refer to yourself)"
                                 },
                                 {
-                                    name: "Text to use",
-                                    type: "text",
-                                    optional: false,
-                                    description: "The text to use on the steamcard"
+                                    "name": "Text to use",
+                                    "type": "text",
+                                    "optional": false,
+                                    "description": "The text to use on the steamcard"
                                 }
                             ]
                         }
@@ -992,6 +1011,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                 break;
             }
             case GENERATE_ENDPOINT.steamcard:
+            case GENERATE_ENDPOINT.pornhub:
             case GENERATE_ENDPOINT.facebook: {
                 const text = args[0];
                 if (!ObjectUtil.validString(text)) {
