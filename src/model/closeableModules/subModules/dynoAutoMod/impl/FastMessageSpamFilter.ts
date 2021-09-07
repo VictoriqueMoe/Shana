@@ -8,13 +8,14 @@ import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {ICloseableModule} from "../../../ICloseableModule";
 import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
+import * as Immutable from "immutable";
 
 @InjectDynoSubModule(DynoAutoMod)
 export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
 
-    private constructor(parentFilter: ICloseableModule<any>) {
+    public constructor(parentFilter: ICloseableModule<any>) {
         super(parentFilter);
         this._cooldownArray = new TimedSet(5000);
     }
@@ -27,7 +28,7 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
     }
 
     public get actions(): ACTION[] {
-        return [ACTION.DELETE, ACTION.MUTE, ACTION.WARN];
+        return [ACTION.WARN, ACTION.DELETE, ACTION.MUTE];
     }
 
     public get id(): string {
@@ -53,10 +54,11 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
         const memberId = content.member.id;
         let fromArray = this.getFromArray(memberId, content.member.guild.id);
         if (fromArray) {
+            fromArray.addMessage(content);
             fromArray.count++;
             this._cooldownArray.refresh(fromArray);
         } else {
-            fromArray = new MessageSpamEntry(memberId, this, content.member.guild.id);
+            fromArray = new MessageSpamEntry(memberId, this, content.member.guild.id, content);
             this._cooldownArray.add(fromArray);
         }
         return !fromArray.hasViolationLimitReached;
@@ -67,7 +69,7 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
         await super.postToLog("Message spam", message);
     }
 
-    private getFromArray(userId: string, guildId: string): MessageSpamEntry {
+    public getFromArray(userId: string, guildId: string): MessageSpamEntry {
         const arr = this._cooldownArray.rawSet;
         return arr.find(value => value.userId === userId && value.guildId === guildId);
     }
@@ -76,11 +78,22 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
 class MessageSpamEntry {
     public count: number;
 
-    constructor(public userId: string, private _instance: FastMessageSpamFilter, public guildId: string) {
+    constructor(public userId: string, private _instance: FastMessageSpamFilter, public guildId: string, message: Message) {
         this.count = 1;
+        this._messages.push(message);
     }
+
+    private _messages: Message[] = [];
 
     public get hasViolationLimitReached(): boolean {
         return this.count > Number.parseInt(this._instance.value);
+    }
+
+    public get messages(): Immutable.List<Message> {
+        return Immutable.List.of(...this._messages);
+    }
+
+    public addMessage(message: Message): void {
+        this._messages.push(message);
     }
 }

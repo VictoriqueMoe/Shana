@@ -138,7 +138,7 @@ export abstract class MessageListener {
         }
     }
 
-    @MessageListenerDecorator(false, notBot)
+   // @MessageListenerDecorator(false, notBot)
     private async replier([message]: ArgsOf<"message">, client: Client): Promise<void> {
         if (!message.member) {
             return;

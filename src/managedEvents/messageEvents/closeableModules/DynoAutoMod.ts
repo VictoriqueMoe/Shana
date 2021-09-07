@@ -12,6 +12,7 @@ import {Main} from "../../../Main";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import * as Immutable from "immutable";
 import {MessageListenerDecorator, notBot} from "../../../model/decorators/messageListenerDecorator";
+import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
 
 export class DynoAutoMod extends CloseableModule<null> {
 
@@ -60,6 +61,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         }
         violatedFilters.sort((a, b) => a.priority - b.priority);
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(message.guild.id);
+        const guildid = member.guild.id;
         outer:
             for (const filter of violatedFilters) {
                 const actionsToTake = filter.actions;
@@ -73,12 +75,12 @@ export class DynoAutoMod extends CloseableModule<null> {
                             if (await MuteSingleton.instance.isMuted(member)) {
                                 continue;
                             }
-                            let fromArray = this.getFromArray(userId, member.guild.id);
+                            let fromArray = this.getFromArray(userId, guildid);
                             if (fromArray) {
                                 fromArray.muteViolations++;
                                 this._muteTimeoutArray.refresh(fromArray);
                             } else {
-                                fromArray = new MuteViolation(userId, filter.id, member.guild.id);
+                                fromArray = new MuteViolation(userId, filter.id, guildid);
                                 this._muteTimeoutArray.add(fromArray);
                             }
                             if (fromArray.hasViolationLimitReached) {
@@ -99,44 +101,47 @@ export class DynoAutoMod extends CloseableModule<null> {
                         }
                         case ACTION.WARN: {
                             const warnResponse = await message.reply(filter.warnMessage);
-                            setTimeout(() => {
-                                warnResponse.delete();
+                            setTimeout(async () => {
+                                try {
+                                    await warnResponse.delete();
+                                } catch {
+
+                                }
                             }, 5000);
                             break;
                         }
                         case ACTION.DELETE: {
-                            if ('cooldownArray' in filter) {
-                                // @ts-ignore
-                                const entry = filter.getFromArray(message.member.id, message.guild.id);
-                                const toDelete = entry.messageArray;
-                                for (const messageToDelete of toDelete) {
-                                    try {
-                                        await messageToDelete.delete({
-                                            reason: `Auto mod violation "${filter.id}"`
-                                        });
-                                    } catch {
-                                        continue outer;
+                            if (filter.constructor.name === "FastMessageSpamFilter") {
+                                const messageSpamEntry = (filter as FastMessageSpamFilter).getFromArray(userId, guildid);
+                                if (messageSpamEntry) {
+                                    for (const messageEntryM of messageSpamEntry.messages) {
+                                        if (!messageEntryM.deleted) {
+                                            messageEntryM.delete({
+                                                reason: `Auto mod violation "${filter.id}"`
+                                            }).catch(() => {
+                                            });
+                                        }
                                     }
                                 }
-                                entry.messageArray = [];
-                            } else {
-                                try {
-                                    await message.delete({
-                                        reason: `Auto mod violation "${filter.id}"`
-                                    });
-                                } catch {
-                                    continue outer;
-                                }
                             }
-                            break;
+                            try {
+                                if (!message.deleted) {
+                                    message.delete({
+                                        reason: `Auto mod violation "${filter.id}"`
+                                    }).catch(() => {
+                                    });
+                                }
+                            } catch {
+                                continue outer;
+                            }
                         }
                     }
                     if (didPreformTerminaloperation) {
                         break outer;
                     }
                 }
-                const enabled = await this.isEnabled(member.guild.id);
-                console.log(`message from server ${member.guild.name} (${member.guild.id}) violated filter ${filter.id}. Filter status is ${enabled}`);
+                const enabled = await this.isEnabled(guildid);
+                console.log(`message from server ${member.guild.name} (${guildid}) violated filter ${filter.id}. Filter status is ${enabled}`);
                 filter.postProcess(message);
             }
     }

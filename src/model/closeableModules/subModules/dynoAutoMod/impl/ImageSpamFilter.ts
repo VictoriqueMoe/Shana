@@ -13,7 +13,7 @@ export class ImageSpamFilter extends AbstractFilter implements IValueBackedDynoA
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
 
-    private constructor(parentFilter: ICloseableModule<any>) {
+    public constructor(parentFilter: ICloseableModule<any>) {
         super(parentFilter);
         this._cooldownArray = new TimedSet(10000);
     }
