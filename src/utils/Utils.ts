@@ -15,12 +15,10 @@ import {
 } from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
-import {Main} from "../Main";
 import {CommandMessage} from "@typeit/discord";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {Model, Sequelize} from "sequelize-typescript";
-import {defaults} from "request";
 import {glob} from "glob";
 import * as path from "path";
 import {Channels} from "../enums/Channels";
@@ -28,13 +26,14 @@ import {ChannelManager} from "../model/guild/manager/ChannelManager";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
-import {IncomingMessage} from "http";
 import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
+import fetch from "node-fetch";
+import {StatusCodes} from "http-status-codes";
+import {Main} from "../Main";
 
 const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
 const isImageFast = require('is-image-fast');
-const request = defaults({encoding: null});
 
 export class ChronException extends Error {
     constructor(e: string) {
@@ -485,21 +484,13 @@ export namespace DiscordUtils {
         return null;
     }
 
-    export function loadResourceFromURL(url: string): Promise<Buffer> {
-        return new Promise((resolve, reject) => {
-            request.get(url, function (err: string, resp: IncomingMessage, buffer: Buffer) {
-                if (err) {
-                    console.error(err, url);
-                    reject(err);
-                    return;
-                }
-                if (resp.statusCode !== 200) {
-                    reject(buffer.toString("utf-8"));
-                    return;
-                }
-                resolve(buffer);
-            });
-        });
+    export async function loadResourceFromURL(url: string): Promise<Buffer> {
+        const response = await fetch(url);
+        const buffer = await response.buffer();
+        if (response.status !== StatusCodes.OK) {
+            throw new Error(buffer.toString("utf-8"));
+        }
+        return buffer;
     }
 
     export function getAccountAge(user: User | GuildMember, format = false): number | string {

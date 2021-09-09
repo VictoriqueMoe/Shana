@@ -19,7 +19,7 @@ export class AnimeTractApi {
      * @param {string} imageURL The URL for the image.
      */
     public async fetchAnime(imageURL: string): Promise<Response> {
-        return fetch(`https://api.trace.moe/search?url=${encodeURIComponent(`${imageURL}`)}`).then((e) => e.json());
+        return fetch(`https://api.trace.moe/search?url=${encodeURIComponent(`${imageURL}`)}`).then((e) => e.json()) as Promise<Response>;
     }
 
     public async fetchPreview(vidUrl: string): Promise<Buffer> {
