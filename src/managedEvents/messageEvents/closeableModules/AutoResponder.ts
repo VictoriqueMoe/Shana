@@ -65,7 +65,7 @@ export class AutoResponder extends TriggerConstraint<null> {
                     if (isUpdate) {
                         continue;
                     }
-                    const responseText: string = await this._parseVars(autoResponder.response, message);
+                    const responseText: string = this._parseVars(autoResponder.response, message);
                     if (publicDelete) {
                         message.delete();
                     }
@@ -96,7 +96,7 @@ export class AutoResponder extends TriggerConstraint<null> {
         }
     }
 
-    private async _parseVars(response: string, {channel, guild, member}: Message): Promise<string> {
+    private _parseVars(response: string, {channel, guild, member}: Message): string {
         let retStr = String(response);
         const regex = new RegExp(/{([^{}]+)}/gm);
         let result: RegExpExecArray;
