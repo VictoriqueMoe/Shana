@@ -1,10 +1,14 @@
 import {ObjectUtil} from "../utils/Utils";
-import {Client, Next} from "discordx";
+import {ArgsOf, GuardFunction, SimpleCommandMessage} from "discordx";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {getPrefix} from "../Main";
-import {Message} from "discord.js";
+import {CommandInteraction, GuildMember} from "discord.js";
 
-export async function secureCommand(message: Message, client: Client, next: Next): Promise<void> {
+export const secureCommand: GuardFunction<ArgsOf<"messageCreate">> = async (
+    [message],
+    client,
+    next
+) => {
     const prefix = await getPrefix(message);
     const commandName = message.content.split(prefix)[1].split(" ")[0];
     if (!ObjectUtil.validString(commandName)) {
@@ -16,4 +20,31 @@ export async function secureCommand(message: Message, client: Client, next: Next
         return await next();
     }
     message.reply("you do not have permissions to use this command");
-}
+};
+
+export const secureCommandInteraction: GuardFunction<CommandInteraction | SimpleCommandMessage> = async (arg, client, next) => {
+    let commandName = "";
+    let member: GuildMember = null;
+    let guildId = "";
+    if (arg instanceof CommandInteraction) {
+        commandName = arg.commandName;
+        if (arg.member instanceof GuildMember) {
+            member = arg.member;
+        }
+        guildId = arg.guildId;
+    } else {
+        const message = arg.message;
+        const prefix = await getPrefix(message);
+        commandName = message.content.split(prefix)[1].split(" ")[0];
+        member = message.member;
+        guildId = message.guildId;
+    }
+    if (!ObjectUtil.validString(commandName) || !ObjectUtil.validString(guildId) || !member) {
+        return;
+    }
+    const canRun = await CommandSecurityManager.instance.canRunCommand(member, commandName);
+    const isEnabled = await CommandSecurityManager.instance.isEnabled(commandName, guildId);
+    if (canRun && isEnabled) {
+        return await next();
+    }
+};

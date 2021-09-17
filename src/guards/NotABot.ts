@@ -1,10 +1,27 @@
-import {Client, Next} from "discordx";
+import {ArgsOf, GuardFunction, SimpleCommandMessage} from "discordx";
 import {notBot} from "../model/decorators/messageListenerDecorator";
-import {CommandInteraction, Message} from "discord.js";
+import {CommandInteraction} from "discord.js";
 
-export async function NotBot(message: Message | CommandInteraction, client: Client, next: Next): Promise<void> {
+export const NotBot: GuardFunction<ArgsOf<"messageCreate">> = async (
+    [message],
+    client,
+    next
+) => {
     if (await notBot(message)) {
         await next();
     }
-}
+};
 
+
+export const NotBotInteraction: GuardFunction<CommandInteraction | SimpleCommandMessage> = async (arg, client, next) => {
+    if (arg instanceof SimpleCommandMessage) {
+        if (await notBot(arg.message)) {
+            await next();
+        }
+    }
+    if (arg instanceof CommandInteraction) {
+        if (!arg.member.user.bot) {
+            await next();
+        }
+    }
+};

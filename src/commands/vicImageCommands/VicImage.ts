@@ -1,9 +1,10 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {secureCommand} from "../../guards/RoleConstraint";
+import {Discord, Guard, Slash} from "discordx";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
-import {NotBot} from "../../guards/NotABot";
+import {NotBotInteraction} from "../../guards/NotABot";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {Main} from "../../Main";
+import {CommandInteraction} from "discord.js";
+import {secureCommandInteraction} from "../../guards/RoleConstraint";
 
 @Discord()
 export abstract class VicImage extends AbstractCommandModule<any> {
@@ -31,15 +32,16 @@ export abstract class VicImage extends AbstractCommandModule<any> {
         });
     }
 
-    @SimpleCommand("vicImage")
-    @Guard(NotBot, secureCommand)
-    private async vicImage({message}: SimpleCommandMessage): Promise<void> {
-        const findingMessage = await message.channel.send("Finding image...");
+    @Slash("vicImage")
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async vicImage(interaction: CommandInteraction): Promise<void> {
+        await interaction.deferReply();
+        const channel = interaction.channel;
         const randomImageMetadata = VicDropbox.instance.randomImage;
         const randomImage = (await Main.dropBox.filesDownload({"path": randomImageMetadata.path_lower})).result;
         const buffer: Buffer = (randomImage as any).fileBinary;
         try {
-            await message.channel.send({
+            await interaction.editReply({
                 content: "Found one!",
                 files: [{
                     attachment: buffer,
@@ -47,17 +49,20 @@ export abstract class VicImage extends AbstractCommandModule<any> {
                 }]
             });
         } catch (e) {
-            message.channel.send("Failed to send, maybe image is too large?");
+            channel.send("Failed to send, maybe image is too large?");
             console.error(e);
             console.log(`Failed to send ${randomImage.name}`);
         }
-        findingMessage.delete();
     }
 
-    @SimpleCommand("vicReIndex")
-    @Guard(NotBot, secureCommand)
-    private async vicReIndex({message}: SimpleCommandMessage): Promise<void> {
+
+    @Slash("vicReIndex")
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async vicReIndex(interaction: CommandInteraction): Promise<void> {
+        await interaction.deferReply();
         await VicDropbox.instance.index();
-        message.channel.send(`Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`);
+        interaction.editReply({
+            content: `Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`
+        });
     }
 }

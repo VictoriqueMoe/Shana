@@ -1,5 +1,5 @@
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {NotBot} from "../guards/NotABot";
+import {NotBotInteraction} from "../guards/NotABot";
 import {ArrayUtils, ObjectUtil, StringUtils} from "../utils/Utils";
 import {GuildMember, MessageEmbed} from "discord.js";
 import {Main} from "../Main";
@@ -7,7 +7,6 @@ import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {Typeings} from "../model/types/Typeings";
-import {secureCommand} from "../guards/RoleConstraint";
 import {AbstractCommandModule} from "./AbstractCommandModule";
 
 @Discord()
@@ -51,7 +50,7 @@ export class Help extends AbstractCommandModule<any> {
     }
 
     @SimpleCommand("help")
-    @Guard(NotBot, secureCommand)
+    @Guard(NotBotInteraction)
     private async help({message}: SimpleCommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 3 && argumentArray.length !== 2 && argumentArray.length !== 1 && argumentArray.length !== 0) {

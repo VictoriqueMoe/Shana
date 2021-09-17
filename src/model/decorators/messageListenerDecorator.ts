@@ -7,6 +7,7 @@ export async function notBot(message: Message | CommandInteraction): Promise<boo
     return (!(message.channel instanceof DMChannel)) && !message.member.user.bot;
 }
 
+
 /**
  * signals this method to be triggered on a message event.
  * @param triggerOnEdit
