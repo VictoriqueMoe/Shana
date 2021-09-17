@@ -14,7 +14,7 @@ export interface IDynoAutoModFilter extends ISubModule {
     /**
      * Message used to warn when action includes ACTION.WARN
      */
-    readonly warnMessage: string
+    readonly warnMessage: string;
 
     /**
      * The priority of this filter, this will determine if this filter is applied before or after others

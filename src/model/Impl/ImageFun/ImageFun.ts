@@ -7,8 +7,8 @@ import {
     ImageEndPointRequest,
     ImageEndPointResponse
 } from "./Typeings";
-import fetch, {Headers} from "node-fetch";
 import {URLSearchParams} from "url";
+import fetch from 'node-fetch';
 
 export class ImageFun {
     private readonly token: string = process.env.amethysteToken;
@@ -26,29 +26,27 @@ export class ImageFun {
         return ImageFun._instance;
     }
 
-    private get authHeader(): Headers {
-        return new Headers({
+    private get authHeader(): Record<string, string> {
+        return {
             'Authorization': `Bearer ${this.token}`
-        });
+        };
     }
 
     public async generate(request: GenerateEndPointRequest): Promise<GenerateEndPointResponse> {
-        const requestOptions = {
-            method: 'POST',
-            "headers": this.authHeader,
-
-        };
         const urlencoded = new URLSearchParams();
         const body = request.Body_Params;
         urlencoded.append("url", body.url);
         if (body.additional) {
             this.eachRecursive(body.additional, urlencoded);
         }
-        requestOptions["body"] = urlencoded;
-        const wrapper = await fetch(`${this.baseUrl}/generate/${request.endPoint}`, requestOptions);
+        const wrapper = await fetch(`${this.baseUrl}/generate/${request.endPoint}`, {
+            "method": 'POST',
+            "headers": this.authHeader,
+            "body": urlencoded
+        });
 
         if (wrapper.status !== 200) {
-            const json = await wrapper.json();
+            const json = await wrapper.json() as any;
             const error = json.message;
             throw new Error(error);
         }
@@ -64,7 +62,7 @@ export class ImageFun {
             "method": "get",
             "headers": this.authHeader
         });
-        return await wrapper.json();
+        return wrapper.json() as Promise<GenerateEndPointGetAllResponse>;
     }
 
     public async getEndpointsImage(): Promise<ImageEndPointGetAllResponse> {
@@ -72,7 +70,7 @@ export class ImageFun {
             "method": "get",
             "headers": this.authHeader
         });
-        return await wrapper.json();
+        return wrapper.json() as Promise<ImageEndPointGetAllResponse>;
     }
 
     private eachRecursive(obj: additionalGenGetArgs, params: URLSearchParams): void {
