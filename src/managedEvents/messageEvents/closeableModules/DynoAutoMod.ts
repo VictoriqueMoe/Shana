@@ -124,7 +124,8 @@ export class DynoAutoMod extends CloseableModule<null> {
                             }
                             try {
                                 if (!message.deleted) {
-                                    message.delete().catch(() => {});
+                                    message.delete().catch(() => {
+                                    });
                                 }
                             } catch {
                                 continue outer;
