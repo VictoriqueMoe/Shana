@@ -6,7 +6,7 @@ import {AbstractFilter} from "../closeableModules/subModules/dynoAutoMod/Abstrac
 import {DIService} from "discordx";
 
 export function InjectDynoSubModule(parentModule: typeof CloseableModule) {
-    return (constructor: typeof AbstractFilter) => {
+    return (constructor: typeof AbstractFilter): void => {
         let parentFilter: ICloseableModule<any> = DIService.instance.getService(parentModule);
         if (parentFilter == null) {
             const map = MessageEventDispatcher.messageListenerMap;
