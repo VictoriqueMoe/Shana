@@ -1,9 +1,9 @@
 import {IDynoAutoModFilter} from "../closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
-import {ISubModule} from "../closeableModules/subModules/ISubModule";
 import {ICloseableModule} from "../closeableModules/ICloseableModule";
 import {CloseableModule} from "../closeableModules/impl/CloseableModule";
 import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventDispatcher";
 import {AbstractFilter} from "../closeableModules/subModules/dynoAutoMod/AbstractFilter";
+import {DIService} from "discordx";
 
 export function InjectDynoSubModule(parentModule: typeof CloseableModule) {
     return (constructor: typeof AbstractFilter) => {

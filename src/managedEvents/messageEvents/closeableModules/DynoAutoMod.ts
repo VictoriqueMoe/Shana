@@ -116,9 +116,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                                 if (messageSpamEntry) {
                                     for (const messageEntryM of messageSpamEntry.messages) {
                                         if (!messageEntryM.deleted) {
-                                            messageEntryM.delete({
-                                                reason: `Auto mod violation "${filter.id}"`
-                                            }).catch(() => {
+                                            messageEntryM.delete().catch(() => {
                                             });
                                         }
                                     }

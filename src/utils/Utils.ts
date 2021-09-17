@@ -16,8 +16,6 @@ import {
 } from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
-import {CommandMessage} from "@typeit/discord";
-import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {Main} from "../Main";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {Model, Sequelize} from "sequelize-typescript";
@@ -31,7 +29,7 @@ import {SETTINGS} from "../enums/SETTINGS";
 import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
 import fetch from "node-fetch";
 import {StatusCodes} from "http-status-codes";
-import {Main} from "../Main";
+import {Typeings} from "../model/types/Typeings";
 
 const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
