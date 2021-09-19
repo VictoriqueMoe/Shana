@@ -1,12 +1,12 @@
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {NotBot} from "../guards/NotABot";
+import {NotBotInteraction} from "../guards/NotABot";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../utils/Utils";
 import {MessageEmbed} from "discord.js";
 import {Main} from "../Main";
 import {TimedSet} from "../model/Impl/TimedSet";
 import {AnimeTractApi} from "../model/anime/AnimeTractApi";
 import {Response} from "../model/anime/AnimeTypings";
-import {secureCommand} from "../guards/RoleConstraint";
+import {secureCommandInteraction} from "../guards/RoleConstraint";
 import {AbstractCommandModule} from "./AbstractCommandModule";
 import {DeepAPI} from "../model/DeepAPI";
 
@@ -30,6 +30,7 @@ export class Misc extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "findSource",
+                    isSlash: false,
                     description: {
                         text: "Perform a reverse image search",
                         args: [
@@ -44,6 +45,7 @@ export class Misc extends AbstractCommandModule<any> {
                 },
                 {
                     name: "findAnime",
+                    isSlash: false,
                     description: {
                         text: "Find anime source, including episode and preview",
                         args: [
@@ -58,6 +60,7 @@ export class Misc extends AbstractCommandModule<any> {
                 },
                 {
                     name: "avatar",
+                    isSlash: true,
                     description: {
                         text: "Display a users avatar",
                         args: [
@@ -72,6 +75,7 @@ export class Misc extends AbstractCommandModule<any> {
                 },
                 {
                     name: "posOrNeg",
+                    isSlash: false,
                     description: {
                         text: "This algorithm classifies each sentence in the input as very negative, negative, neutral, positive, or very positive",
                         args: [
@@ -86,6 +90,7 @@ export class Misc extends AbstractCommandModule<any> {
                 },
                 {
                     name: "generateText",
+                    isSlash: true,
                     description: {
                         text: "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text.",
                         args: [
@@ -103,7 +108,7 @@ export class Misc extends AbstractCommandModule<any> {
     }
 
     @SimpleCommand("generateText")
-    @Guard(NotBot, secureCommand)
+    @Guard(NotBotInteraction, secureCommandInteraction)
     private async generateText({message}: SimpleCommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
@@ -121,7 +126,7 @@ export class Misc extends AbstractCommandModule<any> {
     }
 
     @SimpleCommand("posOrNeg")
-    @Guard(NotBot, secureCommand)
+    @Guard(NotBotInteraction, secureCommandInteraction)
     private async posOrNeg({message}: SimpleCommandMessage): Promise<void> {
         const reference = message.reference;
         let text = "";
@@ -143,7 +148,7 @@ export class Misc extends AbstractCommandModule<any> {
     }
 
     @SimpleCommand("avatar")
-    @Guard(NotBot, secureCommand)
+    @Guard(NotBotInteraction, secureCommandInteraction)
     private async avatar({message}: SimpleCommandMessage): Promise<void> {
         const {mentions} = message;
         if (mentions.members.size !== 1) {
@@ -162,7 +167,7 @@ export class Misc extends AbstractCommandModule<any> {
 
 
     @SimpleCommand("findAnime")
-    @Guard(NotBot, secureCommand)
+    @Guard(NotBotInteraction, secureCommandInteraction)
     private async findAnime({message}: SimpleCommandMessage): Promise<void> {
         const freshHold = 0.86;
         const messaheUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(message);
@@ -209,7 +214,7 @@ export class Misc extends AbstractCommandModule<any> {
             isAdult,
             title
         } = aniDbRes;
-        const botAvarar = Main.client.user.displayAvatarURL({dynamic: true});
+        const botAvatar = Main.client.user.displayAvatarURL({dynamic: true});
         const humanAt = new Date(from * 1000).toISOString().substr(11, 8);
         if (isAdult || similarity < freshHold) {
             replyMessage.delete();
@@ -218,7 +223,7 @@ export class Misc extends AbstractCommandModule<any> {
         }
         const embed = new MessageEmbed()
             .setTitle(`${title.romaji}`)
-            .setAuthor(`${Main.client.user.username}`, botAvarar)
+            .setAuthor(`${Main.client.user.username}`, botAvatar)
             .setThumbnail(url)
             .setColor('#0099ff')
             .addField("Episode and timestamp this scene is from", `Episode: ${episode} at: ${humanAt}`)
@@ -274,7 +279,7 @@ export class Misc extends AbstractCommandModule<any> {
 
 
     @SimpleCommand("findSource")
-    @Guard(NotBot, secureCommand)
+    @Guard(NotBotInteraction, secureCommandInteraction)
     private async imageSearch({message}: SimpleCommandMessage): Promise<void> {
         type GoogleImageResult = {
             url?: string,

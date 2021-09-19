@@ -11,6 +11,7 @@ export namespace Typeings {
     };
     export type Command = {
         name: string,
+        isSlash: boolean,
         deprecated?: boolean,
         description?: {
             text?: string,

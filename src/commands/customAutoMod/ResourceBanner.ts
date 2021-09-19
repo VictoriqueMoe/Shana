@@ -22,6 +22,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
             },
             commands: [
                 {
+                    isSlash: false,
                     name: "banAttachment",
                     description: {
                         text: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \n banning an attachment means that if it is posted again, it is automatically deleted and logged",
@@ -30,6 +31,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
                 },
                 {
                     name: "banEmoji",
+                    isSlash: false,
                     description: {
                         text: "This command is used to ban emojis from other servers, to use it, reply to a message that contains the emoji you want banned, if the replied message contains more than one emoji, this bot will ask you what one you wish to ban",
                     }
@@ -153,13 +155,13 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
         if (ObjectUtil.validString(repliedMessageContent)) {
             urlsInMessage = getUrls(repliedMessageObj.content);
         }
-        const attatchmentArray = repliedMessageObj.attachments;
-        if (attatchmentArray.size === 0 && urlsInMessage.size === 0) {
+        const attachmentArray = repliedMessageObj.attachments;
+        if (attachmentArray.size === 0 && urlsInMessage.size === 0) {
             message.reply("Linked message contains no attachments");
             return;
         }
         const waitMessage = await message.channel.send("Extracting attachments...");
-        const urls = attatchmentArray.map(value => (value.attachment as string));
+        const urls = attachmentArray.map(value => (value.attachment as string));
         if (urlsInMessage && urlsInMessage.size > 0) {
             urls.push(...urlsInMessage.values());
         }

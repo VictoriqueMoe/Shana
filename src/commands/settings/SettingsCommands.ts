@@ -22,6 +22,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "prefix",
+                    isSlash: true,
                     description: {
                         text: "Change the global prefix for this bot",
                         examples: ["prefix '_' = change prefix to _"],
@@ -37,6 +38,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 },
                 {
                     name: "AutoRoleMinAccountAge",
+                    isSlash: true,
                     description: {
                         text: "Set the minimum age of the account joining needs to be before they awre allowed to see the rest of the server\nIf an account joins before this age, then they are placed in jail until the account is old enough\nThis requires 'JailRole' to be set\n set to -1 to disable",
                         args: [{
@@ -49,6 +51,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 },
                 {
                     name: "AutoAutoJail",
+                    isSlash: true,
                     description: {
                         text: "If set to true then users will automatically be re-jailed if they leave the server while in jail and return",
                         args: [{
@@ -61,6 +64,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 },
                 {
                     name: "AutoRoleAutoMute",
+                    isSlash: true,
                     description: {
                         text: "If set to true, then members will automatically be muted if they leave as mute and rejoin as long as the mute is still active",
                         args: [{
@@ -73,6 +77,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 },
                 {
                     name: "panicMode",
+                    isSlash: true,
                     description: {
                         text: "Enabling this will auto apply the 'unverified' role to everyone who joins",
                         args: [{
@@ -85,6 +90,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 },
                 {
                     name: "massJoinProtection",
+                    isSlash: true,
                     description: {
                         text: "Set the mac mass joins in 10 seconds, if this is limit is hit, then panicMode is enabled",
                         args: [{

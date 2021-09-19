@@ -1,16 +1,18 @@
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {NotBot} from "../../guards/NotABot";
-import {secureCommand} from "../../guards/RoleConstraint";
-import {DiscordUtils, StringUtils} from "../../utils/Utils";
-import {GuildMember} from "discord.js";
+import {Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {NotBotInteraction} from "../../guards/NotABot";
+import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {DiscordUtils} from "../../utils/Utils";
+import {CommandInteraction, GuildMember, User} from "discord.js";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {AbstractCommandModule} from "../AbstractCommandModule";
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@SlashGroup("Username", "Commands to set usernames for people")
 export abstract class Username extends AbstractCommandModule<UsernameModel> {
 
-    constructor() {
+    protected constructor() {
         super({
             module: {
                 name: "Username",
@@ -19,30 +21,17 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
             commands: [
                 {
                     name: "viewUsernames",
+                    isSlash: true,
                     description: {
                         text: "View all the persisted usernames this bot is aware of"
                     }
                 },
                 {
-                    name: "removeUsername",
-                    deprecated: true,
-                    description: {
-                        text: "This command is used to remove and reset the persisted entry. \n this command is the SAME as wiping the username using the discord 'change username' feature and will be removed in the future",
-                        args: [
-                            {
-                                name: "User",
-                                type: "mention",
-                                optional: false,
-                                description: "The member you wish to reset the username for"
-                            }
-                        ]
-                    }
-                },
-                {
                     name: "username",
+                    isSlash: true,
                     description: {
                         text: "force a username to always be set to a member, this will automatically apply the username if they leave and rejoin again. \n you can optionally add a block to anyone other than staff member from changing it",
-                        examples: ["username @user 'this is a new username' = username will always be 'this is a new username' if they leave and rejoin", "username @user 'this is a new username' true = same as before, but this means they can not change it shemselves"],
+                        examples: ["username @user 'this is a new username' = username will always be 'this is a new username' if they leave and rejoin", "username @user 'this is a new username' true = same as before, but this means they can not change it themselves"],
                         args: [
                             {
                                 name: "User",
@@ -70,17 +59,21 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
     }
 
 
-    @SimpleCommand("viewUsernames")
-    @Guard(NotBot, secureCommand)
-    private async ViewAllSetUsernames({message}: SimpleCommandMessage): Promise<void> {
+    @Slash("viewUsernames", {
+        description: "View all the persisted usernames this bot is aware of"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async ViewAllSetUsernames(interaction: CommandInteraction): Promise<void> {
+        await interaction.deferReply();
+        const {guild} = interaction;
+        const guildId = guild.id;
         const allModels = await UsernameModel.findAll({
             where: {
-                guildId: message.guild.id
+                guildId
             }
         });
-        const guild = message.guild;
         if (allModels.length === 0) {
-            message.reply("No members in the database");
+            InteractionUtils.editWithText(interaction, "No members in the database");
             return;
         }
         let messageDisplay = `\n`;
@@ -95,69 +88,55 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
 
             }
         }
-        message.reply(messageDisplay);
+        InteractionUtils.editWithText(interaction, messageDisplay);
     }
 
-    @SimpleCommand("removeUsername")
-    @Guard(NotBot, secureCommand)
-    private async removeSetUsername({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 1) {
-            message.reply('Invalid arguments, please supply <"username">');
-            return;
+    @Slash("username", {
+        description: "force a username to always be set to a member"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async setUsername(
+        @SlashOption("User", {
+            description: "The user you want to change nickname",
+            required: true
+        })
+            mentionedMember: User,
+        @SlashOption("newNickname", {
+            description: "The new nickname for the user",
+            required: true
+        })
+            usernameToPersist: string,
+        @SlashOption("blockChanges", {
+            description: "Block this username from being changed by another other than staff members",
+            required: false
+        })
+            force: boolean = false,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply();
+        if (!(mentionedMember instanceof GuildMember)) {
+            return InteractionUtils.replyWithText(interaction, "Unable to find user", false);
         }
-        const mentionMembers = message.mentions.members;
-        if (mentionMembers.size != 1) {
-            message.reply('Invalid arguments, Please supply ONE user in your arguments');
-            return;
-        }
-        const mentionMember = mentionMembers.values().next().value as GuildMember;
-        const userId = mentionMember.id;
-        const rowCount = await UsernameModel.destroy({
-            where: {
-                userId,
-                guildId: mentionMember.guild.id
-            }
-        });
-        rowCount === 1 ? message.reply("Member remove from Database") : message.reply("Member not found in database");
-    }
-
-    @SimpleCommand("username")
-    @Guard(NotBot, secureCommand)
-    private async setUsername({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 2 && argumentArray.length !== 3) {
-            message.reply('Invalid arguments, please supply <"username"> <"new username"> [block change]');
-            return;
-        }
-        const [, usernameToPersist] = argumentArray;
-        let force = false;
-        if (argumentArray.length === 3) {
-            force = (argumentArray[2] == 'true');
-        }
-        const mentionMembers = message.mentions.members;
-        if (mentionMembers.size != 1) {
-            message.reply('Invalid arguments, Please supply ONE user in your arguments');
-            return;
-        }
-        const mentionMember = mentionMembers.values().next().value as GuildMember;
-        const guild = await GuildManager.instance.getGuild(message.guild.id);
+        const guildId = interaction.guild.id;
+        const guild = await GuildManager.instance.getGuild(guildId);
         const bot = await DiscordUtils.getBot(guild.id);
         const botHighestRole = bot.roles.highest;
-        const roleOfMember = mentionMember.roles.highest;
+        const roleOfMember = mentionedMember.roles.highest;
         if (roleOfMember.position > botHighestRole.position) {
-            message.reply("You can not use this command against a member who's highest role is above this bots highest role");
-            return;
+            return InteractionUtils.replyWithText(interaction, "You can not use this command against a member who's highest role is above this bots highest role", false);
         }
-        if (roleOfMember.position >= message.member.roles.highest.position) {
-            message.reply("You can not use this command against a member who's role is higher than yours!");
-            return;
+        const callee = InteractionUtils.getInteractionCaller(interaction);
+        if (!(callee instanceof GuildMember)) {
+            return InteractionUtils.replyWithText(interaction, "Internal Error", false);
         }
-        const userId = mentionMember.id;
+        if (roleOfMember.position >= callee.roles.highest.position) {
+            return InteractionUtils.replyWithText(interaction, "You can not use this command against a member who's role is higher than yours!", false);
+        }
+        const userId = mentionedMember.id;
         if (await UsernameModel.count({
             where: {
                 userId,
-                guildId: mentionMember.guild.id
+                guildId
             }
         }) > 0) {
             await UsernameModel.update(
@@ -168,7 +147,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
                 {
                     where: {
                         userId,
-                        guildId: mentionMember.guild.id
+                        guildId
                     }
                 }
             );
@@ -177,7 +156,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
                 userId,
                 usernameToPersist,
                 force,
-                guildId: mentionMember.guild.id
+                guildId
             };
 
             const model = new UsernameModel(obj);
@@ -186,7 +165,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
             } catch (e) {
             }
         }
-        await mentionMember.setNickname(usernameToPersist);
-        message.reply(`user ${mentionMember.user.username} has been persisted to always be "${usernameToPersist}"`);
+        await mentionedMember.setNickname(usernameToPersist);
+        InteractionUtils.editWithText(interaction, `user ${mentionedMember.user.username} has been persisted to always be "${usernameToPersist}"`);
     }
 }

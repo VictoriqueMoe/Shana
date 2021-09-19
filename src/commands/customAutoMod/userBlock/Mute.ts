@@ -23,6 +23,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
             commands: [
                 {
                     name: "mute",
+                    isSlash: true,
                     description: {
                         text: "Block a user from sending any messages with an optional timeout",
                         examples: ['mute @user "they where annoying" 2d = Mute user for 2 days', 'mute @user "they where not so annoying" 60 = Mute user for 60 seconds', 'mute @user "they where REALLY annoying" = Mute user indefinitely until unmute'],
@@ -50,12 +51,14 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                 },
                 {
                     name: "muteTimeUnits",
+                    isSlash: true,
                     description: {
                         text: "Get all the available time units you can use in mute"
                     }
                 },
                 {
                     name: "viewAllMutes",
+                    isSlash: true,
                     description: {
                         text: "View all the currently active mutes"
                     }
@@ -88,16 +91,16 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
     ): Promise<void> {
         await interaction.deferReply();
         if (!(mentionedMember instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Unable to find user", false, true);
+            return InteractionUtils.replyWithText(interaction, "Unable to find user", false);
         }
         const guildId = interaction.guild.id;
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
         if (!mutedRole) {
-            return InteractionUtils.replyWithText(interaction, "This command has not been configured or is disabled", false, true);
+            return InteractionUtils.replyWithText(interaction, "This command has not been configured or is disabled", false);
         }
         const creator = InteractionUtils.getInteractionCaller(interaction);
         if (!(creator instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Unable to inspect calle", false, true);
+            return InteractionUtils.replyWithText(interaction, "Unable to inspect calle", false);
         }
         const creatorID = creator.id;
         const blockedUserId = mentionedMember.id;
@@ -106,19 +109,19 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         const bot = await DiscordUtils.getBot(guildId);
         const botRole = bot.roles.highest;
         if (botRole.position <= mentionedMember.roles.highest.position) {
-            return InteractionUtils.replyWithText(interaction, "You can not block a member whose role is above or on the same level as this bot!", false, true);
+            return InteractionUtils.replyWithText(interaction, "You can not block a member whose role is above or on the same level as this bot!", false);
         }
 
         if (creatorID == blockedUserId) {
-            return InteractionUtils.replyWithText(interaction, "You can not block yourself!", false, true);
+            return InteractionUtils.replyWithText(interaction, "You can not block yourself!", false);
         }
 
         if (!canBlock) {
-            return InteractionUtils.replyWithText(interaction, "You can not block a member whose role is above or on the same level as yours!", false, true);
+            return InteractionUtils.replyWithText(interaction, "You can not block a member whose role is above or on the same level as yours!", false);
         }
 
         if (didYouBlockABot) {
-            return InteractionUtils.replyWithText(interaction, "You can not block a bot", false, true);
+            return InteractionUtils.replyWithText(interaction, "You can not block a bot", false);
         }
 
         let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
@@ -127,14 +130,14 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
             const numberValueStr = timeout.slice(0, -unit.length);
             const timeEnum = EnumEx.loopBack(TIME_UNIT, unit, true) as TIME_UNIT;
             if (!ObjectUtil.validString(timeEnum)) {
-                return InteractionUtils.replyWithText(interaction, `invalid unit, '${unit}', available values are: \n ${this.getMuteTimeOutStr()}`, false, true);
+                return InteractionUtils.replyWithText(interaction, `invalid unit, '${unit}', available values are: \n ${this.getMuteTimeOutStr()}`, false);
             }
             const numValue = Number.parseInt(numberValueStr);
             await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, numValue, timeEnum);
             const seconds = TimeUtils.convertToMilli(numValue, timeEnum) / 1000;
             replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
         } catch (e) {
-            return InteractionUtils.replyWithText(interaction, e.message, false, true);
+            return InteractionUtils.replyWithText(interaction, e.message, false);
         }
         InteractionUtils.editWithText(interaction, replyMessage);
     }
@@ -168,7 +171,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
             }
         });
         if (currentBlocks.length === 0) {
-            return InteractionUtils.replyWithText(interaction, "No members are muted", false, true);
+            return InteractionUtils.replyWithText(interaction, "No members are muted", false);
         }
         let replyStr = `\n`;
         for (const block of currentBlocks) {

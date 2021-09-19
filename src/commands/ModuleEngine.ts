@@ -1,6 +1,6 @@
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {DiscordUtils, StringUtils} from "../utils/Utils";
-import {secureCommand} from "../guards/RoleConstraint";
+import {secureCommandInteraction} from "../guards/RoleConstraint";
 import {AbstractCommandModule} from "./AbstractCommandModule";
 
 @Discord()
@@ -15,6 +15,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "dynoReplace",
+                    isSlash: true,
                     description: {
                         text: "Loads all of the modules nessasery for replacing current Dyno functionality",
                         args: [
@@ -29,6 +30,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
                 },
                 {
                     name: "enableModule",
+                    isSlash: true,
                     description: {
                         text: "Enable a module to run. These modules are designed to be shut down and started dynamically",
                         examples: ["enableModule AdminLog true = enable module AdminLog", "enableModule AdminLog false = disable module AdminLog"],
@@ -50,6 +52,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
                 },
                 {
                     name: "getModuleNames",
+                    isSlash: true,
                     description: {
                         text: "Return a list of all modules to use with the 'enableModule' command"
                     }
@@ -59,7 +62,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
     }
 
     @SimpleCommand("dynoReplace")
-    @Guard(secureCommand)
+    @Guard(secureCommandInteraction)
     private async dynoReplace({message}: SimpleCommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 1) {
@@ -80,7 +83,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
     }
 
     @SimpleCommand("enableModule")
-    @Guard(secureCommand)
+    @Guard(secureCommandInteraction)
     private async enableModule({message}: SimpleCommandMessage): Promise<void> {
         const argumentArray = StringUtils.splitCommandLine(message.content);
         if (argumentArray.length !== 2) {
@@ -107,7 +110,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
     }
 
     @SimpleCommand("getModuleNames")
-    @Guard(secureCommand)
+    @Guard(secureCommandInteraction)
     private async getModuleNames({message}: SimpleCommandMessage): Promise<void> {
         const allModuleNames = await DiscordUtils.getAllClosableModules(message.guild.id);
         message.reply(`all available modules are: \n ${allModuleNames.join(", ")}`);

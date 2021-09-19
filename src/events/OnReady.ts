@@ -106,7 +106,11 @@ export class OnReady extends BaseDAO<any> {
 
         io.action("Re init commands", async cb => {
             for (const guild of await GuildManager.instance.getGuilds()) {
-                await Main.client.clearApplicationCommands(guild.id);
+                try {
+                    await Main.client.clearApplicationCommands(guild.id);
+                } catch {
+
+                }
             }
             await OnReady.initAppCommands();
             return cb("Slash Commands reset");

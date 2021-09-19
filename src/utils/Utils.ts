@@ -320,16 +320,17 @@ export namespace DiscordUtils {
             });
         }
 
-        export async function replyWithText(interaction: CommandInteraction, content: string, ephemeral: boolean = false, failADeffer: boolean = false): Promise<void> {
-            if (failADeffer && interaction.deferred) {
+        export async function replyWithText(interaction: CommandInteraction, content: string, ephemeral: boolean = false): Promise<void> {
+            if (interaction.deferred) {
                 await interaction.editReply({
-                    content: "Interaction failed"
+                    content
+                });
+            } else {
+                return interaction.reply({
+                    content,
+                    ephemeral
                 });
             }
-            return interaction.reply({
-                content,
-                ephemeral
-            });
         }
 
         export function getInteractionCaller(interaction: CommandInteraction): GuildMember | APIInteractionGuildMember {

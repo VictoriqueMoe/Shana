@@ -1,4 +1,4 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage, SlashGroup} from "discordx";
 import {NotBotInteraction} from "../guards/NotABot";
 import {ArrayUtils, ObjectUtil, StringUtils} from "../utils/Utils";
 import {GuildMember, MessageEmbed} from "discord.js";
@@ -10,6 +10,7 @@ import {Typeings} from "../model/types/Typeings";
 import {AbstractCommandModule} from "./AbstractCommandModule";
 
 @Discord()
+@SlashGroup("Help", "Commands to display help and info")
 export class Help extends AbstractCommandModule<any> {
     constructor() {
         super({
@@ -20,6 +21,7 @@ export class Help extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "help",
+                    isSlash: false,
                     description: {
                         text: "Get the description of a command or all commands",
                         examples: ['help = display ALL modules', 'help memes = display all the commands in the "memes" modules ', 'help memes 2 = get page 2 of commands in the memes module', 'help memes missionpassed = see the arguments and info for the "missionpassed" command'],
@@ -99,15 +101,19 @@ export class Help extends AbstractCommandModule<any> {
                     return;
                 }
                 // eslint-disable-next-line prefer-const
-                let {name, deprecated, description: {args, examples, text}} = commandObj;
-                embed.setTitle(`${prefix}${name}`);
+                let {name, deprecated, isSlash, description: {args, examples, text}} = commandObj;
+                const title = isSlash ? `/${name}` : `${prefix}${name}`;
+                embed.setTitle(title);
                 if (!ObjectUtil.validString(text)) {
                     text = "No description";
                 }
-                embed.setDescription(`${text} \n\nall arguments of type 'text' should be wrapped with speach marks: ""`);
-                if (ArrayUtils.isValidArray(examples)) {
+                if (!isSlash) {
+                    embed.setDescription(`${text} \n\nall arguments of type 'text' should be wrapped with speach marks: ""`);
+                }
+                if (ArrayUtils.isValidArray(examples) && !isSlash) {
                     embed.addField("Examples:", examples.map(example => `${prefix}${example}`).join("\n\n"));
                 }
+                embed.addField("Is a slash command", String(isSlash));
                 if (ArrayUtils.isValidArray(args)) {
                     embed.addField('Arguments:', '\u200b');
                     for (const arg of args) {
@@ -129,7 +135,7 @@ export class Help extends AbstractCommandModule<any> {
         });
     }
 
-    private chunk<T>(array: T[], chunkSize: number): T[][] {
+    private static chunk<T>(array: T[], chunkSize: number): T[][] {
         const r: T[][] = [];
         for (let i = 0; i < array.length; i += chunkSize) {
             r.push(array.slice(i, i + chunkSize));
@@ -138,7 +144,7 @@ export class Help extends AbstractCommandModule<any> {
     }
 
     private async populatePagedFields(pageNumber: number, commands: Typeings.Command[], embed: MessageEmbed, member: GuildMember, prefix: string): Promise<void> {
-        const chunks = this.chunk(commands, 24);
+        const chunks = Help.chunk(commands, 24);
         const maxPage = chunks.length;
         if (pageNumber > maxPage) {
             pageNumber = maxPage;
@@ -167,7 +173,9 @@ export class Help extends AbstractCommandModule<any> {
                     fieldValue += `\n\n*this command requires: ${requiredArgs} mandatory arguments*`;
                 }
             }
-            embed.addField(`${prefix}${name}`, fieldValue, resultOfPage.length > 5);
+            fieldValue += `\n\nIs a slash command: ${command.isSlash}`;
+            const nameToDisplay = command.isSlash ? `/${name}` : `${prefix}${name}`;
+            embed.addField(nameToDisplay, fieldValue, resultOfPage.length > 5);
         }
     }
 }

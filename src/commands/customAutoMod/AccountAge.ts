@@ -3,7 +3,7 @@ import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Main} from "../../Main";
-import {Channel, CommandInteraction, User} from "discord.js";
+import {Channel, CommandInteraction, GuildMember, User} from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
@@ -20,6 +20,7 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "age",
+                    isSlash: true,
                     description: {
                         text: "Get the age on an account",
                         args: [
@@ -34,12 +35,14 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
                 },
                 {
                     name: "serverAge",
+                    isSlash: true,
                     description: {
                         text: "Get the age of this server"
                     }
                 },
                 {
                     name: "channelAge",
+                    isSlash: true,
                     description: {
                         text: "View the age of a channel",
                         args: [
@@ -57,6 +60,9 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
     }
 
     private static getAge(toCall: { createdAt: Date }): { ageHumanReadable: string, utcDate: string } {
+        if (toCall instanceof GuildMember) {
+            toCall = toCall.user;
+        }
         const guildDate = toCall.createdAt;
         const timeStamp = guildDate.getTime();
         const age = Date.now() - timeStamp;
