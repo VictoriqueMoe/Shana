@@ -24,7 +24,7 @@ export class SubModuleManager {
         return Immutable.Set.of(...this._subModules.values());
     }
 
-    public addSubModules(filter: ISubModule): void {
+    public addSubModule(filter: ISubModule): void {
         this._subModules.add(filter);
     }
 

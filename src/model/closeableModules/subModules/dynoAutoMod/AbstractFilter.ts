@@ -1,6 +1,5 @@
 import {IDynoAutoModFilter} from "./IDynoAutoModFilter";
 import {Message, MessageEmbed} from "discord.js";
-import {SubModuleManager} from "../../manager/SubModuleManager";
 import {ACTION} from "../../../../enums/ACTION";
 import {ICloseableModule} from "../../ICloseableModule";
 import {DiscordUtils} from "../../../../utils/Utils";
@@ -14,9 +13,7 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
     abstract readonly priority: number;
 
     protected constructor(protected _parentModule: ICloseableModule<null>) {
-        if (_parentModule != null) {
-            SubModuleManager.instance.addSubModules(this);
-        }
+
     }
 
     /**

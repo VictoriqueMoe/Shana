@@ -4,6 +4,7 @@ import {CloseableModule} from "../closeableModules/impl/CloseableModule";
 import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventDispatcher";
 import {AbstractFilter} from "../closeableModules/subModules/dynoAutoMod/AbstractFilter";
 import {DIService} from "discordx";
+import {SubModuleManager} from "../closeableModules/manager/SubModuleManager";
 
 export function InjectDynoSubModule(parentModule: typeof CloseableModule) {
     return (constructor: typeof AbstractFilter): void => {
@@ -23,6 +24,7 @@ export function InjectDynoSubModule(parentModule: typeof CloseableModule) {
         }
         // @ts-ignore
         const instance: IDynoAutoModFilter = new constructor(parentFilter);
+        SubModuleManager.instance.addSubModule(instance);
         console.log(`Register submodule: "${instance.id}" with parent: "${parentFilter.moduleId}"`);
     };
 }
