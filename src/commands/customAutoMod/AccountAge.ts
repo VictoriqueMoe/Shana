@@ -1,25 +1,17 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {NotBot} from "../../guards/NotABot";
-import {secureCommand} from "../../guards/RoleConstraint";
-import {ObjectUtil} from "../../utils/Utils";
+import {Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {NotBotInteraction} from "../../guards/NotABot";
+import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Main} from "../../Main";
-import {GuildChannel} from "discord.js";
+import {Channel, CommandInteraction, User} from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-
-
-type AgeType = {
-    ageHumanReadable: string,
-    utcDate: string
-}
-
-interface Dateable {
-    createdAt: Date;
-}
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@SlashGroup("Ages", "commands to get ages of accounts and servers")
 export abstract class AccountAge extends AbstractCommandModule<any> {
 
-    constructor() {
+    protected constructor() {
         super({
             module: {
                 name: "Ages",
@@ -64,51 +56,59 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
         });
     }
 
-    private getAge(toCall: Dateable): AgeType {
+    private static getAge(toCall: { createdAt: Date }): { ageHumanReadable: string, utcDate: string } {
         const guildDate = toCall.createdAt;
         const timeStamp = guildDate.getTime();
         const age = Date.now() - timeStamp;
-        const humanReadable = ObjectUtil.secondsToHuman(Math.round(age / 1000));
-        const dateCreatedStr = guildDate.toUTCString();
+        const ageHumanReadable = ObjectUtil.secondsToHuman(Math.round(age / 1000));
+        const utcDate = guildDate.toUTCString();
         return {
-            ageHumanReadable: humanReadable,
-            utcDate: dateCreatedStr
+            ageHumanReadable,
+            utcDate
         };
     }
 
-    @SimpleCommand("serverAge")
-    @Guard(NotBot, secureCommand)
-    private async serverAge({message}: SimpleCommandMessage): Promise<void> {
-        const guildId = message.guild.id;
+    @Slash("serverAge", {
+        description: "Get the age of this server"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async serverAge(interaction: CommandInteraction): Promise<void> {
+        const guildId = interaction.guild.id;
         const guild = await Main.client.guilds.fetch(guildId);
-        const ageObject = this.getAge(guild);
-        message.reply(`Server is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
+        const ageObject = AccountAge.getAge(guild);
+        return InteractionUtils.replyWithText(interaction, `Server is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
     }
 
-    @SimpleCommand("channelAge")
-    @Guard(NotBot, secureCommand)
-    private async channelAge({message}: SimpleCommandMessage): Promise<void> {
-        const channelsInMessage = message.mentions.channels;
-        if (channelsInMessage.size !== 1) {
-            message.reply("Please make sure you mention 1 channel only");
-            return;
-        }
-        const channelMentioned = channelsInMessage.first() as GuildChannel;
-        const ageObject = this.getAge(channelMentioned);
-        message.reply(`Channel is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
+    @Slash("channelAge", {
+        description: "View the age of a channel"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async channelAge(
+        @SlashOption("Channel", {
+            description: "The reference to the channel",
+            required: true
+        })
+            channel: Channel,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        const ageObject = AccountAge.getAge(channel);
+        return InteractionUtils.replyWithText(interaction, `Channel is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
     }
 
 
-    @SimpleCommand("age")
-    @Guard(NotBot, secureCommand)
-    private async getAccountAge({message}: SimpleCommandMessage): Promise<void> {
-        const mentions = message.mentions;
-        if (mentions.users.size != 1) {
-            message.reply("Please supply username");
-            return;
-        }
-        const mention = mentions.users.first();
-        const ageObject = this.getAge(mention);
-        message.reply(`Account is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
+    @Slash("age", {
+        description: "Get the age on an account"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async getAccountAge(
+        @SlashOption("User", {
+            description: "The user you want to check the account age of",
+            required: true
+        })
+            user: User,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        const ageObject = AccountAge.getAge(user);
+        return InteractionUtils.replyWithText(interaction, `Account is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
     }
 }

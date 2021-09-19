@@ -1,15 +1,17 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, StringUtils, TimeUtils} from "../../../utils/Utils";
+import {Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
-import {NotBot} from "../../../guards/NotABot";
-import {secureCommand} from "../../../guards/RoleConstraint";
-import {GuildMember} from "discord.js";
+import {NotBotInteraction} from "../../../guards/NotABot";
+import {secureCommandInteraction} from "../../../guards/RoleConstraint";
+import {CommandInteraction, GuildMember, User} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {MuteSingleton} from "./MuteSingleton";
 import {AbstractCommandModule} from "../../AbstractCommandModule";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@SlashGroup("Mute", "Commands to mute people from servers")
 export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
 
     public constructor() {
@@ -39,7 +41,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                             },
                             {
                                 name: "Timeout",
-                                optional: true,
+                                optional: false,
                                 type: "number",
                                 description: "timeout in seconds for how long this user should be muted. \n you can also use the time unit at the end of the number to use other time units"
                             }
@@ -62,83 +64,79 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         });
     }
 
-    @SimpleCommand("mute")
-    @Guard(NotBot, secureCommand)
-    private async mute({message}: SimpleCommandMessage): Promise<void> {
-        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(message.guild.id);
+    @Slash("mute", {
+        description: "Block a user from sending any messages with a timeout"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async mute(
+        @SlashOption("User", {
+            description: "User you wish to mute",
+            required: true
+        })
+            mentionedMember: User,
+        @SlashOption("Reason", {
+            description: "The reason why this user is muted",
+            required: true
+        })
+            reason: string,
+        @SlashOption("Timeout", {
+            description: "timeout for how long this user should be muted.",
+            required: true
+        })
+            timeout: string,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply();
+        if (!(mentionedMember instanceof GuildMember)) {
+            return InteractionUtils.replyWithText(interaction, "Unable to find user", false, true);
+        }
+        const guildId = interaction.guild.id;
+        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
         if (!mutedRole) {
-            message.reply("This command has not been configured or is disabled");
+            return InteractionUtils.replyWithText(interaction, "This command has not been configured or is disabled", false, true);
         }
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 3 && argumentArray.length !== 2) {
-            message.reply(`Command arguments wrong, usage: ~mute <"username"> <"reason"> [timeout in seconds]`);
-            return;
+        const creator = InteractionUtils.getInteractionCaller(interaction);
+        if (!(creator instanceof GuildMember)) {
+            return InteractionUtils.replyWithText(interaction, "Unable to inspect calle", false, true);
         }
-        const [, reason, timeout] = argumentArray;
-        const creatorID = message.member.id;
-        const mentionedUserCollection = message.mentions.users;
-        const mentionedMember: GuildMember = message.mentions.members.values().next().value;
-        if (mentionedUserCollection.size !== 1) {
-            message.reply("You must specify ONE user in your arguments");
-            return;
-        }
-        const blockedUserId = mentionedUserCollection.keys().next().value;
-        const blockUserObject = mentionedUserCollection.get(blockedUserId);
-        const didYouBlockABot = blockUserObject.bot;
-        const canBlock = await DiscordUtils.canUserPreformBlock(message);
-        const bot = await DiscordUtils.getBot(message.guild.id);
+        const creatorID = creator.id;
+        const blockedUserId = mentionedMember.id;
+        const didYouBlockABot = mentionedMember.bot;
+        const canBlock = await DiscordUtils.canUserPreformBlock(creator, mentionedMember);
+        const bot = await DiscordUtils.getBot(guildId);
         const botRole = bot.roles.highest;
         if (botRole.position <= mentionedMember.roles.highest.position) {
-            message.reply("You can not block a member whose role is above or on the same level as this bot!");
-            return;
+            return InteractionUtils.replyWithText(interaction, "You can not block a member whose role is above or on the same level as this bot!", false, true);
         }
 
         if (creatorID == blockedUserId) {
-            message.reply("You can not block yourself!");
-            return;
+            return InteractionUtils.replyWithText(interaction, "You can not block yourself!", false, true);
         }
 
         if (!canBlock) {
-            message.reply("You can not block a member whose role is above or on the same level as yours!");
-            return;
-        }
-        if (didYouBlockABot) {
-            message.reply("You can not block a bot");
-            return;
+            return InteractionUtils.replyWithText(interaction, "You can not block a member whose role is above or on the same level as yours!", false, true);
         }
 
-        const hasTimeout = ObjectUtil.validString(timeout);
+        if (didYouBlockABot) {
+            return InteractionUtils.replyWithText(interaction, "You can not block a bot", false, true);
+        }
+
         let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
         try {
-            if (hasTimeout) {
-                let seconds = -1;
-                if (ObjectUtil.isNumeric(timeout)) {
-                    seconds = Number.parseInt(timeout);
-                    await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, seconds);
-                } else {
-                    const unit = timeout.replace(/\d+/, "");
-                    const numberValueStr = timeout.slice(0, -unit.length);
-                    const timeEnum = EnumEx.loopBack(TIME_UNIT, unit, true) as TIME_UNIT;
-                    if (!ObjectUtil.validString(timeEnum)) {
-                        message.reply(`invalid unit, '${unit}', available values are: \n ${this.getMuteTimeOutStr()}`);
-                        return;
-                    }
-                    const numValue = Number.parseInt(numberValueStr);
-                    await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, numValue, timeEnum);
-                    seconds = TimeUtils.convertToMilli(numValue, timeEnum) / 1000;
-                }
-
-                replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
-            } else {
-                await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID);
+            const unit = timeout.replace(/\d+/, "");
+            const numberValueStr = timeout.slice(0, -unit.length);
+            const timeEnum = EnumEx.loopBack(TIME_UNIT, unit, true) as TIME_UNIT;
+            if (!ObjectUtil.validString(timeEnum)) {
+                return InteractionUtils.replyWithText(interaction, `invalid unit, '${unit}', available values are: \n ${this.getMuteTimeOutStr()}`, false, true);
             }
+            const numValue = Number.parseInt(numberValueStr);
+            await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, numValue, timeEnum);
+            const seconds = TimeUtils.convertToMilli(numValue, timeEnum) / 1000;
+            replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
         } catch (e) {
-            message.reply(e.message);
-            return;
+            return InteractionUtils.replyWithText(interaction, e.message, false, true);
         }
-
-        message.reply(replyMessage);
-
+        InteractionUtils.editWithText(interaction, replyMessage);
     }
 
     private getMuteTimeOutStr(): string {
@@ -149,23 +147,28 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         }).join("\n ");
     }
 
-    @SimpleCommand("muteTimeUnits")
-    @Guard(NotBot, secureCommand)
-    private async getTimeUnits({message}: SimpleCommandMessage): Promise<void> {
-        message.reply(`\n ${this.getMuteTimeOutStr()}`);
+    @Slash("muteTimeUnits", {
+        description: "Get all the available time units you can use in mute"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async getTimeUnits(interaction: CommandInteraction): Promise<void> {
+        return InteractionUtils.replyWithText(interaction, `\n ${this.getMuteTimeOutStr()}`);
     }
 
-    @SimpleCommand("viewAllMutes")
-    @Guard(NotBot, secureCommand)
-    private async viewAllMutes({message}: SimpleCommandMessage): Promise<MuteModel[]> {
+    @Slash("viewAllMutes", {
+        description: "View all the currently active mutes"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async viewAllMutes(interaction: CommandInteraction): Promise<void> {
+        await interaction.deferReply();
+        const guildId = interaction.guild.id;
         const currentBlocks = await MuteModel.findAll({
             where: {
-                guildId: message.guild.id
+                guildId
             }
         });
         if (currentBlocks.length === 0) {
-            message.reply("No members are muted");
-            return;
+            return InteractionUtils.replyWithText(interaction, "No members are muted", false, true);
         }
         let replyStr = `\n`;
         for (const block of currentBlocks) {
@@ -182,7 +185,6 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                 replyStr += `, This user has also attempted to post ${block.violationRules} times while blocked`;
             }
         }
-        message.reply(replyStr);
-        return currentBlocks;
+        await InteractionUtils.editWithText(interaction, replyStr);
     }
 }

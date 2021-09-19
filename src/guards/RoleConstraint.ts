@@ -1,5 +1,5 @@
-import {ObjectUtil} from "../utils/Utils";
-import {ArgsOf, GuardFunction, SimpleCommandMessage} from "discordx";
+import {DiscordUtils, ObjectUtil} from "../utils/Utils";
+import {ArgsOf, GuardFunction} from "discordx";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {getPrefix} from "../Main";
 import {CommandInteraction, GuildMember} from "discord.js";
@@ -22,29 +22,21 @@ export const secureCommand: GuardFunction<ArgsOf<"messageCreate">> = async (
     message.reply("you do not have permissions to use this command");
 };
 
-export const secureCommandInteraction: GuardFunction<CommandInteraction | SimpleCommandMessage> = async (arg, client, next) => {
-    let commandName = "";
+export const secureCommandInteraction: GuardFunction<CommandInteraction> = async (arg, client, next) => {
+    const commandName = arg.commandName;
     let member: GuildMember = null;
     let guildId = "";
-    if (arg instanceof CommandInteraction) {
-        commandName = arg.commandName;
-        if (arg.member instanceof GuildMember) {
-            member = arg.member;
-        }
-        guildId = arg.guildId;
-    } else {
-        const message = arg.message;
-        const prefix = await getPrefix(message);
-        commandName = message.content.split(prefix)[1].split(" ")[0];
-        member = message.member;
-        guildId = message.guildId;
+    if (arg.member instanceof GuildMember) {
+        member = arg.member;
     }
+    guildId = arg.guildId;
     if (!ObjectUtil.validString(commandName) || !ObjectUtil.validString(guildId) || !member) {
-        return;
+        return DiscordUtils.InteractionUtils.replyWithText(arg, "Unable to execute command", false, true);
     }
     const canRun = await CommandSecurityManager.instance.canRunCommand(member, commandName);
     const isEnabled = await CommandSecurityManager.instance.isEnabled(commandName, guildId);
     if (canRun && isEnabled) {
-        return await next();
+        return next();
     }
+    return DiscordUtils.InteractionUtils.replyWithText(arg, "you do not have permissions to use this command", false, true);
 };

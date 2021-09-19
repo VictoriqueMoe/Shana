@@ -1,4 +1,5 @@
 import {
+    CommandInteraction,
     Guild,
     GuildAuditLogs,
     GuildAuditLogsAction,
@@ -30,6 +31,7 @@ import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
 import fetch from "node-fetch";
 import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
+import {APIInteractionGuildMember, APIMessage} from "discord-api-types";
 
 const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
@@ -302,6 +304,56 @@ export namespace ChronUtils {
 
 
 export namespace DiscordUtils {
+
+    export namespace InteractionUtils {
+
+        export async function followupWithText(interaction: CommandInteraction, content: string, ephemeral: boolean = false): Promise<Message | APIMessage> {
+            return interaction.followUp({
+                content,
+                ephemeral
+            });
+        }
+
+        export async function editWithText(interaction: CommandInteraction, content: string): Promise<Message | APIMessage> {
+            return interaction.editReply({
+                content
+            });
+        }
+
+        export async function replyWithText(interaction: CommandInteraction, content: string, ephemeral: boolean = false, failADeffer: boolean = false): Promise<void> {
+            if (failADeffer && interaction.deferred) {
+                await interaction.editReply({
+                    content: "Interaction failed"
+                });
+            }
+            return interaction.reply({
+                content,
+                ephemeral
+            });
+        }
+
+        export function getInteractionCaller(interaction: CommandInteraction): GuildMember | APIInteractionGuildMember {
+            const {member} = interaction;
+            if (member == null) {
+                interaction.reply("Unable to extract member");
+                throw new Error("Unable to extract member");
+            }
+            if (member instanceof GuildMember) {
+                return member;
+            }
+            return member;
+        }
+
+        export function getInteractionCallerId(interaction: CommandInteraction): string {
+            const caller = InteractionUtils.getInteractionCaller(interaction);
+            if (caller instanceof GuildMember) {
+                return caller.id;
+            }
+            return caller.user.id;
+        }
+    }
+
+
     export type EmojiInfo = {
         "buffer"?: Buffer,
         "url": string,
@@ -574,18 +626,10 @@ export namespace DiscordUtils {
         }
     }
 
-    /**
-     * Prevent CP from blocking OE, etc...
-     * @param command
-     * @private
-     */
-    export async function canUserPreformBlock(message: Message): Promise<boolean> {
-        const userToBlockCollection = message.mentions.members;
-        const userToBlock = userToBlockCollection.values().next().value as GuildMember;
-        const userToBlockHighestRole = userToBlock.roles.highest;
-        const userPreformingCommand = await message.member;
-        const userPreformingActionHigestRole = userPreformingCommand.roles.highest;
-        return userPreformingActionHigestRole.position > userToBlockHighestRole.position;
+    export async function canUserPreformBlock(memberUsingBlock: GuildMember, memberAttemptingToBeBlocked: GuildMember): Promise<boolean> {
+        const userToBlockHighestRole = memberAttemptingToBeBlocked.roles.highest;
+        const userPreformingActionHighestRole = memberUsingBlock.roles.highest;
+        return userPreformingActionHighestRole.position > userToBlockHighestRole.position;
     }
 
     export async function getAllClosableModules(guildId: string): Promise<string[]> {
@@ -666,16 +710,16 @@ export class ObjectUtil {
             [Math.floor((((seconds % 31536000) % 86400) % 3600) / 60), 'minutes'],
             [(((seconds % 31536000) % 86400) % 3600) % 60, 'seconds'],
         ];
-        let returntext = '';
+        let returnText = '';
 
         for (let i = 0, max = levels.length; i < max; i++) {
             if (levels[i][0] === 0) {
                 continue;
             }
             // @ts-ignore
-            returntext += ` ${levels[i][0]} ${levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]}`;
+            returnText += ` ${levels[i][0]} ${levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]}`;
         }
-        return returntext.trim();
+        return returnText.trim();
     }
 
     public static validString(...strings: Array<unknown>): boolean {

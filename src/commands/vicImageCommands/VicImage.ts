@@ -1,4 +1,4 @@
-import {Discord, Guard, Slash} from "discordx";
+import {Discord, Guard, Slash, SlashGroup} from "discordx";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {AbstractCommandModule} from "../AbstractCommandModule";
@@ -7,6 +7,7 @@ import {CommandInteraction} from "discord.js";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 
 @Discord()
+@SlashGroup("VicImage", "Obtain images of Victorique#0002")
 export abstract class VicImage extends AbstractCommandModule<any> {
 
     constructor() {
@@ -32,7 +33,9 @@ export abstract class VicImage extends AbstractCommandModule<any> {
         });
     }
 
-    @Slash("vicImage")
+    @Slash("vicImage", {
+        description: "Get a random image of Victorique#0002"
+    })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async vicImage(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
@@ -56,12 +59,14 @@ export abstract class VicImage extends AbstractCommandModule<any> {
     }
 
 
-    @Slash("vicReIndex")
+    @Slash("vicReIndex", {
+        description: "Get a random image of Victorique#0002"
+    })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async vicReIndex(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         await VicDropbox.instance.index();
-        interaction.editReply({
+        await interaction.editReply({
             content: `Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`
         });
     }

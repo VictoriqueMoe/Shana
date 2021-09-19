@@ -15,6 +15,16 @@ export abstract class AbstractCommandModule<T extends Model> extends BaseDAO<T> 
         return this._commands;
     }
 
+    protected getDescription(commandName: string): string {
+        const defaultReturn = "";
+        for (const command of this._commands.commands) {
+            if (command.name === commandName) {
+                return command?.description?.text ?? defaultReturn;
+            }
+        }
+        return defaultReturn;
+    }
+
     public async getCommand(name: string, member: GuildMember): Promise<Command> {
         for (const command of this._commands.commands) {
             if (command.name === name) {

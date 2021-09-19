@@ -48,10 +48,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
                 guildId: user.guild.id
             }
         });
-        if (has) {
-            return true;
-        }
-        return false;
+        return !!has;
     }
 
     /**
