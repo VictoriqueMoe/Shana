@@ -43,7 +43,7 @@ export class CloseableModuleSet extends Set<CloseableModule<any>> {
 }
 
 export async function getPrefix(message: Message): Promise<string> {
-    const guildId = message.guild.id;
+    const guildId = message?.guild?.id ?? "~";
     return SettingsManager.instance.getSetting(SETTINGS.PREFIX, guildId);
 }
 
