@@ -62,13 +62,11 @@ export class OnReady extends BaseDAO<any> {
 
     private static async cleanCommands(): Promise<void> {
         await Main.client.clearApplicationCommands();
-        if (Main.interactionTestMode) {
-            for (const guild of await GuildManager.instance.getGuilds()) {
-                try {
-                    await Main.client.clearApplicationCommands(guild.id);
-                } catch {
+        for (const guild of await GuildManager.instance.getGuilds()) {
+            try {
+                await Main.client.clearApplicationCommands(guild.id);
+            } catch {
 
-                }
             }
         }
     }
