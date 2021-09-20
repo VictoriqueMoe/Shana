@@ -25,13 +25,16 @@ export abstract class AbstractCommandModule<T extends Model> extends BaseDAO<T> 
         return defaultReturn;
     }
 
-    public async getCommand(name: string, member: GuildMember): Promise<Command> {
+    public async getCommand(name: string, member?: GuildMember): Promise<Command> {
         for (const command of this._commands.commands) {
             if (command.name === name) {
-                if (await CommandSecurityManager.instance.canRunCommand(member, name)) {
-                    return command;
+                if (member) {
+                    if (await CommandSecurityManager.instance.canRunCommand(member, name)) {
+                        return command;
+                    }
+                    return null;
                 }
-                return null;
+                return command;
             }
         }
         return null;

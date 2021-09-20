@@ -1,4 +1,4 @@
-import {Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {Discord, Guard, Slash, SlashChoice, SlashGroup, SlashOption} from "discordx";
 import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {NotBotInteraction} from "../../../guards/NotABot";
@@ -44,7 +44,13 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                                 name: "Timeout",
                                 optional: false,
                                 type: "number",
-                                description: "timeout in seconds for how long this user should be muted. \n you can also use the time unit at the end of the number to use other time units"
+                                description: "timeout in seconds for how long this user should be muted"
+                            },
+                            {
+                                name: "Timeout",
+                                optional: false,
+                                type: "text",
+                                description: "The time unit used to specify how long a user should be muted \n see muteTimeUnits for values"
                             }
                         ]
                     }
@@ -84,9 +90,16 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
             reason: string,
         @SlashOption("Timeout", {
             description: "timeout for how long this user should be muted.",
+            required: true,
+            type: "INTEGER"
+        })
+            timeout: number,
+        @SlashChoice(TIME_UNIT)
+        @SlashOption("timeUnit", {
+            description: "The time unit used to specify how long a user should be muted",
             required: true
         })
-            timeout: string,
+            timeUnit: TIME_UNIT,
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
@@ -126,15 +139,8 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
 
         let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
         try {
-            const unit = timeout.replace(/\d+/, "");
-            const numberValueStr = timeout.slice(0, -unit.length);
-            const timeEnum = EnumEx.loopBack(TIME_UNIT, unit, true) as TIME_UNIT;
-            if (!ObjectUtil.validString(timeEnum)) {
-                return InteractionUtils.replyWithText(interaction, `invalid unit, '${unit}', available values are: \n ${this.getMuteTimeOutStr()}`, false);
-            }
-            const numValue = Number.parseInt(numberValueStr);
-            await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, numValue, timeEnum);
-            const seconds = TimeUtils.convertToMilli(numValue, timeEnum) / 1000;
+            await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, timeout, timeUnit);
+            const seconds = TimeUtils.convertToMilli(timeout, timeUnit) / 1000;
             replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
         } catch (e) {
             return InteractionUtils.replyWithText(interaction, e.message, false);

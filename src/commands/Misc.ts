@@ -1,7 +1,7 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage, Slash, SlashOption} from "discordx";
 import {NotBotInteraction} from "../guards/NotABot";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../utils/Utils";
-import {MessageEmbed} from "discord.js";
+import {CommandInteraction, GuildMember, ImageURLOptions, MessageEmbed, User} from "discord.js";
 import {Main} from "../Main";
 import {TimedSet} from "../model/Impl/TimedSet";
 import {AnimeTractApi} from "../model/anime/AnimeTractApi";
@@ -9,6 +9,7 @@ import {Response} from "../model/anime/AnimeTypings";
 import {secureCommandInteraction} from "../guards/RoleConstraint";
 import {AbstractCommandModule} from "./AbstractCommandModule";
 import {DeepAPI} from "../model/DeepAPI";
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const Anilist = require('anilist-node');
 const reverseImageSearch = require("node-reverse-image-search");
@@ -107,22 +108,21 @@ export class Misc extends AbstractCommandModule<any> {
         });
     }
 
-    @SimpleCommand("generateText")
+    @Slash("generateText", {
+        description: "The text generation is a large unsupervised language model that can generate paragraphs of text"
+    })
     @Guard(NotBotInteraction, secureCommandInteraction)
-    private async generateText({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 1) {
-            message.reply(`Command arguments wrong, usage: ~generateText "text"`);
-            return;
-        }
-        const text = argumentArray[0];
-        if (!ObjectUtil.validString(text)) {
-            message.reply(`Command arguments wrong, usage: ~generateText "text"`);
-            return;
-        }
-        const command = await message.channel.send("Generating...");
-        const resp = await DeepAPI.instance.textGeneration(text);
-        command.edit(resp);
+    private async generateText(
+        @SlashOption("value", {
+            description: "the text to include in the generation",
+            required: true
+        })
+            value: string,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply();
+        const resp = await DeepAPI.instance.textGeneration(value);
+        await InteractionUtils.editWithText(interaction, resp);
     }
 
     @SimpleCommand("posOrNeg")
@@ -147,20 +147,29 @@ export class Misc extends AbstractCommandModule<any> {
         message.reply(`This message is ${resp}`);
     }
 
-    @SimpleCommand("avatar")
+    @Slash("avatar", {
+        description: "Display a users avatar"
+    })
     @Guard(NotBotInteraction, secureCommandInteraction)
-    private async avatar({message}: SimpleCommandMessage): Promise<void> {
-        const {mentions} = message;
-        if (mentions.members.size !== 1) {
-            message.reply("Please mention a user");
-            return;
-        }
-        const mentionUser = [...mentions.members.values()][0];
-        const avatarUrl = mentionUser.user.displayAvatarURL({
+    private async avatar(
+        @SlashOption("user", {
+            description: "The user to get",
+            required: true
+        })
+            user: User,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        let avatarUrl = "";
+        const ops: ImageURLOptions = {
             dynamic: true,
             size: 1024
-        });
-        message.channel.send({
+        };
+        if (user instanceof GuildMember) {
+            avatarUrl = user.user.displayAvatarURL(ops);
+        } else {
+            avatarUrl = user.displayAvatarURL(ops);
+        }
+        return interaction.reply({
             files: [avatarUrl]
         });
     }

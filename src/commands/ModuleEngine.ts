@@ -1,7 +1,9 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {DiscordUtils, StringUtils} from "../utils/Utils";
+import {Discord, Guard, Slash, SlashOption} from "discordx";
+import {DiscordUtils} from "../utils/Utils";
 import {secureCommandInteraction} from "../guards/RoleConstraint";
 import {AbstractCommandModule} from "./AbstractCommandModule";
+import {CommandInteraction} from "discord.js";
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 export abstract class ModuleEngine extends AbstractCommandModule<any> {
@@ -13,21 +15,6 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
                 description: "Commands to enable or disable features"
             },
             commands: [
-                {
-                    name: "dynoReplace",
-                    isSlash: true,
-                    description: {
-                        text: "Loads all of the modules nessasery for replacing current Dyno functionality",
-                        args: [
-                            {
-                                name: "enable/disable",
-                                optional: false,
-                                type: "boolean",
-                                description: "true = enable, false = disable"
-                            }
-                        ]
-                    }
-                },
                 {
                     name: "enableModule",
                     isSlash: true,
@@ -61,58 +48,50 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
         });
     }
 
-    @SimpleCommand("dynoReplace")
+    @Slash("enableModule", {
+        description: "Enable a module to run. These modules are designed to be shut down and started dynamically"
+    })
     @Guard(secureCommandInteraction)
-    private async dynoReplace({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 1) {
-            message.reply(`Command arguments wrong, usage: ~enableModule <"enable">`);
-            return;
-        }
-        const isEnable = argumentArray[0].toLowerCase() === "true";
-        const dynoModules = DiscordUtils.getDynoReplacementModules();
-        for (const module of dynoModules) {
-            isEnable ? await module.open(message.guild.id) : await module.close(message.guild.id);
-        }
-        const modulesEnabled = dynoModules.map(d => {
-            const subModules = d.submodules.filter(sm => sm.isActive);
-            return subModules.size > 0 ? `${d.moduleId} (subModules: ${(subModules.map(s => s.id)).join(", ")})` : d.moduleId;
-        });
-        const str = `the following modules have been ${isEnable ? "enabled" : "disabled"}: \n ${modulesEnabled.join("\n ")}`;
-        message.reply(str);
-    }
-
-    @SimpleCommand("enableModule")
-    @Guard(secureCommandInteraction)
-    private async enableModule({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 2) {
-            message.reply(`Command arguments wrong, usage: ~enableModule <"moduleId"> <"enable">`);
-            return;
-        }
-        const moduleId = argumentArray[0];
-        const isEnable = argumentArray[1].toLowerCase() === "true";
-        const allModuleNames = await DiscordUtils.getAllClosableModules(message.guild.id);
+    private async enableModule(
+        @SlashOption("setting", {
+            description: "the name of the module to close or open",
+            required: true
+        })
+            moduleId: string,
+        @SlashOption("value", {
+            description: "true = enable, false = disable",
+            required: true,
+            type: "BOOLEAN"
+        })
+            isEnable: boolean,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply();
+        const guildId = interaction.guild.id;
+        const allModuleNames = await DiscordUtils.getAllClosableModules(guildId);
         if (!allModuleNames.includes(moduleId)) {
-            message.reply(`Unable to find that module, all available modules are: \n ${allModuleNames.join(", ")}`);
-            return;
+            return InteractionUtils.replyWithText(interaction, `Unable to find that module, all available modules are: \n ${allModuleNames.join(", ")}`);
         }
         const module = DiscordUtils.getModule(moduleId);
         const subModules = module.submodules.filter(sm => sm.isActive);
         const subModulesStr = (subModules.map(s => s.id)).join(", ");
         if (isEnable) {
-            const didOpen = await module.open(message.guild.id);
-            didOpen ? message.reply(`module ${moduleId} (subModules: ${subModulesStr}) has been enabled`) : message.reply(`module ${moduleId} (subModules: ${subModulesStr}) can not be enabled`);
+            const didOpen = await module.open(guildId);
+            didOpen ? InteractionUtils.editWithText(interaction, `module ${moduleId} (subModules: ${subModulesStr}) has been enabled`) : InteractionUtils.editWithText(interaction, `module ${moduleId} (subModules: ${subModulesStr}) can not be enabled`);
         } else {
-            const didClose = await module.close(message.guild.id);
-            didClose ? message.reply(`module ${moduleId} (subModules: ${subModulesStr}) has been disabled`) : message.reply(`module ${moduleId} (subModules: ${subModulesStr}) can not be disabled`);
+            const didClose = await module.close(guildId);
+            didClose ? InteractionUtils.editWithText(interaction, `module ${moduleId} (subModules: ${subModulesStr}) has been disabled`) : InteractionUtils.editWithText(interaction, `module ${moduleId} (subModules: ${subModulesStr}) can not be disabled`);
         }
     }
 
-    @SimpleCommand("getModuleNames")
+    @Slash("getModuleNames", {
+        description: "Return a list of all modules to use with the 'enableModule' command"
+    })
     @Guard(secureCommandInteraction)
-    private async getModuleNames({message}: SimpleCommandMessage): Promise<void> {
-        const allModuleNames = await DiscordUtils.getAllClosableModules(message.guild.id);
-        message.reply(`all available modules are: \n ${allModuleNames.join(", ")}`);
+    private async getModuleNames(interaction: CommandInteraction): Promise<void> {
+        await interaction.deferReply();
+        const guildId = interaction.guild.id;
+        const allModuleNames = await DiscordUtils.getAllClosableModules(guildId);
+        InteractionUtils.replyWithText(interaction, `all available modules are: \n ${allModuleNames.join(", ")}`);
     }
 }

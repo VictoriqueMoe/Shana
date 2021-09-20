@@ -32,6 +32,7 @@ import fetch from "node-fetch";
 import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
 import {APIInteractionGuildMember, APIMessage} from "discord-api-types";
+import {FindOptions} from "sequelize/types/lib/model";
 
 const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
@@ -633,17 +634,21 @@ export namespace DiscordUtils {
         return userPreformingActionHighestRole.position > userToBlockHighestRole.position;
     }
 
-    export async function getAllClosableModules(guildId: string): Promise<string[]> {
-        const allModules = await CloseOptionModel.findAll({
+    export async function getAllClosableModules(guildId?: string): Promise<string[]> {
+        const options: FindOptions<CloseOptionModel['_attributes']> = {
             attributes: [
                 [
                     Sequelize.fn('DISTINCT', Sequelize.col('moduleId')), 'moduleId'
                 ]
-            ],
-            where: {
+            ]
+        };
+        if (ObjectUtil.validString(guildId)) {
+            options["where"] = {
                 guildId
-            }
-        });
+            };
+        }
+        const allModules = await CloseOptionModel.findAll(options);
+
         return allModules.map(m => m.moduleId);
     }
 

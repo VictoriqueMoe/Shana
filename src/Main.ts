@@ -50,6 +50,7 @@ export async function getPrefix(message: Message): Promise<string> {
 export class Main {
     public static closeableModules: CloseableModuleSet = new CloseableModuleSet();
     public static testMode = false;
+    public static interactionTestMode = Main.testMode || false;
     public static botServer: http.Server;
     private static _client: Client;
     private static dbx: Dropbox;
@@ -88,7 +89,7 @@ export class Main {
                 Intents.FLAGS.DIRECT_MESSAGES,
                 Intents.FLAGS.DIRECT_MESSAGE_REACTIONS
             ],
-            botGuilds: Main.testMode ? ["264429768219426819", "876273421284171796"] : undefined,
+            botGuilds: Main.interactionTestMode ? ["264429768219426819", "876273421284171796"] : undefined,
             silent: false,
         });
         Main._dao = new Sequelize('database', '', '', {

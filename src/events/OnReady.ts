@@ -60,6 +60,19 @@ export class OnReady extends BaseDAO<any> {
         }
     }
 
+    private static async cleanCommands(): Promise<void> {
+        await Main.client.clearApplicationCommands();
+        if (Main.interactionTestMode) {
+            for (const guild of await GuildManager.instance.getGuilds()) {
+                try {
+                    await Main.client.clearApplicationCommands(guild.id);
+                } catch {
+
+                }
+            }
+        }
+    }
+
     private static async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
         const retMap: Map<Guild, string[]> = new Map();
         const guildModels = await GuildableModel.findAll({
@@ -105,13 +118,7 @@ export class OnReady extends BaseDAO<any> {
         });
 
         io.action("Re init commands", async cb => {
-            for (const guild of await GuildManager.instance.getGuilds()) {
-                try {
-                    await Main.client.clearApplicationCommands(guild.id);
-                } catch {
-
-                }
-            }
+            await OnReady.cleanCommands();
             await OnReady.initAppCommands();
             return cb("Slash Commands reset");
         });
@@ -169,6 +176,7 @@ export class OnReady extends BaseDAO<any> {
         }
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
+        //await OnReady.cleanCommands();
         pArr.push(VicDropbox.instance.index());
         pArr.push(OnReady.initiateMuteTimers());
         pArr.push(this.initUsernames());
@@ -276,32 +284,69 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private async populateCommandSecurity(): Promise<void> {
-        const guildModels = await GuildableModel.findAll({
-            include: [CommandSecurityModel]
-        });
-        for (const guildModel of guildModels) {
-            const guildId = guildModel.guildId;
-            const commandSecurity = guildModel.commandSecurityModel;
-            const allCommands = CommandSecurityManager.instance.runnableCommands;
-            await Main.dao.transaction(async t => {
-                const models: {
-                    commandName: string, guildId: string
-                }[] = [];
-                for (const commandCLazz of allCommands) {
-                    const {commands} = commandCLazz.commandDescriptors;
-                    for (const {name} of commands) {
-                        const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName === name);
-                        if (!inArray) {
-                            models.push({
-                                commandName: name,
-                                guildId
-                            });
+        async function addNewCommands(guildModels: GuildableModel[]): Promise<void> {
+            for (const guildModel of guildModels) {
+                const guildId = guildModel.guildId;
+                const commandSecurity = guildModel.commandSecurityModel;
+                const allCommands = CommandSecurityManager.instance.runnableCommands;
+                await Main.dao.transaction(async t => {
+                    const models: {
+                        commandName: string, guildId: string
+                    }[] = [];
+                    for (const commandCLazz of allCommands) {
+                        const {commands} = commandCLazz.commandDescriptors;
+                        for (const {name} of commands) {
+                            const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName === name);
+                            if (!inArray) {
+                                models.push({
+                                    commandName: name,
+                                    guildId
+                                });
+                            }
                         }
                     }
-                }
-                return CommandSecurityModel.bulkCreate(models);
-            });
+                    console.log(`adding commands: ${models.map(value => value.commandName)}`);
+                    return CommandSecurityModel.bulkCreate(models);
+                });
+            }
         }
+
+        async function removeOldCommands(guildModels: GuildableModel[]): Promise<void> {
+            for (const guildModel of guildModels) {
+                const {guildId} = guildModel;
+                const commandSecurity = guildModel.commandSecurityModel;
+                const allCommands = CommandSecurityManager.instance.runnableCommands;
+                const commandsToDestory: string[] = [];
+                for (const {commandName} of commandSecurity) {
+                    let found = false;
+                    for (const commandClazz of allCommands) {
+                        const commandFromSystem = await commandClazz.getCommand(commandName);
+                        if (ObjectUtil.isValidObject(commandFromSystem)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        console.log(`delete command ${commandName}`);
+                        commandsToDestory.push(commandName);
+                    }
+                }
+                if (ArrayUtils.isValidArray(commandsToDestory)) {
+                    await CommandSecurityModel.destroy({
+                        where: {
+                            "commandName": commandsToDestory,
+                            guildId
+                        }
+                    });
+                }
+            }
+        }
+
+        const guilds = await GuildableModel.findAll({
+            include: [CommandSecurityModel]
+        });
+        await Promise.all([addNewCommands(guilds), removeOldCommands(guilds)]);
+        return Promise.resolve();
     }
 
     private async populatePostableChannels(): Promise<void> {

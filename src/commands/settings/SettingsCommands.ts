@@ -1,14 +1,25 @@
-import {Discord, DIService, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {NotBot} from "../../guards/NotABot";
-import {ObjectUtil, StringUtils} from "../../utils/Utils";
+import {Discord, DIService, Guard, Slash, SlashChoice, SlashOption} from "discordx";
+import {NotBotInteraction} from "../../guards/NotABot";
+import {DiscordUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
-import {DEFAULT_SETTINGS, SETTINGS} from "../../enums/SETTINGS";
-import {secureCommand} from "../../guards/RoleConstraint";
+import {SETTINGS} from "../../enums/SETTINGS";
+import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {ICloseableModule} from "../../model/closeableModules/ICloseableModule";
 import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
 import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole";
 import {AbstractCommandModule} from "../AbstractCommandModule";
+import {CommandInteraction} from "discord.js";
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
+enum SAVABLE_SETTINGS {
+    AutoRoleAutoMute = "AutoRoleAutoMute",
+    AutoAutoJail = "AutoAutoJail",
+    AutoRoleMinAccountAge = "AutoRoleMinAccountAge",
+    massJoinProtection = "massJoinProtection"
+}
+
+const SETTINGS_SAVABLE = {...SETTINGS, ...SAVABLE_SETTINGS};
+type SETTINGS_SAVABLE = keyof typeof SETTINGS_SAVABLE;
 
 @Discord()
 export class SettingsCommands extends AbstractCommandModule<any> {
@@ -21,227 +32,104 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             },
             commands: [
                 {
-                    name: "prefix",
+                    name: "setting",
                     isSlash: true,
                     description: {
-                        text: "Change the global prefix for this bot",
-                        examples: ["prefix '_' = change prefix to _"],
+                        text: "Change or set any setting",
                         args: [
                             {
-                                name: "prefix",
+                                name: "setting",
+                                optional: false,
                                 type: "text",
-                                optional: true,
-                                description: "Please ensure the prefix does NOT contain spaces"
+                                description: "the name of the setting you wish to change"
+                            },
+                            {
+                                name: "value",
+                                optional: false,
+                                type: "text",
+                                description: "the value of the setting"
                             }
                         ]
-                    }
-                },
-                {
-                    name: "AutoRoleMinAccountAge",
-                    isSlash: true,
-                    description: {
-                        text: "Set the minimum age of the account joining needs to be before they awre allowed to see the rest of the server\nIf an account joins before this age, then they are placed in jail until the account is old enough\nThis requires 'JailRole' to be set\n set to -1 to disable",
-                        args: [{
-                            name: "value",
-                            description: "number in days of limit",
-                            optional: false,
-                            type: "number"
-                        }]
-                    }
-                },
-                {
-                    name: "AutoAutoJail",
-                    isSlash: true,
-                    description: {
-                        text: "If set to true then users will automatically be re-jailed if they leave the server while in jail and return",
-                        args: [{
-                            name: "enabled",
-                            description: "true or false",
-                            optional: false,
-                            type: "boolean"
-                        }]
-                    }
-                },
-                {
-                    name: "AutoRoleAutoMute",
-                    isSlash: true,
-                    description: {
-                        text: "If set to true, then members will automatically be muted if they leave as mute and rejoin as long as the mute is still active",
-                        args: [{
-                            name: "enabled",
-                            description: "true or false",
-                            optional: false,
-                            type: "boolean"
-                        }]
-                    }
-                },
-                {
-                    name: "panicMode",
-                    isSlash: true,
-                    description: {
-                        text: "Enabling this will auto apply the 'unverified' role to everyone who joins",
-                        args: [{
-                            name: "enabled",
-                            description: "true or false",
-                            optional: false,
-                            type: "boolean"
-                        }]
-                    }
-                },
-                {
-                    name: "massJoinProtection",
-                    isSlash: true,
-                    description: {
-                        text: "Set the mac mass joins in 10 seconds, if this is limit is hit, then panicMode is enabled",
-                        args: [{
-                            name: "value",
-                            description: "number of joins in 10 seconds",
-                            optional: false,
-                            type: "number"
-                        }]
                     }
                 }
             ]
         });
     }
 
-    @SimpleCommand("AutoRoleAutoMute")
-    @Guard(NotBot, secureCommand)
-    private async AutoRoleAutoMute({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 1) {
-            message.reply("Please supply true or false");
-            return;
+    @Slash("setting", {
+        description: "Change or set any setting"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async mute(
+        @SlashChoice(SETTINGS_SAVABLE)
+        @SlashOption("setting", {
+            description: "the name of the setting you wish to change",
+            required: true
+        })
+            setting: SETTINGS_SAVABLE,
+        @SlashOption("value", {
+            description: "the value of the setting",
+            required: true
+        })
+            value: string,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply();
+        const guildId = interaction.guild.id;
+        switch (setting) {
+            case SETTINGS.JAIL_ROLE:
+            case SETTINGS.AUTO_ROLE:
+            case SETTINGS.YOUNG_ACCOUNT_ROLE:
+            case SETTINGS.MUTE_ROLE: {
+                const theRole = interaction.guild.roles.cache.get(value);
+                if (!theRole) {
+                    return InteractionUtils.replyWithText(interaction, `Unable to find role with id ${value}`);
+                }
+                await SettingsManager.instance.saveOrUpdateSetting(setting as SETTINGS, value, guildId);
+                break;
+            }
+            case SAVABLE_SETTINGS.massJoinProtection:
+            case SAVABLE_SETTINGS.AutoRoleMinAccountAge: {
+                const settingValue = parseInt(value);
+                if (isNaN(settingValue)) {
+                    return InteractionUtils.replyWithText(interaction, "Please supply a number");
+                }
+                const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
+                const settingObj: AutoRoleSettings = {};
+                if (setting === SAVABLE_SETTINGS.massJoinProtection) {
+                    settingObj["massJoinProtection"] = settingValue;
+                } else {
+                    settingObj["minAccountAge"] = settingValue;
+                }
+                try {
+                    await autoRole.saveSettings(guildId, settingObj, true);
+                } catch (e) {
+                    return InteractionUtils.replyWithText(interaction, e.message);
+                }
+                break;
+            }
+            case SAVABLE_SETTINGS.AutoAutoJail:
+            case SAVABLE_SETTINGS.AutoRoleAutoMute:
+            case SETTINGS.PANIC_MODE: {
+                const settingValue = value === "true";
+                const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
+                const settingObj: AutoRoleSettings = {};
+                if (setting === SAVABLE_SETTINGS.AutoAutoJail) {
+                    settingObj["settingValue"] = settingValue;
+                } else if (setting === SAVABLE_SETTINGS.AutoRoleAutoMute) {
+                    settingObj["autoMute"] = settingValue;
+                } else if (setting === SETTINGS.PANIC_MODE) {
+                    settingObj["panicMode"] = settingValue;
+                }
+                try {
+                    await autoRole.saveSettings(guildId, settingObj, true);
+                } catch (e) {
+                    return InteractionUtils.replyWithText(interaction, e.message);
+                }
+                break;
+            }
         }
-        const autoMute = argumentArray[0] === "true";
-        const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
-        const setting = {
-            autoMute
-        };
-        try {
-            await autoRole.saveSettings(message.guild.id, setting, true);
-        } catch (e) {
-            message.reply(e.message);
-            return;
-        }
-        message.reply("Setting saved");
+        return InteractionUtils.replyWithText(interaction, `Setting "${setting}" has been saved with value ${value}`);
     }
 
-    @SimpleCommand("AutoAutoJail")
-    @Guard(NotBot, secureCommand)
-    private async AutoAutoJail({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 1) {
-            message.reply("Please supply true or false");
-            return;
-        }
-        const autoJail = argumentArray[0] === "true";
-        const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
-        const setting = {
-            autoJail
-        };
-        try {
-            await autoRole.saveSettings(message.guild.id, setting, true);
-        } catch (e) {
-            message.reply(e.message);
-            return;
-        }
-        message.reply("Setting saved");
-    }
-
-    @SimpleCommand("AutoRoleMinAccountAge")
-    @Guard(NotBot, secureCommand)
-    private async AutoRoleMinAccountAge({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 1) {
-            message.reply("Please supply a number");
-            return;
-        }
-        const minAccountAge = parseInt(argumentArray[0]);
-        if (isNaN(minAccountAge)) {
-            message.reply("Please supply a number");
-            return;
-        }
-        const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
-        const setting = {
-            minAccountAge
-        };
-        try {
-            await autoRole.saveSettings(message.guild.id, setting, true);
-        } catch (e) {
-            message.reply(e.message);
-            return;
-        }
-        message.reply("Setting saved");
-    }
-
-    @SimpleCommand("prefix")
-    @Guard(NotBot, secureCommand)
-    private async setPrefix({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 1 && argumentArray.length !== 0) {
-            message.reply("Please supply one or zero argument(s) only");
-            return;
-        }
-        const [prefix] = argumentArray;
-        if (ObjectUtil.isNumeric(prefix)) {
-            message.reply("Prefix can not be a number");
-            return;
-        }
-        if (!ObjectUtil.validString(prefix)) {
-            await SettingsManager.instance.saveOrUpdateSetting(SETTINGS.PREFIX, DEFAULT_SETTINGS.PREFIX, message.guild.id);
-            message.reply(`Prefix has been reset to "${DEFAULT_SETTINGS.PREFIX}"`);
-        } else {
-            await SettingsManager.instance.saveOrUpdateSetting(SETTINGS.PREFIX, prefix, message.guild.id);
-            message.reply(`Prefix has been changed to "${prefix}"`);
-        }
-    }
-
-    @SimpleCommand("panicMode")
-    @Guard(NotBot, secureCommand)
-    private async panicMode({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 1) {
-            message.reply("Please supply true or false");
-            return;
-        }
-        const panicMode = argumentArray[0] === "true";
-        const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
-        const setting = {
-            panicMode
-        };
-        try {
-            await autoRole.saveSettings(message.guild.id, setting, true);
-        } catch (e) {
-            message.reply(e.message);
-            return;
-        }
-        message.reply("Setting saved");
-    }
-
-    @SimpleCommand("massJoinProtection")
-    @Guard(NotBot, secureCommand)
-    private async massJoinProtection({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 1) {
-            message.reply("Please supply a number");
-            return;
-        }
-        const massJoinProtection = parseInt(argumentArray[0]);
-        if (isNaN(massJoinProtection)) {
-            message.reply("Please supply a number");
-            return;
-        }
-        const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
-        const setting = {
-            massJoinProtection
-        };
-        try {
-            await autoRole.saveSettings(message.guild.id, setting, true);
-        } catch (e) {
-            message.reply(e.message);
-            return;
-        }
-        message.reply("Setting saved");
-    }
 }
