@@ -3,8 +3,9 @@ import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint";
 import {Message} from "discord.js";
-import {MessageListenerDecorator, notBot} from "../../../model/decorators/messageListenerDecorator";
+import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
 import {AutoResponderManager} from "../../../model/guild/manager/AutoResponderManager";
+import {notBot} from "../../../guards/NotABot";
 
 export class AutoResponder extends TriggerConstraint<null> {
 

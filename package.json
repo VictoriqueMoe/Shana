@@ -25,6 +25,7 @@
     "url": "https://github.com/VictoriqueMoe/WeebBot/issues"
   },
   "dependencies": {
+    "@discordjs/opus": "^0.6.0",
     "@overnightjs/core": "^1.7.6",
     "@pm2/io": "^5.0.0",
     "anilist-node": "^1.9.1",

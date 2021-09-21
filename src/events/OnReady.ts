@@ -174,7 +174,8 @@ export class OnReady extends BaseDAO<any> {
         }
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
-        //await OnReady.cleanCommands();
+        // await OnReady.cleanCommands();
+        Main.initMusicPlayer();
         pArr.push(VicDropbox.instance.index());
         pArr.push(OnReady.initiateMuteTimers());
         pArr.push(this.initUsernames());

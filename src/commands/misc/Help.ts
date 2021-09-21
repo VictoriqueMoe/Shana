@@ -1,13 +1,13 @@
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage, SlashGroup} from "discordx";
-import {NotBotInteraction} from "../guards/NotABot";
-import {ArrayUtils, ObjectUtil, StringUtils} from "../utils/Utils";
+import {NotBotInteraction} from "../../guards/NotABot";
+import {ArrayUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {GuildMember, MessageEmbed} from "discord.js";
-import {Main} from "../Main";
-import {SettingsManager} from "../model/settings/SettingsManager";
-import {SETTINGS} from "../enums/SETTINGS";
-import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
-import {Typeings} from "../model/types/Typeings";
-import {AbstractCommandModule} from "./AbstractCommandModule";
+import {Main} from "../../Main";
+import {SettingsManager} from "../../model/settings/SettingsManager";
+import {SETTINGS} from "../../enums/SETTINGS";
+import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+import {Typeings} from "../../model/types/Typeings";
+import {AbstractCommandModule} from "../AbstractCommandModule";
 
 @Discord()
 @SlashGroup("Help", "Commands to display help and info")

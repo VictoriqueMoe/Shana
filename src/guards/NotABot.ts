@@ -1,17 +1,5 @@
-import {ArgsOf, GuardFunction, SimpleCommandMessage} from "discordx";
-import {notBot} from "../model/decorators/messageListenerDecorator";
-import {CommandInteraction} from "discord.js";
-
-export const NotBot: GuardFunction<ArgsOf<"messageCreate">> = async (
-    [message],
-    client,
-    next
-) => {
-    if (await notBot(message)) {
-        await next();
-    }
-};
-
+import {GuardFunction, SimpleCommandMessage} from "discordx";
+import {CommandInteraction, DMChannel, Message} from "discord.js";
 
 export const NotBotInteraction: GuardFunction<CommandInteraction | SimpleCommandMessage> = async (arg, client, next) => {
     if (arg instanceof SimpleCommandMessage) {
@@ -25,3 +13,7 @@ export const NotBotInteraction: GuardFunction<CommandInteraction | SimpleCommand
         }
     }
 };
+
+export async function notBot(message: Message | CommandInteraction): Promise<boolean> {
+    return message.channel instanceof DMChannel ? false : !message?.member?.user?.bot;
+}

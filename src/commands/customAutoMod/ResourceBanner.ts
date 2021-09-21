@@ -1,10 +1,10 @@
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {NotBot} from "../../guards/NotABot";
-import {secureCommand} from "../../guards/RoleConstraint";
 import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import {Collection, Message, Snowflake} from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
+import {NotBotInteraction} from "../../guards/NotABot";
+import {secureCommandInteraction} from "../../guards/RoleConstraint";
 
 const getUrls = require('get-urls');
 const md5 = require('md5');
@@ -62,7 +62,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
     }
 
     @SimpleCommand("banEmoji")
-    @Guard(NotBot, secureCommand)
+    @Guard(NotBotInteraction, secureCommandInteraction)
     private async banEmoji({message}: SimpleCommandMessage): Promise<void> {
         const repliedMessageLink = message.reference;
         if (!repliedMessageLink) {
@@ -135,7 +135,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
     }
 
     @SimpleCommand("banAttachment")
-    @Guard(NotBot, secureCommand)
+    @Guard(NotBotInteraction, secureCommandInteraction)
     private async banAttachment({message}: SimpleCommandMessage): Promise<void> {
         const repliedMessageRef = message.reference;
         if (!repliedMessageRef) {

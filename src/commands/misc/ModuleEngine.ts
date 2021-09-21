@@ -1,7 +1,7 @@
 import {Discord, Guard, Slash, SlashOption} from "discordx";
-import {DiscordUtils} from "../utils/Utils";
-import {secureCommandInteraction} from "../guards/RoleConstraint";
-import {AbstractCommandModule} from "./AbstractCommandModule";
+import {DiscordUtils} from "../../utils/Utils";
+import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction} from "discord.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 

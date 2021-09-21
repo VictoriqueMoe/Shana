@@ -11,8 +11,9 @@ import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingl
 import {Main} from "../../../Main";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import * as Immutable from "immutable";
-import {MessageListenerDecorator, notBot} from "../../../model/decorators/messageListenerDecorator";
+import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
 import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
+import {notBot} from "../../../guards/NotABot";
 
 export class DynoAutoMod extends CloseableModule<null> {
 

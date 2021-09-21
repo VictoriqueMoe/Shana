@@ -98,6 +98,10 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
                 "commandName": Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('commandName')), 'LIKE', `%${commandName}%`)
             }
         });
+        if (!command) {
+            console.error(`Unable to find command with name "${commandName}" from guildId: "${guildId}`);
+            return false;
+        }
         return command.enabled;
     }
 

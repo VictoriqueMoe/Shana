@@ -10,6 +10,7 @@ import * as v8 from "v8";
 import {Client} from "discordx";
 import {Intents, Message} from "discord.js";
 import {Dropbox} from "dropbox";
+import {Player} from "discord-music-player";
 // const https = require('http-debug').https;
 // https.debug = 1;
 const io = require('@pm2/io');
@@ -50,10 +51,11 @@ export async function getPrefix(message: Message): Promise<string> {
 export class Main {
     public static closeableModules: CloseableModuleSet = new CloseableModuleSet();
     public static testMode = false;
-    public static interactionTestMode = Main.testMode || false;
+    public static interactionTestMode = Main.testMode || true;
     public static botServer: http.Server;
     private static _client: Client;
     private static dbx: Dropbox;
+    private static _player: Player;
 
     static get client(): Client {
         return this._client;
@@ -67,6 +69,10 @@ export class Main {
 
     public static get dropBox(): Dropbox {
         return Main.dbx;
+    }
+
+    public static get player(): Player {
+        return Main._player;
     }
 
     public static async start(): Promise<void> {
@@ -87,7 +93,8 @@ export class Main {
                 Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
                 Intents.FLAGS.GUILD_PRESENCES,
                 Intents.FLAGS.DIRECT_MESSAGES,
-                Intents.FLAGS.DIRECT_MESSAGE_REACTIONS
+                Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+                Intents.FLAGS.GUILD_VOICE_STATES
             ],
             botGuilds: Main.interactionTestMode ? ["264429768219426819", "876273421284171796"] : undefined,
             silent: false,
@@ -108,6 +115,14 @@ export class Main {
         });
         await Main.dao.sync({force: false});
         await this._client.login(process.env.token);
+
+    }
+
+    public static initMusicPlayer(): void {
+        Main._player = new Player(Main.client, {
+            leaveOnEmpty: true,
+            quality: "high"
+        });
     }
 
     public static async setDefaultSettings(): Promise<void> {

@@ -1,14 +1,14 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage, Slash, SlashOption} from "discordx";
-import {NotBotInteraction} from "../guards/NotABot";
-import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../utils/Utils";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage, Slash, SlashGroup, SlashOption} from "discordx";
+import {NotBotInteraction} from "../../guards/NotABot";
+import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {CommandInteraction, GuildMember, ImageURLOptions, MessageEmbed, User} from "discord.js";
-import {Main} from "../Main";
-import {TimedSet} from "../model/Impl/TimedSet";
-import {AnimeTractApi} from "../model/anime/AnimeTractApi";
-import {Response} from "../model/anime/AnimeTypings";
-import {secureCommandInteraction} from "../guards/RoleConstraint";
-import {AbstractCommandModule} from "./AbstractCommandModule";
-import {DeepAPI} from "../model/DeepAPI";
+import {Main} from "../../Main";
+import {TimedSet} from "../../model/Impl/TimedSet";
+import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
+import {Response} from "../../model/anime/AnimeTypings";
+import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {AbstractCommandModule} from "../AbstractCommandModule";
+import {DeepAPI} from "../../model/DeepAPI";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const Anilist = require('anilist-node');
@@ -17,6 +17,7 @@ const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
 
 @Discord()
+@SlashGroup("Miscellaneous", "Miscellaneous commands")
 export class Misc extends AbstractCommandModule<any> {
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
     private readonly animeTractApi = new AnimeTractApi();

@@ -6,7 +6,8 @@ import {Main} from "../../Main";
 import {DMChannel, GuildMember, Message, Role, User} from "discord.js";
 import {Op} from "sequelize";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
-import {MessageListenerDecorator, notBot} from "../../model/decorators/messageListenerDecorator";
+import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
+import {notBot} from "../../guards/NotABot";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
 const getUrls = require('get-urls');

@@ -94,5 +94,5 @@ export type EventSecurityConstraintType = {
     ignoredRoles?: string[],
 }
 
-export type EditType = ([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate: boolean) => Promise<void>;
+export type EditType = ([message]: ArgsOf<"messageCreate">, client: Client, guardPayload: any, isUpdate: boolean) => Promise<void>;
 export type EventTriggerCondition = (message: Message) => Promise<boolean>;

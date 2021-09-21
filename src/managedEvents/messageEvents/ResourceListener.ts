@@ -3,10 +3,11 @@ import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil} from "../../ut
 import {Collection, MessageEmbed} from "discord.js";
 import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
 import fs from "fs";
-import {MessageListenerDecorator, notBot} from "../../model/decorators/messageListenerDecorator";
+import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
 import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner";
 import {Main} from "../../Main";
 import {DirResult} from "tmp";
+import {notBot} from "../../guards/NotABot";
 import ffmpeg = require("ffmpeg");
 
 const getUrls = require('get-urls');
