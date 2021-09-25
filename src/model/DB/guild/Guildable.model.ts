@@ -9,6 +9,7 @@ import {SettingsModel} from "../Settings.model";
 import {PostableChannelModel} from "./PostableChannel.model";
 import {CommandSecurityModel} from "./CommandSecurity.model";
 import {AutoResponderModel} from "../autoMod/impl/AutoResponder.model";
+import {RoleJoinerModel} from "../RoleJoiner.model";
 
 @Table
 export class GuildableModel extends Model implements IGuildAware {
@@ -42,7 +43,7 @@ export class GuildableModel extends Model implements IGuildAware {
 
     @HasMany(() => AutoResponderModel)
     public autoResponderModel: AutoResponderModel[];
-    /*
-        @HasMany(() => SubModuleModel)
-        public subModuleModel: SubModuleModel[];*/
+
+    @HasMany(() => RoleJoinerModel)
+    public roleJoinerModel: RoleJoinerModel[];
 }

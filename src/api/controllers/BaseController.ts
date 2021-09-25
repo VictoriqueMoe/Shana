@@ -15,7 +15,9 @@ export abstract class baseController {
 
     // eslint-disable-next-line @typescript-eslint/ban-types
     protected ok(res: Response, json: object): Response {
-        return res.status(StatusCodes.OK).json(json);
+        const serialisedJson: string = JSON.stringify(json, (key, value) => typeof value === 'bigint' ? value.toString() : value);
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(StatusCodes.OK).send(serialisedJson);
     }
 
     protected async getGuild(req: Request): Promise<Guild> {

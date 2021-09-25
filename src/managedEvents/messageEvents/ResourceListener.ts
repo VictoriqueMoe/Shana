@@ -26,11 +26,6 @@ export class ResourceListener {
         if (Main.testMode && message.member.id !== "697417252320051291") {
             return;
         }
-        try {
-            message = await message.fetch();
-        } catch {
-
-        }
         const messageContent = message.content;
         let urlsInMessage: Set<string> = new Set();
         if (ObjectUtil.validString(messageContent)) {

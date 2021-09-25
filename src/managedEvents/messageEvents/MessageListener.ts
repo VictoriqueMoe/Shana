@@ -203,11 +203,6 @@ export abstract class MessageListener {
         if (!member) {
             return;
         }
-        try {
-            message = await message.fetch();
-        } catch {
-
-        }
         const attachments = message.attachments;
         const messageContent = message.content;
         const arratchmentUrl: string[] = attachments.map(attachmentObject => attachmentObject.attachment as string);

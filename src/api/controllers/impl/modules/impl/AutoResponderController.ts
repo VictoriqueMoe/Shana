@@ -64,7 +64,23 @@ export class AutoResponderController extends AbstractModuleController {
         }
         try {
             const responders = await AutoResponderManager.instance.getAllAutoResponders(guild.id);
-            return super.ok(res, responders);
+            const json = responders.map(value => value.toJSON());
+            /*for (const value of json) {
+                for (const prop in value) {
+                    if (value.hasOwnProperty(prop)) {
+                        const propValue = value[prop];
+                        if (ArrayUtils.isValidArray(propValue)) {
+                            for (let i = 0; i < propValue.length; i++) {
+                                const innerItem = propValue[i];
+                                if (innerItem instanceof Base) {
+                                    propValue[i] = innerItem.toJSON();
+                                }
+                            }
+                        }
+                    }
+                }
+            }*/
+            return super.ok(res, json);
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.INTERNAL_SERVER_ERROR);
         }
