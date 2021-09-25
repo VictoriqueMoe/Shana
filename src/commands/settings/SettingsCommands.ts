@@ -15,7 +15,8 @@ enum SAVABLE_SETTINGS {
     AutoRoleAutoMute = "AutoRoleAutoMute",
     AutoAutoJail = "AutoAutoJail",
     AutoRoleMinAccountAge = "AutoRoleMinAccountAge",
-    massJoinProtection = "massJoinProtection"
+    massJoinProtection = "massJoinProtection",
+    autoRoleTimeout = "autoRoleTimeout"
 }
 
 const SETTINGS_SAVABLE = {...SETTINGS, ...SAVABLE_SETTINGS};
@@ -89,6 +90,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 break;
             }
             case SAVABLE_SETTINGS.massJoinProtection:
+            case SAVABLE_SETTINGS.autoRoleTimeout:
             case SAVABLE_SETTINGS.AutoRoleMinAccountAge: {
                 const settingValue = parseInt(value);
                 if (isNaN(settingValue)) {
@@ -98,8 +100,10 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 const settingObj: AutoRoleSettings = {};
                 if (setting === SAVABLE_SETTINGS.massJoinProtection) {
                     settingObj["massJoinProtection"] = settingValue;
-                } else {
+                } else if (setting === SAVABLE_SETTINGS.AutoRoleMinAccountAge) {
                     settingObj["minAccountAge"] = settingValue;
+                } else {
+                    settingObj["autoRoleTimeout"] = settingValue;
                 }
                 try {
                     await autoRole.saveSettings(guildId, settingObj, true);
@@ -115,7 +119,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
                 const settingObj: AutoRoleSettings = {};
                 if (setting === SAVABLE_SETTINGS.AutoAutoJail) {
-                    settingObj["settingValue"] = settingValue;
+                    settingObj["autoJail"] = settingValue;
                 } else if (setting === SAVABLE_SETTINGS.AutoRoleAutoMute) {
                     settingObj["autoMute"] = settingValue;
                 } else if (setting === SETTINGS.PANIC_MODE) {

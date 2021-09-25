@@ -154,13 +154,17 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                 }
             }
         }
-        const now = Date.now();
-        const oneMin = 60000;
-        const toAddRole = now + oneMin;
-        const d = new Date(toAddRole);
-        schedule.scheduleJob(`enable ${member.user.tag}`, d, async () => {
-            await this.applyRole(member, guildId, true);
-        });
+        if (settings.autoRoleTimeout > 0) {
+            const now = Date.now();
+            const timeout = settings.autoRoleTimeout;
+            const toAddRole = now + timeout;
+            const d = new Date(toAddRole);
+            schedule.scheduleJob(`enable ${member.user.tag}`, d, async () => {
+                await this.applyRole(member, guildId, true);
+            });
+        } else {
+            await this.applyRole(member, guildId, false);
+        }
     }
 
     @On("guildMemberRemove")

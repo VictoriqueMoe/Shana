@@ -13,7 +13,7 @@ export class MessageEventDispatcher {
     }
 
     @On("messageCreate")
-    private async eventTrigger([message]: ArgsOf<"message">, client: Client): Promise<void> {
+    private async eventTrigger([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         await Main.client.executeCommand(message, {
             caseSensitive: false
         });

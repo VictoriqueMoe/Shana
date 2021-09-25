@@ -22,7 +22,7 @@ export class ResourceListener {
     private static readonly MAX_SIZE_BYTES: number = 10485760;
 
     @MessageListenerDecorator(true, notBot)
-    private async discordMessageCrash([message]: ArgsOf<"message">, client: Client): Promise<void> {
+    private async discordMessageCrash([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         if (Main.testMode && message.member.id !== "697417252320051291") {
             return;
         }

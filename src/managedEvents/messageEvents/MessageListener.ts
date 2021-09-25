@@ -19,7 +19,7 @@ export abstract class MessageListener {
 
     /*@On("message")
     @Guard(NotBot, PremiumChannelOnlyCommand, BlockGuard)
-    private activateVibrator([message]: ArgsOf<"message">, client: Client): void {
+    private activateVibrator([message]: ArgsOf<"messageCreate">, client: Client): void {
         const hasPingedRole = message.mentions.roles.has(RolesEnum.WEEB_OVERLORD); // whore role
         if (hasPingedRole) {
             console.log(`user: ${message.author.username} pinged your role`);
@@ -75,7 +75,7 @@ export abstract class MessageListener {
     }
 
     @MessageListenerDecorator(true, notBot)
-    private async moeLoliDestroyer([message]: ArgsOf<"message">, client: Client): Promise<void> {
+    private async moeLoliDestroyer([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         if (!message.member) {
             return;
         }
@@ -107,7 +107,7 @@ export abstract class MessageListener {
     }
 
     @MessageListenerDecorator()
-    private async logDMs([message]: ArgsOf<"message">, client: Client): Promise<void> {
+    private async logDMs([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         if (message.author.bot || !ObjectUtil.validString(message.content)) {
             return;
         }
@@ -140,7 +140,7 @@ export abstract class MessageListener {
     }
 
     // @MessageListenerDecorator(false, notBot)
-    private async replier([message]: ArgsOf<"message">, client: Client): Promise<void> {
+    private async replier([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         if (!message.member) {
             return;
         }
@@ -183,7 +183,7 @@ export abstract class MessageListener {
     }
 
     @MessageListenerDecorator(true)
-    private async scanEmoji([message]: ArgsOf<"message">, client: Client): Promise<void> {
+    private async scanEmoji([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         const member = message.member;
         if (!member) {
             return;
@@ -198,7 +198,7 @@ export abstract class MessageListener {
 
 
     @MessageListenerDecorator(true)
-    private async scanAttachments([message]: ArgsOf<"message">, client: Client): Promise<void> {
+    private async scanAttachments([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         const member = message.member;
         if (!member) {
             return;

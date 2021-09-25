@@ -26,4 +26,9 @@ export interface AutoRoleSettings extends ModuleSettings {
      * defines the threshold for members joining in 10 seconds before automatically enabling panicMode
      */
     massJoinProtection?: number
+
+    /**
+     * How long to wait before the autoRole is applied (ignored for unverfied and auto-jail/ato-mute)
+     */
+    autoRoleTimeout?: number;
 }

@@ -37,7 +37,7 @@ export class DynoAutoMod extends CloseableModule<null> {
     }
 
     @MessageListenerDecorator(true, notBot)
-    private async process([message]: ArgsOf<"message">, client: Client): Promise<void> {
+    private async process([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         if (!await this.canRun(message.guild.id, message.member, message.channel)) {
             return;
         }

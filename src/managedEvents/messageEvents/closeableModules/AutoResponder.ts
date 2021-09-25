@@ -24,7 +24,7 @@ export class AutoResponder extends TriggerConstraint<null> {
     }
 
     @MessageListenerDecorator(true, notBot)
-    private async process([message]: ArgsOf<"message">, client: Client, guardPayload: any, isUpdate: boolean = false): Promise<void> {
+    private async process([message]: ArgsOf<"messageCreate">, client: Client, guardPayload: any, isUpdate: boolean = false): Promise<void> {
         const channel = message.channel;
         const guildId = message.guild.id;
         if (!await this.canRun(guildId, null, channel)) {
