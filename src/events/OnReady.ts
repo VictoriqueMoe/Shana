@@ -60,14 +60,17 @@ export class OnReady extends BaseDAO<any> {
         }
     }
 
-    private static async cleanCommands(): Promise<void> {
-        await Main.client.clearApplicationCommands();
-        for (const guild of await GuildManager.instance.getGuilds()) {
-            try {
-                await Main.client.clearApplicationCommands(guild.id);
-            } catch {
+    private static async cleanCommands(justGuilds: boolean): Promise<void> {
+        if (justGuilds) {
+            for (const guild of await GuildManager.instance.getGuilds()) {
+                try {
+                    await Main.client.clearApplicationCommands(guild.id);
+                } catch {
 
+                }
             }
+        } else {
+            await Main.client.clearApplicationCommands();
         }
     }
 
@@ -115,8 +118,14 @@ export class OnReady extends BaseDAO<any> {
             return cb(log);
         });
 
-        io.action("Re init commands", async cb => {
-            await OnReady.cleanCommands();
+        io.action("Re init commands (globally)", async cb => {
+            await OnReady.cleanCommands(false);
+            await OnReady.initAppCommands();
+            return cb("Slash Commands reset");
+        });
+
+        io.action("Re init commands (guilds only)", async cb => {
+            await OnReady.cleanCommands(true);
             await OnReady.initAppCommands();
             return cb("Slash Commands reset");
         });
@@ -344,8 +353,8 @@ export class OnReady extends BaseDAO<any> {
         const guilds = await GuildableModel.findAll({
             include: [CommandSecurityModel]
         });
-        await Promise.all([addNewCommands(guilds), removeOldCommands(guilds)]);
-        return Promise.resolve();
+        await addNewCommands(guilds);
+        await removeOldCommands(guilds);
     }
 
     private async populatePostableChannels(): Promise<void> {

@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
+    "@discordx/utilities": "^1.1.8",
     "@overnightjs/core": "^1.7.6",
     "@pm2/io": "^5.0.0",
     "anilist-node": "^1.9.1",
@@ -36,7 +37,7 @@
     "deepai": "^1.0.17",
     "discord-music-player": "^8.1.0",
     "discord.js": "13.1.0",
-    "discordx": "^5.9.3",
+    "discordx": "^5.9.4",
     "dotenv": "^10.0.0",
     "dropbox": "^10.9.0",
     "emoji-regex": "^9.2.2",

@@ -1,4 +1,4 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage, SlashGroup} from "discordx";
+import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {ArrayUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {GuildMember, MessageEmbed} from "discord.js";
@@ -10,7 +10,6 @@ import {Typeings} from "../../model/types/Typeings";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 
 @Discord()
-@SlashGroup("Help", "Commands to display help and info")
 export class Help extends AbstractCommandModule<any> {
     constructor() {
         super({

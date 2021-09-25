@@ -1,7 +1,7 @@
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {CommandInteraction, GuildMember, ImageURLOptions, MessageEmbed, User} from "discord.js";
+import {CommandInteraction, GuildMember, ImageURLOptions, MessageAttachment, MessageEmbed, User} from "discord.js";
 import {Main} from "../../Main";
 import {TimedSet} from "../../model/Impl/TimedSet";
 import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
@@ -231,6 +231,7 @@ export class Misc extends AbstractCommandModule<any> {
             message.reply("No results found...");
             return;
         }
+        let mainTitle = title.romaji;
         const embed = new MessageEmbed()
             .setTitle(`${title.romaji}`)
             .setAuthor(`${Main.client.user.username}`, botAvatar)
@@ -240,6 +241,7 @@ export class Misc extends AbstractCommandModule<any> {
             .setTimestamp();
         if (ObjectUtil.validString(title.english)) {
             embed.setTitle(`${title.english} [${title.romaji}]`);
+            mainTitle = `${title.english} [${title.romaji}]`;
         }
         if (ObjectUtil.isValidObject(aniDbRes)) {
             const coverImage = aniDbRes.coverImage;
@@ -253,7 +255,7 @@ export class Misc extends AbstractCommandModule<any> {
                 },
                 {
                     name: "Episodes",
-                    value: aniDbRes.episodes
+                    value: String(aniDbRes.episodes)
                 },
                 {
                     name: "Start date",
@@ -275,9 +277,10 @@ export class Misc extends AbstractCommandModule<any> {
         try {
             const previewBuffer = await this.animeTractApi.fetchPreview(video);
             await replyMessage.delete();
+            const file = new MessageAttachment(previewBuffer, `${mainTitle}.mp4`);
             await message.reply({
                 embeds: [embed],
-                files: [previewBuffer]
+                files: [file]
             });
         } catch {
         }

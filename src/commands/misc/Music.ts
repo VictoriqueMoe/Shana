@@ -82,7 +82,9 @@ export class Music extends AbstractCommandModule<any> {
 
     @ButtonComponent("btn-next")
     private async next(interaction: ButtonInteraction): Promise<void> {
-        await interaction.deferReply();
+        await interaction.deferReply({
+            ephemeral: true
+        });
         const {guildId} = interaction;
         const guildQueue = Music.getGuildQueue(interaction);
         if (!guildQueue) {
@@ -94,13 +96,17 @@ export class Music extends AbstractCommandModule<any> {
         }
         const {member} = interaction;
         if (!(member instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Internal Error", false);
+            return InteractionUtils.replyWithText(interaction, "Internal Error");
         }
         const vc = member.voice.channel;
         if (!vc) {
             return InteractionUtils.replyWithText(interaction, "You must first join the voice channel before you can use this");
         }
         guildQueue.skip();
+        const embed = Music.displayPlaylist(guildQueue);
+        await interaction.editReply({
+            embeds: [embed]
+        });
     }
 
     @Slash("nowPlaying", {
