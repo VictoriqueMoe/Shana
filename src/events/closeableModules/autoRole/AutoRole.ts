@@ -11,6 +11,7 @@ import {UniqueViolationError} from "../../../DAO/BaseDAO";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
 import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings";
 import {TimedSet} from "../../../model/Impl/TimedSet";
+import {container} from "tsyringe";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 class RoleProxy extends AbstractRoleApplier {
@@ -73,7 +74,8 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         });
         try {
             if (persistedRole) {
-                const guild = await GuildManager.instance.getGuild(guildId);
+                const guildManager = container.resolve(GuildManager);
+                const guild = await guildManager.getGuild(guildId);
                 const rolePersisted = await guild.roles.fetch(persistedRole.roleId);
                 const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
                 const muteRole = await GuildUtils.RoleUtils.getMuteRole(guildId);

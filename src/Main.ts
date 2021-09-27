@@ -11,6 +11,8 @@ import {Client} from "discordx";
 import {Intents, Message} from "discord.js";
 import {Dropbox} from "dropbox";
 import {Player} from "discord-music-player";
+import {GuildableModel} from "./model/DB/guild/Guildable.model";
+import {moduleRegistrar} from "./DI/moduleRegistrar";
 // const https = require('http-debug').https;
 // https.debug = 1;
 const io = require('@pm2/io');
@@ -78,7 +80,25 @@ export class Main {
     public static async start(): Promise<void> {
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
+        moduleRegistrar();
         Main.dbx = new Dropbox({accessToken: process.env.dropboxToken});
+        Main._dao = new Sequelize('database', '', '', {
+            host: 'localhost',
+            dialect: 'sqlite',
+            logging: (sql: string, timing: number): void => {
+                if (Main.testMode) {
+                    // console.log(sql, timing);
+                }
+            },
+            storage: 'database.sqlite',
+            models: [__dirname + '/model/DB/**/*.model.{ts,js}'],
+            modelMatch: (filename, member): boolean => {
+                return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
+            }
+        });
+        await Main.dao.sync({force: false});
+        const guilds = await GuildableModel.findAll();
+        const allGuildIds = guilds.map(guild => guild.guildId);
         this._client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             prefix: getPrefix,
@@ -96,24 +116,9 @@ export class Main {
                 Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
                 Intents.FLAGS.GUILD_VOICE_STATES
             ],
-            botGuilds: Main.interactionTestMode ? ["264429768219426819", "876273421284171796", "865937521011458048"] : undefined,
+            botGuilds: Main.interactionTestMode ? allGuildIds : undefined,
             silent: false,
         });
-        Main._dao = new Sequelize('database', '', '', {
-            host: 'localhost',
-            dialect: 'sqlite',
-            logging: (sql: string, timing: number): void => {
-                if (Main.testMode) {
-                    // console.log(sql, timing);
-                }
-            },
-            storage: 'database.sqlite',
-            models: [__dirname + '/model/DB/**/*.model.{ts,js}'],
-            modelMatch: (filename, member): boolean => {
-                return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
-            }
-        });
-        await Main.dao.sync({force: false});
         await this._client.login(process.env.token);
 
     }

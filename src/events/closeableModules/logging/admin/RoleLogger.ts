@@ -4,6 +4,7 @@ import {ArgsOf, Client, Discord, On} from "discordx";
 import {MessageEmbed, Role, User} from "discord.js";
 import {MemberRoleChange} from "../../../../modules/automod/MemberRoleChange";
 import {GuildManager} from "../../../../model/guild/manager/GuildManager";
+import {container} from "tsyringe";
 
 
 /**
@@ -40,7 +41,8 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         const change = new MemberRoleChange(oldMember, newMember);
         const roleChanges = change.roleChanges;
         const added = roleChanges.add;
-        const guild = await GuildManager.instance.getGuild(oldMember.guild.id);
+        const guildManager = container.resolve(GuildManager);
+        const guild = await guildManager.getGuild(oldMember.guild.id);
         if (added.length > 0) {
             const arr = [];
             for (const roleId of added) {

@@ -7,6 +7,7 @@ import {CommandInteraction, GuildMember, User} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {MuteSingleton} from "./MuteSingleton";
 import {AbstractCommandModule} from "../../AbstractCommandModule";
+import {container} from "tsyringe";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
@@ -139,7 +140,8 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
 
         let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
         try {
-            await MuteSingleton.instance.muteUser(mentionedMember, reason, creatorID, timeout, timeUnit);
+            const muteSingleton = container.resolve(MuteSingleton);
+            await muteSingleton.muteUser(mentionedMember, reason, creatorID, timeout, timeUnit);
             const seconds = TimeUtils.convertToMilli(timeout, timeUnit) / 1000;
             replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
         } catch (e) {

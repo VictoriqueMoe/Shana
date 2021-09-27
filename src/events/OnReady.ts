@@ -12,14 +12,13 @@ import {GuildableModel} from "../model/DB/guild/Guildable.model";
 import {CommandSecurityModel} from "../model/DB/guild/CommandSecurity.model";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {PostableChannelModel} from "../model/DB/guild/PostableChannel.model";
-import {IBannedWordDynoAutoModFilter} from "../model/closeableModules/subModules/dynoAutoMod/IBannedWordDynoAutoModFilter";
-import {ISubModule} from "../model/closeableModules/subModules/ISubModule";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {AutoRole} from "./closeableModules/autoRole/AutoRole";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import * as fs from 'fs';
 import {SettingsManager} from "../model/settings/SettingsManager";
 import {ArgsOf, Discord, DIService, On} from "discordx";
+import {container} from "tsyringe";
 
 const io = require('@pm2/io');
 
@@ -36,6 +35,7 @@ export class OnReady extends BaseDAO<any> {
             }
         });
         const now = Date.now();
+        const muteSingleton = container.resolve(MuteSingleton);
         for (const mute of mutesWithTimers) {
             const mutedRole = await GuildUtils.RoleUtils.getMuteRole(mute.guildId);
             if (!mutedRole) {
@@ -55,14 +55,15 @@ export class OnReady extends BaseDAO<any> {
                 });
             } else {
                 console.log(`Re-creating timed mute for ${mute.username}, time reamining is: ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))}`);
-                MuteSingleton.instance.createTimeout(mute.userId, mute.username, timeLeft, guild, mutedRole.id);
+                muteSingleton.createTimeout(mute.userId, mute.username, timeLeft, guild, mutedRole.id);
             }
         }
     }
 
     private static async cleanCommands(justGuilds: boolean): Promise<void> {
         if (justGuilds) {
-            for (const guild of await GuildManager.instance.getGuilds()) {
+            const guildManager = container.resolve(GuildManager);
+            for (const guild of await guildManager.getGuilds()) {
                 try {
                     await Main.client.clearApplicationCommands(guild.id);
                 } catch {
@@ -79,9 +80,10 @@ export class OnReady extends BaseDAO<any> {
         const guildModels = await GuildableModel.findAll({
             include: [CommandSecurityModel]
         });
+        const guildManager = container.resolve(GuildManager);
         for (const guildModel of guildModels) {
             const guildId = guildModel.guildId;
-            const guild = await GuildManager.instance.getGuild(guildId);
+            const guild = await guildManager.getGuild(guildId);
             const autoRoleModule: AutoRole = DIService.instance.getService(AutoRole);
             const enabled = await autoRoleModule.isEnabled(guildId);
             if (enabled) {
@@ -191,7 +193,7 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(...this.init());
         pArr.push(OnReady.applyEmptyRoles());
         pArr.push(loadClasses(...this.classesToLoad));
-        pArr.push(this.startServer());
+        pArr.push(OnReady.startServer());
         pArr.push(OnReady.loadCustomActions());
         return Promise.all(pArr).then(() => {
             console.log("Bot logged in.");
@@ -263,14 +265,10 @@ export class OnReady extends BaseDAO<any> {
         }
     }
 
-    private isIBannedWordDynoAutoModFilter(module: ISubModule): module is IBannedWordDynoAutoModFilter {
-        return "bannedWords" in module;
-    }
-
-    private async startServer(): Promise<void> {
-        const server = await BotServer.getInstance();
-        const startServer = server.start(4401);
-        Main.botServer = startServer;
+    private static async startServer(): Promise<void> {
+        const botServer = container.resolve(BotServer);
+        await botServer.initClasses();
+        Main.botServer = botServer.start(4401);
     }
 
     private async populateGuilds(): Promise<void> {

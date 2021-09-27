@@ -4,26 +4,19 @@ import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersisten
 import {Guild, GuildMember} from "discord.js";
 import {Main} from "../../../Main";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
-import {GuildManager} from "../../../model/guild/manager/GuildManager";
 import * as schedule from "node-schedule";
 import {Job} from "node-schedule";
+import {singleton} from "tsyringe";
+import {GuildManager} from "../../../model/guild/manager/GuildManager";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
+@singleton()
 export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
     private readonly _mutes: Set<Job>;
 
-    private constructor() {
+    public constructor(private _guildManager: GuildManager) {
         super();
         this._mutes = new Set();
-    }
-
-    private static _instance: MuteSingleton;
-
-    public static get instance(): MuteSingleton {
-        if (!MuteSingleton._instance) {
-            MuteSingleton._instance = new MuteSingleton();
-        }
-        return MuteSingleton._instance;
     }
 
     public async isMuted(user: GuildMember): Promise<boolean> {
@@ -114,7 +107,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
         await userObject.roles.add(muteRoleId);
         if (hasTimeout) {
-            MuteSingleton.instance.createTimeout(blockUserObject.id, blockUserObject.username, millis, user.guild, muteRoleId);
+            this.createTimeout(blockUserObject.id, blockUserObject.username, millis, user.guild, muteRoleId);
         }
         return savedModel;
     }
@@ -163,8 +156,9 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
 
         await member.roles.remove(muteRoleId);
+
         for (const roleId of prevRoles) {
-            const role = await (await GuildManager.instance.getGuild(guildId)).roles.fetch(roleId);
+            const role = await (await this._guildManager.getGuild(guildId)).roles.fetch(roleId);
             console.log(`re-applying role ${role.name} to ${member.user.username}`);
             try {
                 await member.roles.add(role.id);
@@ -190,7 +184,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         try {
             const job = schedule.scheduleJob(userId, newDate, async () => {
                 await Main.dao.transaction(async t => {
-                    await MuteSingleton.instance.doRemove(userId, guild.id, muteRoleId);
+                    await this.doRemove(userId, guild.id, muteRoleId);
                 });
                 DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);
             });

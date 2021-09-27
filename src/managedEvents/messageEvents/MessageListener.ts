@@ -8,6 +8,7 @@ import {Op} from "sequelize";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
 import {notBot} from "../../guards/NotABot";
+import {container} from "tsyringe";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
 const getUrls = require('get-urls');
@@ -115,7 +116,8 @@ export abstract class MessageListener {
             const user = message.author;
             const {id} = user;
             try {
-                const guilds = await GuildManager.instance.getGuilds();
+                const guildManager = container.resolve(GuildManager);
+                const guilds = await guildManager.getGuilds();
                 for (const guild of guilds) {
                     let member: GuildMember = null;
                     let youngAccountRole: Role = null;

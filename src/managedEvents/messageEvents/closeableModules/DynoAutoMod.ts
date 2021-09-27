@@ -14,6 +14,7 @@ import * as Immutable from "immutable";
 import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
 import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
 import {notBot} from "../../../guards/NotABot";
+import {container} from "tsyringe";
 
 export class DynoAutoMod extends CloseableModule<null> {
 
@@ -63,6 +64,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         violatedFilters.sort((a, b) => a.priority - b.priority);
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(message.guild.id);
         const guildid = member.guild.id;
+        const muteSingleton = container.resolve(MuteSingleton);
         outer:
             for (const filter of violatedFilters) {
                 const actionsToTake = filter.actions;
@@ -73,7 +75,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                             if (!mutedRole) {
                                 continue;
                             }
-                            if (await MuteSingleton.instance.isMuted(member)) {
+                            if (await muteSingleton.isMuted(member)) {
                                 continue;
                             }
                             let fromArray = this.getFromArray(userId, guildid);
@@ -147,7 +149,8 @@ export class DynoAutoMod extends CloseableModule<null> {
         if (!user) {
             return;
         }
-        const model = await MuteSingleton.instance.muteUser(user, reason, creatorID, seconds);
+        const muteSingleton = container.resolve(MuteSingleton);
+        const model = await muteSingleton.muteUser(user, reason, creatorID, seconds);
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
             const humanMuted = ObjectUtil.secondsToHuman(seconds);

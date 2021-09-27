@@ -9,13 +9,13 @@ import {SETTINGS} from "../../../enums/SETTINGS";
 import {SettingsManager} from "../../../model/settings/SettingsManager";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
-import {InjectController} from "../../../model/decorators/InjectController";
 import {ModuleController} from "./modules/impl/ModuleController";
 import {CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager";
 import {Typeings} from "../../../model/types/Typeings";
+import {container, singleton} from "tsyringe";
 import CommandArgs = Typeings.CommandArgs;
 
-@InjectController
+@singleton()
 @Controller("api/bot")
 @ChildControllers([
     new ModuleController()
@@ -36,9 +36,10 @@ export class BotController extends baseController {
             return;
         }
         const body: payload = req.body;
+        const muteSingleton = container.resolve(MuteSingleton);
         for (const userId of body) {
             await Main.dao.transaction(async t => {
-                await MuteSingleton.instance.doRemove(userId, guild.id, muteRole.id);
+                await muteSingleton.doRemove(userId, guild.id, muteRole.id);
             });
         }
         return super.ok(res, {});

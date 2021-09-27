@@ -35,6 +35,7 @@ import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
 import {APIInteractionGuildMember, APIMessage} from "discord-api-types";
 import {FindOptions} from "sequelize/types/lib/model";
+import {container} from "tsyringe";
 
 const getUrls = require('get-urls');
 const emojiRegex = require('emoji-regex/es2015/index.js');
@@ -62,7 +63,8 @@ export namespace GuildUtils {
     export namespace RoleUtils {
 
         export async function isValidRole(guildId: string, role: string | Role): Promise<boolean> {
-            const guild = await GuildManager.instance.getGuild(guildId);
+            const guildManager = container.resolve(GuildManager);
+            const guild = await guildManager.getGuild(guildId);
             const roleId = typeof role === "string" ? role : role.id;
             const guildRoles = [...guild.roles.cache.values()];
             for (const guildRole of guildRoles) {
@@ -98,7 +100,8 @@ export namespace GuildUtils {
                 return null;
             }
             try {
-                const guild = await GuildManager.instance.getGuild(guildId);
+                const guildManager = container.resolve(GuildManager);
+                const guild = await guildManager.getGuild(guildId);
                 return guild.roles.fetch(role);
             } catch {
                 return null;
@@ -108,13 +111,15 @@ export namespace GuildUtils {
 
     export async function applyPanicModeRole(member: GuildMember): Promise<void> {
         const guildId = member.guild.id;
-        const guild = await GuildManager.instance.getGuild(guildId);
+        const guildManager = container.resolve(GuildManager);
+        const guild = await guildManager.getGuild(guildId);
         return applyUnverified(member, `Hello, we have detected unusual mass joins on our server recently, we must verify your account before you can access the ${guild.name} Discord Server`, guild, true);
     }
 
     export async function applyYoungAccountConstraint(member: GuildMember, timeout: string): Promise<void> {
         const guildId = member.guild.id;
-        const guild = await GuildManager.instance.getGuild(guildId);
+        const guildManager = container.resolve(GuildManager);
+        const guild = await guildManager.getGuild(guildId);
         return applyUnverified(member, `Hello, as your Discord account is less than ${timeout} old and because of recent scams, we must verify your account before you can access the ${guild.name} Discord Server`, guild);
     }
 
@@ -133,7 +138,8 @@ export namespace GuildUtils {
         }
 
         let message = dmStr;
-        const jailChannel = await ChannelManager.instance.getJailChannel(guild.id);
+        const channelManager = container.resolve(ChannelManager);
+        const jailChannel = await channelManager.getJailChannel(guild.id);
         if (jailChannel) {
             message += `\nPlease post in the #${jailChannel.name} channel for faster verification process`;
         }
@@ -163,7 +169,8 @@ export namespace GuildUtils {
             }
         }
         await member.roles.add(jailRole);
-        const jailChannel = await ChannelManager.instance.getJailChannel(guildId);
+        const channelManager = container.resolve(ChannelManager);
+        const jailChannel = await channelManager.getJailChannel(guildId);
         if (!jailChannel) {
             return;
         }
@@ -199,7 +206,8 @@ export namespace GuildUtils {
     }
 
     export async function getAutoBotIds(guildId: string): Promise<string[]> {
-        const guild = await GuildManager.instance.getGuild(guildId);
+        const guildManager = container.resolve(GuildManager);
+        const guild = await guildManager.getGuild(guildId);
         const membersCollection = guild.members.cache;
         const reArr: string[] = [];
         for (const [id, member] of membersCollection) {
@@ -365,7 +373,8 @@ export namespace DiscordUtils {
     };
 
     export async function getBot(guildId: string): Promise<GuildMember> {
-        const guild = await GuildManager.instance.getGuild(guildId);
+        const guildManager = container.resolve(GuildManager);
+        const guild = await guildManager.getGuild(guildId);
         return guild.me;
     }
 
@@ -579,14 +588,15 @@ export namespace DiscordUtils {
 
     export async function postToLog(message: MessageEmbed[] | string, guildId: string, adminLog: boolean = false): Promise<Message | null> {
         let channel: TextChannel;
+        const channelManager = container.resolve(ChannelManager);
         if (Main.testMode) {
             const guild = await Main.client.guilds.fetch(guildId);
             channel = await guild.channels.resolve(Channels.TEST_CHANNEL) as TextChannel;
         } else if (adminLog) {
             // channel = await guild.channels.resolve(Channels.ADMIN_LOG) as TextChannel;
-            channel = await ChannelManager.instance.getAdminLogChannel(guildId);
+            channel = await channelManager.getAdminLogChannel(guildId);
         } else {
-            channel = await ChannelManager.instance.getLogChannel(guildId);
+            channel = await channelManager.getLogChannel(guildId);
         }
         if (channel == null) {
             return Promise.resolve(null);
@@ -605,6 +615,9 @@ export namespace DiscordUtils {
      */
     export async function getAuditLogEntry(type: GuildAuditLogsAction, guild: Guild): Promise<GuildAuditLogsEntry> {
         const fetchedAuditLog = await getAuditLogEntries(type, guild);
+        if (!fetchedAuditLog) {
+            return null;
+        }
         const logEntry = fetchedAuditLog.entries.first();
         if (!logEntry) {
             return null;

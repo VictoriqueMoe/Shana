@@ -6,6 +6,7 @@ import {DiscordUtils} from "../../utils/Utils";
 import {CommandInteraction, GuildMember, User} from "discord.js";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {AbstractCommandModule} from "../AbstractCommandModule";
+import {container} from "tsyringe";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -118,7 +119,8 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
             return InteractionUtils.replyWithText(interaction, "Unable to find user", false);
         }
         const guildId = interaction.guild.id;
-        const guild = await GuildManager.instance.getGuild(guildId);
+        const guildManager = container.resolve(GuildManager);
+        const guild = await guildManager.getGuild(guildId);
         const bot = await DiscordUtils.getBot(guild.id);
         const botHighestRole = bot.roles.highest;
         const roleOfMember = mentionedMember.roles.highest;

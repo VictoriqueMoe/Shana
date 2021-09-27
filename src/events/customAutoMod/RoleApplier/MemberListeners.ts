@@ -7,6 +7,7 @@ import {GuildMember, Role} from "discord.js";
 import {AbstractRoleApplier} from "./AbstractRoleApplier";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
 import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
+import {container} from "tsyringe";
 
 @Discord()
 export class MemberListeners extends BaseDAO<RolePersistenceModel> {
@@ -29,7 +30,8 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
         // mute was removed, so clear the timeout and mute Model if one exists
         if (didRemove) {
             try {
-                await MuteSingleton.instance.doRemove(newUser.id, newUser.guild.id, mutedRole.id, true);
+                const muteSingleton = container.resolve(MuteSingleton);
+                await muteSingleton.doRemove(newUser.id, newUser.guild.id, mutedRole.id, true);
             } catch {
             }
         }

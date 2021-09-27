@@ -3,19 +3,13 @@ import {PostableChannelModel} from "../../DB/guild/PostableChannel.model";
 import {TextChannel} from "discord.js";
 import {ObjectUtil} from "../../../utils/Utils";
 import {GuildManager} from "./GuildManager";
+import {singleton} from "tsyringe";
 
+@singleton()
 export class ChannelManager extends BaseDAO<PostableChannelModel> {
-    private constructor() {
+
+    public constructor(private _guildManager: GuildManager) {
         super();
-    }
-
-    private static _instance: ChannelManager;
-
-    public static get instance(): ChannelManager {
-        if (!ChannelManager._instance) {
-            ChannelManager._instance = new ChannelManager();
-        }
-        return ChannelManager._instance;
     }
 
     private static getModel(guildId: string, attra: "logChannel" | "AdminLogchannel" | "JailChannel"): Promise<PostableChannelModel> {
@@ -47,7 +41,7 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
             return null;
         }
         const channelId = model.logChannel;
-        const guild = await GuildManager.instance.getGuild(guildId);
+        const guild = await this._guildManager.getGuild(guildId);
         const channel = guild.channels.resolve(channelId);
         if (channel instanceof TextChannel) {
             return channel;
@@ -61,7 +55,7 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
             return null;
         }
         const channelId = model.AdminLogchannel;
-        const guild = await GuildManager.instance.getGuild(guildId);
+        const guild = await this._guildManager.getGuild(guildId);
         const channel = await guild.channels.resolve(channelId);
         if (channel instanceof TextChannel) {
             return channel;
@@ -75,7 +69,7 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
             return null;
         }
         const channelId = model.JailChannel;
-        const guild = await GuildManager.instance.getGuild(guildId);
+        const guild = await this._guildManager.getGuild(guildId);
         const channel = await guild.channels.resolve(channelId);
         if (channel instanceof TextChannel) {
             return channel;
