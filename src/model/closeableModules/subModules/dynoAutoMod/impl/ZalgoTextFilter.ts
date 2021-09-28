@@ -1,12 +1,11 @@
-import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
-import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {Message} from "discord.js";
 import {ObjectUtil} from "../../../../../utils/Utils";
+import {singleton} from "tsyringe";
 
-@InjectDynoSubModule(DynoAutoMod)
+@singleton()
 export class ZalgoTextFilter extends AbstractFilter {
 
     public get actions(): ACTION[] {

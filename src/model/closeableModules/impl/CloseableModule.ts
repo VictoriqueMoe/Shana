@@ -10,6 +10,7 @@ import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {GuildMember, TextBasedChannels} from "discord.js";
 import {Roles} from "../../../enums/Roles";
 import {CloseOptionModel} from "../../DB/autoMod/impl/CloseOption.model";
+import {container} from "tsyringe";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<ICloseOption> implements ICloseableModule<T> {
@@ -17,13 +18,14 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
     private _isEnabled: Map<string, boolean | null>;
 
     private _settings: Map<string, T | null>;
+    private readonly _subModuleManager: SubModuleManager;
 
-    // @ts-ignore
-    protected constructor(private _model: typeof ICloseOption, private _uid: string) {
+    protected constructor(private _model: typeof CloseOptionModel, private _uid: string) {
         super();
         Main.closeableModules.add(this);
         this._settings = new Map();
         this._isEnabled = new Map();
+        this._subModuleManager = container.resolve(SubModuleManager);
     }
 
     public abstract get moduleId(): string;
@@ -31,7 +33,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
     public abstract get isDynoReplacement(): boolean;
 
     public get submodules(): Immutable.Set<ISubModule> {
-        return SubModuleManager.instance.getSubModulesFromParent(this);
+        return this._subModuleManager.getSubModulesFromParent(this);
     }
 
     public get uid(): string {

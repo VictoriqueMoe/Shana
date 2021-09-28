@@ -2,6 +2,7 @@ import {BaseDAO} from "../../DAO/BaseDAO";
 import {SettingsModel} from "../DB/Settings.model";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {ArrayUtils} from "../../utils/Utils";
+import {singleton} from "tsyringe";
 
 export type ALL_SETTINGS_TYPE = {
     [key in keyof typeof SETTINGS]?: string
@@ -10,23 +11,15 @@ export type ALL_SETTINGS_TYPE = {
 /**
  * ideally this will user super dao for retrieving and saving settings
  */
+@singleton()
 export class SettingsManager extends BaseDAO<SettingsModel> {
     private readonly _cache: Map<string, ALL_SETTINGS_TYPE>;
 
-    private constructor() {
+    public constructor() {
         super();
         this._cache = new Map();
     }
 
-    private static _instance: SettingsManager;
-
-    public static get instance(): SettingsManager {
-        if (!SettingsManager._instance) {
-            SettingsManager._instance = new SettingsManager();
-        }
-
-        return SettingsManager._instance;
-    }
 
     public refresh(): void {
         this._cache.clear();

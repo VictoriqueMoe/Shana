@@ -1,3 +1,3 @@
-export function moduleRegistrar(): void {
+export async function moduleRegistrar(): Promise<void> {
 
 }

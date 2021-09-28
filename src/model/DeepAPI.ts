@@ -1,23 +1,16 @@
 import {Typeings} from "./types/Typeings";
+import {singleton} from "tsyringe";
 import SenimentTypes = Typeings.DEEP_AI.SenimentTypes;
 import ImageSimilarity = Typeings.DEEP_AI.ImageSimilarity;
 import TextGeneration = Typeings.DEEP_AI.TextGeneration;
 
 const deepai = require('deepai');
 
+@singleton()
 export class DeepAPI {
 
-    private constructor() {
+    public constructor() {
         deepai.setApiKey(process.env.deepapi);
-    }
-
-    private static _instance: DeepAPI;
-
-    public static get instance(): DeepAPI {
-        if (!DeepAPI._instance) {
-            DeepAPI._instance = new DeepAPI();
-        }
-        return DeepAPI._instance;
     }
 
     public sentimentAnalysis(statement: string): Promise<SenimentTypes> {

@@ -6,15 +6,20 @@ import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {AbstractCommandModule} from "../../../commands/AbstractCommandModule";
 import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
+import {singleton} from "tsyringe";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
+@singleton()
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
-    private readonly commandClasses: AbstractCommandModule<any> [];
+    private commandClasses: AbstractCommandModule<any> [];
 
-    private constructor() {
+    public constructor() {
         super();
+    }
+
+    public init(): void {
         // @ts-ignore
-        const allCommands: Map = DIService.instance._services;
+        const allCommands: Map<any, any> = DIService.instance._services;
         //TODO: maybe use MetadataStorage.instance.applicationCommands
         this.commandClasses = [];
         for (const [, instance] of allCommands) {
@@ -25,15 +30,6 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
                 this.commandClasses.push(instance);
             }
         }
-    }
-
-    private static _instance: CommandSecurityManager;
-
-    public static get instance(): CommandSecurityManager {
-        if (!CommandSecurityManager._instance) {
-            CommandSecurityManager._instance = new CommandSecurityManager();
-        }
-        return CommandSecurityManager._instance;
     }
 
     public get runnableCommands(): AbstractCommandModule<any>[] {

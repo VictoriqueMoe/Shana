@@ -1,20 +1,10 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {AutoResponderModel} from "../../DB/autoMod/impl/AutoResponder.model";
 import {Main} from "../../../Main";
+import {singleton} from "tsyringe";
 
+@singleton()
 export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
-    private constructor() {
-        super();
-    }
-
-    private static _instance: AutoResponderManager;
-
-    public static get instance(): AutoResponderManager {
-        if (!AutoResponderManager._instance) {
-            AutoResponderManager._instance = new AutoResponderManager();
-        }
-        return AutoResponderManager._instance;
-    }
 
     public async editAutoResponder(obj: AutoResponderModel, currentTitle: string): Promise<AutoResponderModel> {
         return Main.dao.transaction(async t => {

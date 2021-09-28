@@ -10,11 +10,12 @@ import {AssertionError} from "assert";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {container} from "tsyringe";
 
 @Discord()
 export abstract class Meme extends AbstractCommandModule<any> {
 
-    private handler = ImageFun.instance;
+    private handler = container.resolve(ImageFun);
 
     constructor() {
         super(

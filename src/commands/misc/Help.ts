@@ -5,9 +5,9 @@ import {GuildMember, MessageEmbed} from "discord.js";
 import {Main} from "../../Main";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import {SETTINGS} from "../../enums/SETTINGS";
-import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
 import {Typeings} from "../../model/types/Typeings";
 import {AbstractCommandModule} from "../AbstractCommandModule";
+import {container} from "tsyringe";
 
 @Discord()
 export class Help extends AbstractCommandModule<any> {
@@ -60,13 +60,14 @@ export class Help extends AbstractCommandModule<any> {
         }
         const member = message.member;
         const botImage = Main.client.user.displayAvatarURL({dynamic: true});
-        const prefix = await SettingsManager.instance.getSetting(SETTINGS.PREFIX, member.guild.id);
+        const settingsManager = container.resolve(SettingsManager);
+        const prefix = await settingsManager.getSetting(SETTINGS.PREFIX, member.guild.id);
         const highestRoleColour = member.roles.highest.hexColor;
         const embed = new MessageEmbed()
             .setColor(highestRoleColour)
             .setAuthor(`${Main.client.user.username}`, botImage)
             .setTimestamp();
-        const availableModules = await CommandSecurityManager.instance.getCommandModulesForMember(member);
+        const availableModules = await this._securityManager.getCommandModulesForMember(member);
         if (!ArrayUtils.isValidArray(argumentArray)) {
             embed.setDescription(`The items shown below are all the modules supported by this bot, please run '${prefix} help "moduleName"' to see commands for modules and '${prefix} help "moduleName" "commandName"' for argument info`);
             embed.setTitle(`${Main.client.user.username} modules`);
@@ -156,7 +157,7 @@ export class Help extends AbstractCommandModule<any> {
         const resultOfPage = chunks[pageNumber - 1];
         for (const command of resultOfPage) {
             const {name, description, deprecated} = command;
-            if (!await CommandSecurityManager.instance.canRunCommand(member, name)) {
+            if (!await this._securityManager.canRunCommand(member, name)) {
                 continue;
             }
             let fieldValue = "No description";

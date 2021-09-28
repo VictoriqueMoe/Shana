@@ -14,8 +14,9 @@ import * as Immutable from "immutable";
 import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
 import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
 import {notBot} from "../../../guards/NotABot";
-import {container} from "tsyringe";
+import {container, singleton} from "tsyringe";
 
+@singleton()
 export class DynoAutoMod extends CloseableModule<null> {
 
     private static _uid = ObjectUtil.guid();

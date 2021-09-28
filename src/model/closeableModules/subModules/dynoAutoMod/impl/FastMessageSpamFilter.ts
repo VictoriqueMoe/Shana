@@ -4,19 +4,17 @@ import {TimedSet} from "../../../../Impl/TimedSet";
 import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
 import {ObjectUtil} from "../../../../../utils/Utils";
-import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {ICloseableModule} from "../../../ICloseableModule";
-import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import * as Immutable from "immutable";
+import {singleton} from "tsyringe";
 
-@InjectDynoSubModule(DynoAutoMod)
+@singleton()
 export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
 
-    public constructor(parentFilter: ICloseableModule<any>) {
-        super(parentFilter);
+    public constructor() {
+        super();
         this._cooldownArray = new TimedSet(5000);
     }
 

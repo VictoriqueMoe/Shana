@@ -59,6 +59,7 @@ export function loadClasses(...paths: string[]): Promise<any[]> {
 
 export namespace GuildUtils {
     export const vicBotId = "806288433323966514";
+    const settingsManager = container.resolve(SettingsManager);
 
     export namespace RoleUtils {
 
@@ -95,7 +96,7 @@ export namespace GuildUtils {
         }
 
         async function getRole(guildId: string, setting: SETTINGS): Promise<Role | null> {
-            const role = await SettingsManager.instance.getSetting(setting, guildId);
+            const role = await settingsManager.getSetting(setting, guildId);
             if (!ObjectUtil.validString(role)) {
                 return null;
             }
@@ -675,17 +676,6 @@ export namespace DiscordUtils {
             }
         }
         return null;
-    }
-
-    export function getDynoReplacementModules(): ICloseableModule<any>[] {
-        const modules = Main.closeableModules;
-        const returnArr: ICloseableModule<any>[] = [];
-        for (const module of modules) {
-            if (module.isDynoReplacement) {
-                returnArr.push(module);
-            }
-        }
-        return returnArr;
     }
 }
 

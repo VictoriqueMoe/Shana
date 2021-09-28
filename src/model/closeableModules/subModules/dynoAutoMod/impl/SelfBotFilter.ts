@@ -1,14 +1,13 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {ObjectUtil} from "../../../../../utils/Utils";
+import {singleton} from "tsyringe";
 
 const getUrls = require('get-urls');
 
-@InjectDynoSubModule(DynoAutoMod)
+@singleton()
 export class SelfBotFilter extends AbstractFilter {
 
     public get actions(): ACTION[] {

@@ -9,6 +9,7 @@ import {Response} from "../../model/anime/AnimeTypings";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DeepAPI} from "../../model/DeepAPI";
+import {container} from "tsyringe";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const Anilist = require('anilist-node');
@@ -122,7 +123,8 @@ export class Misc extends AbstractCommandModule<any> {
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
-        const resp = await DeepAPI.instance.textGeneration(value);
+        const deepAPI = container.resolve(DeepAPI);
+        const resp = await deepAPI.textGeneration(value);
         await InteractionUtils.editWithText(interaction, resp);
     }
 
@@ -144,7 +146,8 @@ export class Misc extends AbstractCommandModule<any> {
             message.reply(`Command arguments wrong, usage: ~posOrNeg "text" or reference a message with text`);
             return;
         }
-        const resp = await DeepAPI.instance.sentimentAnalysis(text);
+        const deepAPI = container.resolve(DeepAPI);
+        const resp = await deepAPI.sentimentAnalysis(text);
         message.reply(`This message is ${resp}`);
     }
 

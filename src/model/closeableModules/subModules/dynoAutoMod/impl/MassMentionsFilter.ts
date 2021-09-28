@@ -1,12 +1,11 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
+import {singleton} from "tsyringe";
 
-@InjectDynoSubModule(DynoAutoMod)
+@singleton()
 export class MassMentionsFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
 
     public get actions(): ACTION[] {

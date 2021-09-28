@@ -2,12 +2,11 @@ import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {GuildMember, Message} from "discord.js";
 import {BannedWordEntryies, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
-import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {GuildUtils} from "../../../../../utils/Utils";
+import {singleton} from "tsyringe";
 
-@InjectDynoSubModule(DynoAutoMod)
+@singleton()
 export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoAutoModFilter {
 
     public get actions(): ACTION[] {

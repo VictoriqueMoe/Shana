@@ -9,6 +9,7 @@ import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
 import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction} from "discord.js";
+import {container} from "tsyringe";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 enum SAVABLE_SETTINGS {
@@ -86,7 +87,8 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 if (!theRole) {
                     return InteractionUtils.replyWithText(interaction, `Unable to find role with id ${value}`);
                 }
-                await SettingsManager.instance.saveOrUpdateSetting(setting as SETTINGS, value, guildId);
+                const settingsManager = container.resolve(SettingsManager);
+                await settingsManager.saveOrUpdateSetting(setting as SETTINGS, value, guildId);
                 break;
             }
             case SAVABLE_SETTINGS.massJoinProtection:

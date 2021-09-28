@@ -9,22 +9,12 @@ import {
 } from "./Typeings";
 import {URLSearchParams} from "url";
 import fetch from 'node-fetch';
+import {singleton} from "tsyringe";
 
+@singleton()
 export class ImageFun {
     private readonly token: string = process.env.amethysteToken;
     private readonly baseUrl: string = "https://v1.api.amethyste.moe";
-
-    private constructor() {
-    }
-
-    private static _instance: ImageFun;
-
-    public static get instance(): ImageFun {
-        if (!ImageFun._instance) {
-            ImageFun._instance = new ImageFun();
-        }
-        return ImageFun._instance;
-    }
 
     private get authHeader(): Record<string, string> {
         return {

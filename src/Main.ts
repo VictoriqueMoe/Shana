@@ -13,6 +13,7 @@ import {Dropbox} from "dropbox";
 import {Player} from "discord-music-player";
 import {GuildableModel} from "./model/DB/guild/Guildable.model";
 import {moduleRegistrar} from "./DI/moduleRegistrar";
+import {container} from "tsyringe";
 // const https = require('http-debug').https;
 // https.debug = 1;
 const io = require('@pm2/io');
@@ -47,7 +48,8 @@ export class CloseableModuleSet extends Set<CloseableModule<any>> {
 
 export async function getPrefix(message: Message): Promise<string> {
     const guildId = message?.guild?.id ?? "~";
-    return SettingsManager.instance.getSetting(SETTINGS.PREFIX, guildId);
+    const settingsManager = container.resolve(SettingsManager);
+    return settingsManager.getSetting(SETTINGS.PREFIX, guildId);
 }
 
 export class Main {
@@ -80,7 +82,7 @@ export class Main {
     public static async start(): Promise<void> {
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
-        moduleRegistrar();
+        await moduleRegistrar();
         Main.dbx = new Dropbox({accessToken: process.env.dropboxToken});
         Main._dao = new Sequelize('database', '', '', {
             host: 'localhost',
@@ -134,6 +136,7 @@ export class Main {
         const guilds = this.client.guilds;
         const cache = guilds.cache;
         const nameValue = EnumEx.getNamesAndValues(DEFAULT_SETTINGS) as any;
+        const settingsManager = container.resolve(SettingsManager);
         for (const [guildId] of cache) {
             for (const keyValuesObj of nameValue) {
                 const setting: SETTINGS = keyValuesObj.name;
@@ -141,7 +144,7 @@ export class Main {
                 if (!ObjectUtil.validString(value)) {
                     value = null;
                 }
-                await SettingsManager.instance.saveOrUpdateSetting(setting, value, guildId, true);
+                await settingsManager.saveOrUpdateSetting(setting, value, guildId, true);
             }
         }
     }

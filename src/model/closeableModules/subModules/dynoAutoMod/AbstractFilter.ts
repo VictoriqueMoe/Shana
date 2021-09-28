@@ -11,9 +11,15 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
     abstract readonly isActive: boolean;
     abstract readonly warnMessage: string;
     abstract readonly priority: number;
+    private _parentModule: ICloseableModule<null>;
 
-    protected constructor(protected _parentModule: ICloseableModule<null>) {
 
+    public set parentModule(parentModule: ICloseableModule<null>) {
+        this._parentModule = parentModule;
+    }
+
+    public get parentModule(): ICloseableModule<null> {
+        return this._parentModule;
     }
 
     /**
@@ -38,10 +44,6 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
      */
     public static get muteViolationTimeout(): number {
         return 15; //  hard-coded for now
-    }
-
-    public get parentModule(): ICloseableModule<null> {
-        return this._parentModule;
     }
 
     public abstract postProcess(member: Message): Promise<void>;

@@ -10,7 +10,6 @@ import {MuteSingleton} from "../commands/customAutoMod/userBlock/MuteSingleton";
 import {BotServer} from "../api/BotServer";
 import {GuildableModel} from "../model/DB/guild/Guildable.model";
 import {CommandSecurityModel} from "../model/DB/guild/CommandSecurity.model";
-import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {PostableChannelModel} from "../model/DB/guild/PostableChannel.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {AutoRole} from "./closeableModules/autoRole/AutoRole";
@@ -19,6 +18,8 @@ import * as fs from 'fs';
 import {SettingsManager} from "../model/settings/SettingsManager";
 import {ArgsOf, Discord, DIService, On} from "discordx";
 import {container} from "tsyringe";
+import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
+import {registerAfterDiscordTs} from "../DI/registerAfterDiscordTs";
 
 const io = require('@pm2/io');
 
@@ -133,7 +134,8 @@ export class OnReady extends BaseDAO<any> {
         });
 
         io.action('Refresh settings cache', async (cb) => {
-            SettingsManager.instance.refresh();
+            const settingsManager = container.resolve(SettingsManager);
+            settingsManager.refresh();
             return cb("Settings refreshed");
         });
 
@@ -183,11 +185,13 @@ export class OnReady extends BaseDAO<any> {
         } else {
             await Main.client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
         }
+        registerAfterDiscordTs();
+        const vicDropbox = container.resolve(VicDropbox);
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
-        // await OnReady.cleanCommands();
+        // await OnReady.cleanCommands(true);
         Main.initMusicPlayer();
-        pArr.push(VicDropbox.instance.index());
+        pArr.push(vicDropbox.index());
         pArr.push(OnReady.initiateMuteTimers());
         pArr.push(this.initUsernames());
         pArr.push(...this.init());
@@ -290,11 +294,13 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private async populateCommandSecurity(): Promise<void> {
-        async function addNewCommands(guildModels: GuildableModel[]): Promise<void> {
+        const securityManager = container.resolve(CommandSecurityManager);
+
+        async function addNewCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
             for (const guildModel of guildModels) {
                 const guildId = guildModel.guildId;
                 const commandSecurity = guildModel.commandSecurityModel;
-                const allCommands = CommandSecurityManager.instance.runnableCommands;
+                const allCommands = securityManager.runnableCommands;
                 await Main.dao.transaction(async t => {
                     const models: {
                         commandName: string, guildId: string
@@ -317,11 +323,11 @@ export class OnReady extends BaseDAO<any> {
             }
         }
 
-        async function removeOldCommands(guildModels: GuildableModel[]): Promise<void> {
+        async function removeOldCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
             for (const guildModel of guildModels) {
                 const {guildId} = guildModel;
                 const commandSecurity = guildModel.commandSecurityModel;
-                const allCommands = CommandSecurityManager.instance.runnableCommands;
+                const allCommands = securityManager.runnableCommands;
                 const commandsToDestory: string[] = [];
                 for (const {commandName} of commandSecurity) {
                     let found = false;
@@ -351,8 +357,8 @@ export class OnReady extends BaseDAO<any> {
         const guilds = await GuildableModel.findAll({
             include: [CommandSecurityModel]
         });
-        await addNewCommands(guilds);
-        await removeOldCommands(guilds);
+        await addNewCommands.call(this, guilds);
+        await removeOldCommands.call(this, guilds);
     }
 
     private async populatePostableChannels(): Promise<void> {

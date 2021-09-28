@@ -6,12 +6,14 @@ import {Message} from "discord.js";
 import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
 import {AutoResponderManager} from "../../../model/guild/manager/AutoResponderManager";
 import {notBot} from "../../../guards/NotABot";
+import {singleton} from "tsyringe";
 
+@singleton()
 export class AutoResponder extends TriggerConstraint<null> {
 
     private static _uid = ObjectUtil.guid();
 
-    constructor() {
+    constructor(private _autoResponderManager: AutoResponderManager) {
         super(CloseOptionModel, AutoResponder._uid);
     }
 
@@ -30,7 +32,7 @@ export class AutoResponder extends TriggerConstraint<null> {
         if (!await this.canRun(guildId, null, channel)) {
             return;
         }
-        const allRespondObjects = await AutoResponderManager.instance.getAllAutoResponders(guildId);
+        const allRespondObjects = await this._autoResponderManager.getAllAutoResponders(guildId);
         const messageContent = message.content?.trim().toLowerCase();
         if (!ObjectUtil.validString(messageContent) || !ArrayUtils.isValidArray(allRespondObjects)) {
             return;

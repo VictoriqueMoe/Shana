@@ -1,21 +1,19 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
 import {TimedSet} from "../../../../Impl/TimedSet";
-import {ICloseableModule} from "../../../ICloseableModule";
+import {singleton} from "tsyringe";
 
 const getUrls = require('get-urls');
 
-@InjectDynoSubModule(DynoAutoMod)
+@singleton()
 export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
     private readonly _cooldownArray: TimedSet<LinkCooldownEntry>;
 
-    public constructor(parentFilter: ICloseableModule<any>) {
-        super(parentFilter);
+    public constructor() {
+        super();
         this._cooldownArray = new TimedSet(Number.parseInt(this.value) * 1000);
     }
 

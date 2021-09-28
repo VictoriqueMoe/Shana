@@ -129,13 +129,14 @@ export class BotController extends baseController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
-        const commandClasses = CommandSecurityManager.instance.runnableCommands;
+        const securityManager = container.resolve(CommandSecurityManager);
+        const commandClasses = securityManager.runnableCommands;
         const retObj: CommandArgs[] = [];
         for (const commandModule of commandClasses) {
             const {commandDescriptors} = commandModule;
             for (const command of commandDescriptors.commands) {
                 const {name} = command;
-                command["enabled"] = await CommandSecurityManager.instance.isEnabled(name, guild.id);
+                command["enabled"] = await securityManager.isEnabled(name, guild.id);
             }
             retObj.push(commandDescriptors);
         }
@@ -169,7 +170,8 @@ export class BotController extends baseController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
-        const settingValue = await SettingsManager.instance.getSetting(settingEnum, guild.id);
+        const settingsManager = container.resolve(SettingsManager);
+        const settingValue = await settingsManager.getSetting(settingEnum, guild.id);
         return super.ok(res, {
             [setting]: settingValue
         });

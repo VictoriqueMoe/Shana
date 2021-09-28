@@ -1,11 +1,13 @@
 import {files} from "dropbox";
 import {Main} from "../../Main";
+import {singleton} from "tsyringe";
 
+@singleton()
 export class VicDropbox {
     private isIndexed = false;
     private imageCache: files.FolderMetadataReference[];
 
-    private constructor() {
+    public constructor() {
         this.imageCache = [];
         this.isIndexed = false;
         const handler = {
@@ -26,16 +28,6 @@ export class VicDropbox {
             }
         };
         return new Proxy(this, handler);
-    }
-
-    private static _instance: VicDropbox;
-
-    public static get instance(): VicDropbox {
-        if (!VicDropbox._instance) {
-            VicDropbox._instance = new VicDropbox();
-        }
-
-        return VicDropbox._instance;
     }
 
     /**

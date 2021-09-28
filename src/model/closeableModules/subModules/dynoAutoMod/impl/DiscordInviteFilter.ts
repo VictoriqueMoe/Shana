@@ -1,11 +1,10 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
-import {InjectDynoSubModule} from "../../../../decorators/InjectDynoSubModule";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {DynoAutoMod} from "../../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
+import {singleton} from "tsyringe";
 
-@InjectDynoSubModule(DynoAutoMod)
+@singleton()
 export class DiscordInviteFilter extends AbstractFilter {
 
     public get actions(): ACTION[] {

@@ -1,5 +1,5 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {DiscordUtils, GuildUtils} from "../../../utils/Utils";
+import {GuildUtils} from "../../../utils/Utils";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {BaseDAO} from "../../../DAO/BaseDAO";
@@ -39,8 +39,7 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
 
     @On("guildMemberUpdate")
     private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
-        const module = DiscordUtils.getModule("DynoAutoMod");
-        const filter: BannedWordFilter = module.submodules.find(m => m instanceof BannedWordFilter) as BannedWordFilter;
+        const filter: BannedWordFilter = container.resolve(BannedWordFilter);
         if (!filter.isActive) {
             return;
         }

@@ -60,8 +60,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (await this.doPanic(member, settings)) {
             return;
         }
-        const module = DiscordUtils.getModule("DynoAutoMod");
-        const filter: BannedWordFilter = module.submodules.find(m => m instanceof BannedWordFilter) as BannedWordFilter;
+        const filter: BannedWordFilter = container.resolve(BannedWordFilter);
         if (filter.isActive && await filter.checkUsername(member)) {
             return;
         }

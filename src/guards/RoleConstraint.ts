@@ -3,6 +3,7 @@ import {GuardFunction, SimpleCommandMessage} from "discordx";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {getPrefix} from "../Main";
 import {CommandInteraction, GuildMember} from "discord.js";
+import {container} from "tsyringe";
 
 export const secureCommandInteraction: GuardFunction<CommandInteraction | SimpleCommandMessage> = async (arg, client, next) => {
     let commandName = "";
@@ -31,8 +32,9 @@ export const secureCommandInteraction: GuardFunction<CommandInteraction | Simple
         }
         return;
     }
-    const canRun = await CommandSecurityManager.instance.canRunCommand(member, commandName);
-    const isEnabled = await CommandSecurityManager.instance.isEnabled(commandName, guildId);
+    const securityManager = container.resolve(CommandSecurityManager);
+    const canRun = await securityManager.canRunCommand(member, commandName);
+    const isEnabled = await securityManager.isEnabled(commandName, guildId);
     if (canRun && isEnabled) {
         return next();
     }

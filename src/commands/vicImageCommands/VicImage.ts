@@ -5,6 +5,7 @@ import {AbstractCommandModule} from "../AbstractCommandModule";
 import {Main} from "../../Main";
 import {CommandInteraction} from "discord.js";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {container} from "tsyringe";
 
 @Discord()
 @SlashGroup("VicImage", "Obtain images of Victorique#0002")
@@ -42,7 +43,8 @@ export abstract class VicImage extends AbstractCommandModule<any> {
     private async vicImage(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const channel = interaction.channel;
-        const randomImageMetadata = VicDropbox.instance.randomImage;
+        const vicDropbox = container.resolve(VicDropbox);
+        const randomImageMetadata = vicDropbox.randomImage;
         const randomImage = (await Main.dropBox.filesDownload({"path": randomImageMetadata.path_lower})).result;
         const buffer: Buffer = (randomImage as any).fileBinary;
         try {
@@ -67,9 +69,10 @@ export abstract class VicImage extends AbstractCommandModule<any> {
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async vicReIndex(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
-        await VicDropbox.instance.index();
+        const vicDropbox = container.resolve(VicDropbox);
+        await vicDropbox.index();
         await interaction.editReply({
-            content: `Re-indexed ${VicDropbox.instance.allImages.length} images from Dropbox`
+            content: `Re-indexed ${vicDropbox.allImages.length} images from Dropbox`
         });
     }
 }
