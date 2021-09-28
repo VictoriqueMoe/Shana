@@ -1,6 +1,7 @@
 import {EditType, EventTriggerCondition} from "../types/Typeings";
 import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventDispatcher";
 import {MessageEntry} from "../../events/eventDispatcher/MessageEntry";
+import {container} from "tsyringe";
 
 /**
  * signals this method to be triggered on a message event.
@@ -26,7 +27,7 @@ export function MessageListenerDecorator(triggerOnEdit: boolean = false, ...cond
         if (context) {
             map.get(context).push(entry);
         } else {
-            context = new constructor();
+            context = container.resolve(constructor);
             map.set(context, [entry]);
         }
     };

@@ -8,6 +8,7 @@ import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner";
 import {Main} from "../../Main";
 import {DirResult} from "tmp";
 import {notBot} from "../../guards/NotABot";
+import {singleton} from "tsyringe";
 import ffmpeg = require("ffmpeg");
 
 const getUrls = require('get-urls');
@@ -18,6 +19,7 @@ const {basename, join} = require('path');
 const sanitize = require('sanitize-filename');
 const md5 = require('md5');
 
+@singleton()
 export class ResourceListener {
     private static readonly MAX_SIZE_BYTES: number = 10485760;
 

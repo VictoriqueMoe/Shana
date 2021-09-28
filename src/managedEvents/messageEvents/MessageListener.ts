@@ -8,15 +8,15 @@ import {Op} from "sequelize";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
 import {notBot} from "../../guards/NotABot";
-import {container} from "tsyringe";
+import {container, singleton} from "tsyringe";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
 const getUrls = require('get-urls');
 
 const md5 = require('md5');
 
-
-export abstract class MessageListener {
+@singleton()
+export class MessageListener {
 
     /*@On("message")
     @Guard(NotBot, PremiumChannelOnlyCommand, BlockGuard)
