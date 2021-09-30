@@ -66,13 +66,14 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         }
 
         const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", oldMember.guild);
-        const {executor, target} = auditEntry;
-        if (target instanceof User) {
-            if (target.id === newMember.id) {
-                embed.addField("Modified by", executor.tag);
+        if (auditEntry) {
+            const {executor, target} = auditEntry;
+            if (target instanceof User) {
+                if (target.id === newMember.id) {
+                    embed.addField("Modified by", executor.tag);
+                }
             }
         }
-
         super.postToLog(embed, newMember.guild.id);
     }
 
