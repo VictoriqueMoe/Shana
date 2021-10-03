@@ -48,7 +48,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
         });
     }
 
-    @Slash("enableModule", {
+    @Slash("enablemodule", {
         description: "Enable a module to run. These modules are designed to be shut down and started dynamically"
     })
     @Guard(secureCommandInteraction)
@@ -84,7 +84,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
         }
     }
 
-    @Slash("getModuleNames", {
+    @Slash("getmodulenames", {
         description: "Return a list of all modules to use with the 'enableModule' command"
     })
     @Guard(secureCommandInteraction)

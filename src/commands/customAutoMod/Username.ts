@@ -10,7 +10,7 @@ import {container} from "tsyringe";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-@SlashGroup("Username", "Commands to set usernames for people")
+@SlashGroup("username", "Commands to set usernames for people")
 export abstract class Username extends AbstractCommandModule<UsernameModel> {
 
     protected constructor() {
@@ -60,7 +60,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
     }
 
 
-    @Slash("viewUsernames", {
+    @Slash("viewusernames", {
         description: "View all the persisted usernames this bot is aware of"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
@@ -97,17 +97,17 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async setUsername(
-        @SlashOption("User", {
+        @SlashOption("user", {
             description: "The user you want to change nickname",
             required: true
         })
             mentionedMember: User,
-        @SlashOption("newNickname", {
+        @SlashOption("newnickname", {
             description: "The new nickname for the user",
             required: true
         })
             usernameToPersist: string,
-        @SlashOption("blockChanges", {
+        @SlashOption("blockchanges", {
             description: "Block this username from being changed by another other than staff members",
             required: false
         })

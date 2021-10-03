@@ -207,7 +207,7 @@ export class OnReady extends BaseDAO<any> {
         });
     }
 
-    private static async initAppCommands(): Promise<[void[], void]> {
+    private static async initAppCommands(): Promise<void> {
         return Main.client.initApplicationCommands();
     }
 

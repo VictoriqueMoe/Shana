@@ -16,7 +16,7 @@ import {DiscordUtils} from "../../utils/Utils";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-@SlashGroup("Music", "Commands to play music from Youtube")
+@SlashGroup("music", "Commands to play music from Youtube")
 export class Music extends AbstractCommandModule<any> {
     constructor() {
         super({
@@ -62,7 +62,7 @@ export class Music extends AbstractCommandModule<any> {
         return Main.player.getQueue(interaction.guildId);
     }
 
-    @Slash("playerControls", {
+    @Slash("playercontrols", {
         description: "Player controls to skip, pause, skip, stop, resume, etc..."
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
@@ -109,7 +109,7 @@ export class Music extends AbstractCommandModule<any> {
         });
     }
 
-    @Slash("nowPlaying", {
+    @Slash("nowplaying", {
         description: "View the current playlist"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
@@ -134,11 +134,16 @@ export class Music extends AbstractCommandModule<any> {
             required: true
         })
             search: string,
-        @SlashOption("isPlaylist", {
+        @SlashOption("isplaylist", {
             description: "is this url a playlist",
             required: true
         })
             isPlaylist: boolean,
+        @SlashOption("timestamp", {
+            description: "if url contains a timestamp, it will start there",
+            required: false
+        })
+            timestamp: boolean,
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
@@ -161,9 +166,14 @@ export class Music extends AbstractCommandModule<any> {
         let newSong: Song | Playlist = null;
         try {
             if (isPlaylist) {
-                newSong = await queue.playlist(search);
+                newSong = await queue.playlist(search, {
+                    requestedBy: interaction.user
+                });
             } else {
-                newSong = await queue.play(search);
+                newSong = await queue.play(search, {
+                    timecode: timestamp,
+                    requestedBy: interaction.user
+                });
             }
 
         } catch (e) {

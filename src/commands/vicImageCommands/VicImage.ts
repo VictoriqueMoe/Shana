@@ -8,7 +8,7 @@ import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {container} from "tsyringe";
 
 @Discord()
-@SlashGroup("VicImage", "Obtain images of Victorique#0002")
+@SlashGroup("vicimage", "Obtain images of Victorique#0002")
 export abstract class VicImage extends AbstractCommandModule<any> {
 
     constructor() {
@@ -36,7 +36,7 @@ export abstract class VicImage extends AbstractCommandModule<any> {
         });
     }
 
-    @Slash("vicImage", {
+    @Slash("vicimage", {
         description: "Get a random image of Victorique#0002"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
@@ -63,7 +63,7 @@ export abstract class VicImage extends AbstractCommandModule<any> {
     }
 
 
-    @Slash("vicReIndex", {
+    @Slash("vicreindex", {
         description: "Get a random image of Victorique#0002"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)

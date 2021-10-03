@@ -8,7 +8,7 @@ import {AbstractCommandModule} from "../AbstractCommandModule";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-@SlashGroup("Ages", "commands to get ages of accounts and servers")
+@SlashGroup("ages", "commands to get ages of accounts and servers")
 export abstract class AccountAge extends AbstractCommandModule<any> {
 
     protected constructor() {
@@ -74,7 +74,7 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
         };
     }
 
-    @Slash("serverAge", {
+    @Slash("serverage", {
         description: "Get the age of this server"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
@@ -85,12 +85,12 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
         return InteractionUtils.replyWithText(interaction, `Server is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
     }
 
-    @Slash("channelAge", {
+    @Slash("channelage", {
         description: "View the age of a channel"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async channelAge(
-        @SlashOption("Channel", {
+        @SlashOption("channel", {
             description: "The reference to the channel",
             required: true
         })
@@ -107,7 +107,7 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async getAccountAge(
-        @SlashOption("User", {
+        @SlashOption("user", {
             description: "The user you want to check the account age of",
             required: true
         })

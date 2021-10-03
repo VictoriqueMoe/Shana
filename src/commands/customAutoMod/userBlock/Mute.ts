@@ -12,7 +12,7 @@ import TIME_UNIT = TimeUtils.TIME_UNIT;
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-@SlashGroup("Mute", "Commands to mute people from servers")
+@SlashGroup("mute", "Commands to mute people from servers")
 export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
 
     public constructor() {
@@ -79,24 +79,24 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async mute(
-        @SlashOption("User", {
+        @SlashOption("user", {
             description: "User you wish to mute",
             required: true
         })
             mentionedMember: User,
-        @SlashOption("Reason", {
+        @SlashOption("reason", {
             description: "The reason why this user is muted",
             required: true
         })
             reason: string,
-        @SlashOption("Timeout", {
+        @SlashOption("timeout", {
             description: "timeout for how long this user should be muted.",
             required: true,
             type: "INTEGER"
         })
             timeout: number,
         @SlashChoice(TIME_UNIT)
-        @SlashOption("timeUnit", {
+        @SlashOption("timeunit", {
             description: "The time unit used to specify how long a user should be muted",
             required: true
         })
@@ -158,7 +158,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         }).join("\n ");
     }
 
-    @Slash("muteTimeUnits", {
+    @Slash("mutetimeunits", {
         description: "Get all the available time units you can use in mute"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
@@ -166,7 +166,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         return InteractionUtils.replyWithText(interaction, `\n ${this.getMuteTimeOutStr()}`);
     }
 
-    @Slash("viewAllMutes", {
+    @Slash("viewallmutes", {
         description: "View all the currently active mutes"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)

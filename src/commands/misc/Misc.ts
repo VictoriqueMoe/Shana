@@ -18,7 +18,7 @@ const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
 
 @Discord()
-@SlashGroup("Miscellaneous", "Miscellaneous commands")
+@SlashGroup("miscellaneous", "Miscellaneous commands")
 export class Misc extends AbstractCommandModule<any> {
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
     private readonly animeTractApi = new AnimeTractApi();
@@ -110,7 +110,7 @@ export class Misc extends AbstractCommandModule<any> {
         });
     }
 
-    @Slash("generateText", {
+    @Slash("generatetext", {
         description: "The text generation is a large unsupervised language model that can generate paragraphs of text"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)

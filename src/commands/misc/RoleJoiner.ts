@@ -13,7 +13,7 @@ import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-@SlashGroup("RoleJoiner", "Commands to allow users to join vanity roles")
+@SlashGroup("rolejoiner", "Commands to allow users to join vanity roles")
 export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
 
     public constructor() {
@@ -34,7 +34,7 @@ export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
         });
     }
 
-    @Slash("displayJoinUi", {
+    @Slash("displayjoinui", {
         description: "Initialise the role join dropdown and buttons"
     })
     private async displayJoinUi(interaction: CommandInteraction): Promise<void> {

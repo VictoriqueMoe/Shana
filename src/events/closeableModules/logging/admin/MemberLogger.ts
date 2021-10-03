@@ -4,6 +4,7 @@ import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
 import {Roles} from "../../../../enums/Roles";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 
+
 /**
  * admin audit Logger for Admin Audit logging. this will log:
  * Member join
@@ -12,6 +13,7 @@ import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
  * Member leave
  * Member unBanned
  * Member username changed
+ * Member joins/leaves VC
  */
 @Discord()
 export class MemberLogger extends AbstractAdminAuditLogger {
@@ -22,6 +24,41 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         super(MemberLogger._uid);
     }
 
+    @On("voiceStateUpdate")
+    private async voiceChannelChanged([oldState, newState]: ArgsOf<"voiceStateUpdate">, client: Client): Promise<void> {
+        const {member} = newState;
+        const {user} = member;
+        const guildId = member.guild.id;
+        const avatarUrl = user.displayAvatarURL({format: 'jpg'});
+        const oldChannel = oldState.channelId;
+        const newChannel = newState.channelId;
+        const wasDisconnect = ObjectUtil.validString(oldChannel) && newChannel == null;
+        const wasConnect = ObjectUtil.validString(newChannel) && oldChannel == null;
+        const wasServerSwap = oldChannel !== null && newChannel !== null;
+        const displayHexColor = member.displayHexColor;
+        const embed = new MessageEmbed()
+            .setColor(displayHexColor)
+            .setAuthor(member.user.tag, avatarUrl)
+            .setThumbnail(avatarUrl)
+            .setTimestamp()
+            .setFooter(`${user.id}`);
+        if (wasServerSwap) {
+            embed.setTitle("User changed voice channels");
+            embed.setDescription(`<@${user.id}> has changed voice channels`);
+            embed.addField("From", `<#${oldChannel}>`);
+            embed.addField("To", `<#${newChannel}>`);
+        } else if (wasDisconnect) {
+            embed.setTitle("User disconnected from a voice channel");
+            embed.setDescription(`<@${user.id}> has disconnected from a voice channel`);
+            embed.addField("From", `<#${oldChannel}>`);
+        } else if (wasConnect) {
+            embed.setTitle("User connected to a voice channel");
+            embed.setDescription(`<@${user.id}> has connected from a voice channel`);
+            embed.addField("To", `<#${newChannel}>`);
+        }
+        super.postToLog(embed, guildId);
+    }
+
     @On("guildMemberUpdate")
     private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
         const {id, user} = newUser;
@@ -29,7 +66,6 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         const oldNickname = oldUser.nickname;
         const newNickname = newUser.nickname;
         const didNicknameChange = oldNickname !== newNickname;
-        const guildId = newUser.guild.id;
         if (!didNicknameChange) {
             return;
         }

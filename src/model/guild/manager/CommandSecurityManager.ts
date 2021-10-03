@@ -1,7 +1,7 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
 import {GuildMember} from "discord.js";
-import {DIService} from "discordx";
+import {DIService, MetadataStorage} from "discordx";
 import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {AbstractCommandModule} from "../../../commands/AbstractCommandModule";
 import {Typeings} from "../../types/Typeings";
@@ -17,12 +17,16 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         super();
     }
 
-    public init(): void {
-        // @ts-ignore
-        const allCommands: Map<any, any> = DIService.instance._services;
-        //TODO: maybe use MetadataStorage.instance.applicationCommands
+    public async init(): Promise<void> {
+        const dApplicationCommands = MetadataStorage.instance.allApplicationCommands;
+        const appClasses = new Set<Record<string, any>>();
+        for (const applicationCommand of dApplicationCommands) {
+            const classRef = applicationCommand.classRef;
+            appClasses.add(classRef);
+        }
         this.commandClasses = [];
-        for (const [, instance] of allCommands) {
+        for (const classRef of appClasses) {
+            const instance = DIService.instance.getService(classRef);
             if (instance instanceof AbstractCommandModule) {
                 if (!ObjectUtil.isValidObject(instance.commandDescriptors)) {
                     continue;
