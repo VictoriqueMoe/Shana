@@ -34,7 +34,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         const newChannel = newState.channelId;
         const wasDisconnect = ObjectUtil.validString(oldChannel) && newChannel == null;
         const wasConnect = ObjectUtil.validString(newChannel) && oldChannel == null;
-        const wasServerSwap = oldChannel !== null && newChannel !== null;
+        const wasServerSwap = (oldChannel !== null && newChannel !== null) && newChannel !== oldChannel;
         const displayHexColor = member.displayHexColor;
         const embed = new MessageEmbed()
             .setColor(displayHexColor)
@@ -53,8 +53,10 @@ export class MemberLogger extends AbstractAdminAuditLogger {
             embed.addField("From", `<#${oldChannel}>`);
         } else if (wasConnect) {
             embed.setTitle("User connected to a voice channel");
-            embed.setDescription(`<@${user.id}> has connected from a voice channel`);
+            embed.setDescription(`<@${user.id}> has connected to a voice channel`);
             embed.addField("To", `<#${newChannel}>`);
+        } else {
+            return;
         }
         super.postToLog(embed, guildId);
     }
