@@ -8,6 +8,7 @@ import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
 import {container, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
+import {Method} from "discordx/build/decorators/classes/Method";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 @singleton()
@@ -20,8 +21,10 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
 
     public async init(): Promise<void> {
         const dApplicationCommands = MetadataStorage.instance.allApplicationCommands;
+        const simpleCommands = MetadataStorage.instance.allSimpleCommands.map(value => value.command);
+        const merge: Method[] = [...dApplicationCommands, ...simpleCommands];
         const appClasses = new Set<Record<string, any>>();
-        for (const applicationCommand of dApplicationCommands) {
+        for (const applicationCommand of merge) {
             const classRef = applicationCommand.classRef;
             appClasses.add(classRef);
         }
