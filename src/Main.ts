@@ -7,7 +7,7 @@ import {DEFAULT_SETTINGS, SETTINGS} from "./enums/SETTINGS";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import * as http from "http";
 import * as v8 from "v8";
-import {Client} from "discordx";
+import {Client, DIService} from "discordx";
 import {Intents, Message} from "discord.js";
 import {Dropbox} from "dropbox";
 import {Player} from "discord-music-player";
@@ -82,6 +82,7 @@ export class Main {
     public static async start(): Promise<void> {
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
+        DIService.container = container;
         await moduleRegistrar();
         Main.dbx = new Dropbox({accessToken: process.env.dropboxToken});
         Main._dao = new Sequelize('database', '', '', {

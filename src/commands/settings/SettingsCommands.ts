@@ -1,4 +1,4 @@
-import {Discord, DIService, Guard, Slash, SlashChoice, SlashOption} from "discordx";
+import {Discord, Guard, Slash, SlashChoice, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {DiscordUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
@@ -98,7 +98,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 if (isNaN(settingValue)) {
                     return InteractionUtils.replyWithText(interaction, "Please supply a number");
                 }
-                const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
+                const autoRole: ICloseableModule<AutoRoleSettings> = container.resolve(AutoRole);
                 const settingObj: AutoRoleSettings = {};
                 if (setting === SAVABLE_SETTINGS.massJoinProtection) {
                     settingObj["massJoinProtection"] = settingValue;
@@ -118,7 +118,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             case SAVABLE_SETTINGS.AutoRoleAutoMute:
             case SETTINGS.PANIC_MODE: {
                 const settingValue = value === "true";
-                const autoRole: ICloseableModule<AutoRoleSettings> = DIService.instance.getService(AutoRole);
+                const autoRole: ICloseableModule<AutoRoleSettings> = container.resolve(AutoRole);
                 const settingObj: AutoRoleSettings = {};
                 if (setting === SAVABLE_SETTINGS.AutoAutoJail) {
                     settingObj["autoJail"] = settingValue;

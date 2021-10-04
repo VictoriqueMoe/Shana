@@ -1,12 +1,13 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
 import {GuildMember} from "discord.js";
-import {DIService, MetadataStorage} from "discordx";
+import {MetadataStorage} from "discordx";
 import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {AbstractCommandModule} from "../../../commands/AbstractCommandModule";
 import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
-import {singleton} from "tsyringe";
+import {container, singleton} from "tsyringe";
+import constructor from "tsyringe/dist/typings/types/constructor";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 @singleton()
@@ -26,7 +27,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         }
         this.commandClasses = [];
         for (const classRef of appClasses) {
-            const instance = DIService.instance.getService(classRef);
+            const instance = container.resolve(classRef as constructor<any>);
             if (instance instanceof AbstractCommandModule) {
                 if (!ObjectUtil.isValidObject(instance.commandDescriptors)) {
                     continue;
