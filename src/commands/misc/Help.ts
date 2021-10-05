@@ -7,11 +7,14 @@ import {SettingsManager} from "../../model/settings/SettingsManager";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {Typeings} from "../../model/types/Typeings";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {container} from "tsyringe";
+import {container, delay, inject, injectable} from "tsyringe";
+import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+
 
 @Discord()
+@injectable()
 export class Help extends AbstractCommandModule<any> {
-    constructor() {
+    constructor(@inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager) {
         super({
             module: {
                 name: "Help",
@@ -67,7 +70,7 @@ export class Help extends AbstractCommandModule<any> {
             .setColor(highestRoleColour)
             .setAuthor(`${Main.client.user.username}`, botImage)
             .setTimestamp();
-        const availableModules = await this._securityManager.getCommandModulesForMember(member);
+        const availableModules = await this._commandSecurityManager.getCommandModulesForMember(member);
         if (!ArrayUtils.isValidArray(argumentArray)) {
             embed.setDescription(`The items shown below are all the modules supported by this bot, please run '${prefix} help "moduleName"' to see commands for modules and '${prefix} help "moduleName" "commandName"' for argument info`);
             embed.setTitle(`${Main.client.user.username} modules`);
@@ -95,7 +98,7 @@ export class Help extends AbstractCommandModule<any> {
             }
 
             if (commandName) {
-                const commandObj = await moduleRequested.getCommand(commandName, member);
+                const commandObj = await this.getCommand(commandName, member);
                 if (commandObj == null) {
                     message.reply(`Invalid command name: "${commandName}" Please run '${prefix}${moduleName}' for a list of commands`);
                     return;
@@ -157,7 +160,7 @@ export class Help extends AbstractCommandModule<any> {
         const resultOfPage = chunks[pageNumber - 1];
         for (const command of resultOfPage) {
             const {name, description, deprecated} = command;
-            if (!await this._securityManager.canRunCommand(member, name)) {
+            if (!await this._commandSecurityManager.canRunCommand(member, name)) {
                 continue;
             }
             let fieldValue = "No description";

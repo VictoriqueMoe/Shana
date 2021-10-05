@@ -1,7 +1,8 @@
-import {ArgsOf, Client, Discord, DIService, On} from "discordx";
+import {ArgsOf, Client, Discord, On} from "discordx";
 import {BaseDAO} from "../DAO/BaseDAO";
 import {GuildableModel} from "../model/DB/guild/Guildable.model";
 import {OnReady} from "./OnReady";
+import {container} from "tsyringe";
 
 @Discord()
 export class BotGuildUpdater extends BaseDAO<GuildableModel> {
@@ -12,7 +13,7 @@ export class BotGuildUpdater extends BaseDAO<GuildableModel> {
             guildId: guild.id
         });
         await super.commitToDatabase(model);
-        const onReadyClass: OnReady = DIService.instance.getService(OnReady);
+        const onReadyClass: OnReady = container.resolve(OnReady);
         Promise.all(onReadyClass.init()).then(() => {
             console.log(`Joined server "${guild.name}"`);
         }).catch(e => {

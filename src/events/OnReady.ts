@@ -16,7 +16,7 @@ import {AutoRole} from "./closeableModules/autoRole/AutoRole";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import * as fs from 'fs';
 import {SettingsManager} from "../model/settings/SettingsManager";
-import {ArgsOf, Discord, DIService, On} from "discordx";
+import {ArgsOf, Discord, On} from "discordx";
 import {container} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {registerAfterDiscordTs} from "../DI/registerAfterDiscordTs";
@@ -85,7 +85,7 @@ export class OnReady extends BaseDAO<any> {
         for (const guildModel of guildModels) {
             const guildId = guildModel.guildId;
             const guild = await guildManager.getGuild(guildId);
-            const autoRoleModule: AutoRole = DIService.instance.getService(AutoRole);
+            const autoRoleModule = container.resolve(AutoRole);
             const enabled = await autoRoleModule.isEnabled(guildId);
             if (enabled) {
                 const membersApplied: string[] = [];
