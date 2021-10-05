@@ -99,8 +99,6 @@ export class Main {
             }
         });
         await Main.dao.sync({force: false});
-        const guilds = await GuildableModel.findAll();
-        const allGuildIds = guilds.map(guild => guild.guildId);
         this._client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             prefix: getPrefix,
@@ -118,7 +116,10 @@ export class Main {
                 Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
                 Intents.FLAGS.GUILD_VOICE_STATES
             ],
-            botGuilds: Main.interactionTestMode ? allGuildIds : undefined,
+            botGuilds: [async (): Promise<string[]> => {
+                const guilds = await GuildableModel.findAll();
+                return guilds.map(guild => guild.guildId);
+            }],
             silent: false,
         });
         await this._client.login(process.env.token);

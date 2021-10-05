@@ -6,9 +6,8 @@ export const NotBotInteraction: GuardFunction<CommandInteraction | SimpleCommand
         if (await notBot(arg.message)) {
             await next();
         }
-    }
-    if (arg instanceof CommandInteraction) {
-        if (!arg.member.user.bot) {
+    } else {
+        if (!arg?.member?.user?.bot) {
             await next();
         }
     }

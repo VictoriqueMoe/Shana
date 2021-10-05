@@ -1,4 +1,5 @@
 import {
+    BaseCommandInteraction,
     ButtonInteraction,
     CommandInteraction,
     Guild,
@@ -319,20 +320,20 @@ export namespace DiscordUtils {
 
     export namespace InteractionUtils {
 
-        export async function followupWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction, content: string, ephemeral: boolean = false): Promise<Message | APIMessage> {
+        export async function followupWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string, ephemeral: boolean = false): Promise<Message | APIMessage> {
             return interaction.followUp({
                 content,
                 ephemeral
             });
         }
 
-        export async function editWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction, content: string): Promise<Message | APIMessage> {
+        export async function editWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string): Promise<Message | APIMessage> {
             return interaction.editReply({
                 content
             });
         }
 
-        export async function replyWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction, content: string, ephemeral: boolean = false): Promise<void> {
+        export async function replyWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string, ephemeral: boolean = false): Promise<void> {
             if (interaction.deferred) {
                 await interaction.editReply({
                     content
