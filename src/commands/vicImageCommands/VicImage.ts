@@ -20,14 +20,14 @@ export abstract class VicImage extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "vicImage",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: `Get a random image of <@697417252320051291>`
                     }
                 },
                 {
                     name: "vicReIndex",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Re-index image metadata from dropbox"
                     }

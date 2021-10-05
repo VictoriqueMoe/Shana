@@ -28,7 +28,7 @@ export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
                     description: {
                         text: "Initialise the role join dropdown and buttons"
                     },
-                    isSlash: true,
+                    type: "slash",
                 }
             ]
         });

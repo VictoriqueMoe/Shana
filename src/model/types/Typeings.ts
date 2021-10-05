@@ -9,9 +9,10 @@ export namespace Typeings {
         },
         commands: Command[]
     };
+    export type commandType = "slash" | "contextMenu" | "dropdown" | "button" | "command";
     export type Command = {
         name: string,
-        isSlash: boolean,
+        type: commandType
         deprecated?: boolean,
         description?: {
             text?: string,

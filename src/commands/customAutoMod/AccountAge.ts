@@ -20,7 +20,7 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "age",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Get the age on an account",
                         args: [
@@ -35,14 +35,14 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
                 },
                 {
                     name: "serverAge",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Get the age of this server"
                     }
                 },
                 {
                     name: "channelAge",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "View the age of a channel",
                         args: [

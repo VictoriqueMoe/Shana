@@ -27,7 +27,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                 "commands": [
                     {
                         "name": "3000years",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -41,7 +41,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "approved",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -55,7 +55,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "afusion",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -69,7 +69,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "batslap",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -83,7 +83,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "beautiful",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -97,7 +97,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "blur",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -123,7 +123,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "blurple",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -143,7 +143,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "brazzers",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -157,7 +157,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "burn",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -171,7 +171,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "challenger",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -185,7 +185,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "circle",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -199,7 +199,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "contrast",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -213,7 +213,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "crush",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -227,7 +227,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "facebook",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -247,7 +247,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "ddungeon",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -261,7 +261,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "deepfry",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -275,7 +275,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "dictator",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -289,7 +289,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "distort",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -303,7 +303,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "dither565",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -317,7 +317,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "emboss",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -331,7 +331,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "fire",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -345,7 +345,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "frame",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -359,7 +359,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "gay",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -373,7 +373,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "glitch",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -387,7 +387,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "greyple",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -407,7 +407,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "greyscale",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -421,7 +421,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "instagram",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -435,7 +435,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "invert",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -449,7 +449,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "jail",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -463,7 +463,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "lookwhatkarenhave",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -477,7 +477,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "Magik",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -491,7 +491,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "missionpassed",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -505,7 +505,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "moustache",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -519,7 +519,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "pixelize",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -545,7 +545,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "ps4",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -559,7 +559,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "posterize",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -573,7 +573,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "rejected",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -587,7 +587,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "redple",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -601,7 +601,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "rip",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -615,7 +615,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "scary",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -629,7 +629,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "sepia",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -643,7 +643,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "sharpen",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -657,7 +657,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "sniper",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -671,7 +671,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "pornhub",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -691,7 +691,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "steamcard",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -711,7 +711,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "symmetry",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -725,7 +725,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "thanos",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -739,7 +739,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "trinity",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -753,7 +753,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "tobecontinued",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -767,7 +767,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "subzero",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -781,7 +781,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "triggered",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -801,7 +801,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "unsharpen",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -815,7 +815,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "utatoo",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -829,7 +829,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "vs",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -843,7 +843,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "wanted",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -857,7 +857,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "wasted",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {
@@ -871,7 +871,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
                     },
                     {
                         "name": "whowouldwin",
-                        "isSlash": false,
+                        type: "command",
                         "description": {
                             "args": [
                                 {

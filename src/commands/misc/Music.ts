@@ -27,7 +27,7 @@ export class Music extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "play",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Plays or Queues a song ",
                         args: [
@@ -42,14 +42,14 @@ export class Music extends AbstractCommandModule<any> {
                 },
                 {
                     name: "playerControls",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Player controls to skip, pause, skip, stop, resume, etc... "
                     }
                 },
                 {
                     name: "nowPlaying",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "View the current playlist"
                     }

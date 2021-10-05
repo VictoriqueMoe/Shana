@@ -2,6 +2,7 @@ import {
     BaseCommandInteraction,
     ButtonInteraction,
     CommandInteraction,
+    ContextMenuInteraction,
     Guild,
     GuildAuditLogs,
     GuildAuditLogsAction,
@@ -15,6 +16,7 @@ import {
     Permissions,
     Role,
     SelectMenuInteraction,
+    StaticImageURLOptions,
     TextChannel,
     User
 } from "discord.js";
@@ -34,7 +36,6 @@ import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
 import fetch from "node-fetch";
 import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
-import {APIInteractionGuildMember, APIMessage} from "discord-api-types";
 import {FindOptions} from "sequelize/types/lib/model";
 import {container} from "tsyringe";
 
@@ -320,15 +321,20 @@ export namespace DiscordUtils {
 
     export namespace InteractionUtils {
 
-        export async function followupWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string, ephemeral: boolean = false): Promise<Message | APIMessage> {
-            return interaction.followUp({
+        export function getUserFromUserContextInteraction(interaction: ContextMenuInteraction): GuildMember | undefined {
+            const memberId = interaction.targetId;
+            return interaction.guild.members.cache.get(memberId);
+        }
+
+        export async function followupWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string, ephemeral: boolean = false): Promise<void> {
+            await interaction.followUp({
                 content,
                 ephemeral
             });
         }
 
-        export async function editWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string): Promise<Message | APIMessage> {
-            return interaction.editReply({
+        export async function editWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string): Promise<void> {
+            await interaction.editReply({
                 content
             });
         }
@@ -346,7 +352,7 @@ export namespace DiscordUtils {
             }
         }
 
-        export function getInteractionCaller(interaction: CommandInteraction): GuildMember | APIInteractionGuildMember {
+        export function getInteractionCaller(interaction: CommandInteraction): GuildMember | null {
             const {member} = interaction;
             if (member == null) {
                 interaction.reply("Unable to extract member");
@@ -355,15 +361,7 @@ export namespace DiscordUtils {
             if (member instanceof GuildMember) {
                 return member;
             }
-            return member;
-        }
-
-        export function getInteractionCallerId(interaction: CommandInteraction): string {
-            const caller = InteractionUtils.getInteractionCaller(interaction);
-            if (caller instanceof GuildMember) {
-                return caller.id;
-            }
-            return caller.user.id;
+            return null;
         }
     }
 
@@ -506,11 +504,19 @@ export namespace DiscordUtils {
         colourChange?: {
             before: HexColorString,
             after: HexColorString
+        },
+        iconChange?: {
+            before: string,
+            after: string
         }
     };
 
     export function getRoleChanges(oldRole: Role, newRole: Role): RoleChange {
         const retObj: RoleChange = {};
+        const iconUrlSettings: StaticImageURLOptions = {
+            format: "png",
+            size: 64
+        };
         const added = oldRole.permissions.missing(newRole.permissions.bitfield);
         const removed = newRole.permissions.missing(oldRole.permissions.bitfield);
 
@@ -538,6 +544,14 @@ export namespace DiscordUtils {
             };
         }
 
+        const oldIcon = oldRole.iconURL(iconUrlSettings);
+        const newIcon = newRole.iconURL(iconUrlSettings);
+        if (oldIcon !== newIcon) {
+            retObj["iconChange"] = {
+                "before": oldIcon,
+                "after": newIcon
+            };
+        }
         return retObj;
     }
 
@@ -603,10 +617,14 @@ export namespace DiscordUtils {
         if (channel == null) {
             return Promise.resolve(null);
         }
-        if (ArrayUtils.isValidArray(message)) {
-            return await channel.send({embeds: message as MessageEmbed[]});
-        } else {
-            return await channel.send(message as string);
+        try {
+            if (ArrayUtils.isValidArray(message)) {
+                return await channel.send({embeds: message as MessageEmbed[]});
+            } else {
+                return await channel.send(message as string);
+            }
+        } catch (e) {
+            console.warn(e.message);
         }
     }
 

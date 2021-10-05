@@ -9,6 +9,7 @@ import {Typeings} from "../../model/types/Typeings";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {container, delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+import Command = Typeings.Command;
 
 
 @Discord()
@@ -23,7 +24,7 @@ export class Help extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "help",
-                    isSlash: false,
+                    type: "command",
                     description: {
                         text: "Get the description of a command or all commands",
                         examples: ['help = display ALL modules', 'help memes = display all the commands in the "memes" modules ', 'help memes 2 = get page 2 of commands in the memes module', 'help memes missionpassed = see the arguments and info for the "missionpassed" command'],
@@ -104,19 +105,19 @@ export class Help extends AbstractCommandModule<any> {
                     return;
                 }
                 // eslint-disable-next-line prefer-const
-                let {name, deprecated, isSlash, description: {args, examples, text}} = commandObj;
-                const title = isSlash ? `/${name}` : `${prefix}${name}`;
+                let {type, description: {args, examples, text}} = commandObj;
+                const title = this.getCommandName(commandObj, prefix);
                 embed.setTitle(title);
                 if (!ObjectUtil.validString(text)) {
                     text = "No description";
                 }
-                if (!isSlash) {
+                if (type === "command") {
                     embed.setDescription(`${text} \n\nall arguments of type 'text' should be wrapped with speach marks: ""`);
                 }
-                if (ArrayUtils.isValidArray(examples) && !isSlash) {
+                if (ArrayUtils.isValidArray(examples) && type === "command") {
                     embed.addField("Examples:", examples.map(example => `${prefix}${example}`).join("\n\n"));
                 }
-                embed.addField("Is a slash command", String(isSlash));
+                embed.addField("Command type", type);
                 if (ArrayUtils.isValidArray(args)) {
                     embed.addField('Arguments:', '\u200b');
                     for (const arg of args) {
@@ -136,6 +137,17 @@ export class Help extends AbstractCommandModule<any> {
         message.reply({
             embeds: [embed]
         });
+    }
+
+    private getCommandName(command: Command, prefix: string): string {
+        const {name} = command;
+        if (command.type === "slash") {
+            return `/${name}`;
+        } else if (command.type === "command") {
+            return `${prefix}${name}`;
+        } else {
+            return name;
+        }
     }
 
     private static chunk<T>(array: T[], chunkSize: number): T[][] {
@@ -176,8 +188,8 @@ export class Help extends AbstractCommandModule<any> {
                     fieldValue += `\n\n*this command requires: ${requiredArgs} mandatory arguments*`;
                 }
             }
-            fieldValue += `\n\nIs a slash command: ${command.isSlash}`;
-            const nameToDisplay = command.isSlash ? `/${name}` : `${prefix}${name}`;
+            fieldValue += `\n\nCommand type: ${command.type}`;
+            const nameToDisplay = this.getCommandName(command, prefix);
             embed.addField(nameToDisplay, fieldValue, resultOfPage.length > 5);
         }
     }

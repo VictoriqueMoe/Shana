@@ -1,7 +1,16 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage, Slash, SlashGroup, SlashOption} from "discordx";
+import {
+    ContextMenu,
+    Discord,
+    Guard,
+    SimpleCommand,
+    SimpleCommandMessage,
+    Slash,
+    SlashGroup,
+    SlashOption
+} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {CommandInteraction, GuildMember, ImageURLOptions, MessageAttachment, MessageEmbed, User} from "discord.js";
+import {CommandInteraction, ContextMenuInteraction, ImageURLOptions, MessageAttachment, MessageEmbed} from "discord.js";
 import {Main} from "../../Main";
 import {TimedSet} from "../../model/Impl/TimedSet";
 import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
@@ -33,7 +42,7 @@ export class Misc extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "findSource",
-                    isSlash: false,
+                    type: "command",
                     description: {
                         text: "Perform a reverse image search",
                         args: [
@@ -48,7 +57,7 @@ export class Misc extends AbstractCommandModule<any> {
                 },
                 {
                     name: "findAnime",
-                    isSlash: false,
+                    type: "command",
                     description: {
                         text: "Find anime source, including episode and preview",
                         args: [
@@ -63,7 +72,7 @@ export class Misc extends AbstractCommandModule<any> {
                 },
                 {
                     name: "avatar",
-                    isSlash: true,
+                    type: "contextMenu",
                     description: {
                         text: "Display a users avatar",
                         args: [
@@ -77,8 +86,23 @@ export class Misc extends AbstractCommandModule<any> {
                     }
                 },
                 {
+                    name: "banner",
+                    type: "contextMenu",
+                    description: {
+                        text: "Display a users profile banner",
+                        args: [
+                            {
+                                name: "user",
+                                type: "mention",
+                                description: "The user to get",
+                                optional: false
+                            }
+                        ]
+                    }
+                },
+                {
                     name: "posOrNeg",
-                    isSlash: false,
+                    type: "command",
                     description: {
                         text: "This algorithm classifies each sentence in the input as very negative, negative, neutral, positive, or very positive",
                         args: [
@@ -93,7 +117,7 @@ export class Misc extends AbstractCommandModule<any> {
                 },
                 {
                     name: "generateText",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text.",
                         args: [
@@ -151,30 +175,39 @@ export class Misc extends AbstractCommandModule<any> {
         message.reply(`This message is ${resp}`);
     }
 
-    @Slash("avatar", {
+    @ContextMenu("USER", "avatar", {
         description: "Display a users avatar"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
-    private async avatar(
-        @SlashOption("user", {
-            description: "The user to get",
-            required: true
-        })
-            user: User,
-        interaction: CommandInteraction
-    ): Promise<void> {
-        let avatarUrl = "";
+    private async avatar(interaction: ContextMenuInteraction): Promise<void> {
         const ops: ImageURLOptions = {
             dynamic: true,
             size: 1024
         };
-        if (user instanceof GuildMember) {
-            avatarUrl = user.user.displayAvatarURL(ops);
-        } else {
-            avatarUrl = user.displayAvatarURL(ops);
-        }
+        const user = InteractionUtils.getUserFromUserContextInteraction(interaction);
+        const avatarUrl = user.displayAvatarURL(ops);
         return interaction.reply({
             files: [avatarUrl]
+        });
+    }
+
+    @ContextMenu("USER", "banner", {
+        description: "Display a users profile banner"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async banner(interaction: ContextMenuInteraction): Promise<void> {
+        await interaction.deferReply();
+        const ops: ImageURLOptions = {
+            dynamic: true,
+            size: 1024
+        };
+        const user = await InteractionUtils.getUserFromUserContextInteraction(interaction).fetch(true);
+        const bannerUrl = (await user.user.fetch(true)).bannerURL(ops);
+        if (!ObjectUtil.validString(bannerUrl)) {
+            return InteractionUtils.replyWithText(interaction, "User has no banner", true);
+        }
+        await interaction.editReply({
+            files: [bannerUrl]
         });
     }
 

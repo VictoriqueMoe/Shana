@@ -35,7 +35,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "setting",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Change or set any setting",
                         args: [

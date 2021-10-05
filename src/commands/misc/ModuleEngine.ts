@@ -17,7 +17,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
             commands: [
                 {
                     name: "enableModule",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Enable a module to run. These modules are designed to be shut down and started dynamically",
                         examples: ["enableModule AdminLog true = enable module AdminLog", "enableModule AdminLog false = disable module AdminLog"],
@@ -39,7 +39,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
                 },
                 {
                     name: "getModuleNames",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Return a list of all modules to use with the 'enableModule' command"
                     }

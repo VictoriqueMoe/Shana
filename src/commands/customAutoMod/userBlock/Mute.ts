@@ -24,7 +24,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
             commands: [
                 {
                     name: "mute",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Block a user from sending any messages with an optional timeout",
                         examples: ['mute @user "they where annoying" 2d = Mute user for 2 days', 'mute @user "they where not so annoying" 60 = Mute user for 60 seconds', 'mute @user "they where REALLY annoying" = Mute user indefinitely until unmute'],
@@ -58,21 +58,21 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                 },
                 {
                     name: "muteTimeUnits",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "Get all the available time units you can use in mute"
                     }
                 },
                 {
                     name: "Mute User for 30 mins",
-                    isSlash: true,
+                    type: "contextMenu",
                     description: {
                         text: "Mute the current user for 30 mins"
                     }
                 },
                 {
                     name: "viewAllMutes",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "View all the currently active mutes"
                     }
@@ -82,12 +82,13 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
     }
 
 
-    @ContextMenu("USER", "Mute User for 30 mins")
+    @ContextMenu("USER", "Mute User for 30 mins", {
+        description: "Mute the current user for 30 mins"
+    })
     @Guard(secureCommandInteraction)
     private async userHandler(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply();
-        const memberId = interaction.targetId;
-        const member = interaction.guild.members.cache.get(memberId);
+        const member = InteractionUtils.getUserFromUserContextInteraction(interaction);
         if (!(member instanceof GuildMember)) {
             return InteractionUtils.replyWithText(interaction, "Unable to mute non-guild members");
         }

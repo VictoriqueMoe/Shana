@@ -22,7 +22,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
             },
             commands: [
                 {
-                    isSlash: false,
+                    type: "command",
                     name: "banAttachment",
                     description: {
                         text: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \n banning an attachment means that if it is posted again, it is automatically deleted and logged",
@@ -31,7 +31,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
                 },
                 {
                     name: "banEmoji",
-                    isSlash: false,
+                    type: "command",
                     description: {
                         text: "This command is used to ban emojis from other servers, to use it, reply to a message that contains the emoji you want banned, if the replied message contains more than one emoji, this bot will ask you what one you wish to ban",
                     }

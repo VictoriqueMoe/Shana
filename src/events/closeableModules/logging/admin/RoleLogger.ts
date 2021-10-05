@@ -143,6 +143,21 @@ export class RoleLogger extends AbstractAdminAuditLogger {
             ]);
             embed.setColor(after);
         }
+
+        const {iconChange} = roleChange;
+        if (ObjectUtil.isValidObject(iconChange)) {
+            const {before, after} = iconChange;
+            embed.addFields([
+                {
+                    "name": "Old icon url",
+                    "value": before
+                },
+                {
+                    "name": "New icon url",
+                    "value": after
+                }
+            ]);
+        }
         super.postToLog(embed, guildId);
     }
 

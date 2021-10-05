@@ -22,14 +22,14 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
             commands: [
                 {
                     name: "viewUsernames",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "View all the persisted usernames this bot is aware of"
                     }
                 },
                 {
                     name: "username",
-                    isSlash: true,
+                    type: "slash",
                     description: {
                         text: "force a username to always be set to a member, this will automatically apply the username if they leave and rejoin again. \n you can optionally add a block to anyone other than staff member from changing it",
                         examples: ["username @user 'this is a new username' = username will always be 'this is a new username' if they leave and rejoin", "username @user 'this is a new username' true = same as before, but this means they can not change it themselves"],
