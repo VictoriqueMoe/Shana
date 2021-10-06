@@ -18,12 +18,6 @@ import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 @Discord()
 export class MemberLogger extends AbstractAdminAuditLogger {
 
-    private static _uid = ObjectUtil.guid();
-
-    constructor() {
-        super(MemberLogger._uid);
-    }
-
     @On("voiceStateUpdate")
     private async voiceChannelChanged([oldState, newState]: ArgsOf<"voiceStateUpdate">, client: Client): Promise<void> {
         const {member} = newState;

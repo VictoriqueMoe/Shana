@@ -5,8 +5,8 @@ import {DiscordUtils, GuildUtils} from "../../../../utils/Utils";
 
 export abstract class AbstractAdminAuditLogger extends CloseableModule<null> {
 
-    protected constructor(uid: string) {
-        super(CloseOptionModel, uid);
+    protected constructor() {
+        super(CloseOptionModel);
     }
 
     public get isDynoReplacement(): boolean {

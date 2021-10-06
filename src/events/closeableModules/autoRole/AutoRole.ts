@@ -36,12 +36,11 @@ class JoinEntry {
 @Discord()
 export class AutoRole extends CloseableModule<AutoRoleSettings> {
 
-    private static _uid = ObjectUtil.guid();
     private static joinTimedSet = new TimedSet<JoinEntry>(10000);
     private _roleApplier = new RoleProxy();
 
     constructor() {
-        super(CloseOptionModel, AutoRole._uid);
+        super(CloseOptionModel);
     }
 
     public get moduleId(): string {

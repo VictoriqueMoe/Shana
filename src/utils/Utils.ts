@@ -38,9 +38,12 @@ import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
 import {FindOptions} from "sequelize/types/lib/model";
 import {container} from "tsyringe";
+import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
+import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
+
+const emojiRegex = require('emoji-regex');
 
 const getUrls = require('get-urls');
-const emojiRegex = require('emoji-regex/es2015/index.js');
 const isImageFast = require('is-image-fast');
 
 export class ChronException extends Error {
@@ -687,8 +690,13 @@ export namespace DiscordUtils {
         return allModules.map(m => m.moduleId);
     }
 
+    export function getCloseableModules(): CloseableModule<any>[] {
+        const commandSecurityManager = container.resolve(CommandSecurityManager);
+        return commandSecurityManager.runnableCommands.filter(value => value instanceof CloseableModule);
+    }
+
     export function getModule(moduleId: string): ICloseableModule<any> {
-        const modules = Main.closeableModules;
+        const modules = DiscordUtils.getCloseableModules();
         for (const module of modules) {
             if (module.moduleId === moduleId) {
                 return module;

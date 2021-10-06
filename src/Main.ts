@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import {CloseableModule} from "./model/closeableModules/impl/CloseableModule";
 import {Sequelize} from "sequelize-typescript";
 import * as dotenv from "dotenv";
 import {EnumEx, ObjectUtil} from "./utils/Utils";
@@ -11,9 +10,9 @@ import {Client, DIService} from "discordx";
 import {Intents, Message} from "discord.js";
 import {Dropbox} from "dropbox";
 import {Player} from "discord-music-player";
-import {GuildableModel} from "./model/DB/guild/Guildable.model";
 import {moduleRegistrar} from "./DI/moduleRegistrar";
 import {container} from "tsyringe";
+import {GuildManager} from "./model/guild/manager/GuildManager";
 // const https = require('http-debug').https;
 // https.debug = 1;
 const io = require('@pm2/io');
@@ -23,29 +22,6 @@ io.init({
 });
 dotenv.config({path: __dirname + '/../.env'});
 
-export class CloseableModuleSet extends Set<CloseableModule<any>> {
-    override add(value: CloseableModule<any>): this {
-        for (const v of this.values()) {
-            if (v.uid === value.uid) {
-                super.delete(v);
-                break;
-            }
-        }
-        super.add(value);
-        return this;
-    }
-
-    override has(value: CloseableModule<any>): boolean {
-        for (const v of this.values()) {
-            if (v.uid === value.uid) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-}
-
 export async function getPrefix(message: Message): Promise<string> {
     const guildId = message?.guild?.id ?? "~";
     const settingsManager = container.resolve(SettingsManager);
@@ -53,7 +29,6 @@ export async function getPrefix(message: Message): Promise<string> {
 }
 
 export class Main {
-    public static closeableModules: CloseableModuleSet = new CloseableModuleSet();
     public static testMode = false;
     public static interactionTestMode = Main.testMode || true;
     public static botServer: http.Server;
@@ -100,6 +75,7 @@ export class Main {
             }
         });
         await Main.dao.sync({force: false});
+        const guildManager = container.resolve(GuildManager);
         this._client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             prefix: getPrefix,
@@ -118,8 +94,8 @@ export class Main {
                 Intents.FLAGS.GUILD_VOICE_STATES
             ],
             botGuilds: [async (): Promise<string[]> => {
-                const guilds = await GuildableModel.findAll();
-                return guilds.map(guild => guild.guildId);
+                const guilds = await guildManager.getGuilds();
+                return guilds.map(guild => guild.id);
             }],
             silent: false,
         });

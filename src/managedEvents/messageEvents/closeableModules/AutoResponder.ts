@@ -11,10 +11,8 @@ import {container, singleton} from "tsyringe";
 @singleton()
 export class AutoResponder extends TriggerConstraint<null> {
 
-    private static _uid = ObjectUtil.guid();
-
     constructor() {
-        super(CloseOptionModel, AutoResponder._uid);
+        super(CloseOptionModel);
     }
 
     get isDynoReplacement(): boolean {

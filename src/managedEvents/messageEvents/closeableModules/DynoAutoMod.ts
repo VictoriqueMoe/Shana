@@ -19,11 +19,10 @@ import {container, singleton} from "tsyringe";
 @singleton()
 export class DynoAutoMod extends CloseableModule<null> {
 
-    private static _uid = ObjectUtil.guid();
     private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
 
     constructor() {
-        super(CloseOptionModel, DynoAutoMod._uid);
+        super(CloseOptionModel);
     }
 
     public get isDynoReplacement(): boolean {
@@ -109,7 +108,6 @@ export class DynoAutoMod extends CloseableModule<null> {
                                 try {
                                     await warnResponse.delete();
                                 } catch {
-
                                 }
                             }, 5000);
                             break;

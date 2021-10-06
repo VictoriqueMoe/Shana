@@ -20,6 +20,7 @@ import {ArgsOf, Discord, On} from "discordx";
 import {container} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {registerAfterDiscordTs} from "../DI/registerAfterDiscordTs";
+import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 
 const io = require('@pm2/io');
 
@@ -235,7 +236,8 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private async populateClosableEvents(): Promise<void> {
-        const allModules = Main.closeableModules;
+        const commandSecurityManager = container.resolve(CommandSecurityManager);
+        const allModules: CloseableModule<any>[] = commandSecurityManager.runnableCommands.filter(value => value instanceof CloseableModule);
         for (const module of allModules) {
             await Main.dao.transaction(async t => {
                 for (const [guildId, guild] of Main.client.guilds.cache) {

@@ -13,7 +13,7 @@ import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 @singleton()
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
-    private commandClasses: AbstractCommandModule<any> [];
+    private commandClasses: any [];
 
     public constructor() {
         super();
@@ -21,8 +21,9 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
 
     public async init(): Promise<void> {
         const dApplicationCommands = MetadataStorage.instance.allApplicationCommands;
+        const allEvents = MetadataStorage.instance.events;
         const simpleCommands = MetadataStorage.instance.allSimpleCommands.map(value => value.command);
-        const merge: Method[] = [...dApplicationCommands, ...simpleCommands];
+        const merge: Method[] = [...dApplicationCommands, ...simpleCommands, ...allEvents];
         const appClasses = new Set<Record<string, any>>();
         for (const applicationCommand of merge) {
             const classRef = applicationCommand.classRef;
@@ -40,7 +41,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         }
     }
 
-    public get runnableCommands(): AbstractCommandModule<any>[] {
+    public get runnableCommands(): any[] {
         return this.commandClasses;
     }
 

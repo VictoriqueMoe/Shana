@@ -1,6 +1,5 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {ICloseOption} from "../../DB/autoMod/ICloseOption";
-import {Main} from "../../../Main";
 import {ICloseableModule} from "../ICloseableModule";
 import {ISubModule} from "../subModules/ISubModule";
 import * as Immutable from "immutable";
@@ -20,9 +19,8 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
     private _settings: Map<string, T | null>;
     private readonly _subModuleManager: SubModuleManager;
 
-    protected constructor(private _model: typeof CloseOptionModel, private _uid: string) {
+    protected constructor(private _model: typeof CloseOptionModel) {
         super();
-        Main.closeableModules.add(this);
         this._settings = new Map();
         this._isEnabled = new Map();
         this._subModuleManager = container.resolve(SubModuleManager);
@@ -34,10 +32,6 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
 
     public get submodules(): Immutable.Set<ISubModule> {
         return this._subModuleManager.getSubModulesFromParent(this);
-    }
-
-    public get uid(): string {
-        return this._uid;
     }
 
     public async saveSettings(guildId: string, setting: T, merge: boolean = false): Promise<void> {

@@ -13,11 +13,6 @@ export interface ICloseableModule<T extends ModuleSettings> {
     readonly moduleId: string;
 
     /**
-     * Unique ID of this CLASS
-     */
-    readonly uid: string;
-
-    /**
      * Retrun true if this module is intended to replace dyno
      */
     readonly isDynoReplacement: boolean;

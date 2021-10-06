@@ -16,11 +16,6 @@ import {container} from "tsyringe";
  */
 @Discord()
 export class RoleLogger extends AbstractAdminAuditLogger {
-    private static _uid = ObjectUtil.guid();
-
-    constructor() {
-        super(RoleLogger._uid);
-    }
 
     @On("guildMemberUpdate")
     private async roleGiven([oldMember, newMember]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {

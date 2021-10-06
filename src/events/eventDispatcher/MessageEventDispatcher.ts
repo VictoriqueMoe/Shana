@@ -2,6 +2,7 @@ import {ArgsOf, Client, Discord, On} from "discordx";
 import {MessageEntry} from "./MessageEntry";
 import {Message} from "discord.js";
 import {Main} from "../../Main";
+import {container} from "tsyringe";
 
 @Discord()
 export class MessageEventDispatcher {
@@ -39,8 +40,9 @@ export class MessageEventDispatcher {
     private async trigger(message: Message, client: Client, isEdit: boolean = false): Promise<void> {
         const retArr: Promise<void>[] = [];
         for (const [context, entries] of MessageEventDispatcher._messageListenerMap) {
+            const contextInstance = container.resolve(context);
             for (const entry of entries) {
-                retArr.push(entry.trigger(message, client, context, isEdit));
+                retArr.push(entry.trigger(message, client, contextInstance, isEdit));
             }
         }
         return Promise.all(retArr).then();

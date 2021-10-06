@@ -14,10 +14,8 @@ import {Message, MessageEmbed, User} from "discord.js";
 @Discord()
 export class AuditLogger extends CloseableModule<null> {
 
-    private static _uid = ObjectUtil.guid();
-
     constructor() {
-        super(CloseOptionModel, AuditLogger._uid);
+        super(CloseOptionModel);
     }
 
     public get moduleId(): string {

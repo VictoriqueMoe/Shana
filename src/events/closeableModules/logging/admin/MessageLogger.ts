@@ -14,13 +14,8 @@ const isImageFast = require('is-image-fast');
  */
 @Discord()
 export class MessageLogger extends AbstractAdminAuditLogger {
-    private static _uid = ObjectUtil.guid();
     private static messageLimit = 1024;
     private imgur = new Imgur();
-
-    constructor() {
-        super(MessageLogger._uid);
-    }
 
     @On("messageUpdate")
     private async messageEdited([oldMessage, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {

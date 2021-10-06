@@ -10,14 +10,10 @@ import {AssertionError} from "assert";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
-import {container} from "tsyringe";
 
 @Discord()
-export abstract class Meme extends AbstractCommandModule<any> {
-
-    private handler = container.resolve(ImageFun);
-
-    constructor() {
+export class Meme extends AbstractCommandModule<any> {
+    public constructor(private _handler: ImageFun) {
         super(
             {
                 module: {
@@ -941,7 +937,7 @@ export abstract class Meme extends AbstractCommandModule<any> {
         }
         let result: GenerateEndPointResponse = null;
         try {
-            result = await this.handler.generate(request);
+            result = await this._handler.generate(request);
         } catch (e) {
             console.error(e);
             message.reply("An error has occured, this has been logged");
