@@ -79,7 +79,7 @@
     "url-unshort": "^5.0.0",
     "utf-8-validate": "^5.0.5"
   },
-  "homepage": "https://github.com/VictoriqueMoe/SlutBot#readme",
+  "homepage": "https://github.com/VictoriqueMoe/WeebBot#readme",
   "devDependencies": {
     "@types/express": "^4.17.12",
     "@types/express-jwt": "^6.0.1",
