@@ -20,7 +20,7 @@ export class ScamFilter extends AbstractFilter implements IBannedWordDynoAutoMod
     public get bannedWords(): BannedWordEntryies {
         return {
             "exactWord": [],
-            "WildCardWords": ["nigger", "cunt", "nigga", "lambda.it.cx", "taciturasa", "gljfizd8xKgsSrU7dafuw", "fmqdWC-eVqc", "chng.it"]
+            "WildCardWords": []
         };
     }
 

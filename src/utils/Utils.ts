@@ -105,13 +105,15 @@ export namespace GuildUtils {
             if (!ObjectUtil.validString(role)) {
                 return null;
             }
+            let roleResolved: Role = null;
             try {
                 const guildManager = container.resolve(GuildManager);
                 const guild = await guildManager.getGuild(guildId);
-                return guild.roles.fetch(role);
+                roleResolved = await guild.roles.fetch(role);
             } catch {
                 return null;
             }
+            return roleResolved;
         }
     }
 
@@ -327,6 +329,11 @@ export namespace DiscordUtils {
         export function getUserFromUserContextInteraction(interaction: ContextMenuInteraction): GuildMember | undefined {
             const memberId = interaction.targetId;
             return interaction.guild.members.cache.get(memberId);
+        }
+
+        export function getMessageFromContextInteraction(interaction: ContextMenuInteraction): Promise<Message | undefined> {
+            const messageId = interaction.targetId;
+            return interaction.channel.messages.fetch(messageId);
         }
 
         export async function followupWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string, ephemeral: boolean = false): Promise<void> {

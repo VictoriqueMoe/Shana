@@ -3,13 +3,14 @@ import {MessageEntry} from "./MessageEntry";
 import {Message} from "discord.js";
 import {Main} from "../../Main";
 import {container} from "tsyringe";
+import constructor from "tsyringe/dist/typings/types/constructor";
 
 @Discord()
 export class MessageEventDispatcher {
 
-    private static readonly _messageListenerMap: Map<any, MessageEntry[]> = new Map();
+    private static readonly _messageListenerMap: Map<constructor<any>, MessageEntry[]> = new Map();
 
-    public static get messageListenerMap(): Map<any, MessageEntry[]> {
+    public static get messageListenerMap(): Map<constructor<any>, MessageEntry[]> {
         return MessageEventDispatcher._messageListenerMap;
     }
 

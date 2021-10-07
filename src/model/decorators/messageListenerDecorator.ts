@@ -1,6 +1,7 @@
 import {EditType, EventTriggerCondition} from "../types/Typeings";
 import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventDispatcher";
 import {MessageEntry} from "../../events/eventDispatcher/MessageEntry";
+import constructor from "tsyringe/dist/typings/types/constructor";
 
 /**
  * signals this method to be triggered on a message event.
@@ -16,7 +17,7 @@ export function MessageListenerDecorator(triggerOnEdit: boolean = false, ...cond
 
         const method: EditType = target[propertyKey];
         const entry = new MessageEntry(method, triggerOnEdit, conditions);
-        let context = null;
+        let context: constructor<any> = null;
         for (const [_context,] of map) {
             if (_context.constructor === constructor) {
                 context = _context;

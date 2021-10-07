@@ -10,6 +10,7 @@ import {PostableChannelModel} from "./PostableChannel.model";
 import {CommandSecurityModel} from "./CommandSecurity.model";
 import {AutoResponderModel} from "../autoMod/impl/AutoResponder.model";
 import {RoleJoinerModel} from "../RoleJoiner.model";
+import {BookmarkModel} from "../Bookmark.model";
 
 @Table
 export class GuildableModel extends Model implements IGuildAware {
@@ -46,4 +47,7 @@ export class GuildableModel extends Model implements IGuildAware {
 
     @HasMany(() => RoleJoinerModel)
     public roleJoinerModel: RoleJoinerModel[];
+
+    @HasMany(() => BookmarkModel)
+    public bookmarkModel: BookmarkModel[];
 }

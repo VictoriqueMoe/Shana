@@ -10,8 +10,10 @@ import {AssertionError} from "assert";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {injectable} from "tsyringe";
 
 @Discord()
+@injectable()
 export class Meme extends AbstractCommandModule<any> {
     public constructor(private _handler: ImageFun) {
         super(
