@@ -9,7 +9,7 @@ import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {GuildMember, TextBasedChannels} from "discord.js";
 import {Roles} from "../../../enums/Roles";
 import {CloseOptionModel} from "../../DB/autoMod/impl/CloseOption.model";
-import {container} from "tsyringe";
+import {container, delay} from "tsyringe";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<ICloseOption> implements ICloseableModule<T> {
@@ -23,7 +23,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         super();
         this._settings = new Map();
         this._isEnabled = new Map();
-        this._subModuleManager = container.resolve(SubModuleManager);
+        this._subModuleManager = container.resolve(delay(() => SubModuleManager));
     }
 
     public abstract get moduleId(): string;

@@ -82,9 +82,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
     }
 
 
-    @ContextMenu("USER", "Mute User for 30 mins", {
-        description: "Mute the current user for 30 mins"
-    })
+    @ContextMenu("USER", "Mute User for 30 mins")
     @Guard(secureCommandInteraction)
     private async userHandler(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply();

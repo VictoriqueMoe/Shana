@@ -21,7 +21,9 @@ export class BookmarkModel extends Model implements IGuildAware {
         },
         set(messageId: string[]) {
             if (!ArrayUtils.isValidArray(messageId)) {
-                this.setDataValue("messageIds", null);
+                this.destroy({
+                    force: true
+                });
                 return;
             }
             this.setDataValue("messageIds", messageId.join(","));

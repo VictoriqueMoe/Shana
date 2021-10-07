@@ -99,7 +99,7 @@ export class Help extends AbstractCommandModule<any> {
             }
 
             if (commandName) {
-                const commandObj = await this.getCommand(commandName, member);
+                const commandObj = await moduleRequested.getCommand(commandName, member);
                 if (commandObj == null) {
                     message.reply(`Invalid command name: "${commandName}" Please run '${prefix}${moduleName}' for a list of commands`);
                     return;

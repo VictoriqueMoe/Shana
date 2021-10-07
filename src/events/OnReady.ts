@@ -19,7 +19,6 @@ import {SettingsManager} from "../model/settings/SettingsManager";
 import {ArgsOf, Discord, On} from "discordx";
 import {container} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
-import {registerAfterDiscordTs} from "../DI/registerAfterDiscordTs";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 
 const io = require('@pm2/io');
@@ -186,7 +185,6 @@ export class OnReady extends BaseDAO<any> {
         } else {
             await Main.client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
         }
-        registerAfterDiscordTs();
         const vicDropbox = container.resolve(VicDropbox);
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
