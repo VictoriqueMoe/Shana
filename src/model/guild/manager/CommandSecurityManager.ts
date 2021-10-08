@@ -39,16 +39,16 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         }
     }
 
-    public get commandsAndEvents(): any[] {
+    public get commandsAndEvents(): (CloseableModule<any> | AbstractCommandModule<any>)[] {
         return this._commandsAndEvents;
     }
 
     public get events(): CloseableModule<any>[] {
-        return this.commandsAndEvents.filter(c => c instanceof CloseableModule);
+        return this.commandsAndEvents.filter(c => c instanceof CloseableModule) as CloseableModule<any>[];
     }
 
     public get commands(): AbstractCommandModule<any>[] {
-        return this.commandsAndEvents.filter(c => c instanceof AbstractCommandModule);
+        return this.commandsAndEvents.filter(c => c instanceof AbstractCommandModule) as AbstractCommandModule<any>[];
     }
 
     /**
