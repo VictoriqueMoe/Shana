@@ -5,21 +5,6 @@ import {DynoAutoMod} from "../managedEvents/messageEvents/closeableModules/DynoA
 import {AbstractFilter} from "../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
 
 export async function moduleRegistrar(): Promise<void> {
-    /*container.afterResolution(
-        CommandSecurityManager,
-        (_t, result, resolutionType) => {
-            if (Array.isArray(result)) {
-                for (const manager of result) {
-                    manager.init();
-                }
-            } else {
-                result.init();
-            }
-        },
-        {
-            frequency: "Once"
-        }
-    );*/
     container.afterResolution(
         Beans.SubModuleProxyDescriptor.token,
         (_t, result: ISubModule[], resolutionType) => {
@@ -35,4 +20,10 @@ export async function moduleRegistrar(): Promise<void> {
             frequency: "Once"
         }
     );
+}
+
+export function registerInstance(...instances: any): void {
+    for (const instance of instances) {
+        container.registerInstance(instance.constructor, instance);
+    }
 }

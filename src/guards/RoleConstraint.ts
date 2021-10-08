@@ -4,6 +4,7 @@ import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityMana
 import {getPrefix} from "../Main";
 import {CommandInteraction, ContextMenuInteraction, GuildMember} from "discord.js";
 import {container} from "tsyringe";
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 export const secureCommandInteraction: GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> = async (arg, client, next) => {
     let commandName = "";
@@ -44,6 +45,13 @@ export const secureCommandInteraction: GuardFunction<CommandInteraction | Simple
         const message = arg.message;
         message.reply("you do not have permissions to use this command");
     } else {
-        return DiscordUtils.InteractionUtils.replyWithText(arg, "you do not have permissions to use this command", false);
+        if (arg.isContextMenu()) {
+            const targetType = arg.targetType;
+            if (targetType === "USER") {
+                const userTargeted = InteractionUtils.getUserFromUserContextInteraction(arg);
+                return DiscordUtils.InteractionUtils.replyWithText(arg, `<@${member.id}>, you do not have permissions to the command: "${commandName}" against ${userTargeted.user.tag} `, false);
+            }
+        }
+        return DiscordUtils.InteractionUtils.replyWithText(arg, `<@${member.id}>, you do not have permissions to the command: "${commandName}"`, false);
     }
 };

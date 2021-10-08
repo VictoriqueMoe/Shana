@@ -1,4 +1,4 @@
-import {ButtonComponent, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {ButtonComponent, Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {
@@ -10,15 +10,16 @@ import {
     MessageEmbed
 } from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {Main} from "../../Main";
-import {Playlist, Queue, Song} from "discord-music-player";
+import {Player, Playlist, Queue, Song} from "discord-music-player";
 import {DiscordUtils} from "../../utils/Utils";
+import {injectable} from "tsyringe";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @SlashGroup("music", "Commands to play music from Youtube")
+@injectable()
 export class Music extends AbstractCommandModule<any> {
-    constructor() {
+    constructor(private _player: Player, private _client: Client) {
         super({
             module: {
                 name: "Music",
@@ -58,8 +59,8 @@ export class Music extends AbstractCommandModule<any> {
         });
     }
 
-    private static getGuildQueue(interaction: CommandInteraction | ButtonInteraction): Queue {
-        return Main.player.getQueue(interaction.guildId);
+    private getGuildQueue(interaction: CommandInteraction | ButtonInteraction): Queue {
+        return this._player.getQueue(interaction.guildId);
     }
 
     @Slash("playercontrols", {
@@ -86,7 +87,7 @@ export class Music extends AbstractCommandModule<any> {
             ephemeral: true
         });
         const {guildId} = interaction;
-        const guildQueue = Music.getGuildQueue(interaction);
+        const guildQueue = this.getGuildQueue(interaction);
         if (!guildQueue) {
             return InteractionUtils.replyWithText(interaction, "No songs are currently playing");
         } else {
@@ -103,7 +104,7 @@ export class Music extends AbstractCommandModule<any> {
             return InteractionUtils.replyWithText(interaction, "You must first join the voice channel before you can use this");
         }
         guildQueue.skip();
-        const embed = Music.displayPlaylist(guildQueue);
+        const embed = this.displayPlaylist(guildQueue);
         await interaction.editReply({
             embeds: [embed]
         });
@@ -114,11 +115,11 @@ export class Music extends AbstractCommandModule<any> {
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async nowPlaying(interaction: CommandInteraction): Promise<void> {
-        const guildQueue = Music.getGuildQueue(interaction);
+        const guildQueue = this.getGuildQueue(interaction);
         if (!guildQueue || !guildQueue.isPlaying) {
             return InteractionUtils.replyWithText(interaction, "No songs are currently playing");
         }
-        const embed = Music.displayPlaylist(guildQueue);
+        const embed = this.displayPlaylist(guildQueue);
         await interaction.reply({
             embeds: [embed]
         });
@@ -147,10 +148,9 @@ export class Music extends AbstractCommandModule<any> {
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
-        const {channel} = interaction;
-        const player = Main.player;
+        const player = this._player;
         const {guildId} = interaction;
-        const guildQueue = Music.getGuildQueue(interaction);
+        const guildQueue = this.getGuildQueue(interaction);
         const queue = player.createQueue(guildId);
         const member = InteractionUtils.getInteractionCaller(interaction);
         if (!(member instanceof GuildMember)) {
@@ -182,13 +182,13 @@ export class Music extends AbstractCommandModule<any> {
             }
             return InteractionUtils.replyWithText(interaction, `Unable to play ${search}`);
         }
-        const embed = Music.displayPlaylist(queue, newSong, member);
+        const embed = this.displayPlaylist(queue, newSong, member);
         await interaction.editReply({
             embeds: [embed]
         });
     }
 
-    private static displayPlaylist(queue: Queue, newSong?: Song | Playlist, memberWhoAddedSong?: GuildMember): MessageEmbed {
+    private displayPlaylist(queue: Queue, newSong?: Song | Playlist, memberWhoAddedSong?: GuildMember): MessageEmbed {
         const songs = queue.songs;
         const embed = new MessageEmbed().setColor('#FF470F').setTimestamp();
         embed.addField("Currently playing", queue.nowPlaying.name);
@@ -206,8 +206,8 @@ export class Music extends AbstractCommandModule<any> {
             const avatar = memberWhoAddedSong.user.displayAvatarURL({format: 'jpg'});
             embed.setAuthor(`${memberWhoAddedSong.displayName}`, avatar);
         } else {
-            const botImage = Main.client.user.displayAvatarURL({dynamic: true});
-            embed.setAuthor(`${Main.client.user.username}`, botImage);
+            const botImage = this._client.user.displayAvatarURL({dynamic: true});
+            embed.setAuthor(`${this._client.user.username}`, botImage);
         }
         return embed;
     }

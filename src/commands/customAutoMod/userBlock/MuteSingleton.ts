@@ -2,19 +2,20 @@ import {BaseDAO} from "../../../DAO/BaseDAO";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {Guild, GuildMember} from "discord.js";
-import {Main} from "../../../Main";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import * as schedule from "node-schedule";
 import {Job} from "node-schedule";
 import {singleton} from "tsyringe";
 import {GuildManager} from "../../../model/guild/manager/GuildManager";
+import {Sequelize} from "sequelize-typescript";
+import {Client} from "discordx";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 @singleton()
 export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
     private readonly _mutes: Set<Job>;
 
-    public constructor(private _guildManager: GuildManager) {
+    public constructor(private _guildManager: GuildManager, private _dao: Sequelize, private _client: Client) {
         super();
         this._mutes = new Set();
     }
@@ -91,7 +92,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         let savedModel: MuteModel = null;
         userObject = await user.guild.members.fetch(blockedUserId);
         try {
-            savedModel = await Main.dao.transaction(async t => {
+            savedModel = await this._dao.transaction(async t => {
                 const m = await super.commitToDatabase(model) as MuteModel;
                 await this.addRolePersist(userObject, muteRoleId);
                 return m;
@@ -147,7 +148,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         if (job) {
             this._mutes.delete(job);
         }
-        const guild = await Main.client.guilds.fetch(guildId);
+        const guild = await this._client.guilds.fetch(guildId);
         let member;
         try {
             member = await guild.members.fetch(userId);
@@ -183,7 +184,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
         try {
             const job = schedule.scheduleJob(userId, newDate, async () => {
-                await Main.dao.transaction(async t => {
+                await this._dao.transaction(async t => {
                     await this.doRemove(userId, guild.id, muteRoleId);
                 });
                 DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);

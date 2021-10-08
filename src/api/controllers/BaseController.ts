@@ -2,7 +2,8 @@ import {Request, Response} from "express";
 import {getReasonPhrase, StatusCodes} from "http-status-codes";
 import {Guild} from "discord.js";
 import {ObjectUtil} from "../../utils/Utils";
-import {Main} from "../../Main";
+import {Client} from "discordx";
+import {container} from "tsyringe";
 
 export abstract class baseController {
 
@@ -25,13 +26,14 @@ export abstract class baseController {
         if (!ObjectUtil.validString(id)) {
             throw new Error("Please supply an ID");
         }
+        const client = container.resolve(Client);
         if (id.includes("?")) {
             id = id.split("?").shift();
         }
         let guild: Guild = null;
         let guildFound: boolean;
         try {
-            guild = await Main.client.guilds.fetch(id);
+            guild = await client.guilds.fetch(id);
             guildFound = true;
         } catch {
             guildFound = false;

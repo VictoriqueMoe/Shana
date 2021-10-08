@@ -21,7 +21,7 @@ export class DynoAutoMod extends CloseableModule<null> {
 
     private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
 
-    constructor() {
+    constructor(private _client: Client) {
         super(CloseOptionModel);
     }
 
@@ -93,7 +93,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                                     if (channel instanceof TextChannel) {
                                         textChannel = channel;
                                     }
-                                    await this.muteUser(fromArray, member, "Auto mod violation limit reached", Main.client.user.id, textChannel, AbstractFilter.autoMuteTimeout);
+                                    await this.muteUser(fromArray, member, "Auto mod violation limit reached", this._client.user.id, textChannel, AbstractFilter.autoMuteTimeout);
                                     didPreformTerminaloperation = true;
                                 } catch (e) {
                                     console.error(e);

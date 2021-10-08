@@ -1,5 +1,4 @@
-import {files} from "dropbox";
-import {Main} from "../../Main";
+import {Dropbox, files} from "dropbox";
 import {singleton} from "tsyringe";
 
 @singleton()
@@ -7,7 +6,7 @@ export class VicDropbox {
     private isIndexed = false;
     private imageCache: files.FolderMetadataReference[];
 
-    public constructor() {
+    public constructor(private _dropbox: Dropbox) {
         this.imageCache = [];
         this.isIndexed = false;
         const handler = {
@@ -46,7 +45,7 @@ export class VicDropbox {
 
     public async index(): Promise<void> {
         console.log("Indexing images...");
-        this.imageCache = ((await Main.dropBox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
+        this.imageCache = ((await this._dropbox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
         console.log(`Indexed ${this.imageCache.length} images`);
         this.isIndexed = true;
     }

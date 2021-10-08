@@ -4,13 +4,12 @@ import * as dotenv from "dotenv";
 import {EnumEx, ObjectUtil} from "./utils/Utils";
 import {DEFAULT_SETTINGS, SETTINGS} from "./enums/SETTINGS";
 import {SettingsManager} from "./model/settings/SettingsManager";
-import * as http from "http";
 import * as v8 from "v8";
 import {Client, DIService} from "discordx";
 import {Intents, Message} from "discord.js";
 import {Dropbox} from "dropbox";
 import {Player} from "discord-music-player";
-import {moduleRegistrar} from "./DI/moduleRegistrar";
+import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 import {container} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
 // const https = require('http-debug').https;
@@ -30,37 +29,14 @@ export async function getPrefix(message: Message): Promise<string> {
 
 export class Main {
     public static testMode = false;
-    public static interactionTestMode = Main.testMode || true;
-    public static botServer: http.Server;
-    private static _client: Client;
-    private static dbx: Dropbox;
-    private static _player: Player;
-
-    static get client(): Client {
-        return this._client;
-    }
-
-    private static _dao: Sequelize;
-
-    public static get dao(): Sequelize {
-        return Main._dao;
-    }
-
-    public static get dropBox(): Dropbox {
-        return Main.dbx;
-    }
-
-    public static get player(): Player {
-        return Main._player;
-    }
 
     public static async start(): Promise<void> {
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         DIService.container = container;
         await moduleRegistrar();
-        Main.dbx = new Dropbox({accessToken: process.env.dropboxToken});
-        Main._dao = new Sequelize('database', '', '', {
+        const dropBox = new Dropbox({accessToken: process.env.dropboxToken});
+        const dao = new Sequelize('database', '', '', {
             host: 'localhost',
             dialect: 'sqlite',
             logging: (sql: string, timing: number): void => {
@@ -74,9 +50,8 @@ export class Main {
                 return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
             }
         });
-        await Main.dao.sync({force: false});
-        const guildManager = container.resolve(GuildManager);
-        this._client = new Client({
+        await dao.sync({force: false});
+        const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             prefix: getPrefix,
             classes: [
@@ -94,24 +69,29 @@ export class Main {
                 Intents.FLAGS.GUILD_VOICE_STATES
             ],
             botGuilds: [async (): Promise<string[]> => {
+                const guildManager = container.resolve(GuildManager);
                 const guilds = await guildManager.getGuilds();
                 return guilds.map(guild => guild.id);
             }],
             silent: false,
         });
-        await this._client.login(process.env.token);
+        registerInstance(dropBox, dao, client);
+        await client.login(process.env.token);
 
     }
 
     public static initMusicPlayer(): void {
-        Main._player = new Player(Main.client, {
+        const client = container.resolve(Client);
+        const player = new Player(client, {
             leaveOnEmpty: true,
             quality: "high"
         });
+        registerInstance(player);
     }
 
     public static async setDefaultSettings(): Promise<void> {
-        const guilds = this.client.guilds;
+        const client = container.resolve(Client);
+        const guilds = client.guilds;
         const cache = guilds.cache;
         const nameValue = EnumEx.getNamesAndValues(DEFAULT_SETTINGS) as any;
         const settingsManager = container.resolve(SettingsManager);

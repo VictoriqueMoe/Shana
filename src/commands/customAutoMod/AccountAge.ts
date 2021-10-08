@@ -1,17 +1,18 @@
-import {Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
-import {Main} from "../../Main";
 import {Channel, CommandInteraction, GuildMember, User} from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
+import {injectable} from "tsyringe";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @SlashGroup("ages", "commands to get ages of accounts and servers")
-export abstract class AccountAge extends AbstractCommandModule<any> {
+@injectable()
+export class AccountAge extends AbstractCommandModule<any> {
 
-    protected constructor() {
+    public constructor(private _client: Client) {
         super({
             module: {
                 name: "Ages",
@@ -80,7 +81,7 @@ export abstract class AccountAge extends AbstractCommandModule<any> {
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async serverAge(interaction: CommandInteraction): Promise<void> {
         const guildId = interaction.guild.id;
-        const guild = await Main.client.guilds.fetch(guildId);
+        const guild = await this._client.guilds.fetch(guildId);
         const ageObject = AccountAge.getAge(guild);
         return InteractionUtils.replyWithText(interaction, `Server is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
     }

@@ -38,6 +38,7 @@ import {FindOptions} from "sequelize/types/lib/model";
 import {container} from "tsyringe";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
+import {Client} from "discordx";
 
 const emojiRegex = require('emoji-regex');
 
@@ -188,14 +189,16 @@ export namespace GuildUtils {
 
 
     export function getGuildIconUrl(guildId: string): string {
-        const guild = Main.client.guilds.cache.get(guildId);
+        const client = container.resolve(Client);
+        const guild = client.guilds.cache.get(guildId);
         return guild.iconURL({
             dynamic: true,
         });
     }
 
     export function getGuildName(guildId: string): string {
-        const guild = Main.client.guilds.cache.get(guildId);
+        const client = container.resolve(Client);
+        const guild = client.guilds.cache.get(guildId);
         return guild.name;
     }
 
@@ -379,6 +382,10 @@ export namespace DiscordUtils {
         "url": string,
         "id": string
     };
+
+    export function getClient(): Client {
+        return container.resolve(Client);
+    }
 
     export async function getBot(guildId: string): Promise<GuildMember> {
         const guildManager = container.resolve(GuildManager);
@@ -564,7 +571,8 @@ export namespace DiscordUtils {
     }
 
     export function findChannelByName(channelName: string, guildId: string): Typeings.AbstractChannel {
-        const channels = Main.client.guilds.cache.get(guildId).channels;
+        const client = container.resolve(Client);
+        const channels = client.guilds.cache.get(guildId).channels;
         for (const [, channel] of channels.cache) {
             if (channel.name === channelName) {
                 return channel;
@@ -614,7 +622,8 @@ export namespace DiscordUtils {
         let channel: TextChannel;
         const channelManager = container.resolve(ChannelManager);
         if (Main.testMode) {
-            const guild = await Main.client.guilds.fetch(guildId);
+            const client = container.resolve(Client);
+            const guild = await client.guilds.fetch(guildId);
             channel = await guild.channels.resolve(Channels.TEST_CHANNEL) as TextChannel;
         } else if (adminLog) {
             channel = await channelManager.getAdminLogChannel(guildId);
@@ -960,6 +969,7 @@ export namespace ModelUtils {
     }
 
     function getGuild(this: Model): Guild {
-        return Main.client.guilds.cache.get(this.getDataValue("guildId"));
+        const client = container.resolve(Client);
+        return client.guilds.cache.get(this.getDataValue("guildId"));
     }
 }

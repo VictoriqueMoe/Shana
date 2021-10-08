@@ -1,12 +1,15 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {MessageEntry} from "./MessageEntry";
 import {Message} from "discord.js";
-import {Main} from "../../Main";
-import {container} from "tsyringe";
+import {container, injectable} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
 
 @Discord()
+@injectable()
 export class MessageEventDispatcher {
+
+    public constructor(private _client: Client) {
+    }
 
     private static readonly _messageListenerMap: Map<constructor<any>, MessageEntry[]> = new Map();
 
@@ -16,7 +19,7 @@ export class MessageEventDispatcher {
 
     @On("messageCreate")
     private async eventTrigger([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
-        await Main.client.executeCommand(message, {
+        await this._client.executeCommand(message, {
             caseSensitive: false
         });
         return this.trigger(message, client, false);

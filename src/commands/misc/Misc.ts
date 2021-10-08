@@ -1,4 +1,5 @@
 import {
+    Client,
     ContextMenu,
     Discord,
     Guard,
@@ -11,14 +12,13 @@ import {
 import {NotBotInteraction} from "../../guards/NotABot";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {CommandInteraction, ContextMenuInteraction, ImageURLOptions, MessageAttachment, MessageEmbed} from "discord.js";
-import {Main} from "../../Main";
 import {TimedSet} from "../../model/Impl/TimedSet";
 import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
 import {Response} from "../../model/anime/AnimeTypings";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DeepAPI} from "../../model/DeepAPI";
-import {container} from "tsyringe";
+import {container, injectable} from "tsyringe";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const Anilist = require('anilist-node');
@@ -28,12 +28,13 @@ const isImageFast = require('is-image-fast');
 
 @Discord()
 @SlashGroup("miscellaneous", "Miscellaneous commands")
+@injectable()
 export class Misc extends AbstractCommandModule<any> {
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
     private readonly animeTractApi = new AnimeTractApi();
     private readonly anilist = new Anilist();
 
-    constructor() {
+    constructor(private _client: Client) {
         super({
             module: {
                 name: "Miscellaneous",
@@ -256,7 +257,7 @@ export class Misc extends AbstractCommandModule<any> {
             isAdult,
             title
         } = aniDbRes;
-        const botAvatar = Main.client.user.displayAvatarURL({dynamic: true});
+        const botAvatar = this._client.user.displayAvatarURL({dynamic: true});
         const humanAt = new Date(from * 1000).toISOString().substr(11, 8);
         if (isAdult || similarity < freshHold) {
             replyMessage.delete();
@@ -266,7 +267,7 @@ export class Misc extends AbstractCommandModule<any> {
         let mainTitle = title.romaji;
         const embed = new MessageEmbed()
             .setTitle(`${title.romaji}`)
-            .setAuthor(`${Main.client.user.username}`, botAvatar)
+            .setAuthor(`${this._client.user.username}`, botAvatar)
             .setThumbnail(url)
             .setColor('#0099ff')
             .addField("Episode and timestamp this scene is from", `Episode: ${episode} at: ${humanAt}`)
@@ -378,11 +379,11 @@ export class Misc extends AbstractCommandModule<any> {
             return;
         }
         const title = result[0].title;
-        const botAvarar = Main.client.user.displayAvatarURL({dynamic: true});
+        const botAvarar = this._client.user.displayAvatarURL({dynamic: true});
         const embed = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`top ${result.length - 1} ${title}`)
-            .setAuthor(`${Main.client.user.username}`, botAvarar)
+            .setAuthor(`${this._client.user.username}`, botAvarar)
             .setThumbnail(imageUrl)
             .setTimestamp();
         for (let i = 1; i < result.length; i++) {

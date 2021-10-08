@@ -1,13 +1,17 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {AutoResponderModel} from "../../DB/autoMod/impl/AutoResponder.model";
-import {Main} from "../../../Main";
 import {singleton} from "tsyringe";
+import {Sequelize} from "sequelize-typescript";
 
 @singleton()
 export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
 
+    public constructor(private _dao: Sequelize) {
+        super();
+    }
+
     public async editAutoResponder(obj: AutoResponderModel, currentTitle: string): Promise<AutoResponderModel> {
-        return Main.dao.transaction(async t => {
+        return this._dao.transaction(async t => {
             await this.deleteAutoResponse(obj.guildId, currentTitle);
             return this.addAutoResponder(obj);
         });

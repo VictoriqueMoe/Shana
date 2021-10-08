@@ -2,16 +2,17 @@ import {Discord, Guard, Slash, SlashGroup} from "discordx";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {Main} from "../../Main";
 import {CommandInteraction} from "discord.js";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
-import {container} from "tsyringe";
+import {container, injectable} from "tsyringe";
+import {Dropbox} from "dropbox";
 
 @Discord()
 @SlashGroup("vicimage", "Obtain images of Victorique#0002")
-export abstract class VicImage extends AbstractCommandModule<any> {
+@injectable()
+export class VicImage extends AbstractCommandModule<any> {
 
-    constructor() {
+    constructor(private _dropbox: Dropbox) {
         super({
             module: {
                 name: "VicImage",
@@ -45,7 +46,7 @@ export abstract class VicImage extends AbstractCommandModule<any> {
         const channel = interaction.channel;
         const vicDropbox = container.resolve(VicDropbox);
         const randomImageMetadata = vicDropbox.randomImage;
-        const randomImage = (await Main.dropBox.filesDownload({"path": randomImageMetadata.path_lower})).result;
+        const randomImage = (await this._dropbox.filesDownload({"path": randomImageMetadata.path_lower})).result;
         const buffer: Buffer = (randomImage as any).fileBinary;
         try {
             await interaction.editReply({

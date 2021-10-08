@@ -1,6 +1,5 @@
 import {ChildControllers, Controller, Get, Post} from "@overnightjs/core";
 import {Request, Response} from 'express';
-import {Main} from "../../../Main";
 import {baseController} from "../BaseController";
 import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {Channel, Guild, GuildMember} from "discord.js";
@@ -13,6 +12,8 @@ import {ModuleController} from "./modules/impl/ModuleController";
 import {CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager";
 import {Typeings} from "../../../model/types/Typeings";
 import {container, singleton} from "tsyringe";
+import {Sequelize} from "sequelize-typescript";
+import {Client} from "discordx";
 import CommandArgs = Typeings.CommandArgs;
 
 @singleton()
@@ -21,6 +22,10 @@ import CommandArgs = Typeings.CommandArgs;
     new ModuleController()
 ])
 export class BotController extends baseController {
+
+    public constructor(private _dao: Sequelize, private _client: Client) {
+        super();
+    }
 
     @Post("unMuteMembers")
     private async unMuteMembers(req: Request, res: Response): Promise<Response> {
@@ -38,7 +43,7 @@ export class BotController extends baseController {
         const body: payload = req.body;
         const muteSingleton = container.resolve(MuteSingleton);
         for (const userId of body) {
-            await Main.dao.transaction(async t => {
+            await this._dao.transaction(async t => {
                 await muteSingleton.doRemove(userId, guild.id, muteRole.id);
             });
         }
@@ -145,7 +150,7 @@ export class BotController extends baseController {
 
     @Get('allGuilds')
     private async getAllGuilds(req: Request, res: Response): Promise<Response> {
-        const guilds = Main.client.guilds.cache;
+        const guilds = this._client.guilds.cache;
         const obj = {};
         for (const [guildId, guild] of guilds) {
             obj[guildId] = guild.toJSON();
@@ -318,7 +323,7 @@ export class BotController extends baseController {
 
     @Get('getBotInfo')
     private async getBotInfo(req: Request, res: Response): Promise<Response> {
-        const bot = Main.client.user;
+        const bot = this._client.user;
         if (!bot) {
             return super.doError(res, "Unable to fdind client", StatusCodes.INTERNAL_SERVER_ERROR);
         }

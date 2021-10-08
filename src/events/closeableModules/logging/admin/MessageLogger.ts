@@ -22,7 +22,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
         if (!newMessage.member) {
             return;
         }
-        if (newMessage.member.id === Main.client.user.id) {
+        if (newMessage.member.id === client.user.id) {
             return;
         }
         const messageBefore = oldMessage.content;
@@ -59,7 +59,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
 
     @On("messageDelete")
     private async messageDeleted([message]: ArgsOf<"messageDelete">, client: Client): Promise<void> {
-        if (!Main.testMode && message.member && message.member.id === Main.client.user.id) {
+        if (!Main.testMode && message.member && message.member.id === client.user.id) {
             return;
         }
         const dateNow = Date.now();

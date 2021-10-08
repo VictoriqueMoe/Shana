@@ -1,8 +1,7 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
+import {Client, Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {ArrayUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {GuildMember, MessageEmbed} from "discord.js";
-import {Main} from "../../Main";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {Typeings} from "../../model/types/Typeings";
@@ -15,7 +14,8 @@ import Command = Typeings.Command;
 @Discord()
 @injectable()
 export class Help extends AbstractCommandModule<any> {
-    constructor(@inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager) {
+
+    constructor(@inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager, private _client: Client) {
         super({
             module: {
                 name: "Help",
@@ -63,18 +63,18 @@ export class Help extends AbstractCommandModule<any> {
             return;
         }
         const member = message.member;
-        const botImage = Main.client.user.displayAvatarURL({dynamic: true});
+        const botImage = this._client.user.displayAvatarURL({dynamic: true});
         const settingsManager = container.resolve(SettingsManager);
         const prefix = await settingsManager.getSetting(SETTINGS.PREFIX, member.guild.id);
         const highestRoleColour = member.roles.highest.hexColor;
         const embed = new MessageEmbed()
             .setColor(highestRoleColour)
-            .setAuthor(`${Main.client.user.username}`, botImage)
+            .setAuthor(`${this._client.user.username}`, botImage)
             .setTimestamp();
         const availableModules = await this._commandSecurityManager.getCommandModulesForMember(member);
         if (!ArrayUtils.isValidArray(argumentArray)) {
             embed.setDescription(`The items shown below are all the modules supported by this bot, please run '${prefix} help "moduleName"' to see commands for modules and '${prefix} help "moduleName" "commandName"' for argument info`);
-            embed.setTitle(`${Main.client.user.username} modules`);
+            embed.setTitle(`${this._client.user.username} modules`);
             for (const commandClass of availableModules) {
                 const {module} = commandClass.commandDescriptors;
                 const moduleName = module.name;

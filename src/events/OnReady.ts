@@ -16,19 +16,26 @@ import {AutoRole} from "./closeableModules/autoRole/AutoRole";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import * as fs from 'fs';
 import {SettingsManager} from "../model/settings/SettingsManager";
-import {ArgsOf, Discord, On} from "discordx";
-import {container} from "tsyringe";
+import {ArgsOf, Client, Discord, On} from "discordx";
+import {container, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {AbstractCommandModule} from "../commands/AbstractCommandModule";
+import {Sequelize} from "sequelize-typescript";
 
 const io = require('@pm2/io');
 
 @Discord()
+@injectable()
 export class OnReady extends BaseDAO<any> {
     private readonly classesToLoad = [`${__dirname}/../model/closeableModules/subModules/dynoAutoMod/impl/*.{ts,js}`, `${__dirname}/../managedEvents/**/*.{ts,js}`];
 
-    private static async initiateMuteTimers(): Promise<void> {
+    public constructor(private _client: Client, private _dao: Sequelize) {
+        super();
+    }
+
+
+    private async initiateMuteTimers(): Promise<void> {
         const mutesWithTimers = await MuteModel.findAll({
             where: {
                 timeout: {
@@ -46,7 +53,7 @@ export class OnReady extends BaseDAO<any> {
             const muteCreated = (mute.createdAt as Date).getTime();
             const timerLength = mute.timeout;
             const timeLeft = timerLength - (now - muteCreated);
-            const guild: Guild = await Main.client.guilds.fetch(mute.guildId);
+            const guild: Guild = await this._client.guilds.fetch(mute.guildId);
             if (timeLeft <= 0) {
                 console.log(`Timer has expired for user ${mute.username}, removing from database`);
                 await MuteModel.destroy({
@@ -62,18 +69,18 @@ export class OnReady extends BaseDAO<any> {
         }
     }
 
-    private static async cleanCommands(justGuilds: boolean): Promise<void> {
+    private async cleanCommands(justGuilds: boolean): Promise<void> {
         if (justGuilds) {
             const guildManager = container.resolve(GuildManager);
             for (const guild of await guildManager.getGuilds()) {
                 try {
-                    await Main.client.clearApplicationCommands(guild.id);
+                    await this._client.clearApplicationCommands(guild.id);
                 } catch {
 
                 }
             }
         } else {
-            await Main.client.clearApplicationCommands();
+            await this._client.clearApplicationCommands();
         }
     }
 
@@ -113,7 +120,7 @@ export class OnReady extends BaseDAO<any> {
         return retMap;
     }
 
-    private static async loadCustomActions(): Promise<void> {
+    private async loadCustomActions(): Promise<void> {
         io.action('getLogs', async (cb) => {
             const url = `${__dirname}/../../logs/combined.log`;
             const log = fs.readFileSync(url, {
@@ -123,14 +130,14 @@ export class OnReady extends BaseDAO<any> {
         });
 
         io.action("Re init commands (globally)", async cb => {
-            await OnReady.cleanCommands(false);
-            await OnReady.initAppCommands();
+            await this.cleanCommands(false);
+            await this.initAppCommands();
             return cb("Slash Commands reset");
         });
 
         io.action("Re init commands (guilds only)", async cb => {
-            await OnReady.cleanCommands(true);
-            await OnReady.initAppCommands();
+            await this.cleanCommands(true);
+            await this.initAppCommands();
             return cb("Slash Commands reset");
         });
 
@@ -167,24 +174,24 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(this.populateCommandSecurity());
         pArr.push(this.populatePostableChannels());
         pArr.push(this.cleanUpGuilds());
-        pArr.push(OnReady.initAppCommands());
+        pArr.push(this.initAppCommands());
         return pArr;
     }
 
     @On("interactionCreate")
     private async intersectionInit([interaction]: ArgsOf<"interactionCreate">): Promise<void> {
-        await Main.client.executeInteraction(interaction);
+        await this._client.executeInteraction(interaction);
     }
 
     @On("ready")
     private async initialize([client]: ArgsOf<"ready">): Promise<void> {
         if (Main.testMode) {
-            await Main.client.user.setActivity("Under development", {type: "LISTENING"});
-            await Main.client.user.setPresence({
+            await this._client.user.setActivity("Under development", {type: "LISTENING"});
+            await this._client.user.setPresence({
                 status: "idle"
             });
         } else {
-            await Main.client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
+            await this._client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
         }
         const vicDropbox = container.resolve(VicDropbox);
         const pArr: Promise<any>[] = [];
@@ -192,13 +199,13 @@ export class OnReady extends BaseDAO<any> {
         // await OnReady.cleanCommands(true);
         Main.initMusicPlayer();
         pArr.push(vicDropbox.index());
-        pArr.push(OnReady.initiateMuteTimers());
+        pArr.push(this.initiateMuteTimers());
         pArr.push(this.initUsernames());
         pArr.push(...this.init());
         pArr.push(OnReady.applyEmptyRoles());
         pArr.push(loadClasses(...this.classesToLoad));
         pArr.push(OnReady.startServer());
-        pArr.push(OnReady.loadCustomActions());
+        pArr.push(this.loadCustomActions());
         return Promise.all(pArr).then(() => {
             console.log("Bot logged in.");
             if (process.send) {
@@ -207,8 +214,8 @@ export class OnReady extends BaseDAO<any> {
         });
     }
 
-    private static async initAppCommands(): Promise<void> {
-        return Main.client.initApplicationCommands();
+    private async initAppCommands(): Promise<void> {
+        return this._client.initApplicationCommands();
     }
 
     private async initUsernames(): Promise<void> {
@@ -217,7 +224,7 @@ export class OnReady extends BaseDAO<any> {
         });
         const pArr: Promise<void>[] = [];
         for (const model of allModels) {
-            const guild = await Main.client.guilds.fetch(model.guildId);
+            const guild = await this._client.guilds.fetch(model.guildId);
             const userNameModels = model.usernameModel;
             const innerPromiseArray = userNameModels.map(userNameModel => {
                 return guild.members.fetch(userNameModel.userId).then(member => {
@@ -238,8 +245,8 @@ export class OnReady extends BaseDAO<any> {
         const commandSecurityManager = container.resolve(CommandSecurityManager);
         const allModules: CloseableModule<any>[] = commandSecurityManager.events;
         for (const module of allModules) {
-            await Main.dao.transaction(async t => {
-                for (const [guildId, guild] of Main.client.guilds.cache) {
+            await this._dao.transaction(async t => {
+                for (const [guildId, guild] of this._client.guilds.cache) {
                     const moduleId = module.moduleId;
                     const modelPercisted = await CloseOptionModel.findOne({
                         where: {
@@ -273,12 +280,12 @@ export class OnReady extends BaseDAO<any> {
     private static async startServer(): Promise<void> {
         const botServer = container.resolve(BotServer);
         await botServer.initClasses();
-        Main.botServer = botServer.start(4401);
+        botServer.start(4401);
     }
 
     private async populateGuilds(): Promise<void> {
-        const guilds = Main.client.guilds.cache;
-        return Main.dao.transaction(async t => {
+        const guilds = this._client.guilds.cache;
+        return this._dao.transaction(async t => {
             for (const [guildId] of guilds) {
                 const guild = new GuildableModel({
                     guildId
@@ -302,7 +309,7 @@ export class OnReady extends BaseDAO<any> {
             for (const guildModel of guildModels) {
                 const guildId = guildModel.guildId;
                 const commandSecurity = guildModel.commandSecurityModel;
-                await Main.dao.transaction(async t => {
+                await this._dao.transaction(async t => {
                     const models: {
                         commandName: string, guildId: string
                     }[] = [];
@@ -374,7 +381,7 @@ export class OnReady extends BaseDAO<any> {
         const models: {
             guildId: string
         }[] = [];
-        await Main.dao.transaction(async t => {
+        await this._dao.transaction(async t => {
             for (const guildModel of guildModels) {
                 const guildId = guildModel.guildId;
                 if (currentModels.some(m => m.guildId === guildId)) {
@@ -389,7 +396,7 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private async cleanUpGuilds(): Promise<void> {
-        const guildsJoined = [...Main.client.guilds.cache.keys()];
+        const guildsJoined = [...this._client.guilds.cache.keys()];
         for (const guildsJoinedId of guildsJoined) {
             const guildModels = await GuildableModel.findOne({
                 where: {
