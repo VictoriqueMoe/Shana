@@ -22,7 +22,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
     }
 
     @PostConstruct
-    public async init(): Promise<void> {
+    private async init(): Promise<void> {
         const dApplicationCommands = MetadataStorage.instance.allApplicationCommands;
         const allEvents = MetadataStorage.instance.events;
         const simpleCommands = MetadataStorage.instance.allSimpleCommands.map(value => value.command);
