@@ -22,7 +22,10 @@ io.init({
 dotenv.config({path: __dirname + '/../.env'});
 
 export async function getPrefix(message: Message): Promise<string> {
-    const guildId = message?.guild?.id ?? "~";
+    const guildId = message?.guild?.id;
+    if (!ObjectUtil.validString(guildId)) {
+        return "~";
+    }
     const settingsManager = container.resolve(SettingsManager);
     return settingsManager.getSetting(SETTINGS.PREFIX, guildId);
 }

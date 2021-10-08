@@ -204,6 +204,9 @@ export class MemberLogger extends AbstractAdminAuditLogger {
 
     @On("guildBanAdd")
     private async memberBanned([ban]: ArgsOf<"guildBanAdd">, client: Client): Promise<void> {
+        if (ban.partial) {
+            ban = await ban.fetch(true);
+        }
         const {guild, reason, user} = ban;
         const avatarUrl = user.displayAvatarURL({format: 'jpg'});
         const userBanned = new MessageEmbed()
@@ -219,19 +222,11 @@ export class MemberLogger extends AbstractAdminAuditLogger {
             const target = res.target;
             if (target instanceof User) {
                 if (user.id === target.id) {
-                    userBanned.addFields(
-                        {
-                            name: "Banned by",
-                            value: res.executor.tag
-                        },
-                        {
-                            name: "Reason",
-                            value: ObjectUtil.validString(reason) ? reason : "No reason provided"
-                        }
-                    );
+                    userBanned.addField("Banned by", res.executor.tag);
                 }
             }
         }
+        userBanned.addField("Reason", ObjectUtil.validString(reason) ? reason : "No reason provided");
         super.postToLog(userBanned, guild.id);
     }
 }

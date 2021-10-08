@@ -314,7 +314,7 @@ export class OnReady extends BaseDAO<any> {
                         commandName: string, guildId: string
                     }[] = [];
                     for (const commandCLazz of allCommands) {
-                        if (!(commandCLazz instanceof AbstractCommandModule) || !ObjectUtil.isValidObject(commandCLazz.commandDescriptors)) {
+                        if (!ObjectUtil.isValidObject(commandCLazz.commandDescriptors)) {
                             continue;
                         }
                         const {commands} = commandCLazz.commandDescriptors;

@@ -79,6 +79,9 @@ export class AuditLogger extends CloseableModule<null> {
 
     @On("guildBanAdd")
     private async memberBanned([ban]: ArgsOf<"guildBanAdd">, client: Client): Promise<void> {
+        if (ban.partial) {
+            ban = await ban.fetch(true);
+        }
         const {guild, reason, user} = ban;
         if (!await this.isEnabled(guild.id)) {
             return;

@@ -70,25 +70,27 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                 guildId
             }
         });
+        const guildManager = container.resolve(GuildManager);
+        const guild = await guildManager.getGuild(guildId);
+        const bot = guild.me;
+        const botUsername = bot.user.username;
         try {
             if (persistedRole) {
-                const guildManager = container.resolve(GuildManager);
-                const guild = await guildManager.getGuild(guildId);
                 const rolePersisted = await guild.roles.fetch(persistedRole.roleId);
                 const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
                 const muteRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
                 if (jailRole && rolePersisted.id === jailRole.id) {
                     if (settings.autoJail) {
                         DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving in jail and has be re-jailed`, member.guild.id);
-                        await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
+                        await this._roleApplier.applyRole(rolePersisted, member, `added via ${botUsername}`);
                     }
                 } else if (muteRole && rolePersisted.id === muteRole.id) {
                     if (settings.autoMute) {
                         DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and has been re-muted.`, member.guild.id);
-                        await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
+                        await this._roleApplier.applyRole(rolePersisted, member, `added via ${botUsername}`);
                     }
                 } else {
-                    await this._roleApplier.applyRole(rolePersisted, member, "added via VicBot");
+                    await this._roleApplier.applyRole(rolePersisted, member, `added via ${botUsername}`);
                 }
                 return;
             }
@@ -96,7 +98,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         }
         if (autoRole) {
             try {
-                await this._roleApplier.applyRole(autoRole, member, "added via VicBot");
+                await this._roleApplier.applyRole(autoRole, member, `added via ${botUsername}`);
             } catch {
             }
         }
