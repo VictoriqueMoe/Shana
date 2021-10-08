@@ -130,7 +130,7 @@ export class BotController extends baseController {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
         const securityManager = container.resolve(CommandSecurityManager);
-        const commandClasses = securityManager.runnableCommands;
+        const commandClasses = securityManager.commands;
         const retObj: CommandArgs[] = [];
         for (const commandModule of commandClasses) {
             const {commandDescriptors} = commandModule;

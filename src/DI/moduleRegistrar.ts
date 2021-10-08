@@ -3,10 +3,9 @@ import {Beans} from "./Beans";
 import {ISubModule} from "../model/closeableModules/subModules/ISubModule";
 import {DynoAutoMod} from "../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {AbstractFilter} from "../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
-import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 
 export async function moduleRegistrar(): Promise<void> {
-    container.afterResolution(
+    /*container.afterResolution(
         CommandSecurityManager,
         (_t, result, resolutionType) => {
             if (Array.isArray(result)) {
@@ -20,7 +19,7 @@ export async function moduleRegistrar(): Promise<void> {
         {
             frequency: "Once"
         }
-    );
+    );*/
     container.afterResolution(
         Beans.SubModuleProxyDescriptor.token,
         (_t, result: ISubModule[], resolutionType) => {

@@ -20,6 +20,7 @@ import {ArgsOf, Discord, On} from "discordx";
 import {container} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
+import {AbstractCommandModule} from "../commands/AbstractCommandModule";
 
 const io = require('@pm2/io');
 
@@ -235,7 +236,7 @@ export class OnReady extends BaseDAO<any> {
 
     private async populateClosableEvents(): Promise<void> {
         const commandSecurityManager = container.resolve(CommandSecurityManager);
-        const allModules: CloseableModule<any>[] = commandSecurityManager.runnableCommands.filter(value => value instanceof CloseableModule);
+        const allModules: CloseableModule<any>[] = commandSecurityManager.events;
         for (const module of allModules) {
             await Main.dao.transaction(async t => {
                 for (const [guildId, guild] of Main.client.guilds.cache) {
@@ -295,17 +296,20 @@ export class OnReady extends BaseDAO<any> {
 
     private async populateCommandSecurity(): Promise<void> {
         const securityManager = container.resolve(CommandSecurityManager);
+        const allCommands: AbstractCommandModule<any>[] = securityManager.commands;
 
         async function addNewCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
             for (const guildModel of guildModels) {
                 const guildId = guildModel.guildId;
                 const commandSecurity = guildModel.commandSecurityModel;
-                const allCommands = securityManager.runnableCommands;
                 await Main.dao.transaction(async t => {
                     const models: {
                         commandName: string, guildId: string
                     }[] = [];
                     for (const commandCLazz of allCommands) {
+                        if (!(commandCLazz instanceof AbstractCommandModule) || !ObjectUtil.isValidObject(commandCLazz.commandDescriptors)) {
+                            continue;
+                        }
                         const {commands} = commandCLazz.commandDescriptors;
                         for (const {name} of commands) {
                             const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName === name);
@@ -317,8 +321,10 @@ export class OnReady extends BaseDAO<any> {
                             }
                         }
                     }
-                    console.log(`adding commands: ${models.map(value => value.commandName)}`);
-                    return CommandSecurityModel.bulkCreate(models);
+                    if (models.length > 0) {
+                        console.log(`adding commands: ${models.map(value => value.commandName)}`);
+                        return CommandSecurityModel.bulkCreate(models);
+                    }
                 });
             }
         }
@@ -327,7 +333,6 @@ export class OnReady extends BaseDAO<any> {
             for (const guildModel of guildModels) {
                 const {guildId} = guildModel;
                 const commandSecurity = guildModel.commandSecurityModel;
-                const allCommands = securityManager.runnableCommands;
                 const commandsToDestory: string[] = [];
                 for (const {commandName} of commandSecurity) {
                     let found = false;

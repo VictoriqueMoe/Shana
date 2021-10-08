@@ -696,7 +696,7 @@ export namespace DiscordUtils {
 
     export function getCloseableModules(): CloseableModule<any>[] {
         const commandSecurityManager = container.resolve(CommandSecurityManager);
-        return commandSecurityManager.runnableCommands.filter(value => value instanceof CloseableModule);
+        return commandSecurityManager.events;
     }
 
     export function getModule(moduleId: string): ICloseableModule<any> {

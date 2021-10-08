@@ -2,23 +2,26 @@ import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
 import {GuildMember} from "discord.js";
 import {MetadataStorage} from "discordx";
-import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
+import {GuildUtils} from "../../../utils/Utils";
 import {AbstractCommandModule} from "../../../commands/AbstractCommandModule";
 import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
 import {container, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
 import {Method} from "discordx/build/decorators/classes/Method";
+import {PostConstruct} from "../../decorators/PostConstruct";
+import {CloseableModule} from "../../closeableModules/impl/CloseableModule";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 @singleton()
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
-    private commandClasses: any [];
+    private _commandsAndEvents: (CloseableModule<any> | AbstractCommandModule<any>)[];
 
     public constructor() {
         super();
     }
 
+    @PostConstruct
     public async init(): Promise<void> {
         const dApplicationCommands = MetadataStorage.instance.allApplicationCommands;
         const allEvents = MetadataStorage.instance.events;
@@ -29,20 +32,23 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
             const classRef = applicationCommand.classRef;
             appClasses.add(classRef);
         }
-        this.commandClasses = [];
+        this._commandsAndEvents = [];
         for (const classRef of appClasses) {
             const instance = container.resolve(classRef as constructor<any>);
-            if (instance instanceof AbstractCommandModule) {
-                if (!ObjectUtil.isValidObject(instance.commandDescriptors)) {
-                    continue;
-                }
-                this.commandClasses.push(instance);
-            }
+            this._commandsAndEvents.push(instance);
         }
     }
 
-    public get runnableCommands(): any[] {
-        return this.commandClasses;
+    public get commandsAndEvents(): any[] {
+        return this._commandsAndEvents;
+    }
+
+    public get events(): CloseableModule<any>[] {
+        return this.commandsAndEvents.filter(c => c instanceof CloseableModule);
+    }
+
+    public get commands(): AbstractCommandModule<any>[] {
+        return this.commandsAndEvents.filter(c => c instanceof AbstractCommandModule);
     }
 
     /**
@@ -51,7 +57,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
      */
     public async getCommandModulesForMember(member: GuildMember): Promise<AbstractCommandModule<any> []> {
         if (GuildUtils.isMemberAdmin(member)) {
-            return this.commandClasses;
+            return this.commands;
         }
         const retArray: AbstractCommandModule<any>[] = [];
         const memberRoles = [...member.roles.cache.keys()];
@@ -61,7 +67,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
             }
         });
         outer:
-            for (const commandClass of this.commandClasses) {
+            for (const commandClass of this.commands) {
                 const {commands} = commandClass.commandDescriptors;
                 for (const commandDescriptor of commands) {
                     const {name} = commandDescriptor;
@@ -120,7 +126,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
             }
         });
         const memberRoles = [...member.roles.cache.keys()];
-        for (const commandClass of this.commandClasses) {
+        for (const commandClass of this.commands) {
             const {commands} = commandClass.commandDescriptors;
             for (const commandDescriptor of commands) {
                 const {name} = commandDescriptor;
