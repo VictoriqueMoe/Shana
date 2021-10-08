@@ -1,9 +1,9 @@
-import {ContextMenu, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {ArgsOf, Client, ContextMenu, Discord, Guard, On, Slash, SlashGroup, SlashOption} from "discordx";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {BookmarkModel} from "../../model/DB/Bookmark.model";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
-import {CommandInteraction, ContextMenuInteraction, MessageEmbed} from "discord.js";
+import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
 import {BookmarkManager} from "../../model/guild/manager/BookmarkManager";
 import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
@@ -69,6 +69,14 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
         });
     }
 
+    @On("messageDelete")
+    private async messageDeleted([message]: ArgsOf<"messageDelete">, client: Client): Promise<void> {
+        if (!(message instanceof Message)) {
+            message = await message.fetch();
+        }
+        this._bookmarkManager.deleteBookmark(message.member, message);
+    }
+
 
     @ContextMenu("MESSAGE", "bookmark")
     @Guard(NotBotInteraction, secureCommandInteraction)
@@ -126,7 +134,7 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
             const day = messageDate.getUTCDate();
             const year = messageDate.getUTCFullYear();
             const date = year + "/" + month + "/" + day;
-            embed.addField(`**#${i + 1}:**`, `**Preview:** ${first20}\n**By:** <@${bookmark.author.id}> on ${date} \n[Jump to Message](${bookmark.url})\n**ID:** ${bookmark.id}`);
+            embed.addField(`**#${i + 1}:**`, `**Message preview:** ${first20}\n**By:** <@${bookmark.author.id}> on ${date} in <#${bookmark.channel.id}> \n[Jump to Message](${bookmark.url})\n**ID:** ${bookmark.id}`);
         }
         interaction.editReply({
             embeds: [embed]

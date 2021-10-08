@@ -58,7 +58,11 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         });
         if (bookMarksExists) {
             const {messageIds} = bookMarksExists;
-            messageIds.splice(messageIds.indexOf(messageToDeleteId), 1);
+            const indexInArray = messageIds.indexOf(messageToDeleteId);
+            if (indexInArray === -1) {
+                return false;
+            }
+            messageIds.splice(indexInArray, 1);
             if (!ArrayUtils.isValidArray(messageIds)) {
                 return (await BookmarkModel.destroy({
                     where: {
@@ -102,7 +106,9 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
                     if (channel instanceof TextChannel) {
                         try {
                             const message = await channel.messages.fetch(messageId);
-                            if (!message.deleted) {
+                            if (message.deleted) {
+                                await this.deleteBookmark(member, messageId);
+                            } else {
                                 retArr.push(message);
                             }
                         } catch {
