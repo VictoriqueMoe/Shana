@@ -1,7 +1,5 @@
 import {
     BaseCommandInteraction,
-    ButtonInteraction,
-    CommandInteraction,
     ContextMenuInteraction,
     Guild,
     GuildAuditLogs,
@@ -12,10 +10,10 @@ import {
     GuildMember,
     HexColorString,
     Message,
+    MessageComponentInteraction,
     MessageEmbed,
     Permissions,
     Role,
-    SelectMenuInteraction,
     StaticImageURLOptions,
     TextChannel,
     User
@@ -336,20 +334,20 @@ export namespace DiscordUtils {
             return interaction.channel.messages.fetch(messageId);
         }
 
-        export async function followupWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string, ephemeral: boolean = false): Promise<void> {
+        export async function followupWithText(interaction: BaseCommandInteraction | MessageComponentInteraction, content: string, ephemeral: boolean = false): Promise<void> {
             await interaction.followUp({
                 content,
                 ephemeral
             });
         }
 
-        export async function editWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string): Promise<void> {
+        export async function editWithText(interaction: BaseCommandInteraction | MessageComponentInteraction, content: string): Promise<void> {
             await interaction.editReply({
                 content
             });
         }
 
-        export async function replyWithText(interaction: CommandInteraction | ButtonInteraction | SelectMenuInteraction | BaseCommandInteraction, content: string, ephemeral: boolean = false): Promise<void> {
+        export async function replyWithText(interaction: BaseCommandInteraction | MessageComponentInteraction, content: string, ephemeral: boolean = false): Promise<void> {
             if (interaction.deferred) {
                 await interaction.editReply({
                     content
@@ -362,7 +360,7 @@ export namespace DiscordUtils {
             }
         }
 
-        export function getInteractionCaller(interaction: CommandInteraction): GuildMember | null {
+        export function getInteractionCaller(interaction: BaseCommandInteraction): GuildMember | null {
             const {member} = interaction;
             if (member == null) {
                 interaction.reply("Unable to extract member");
@@ -619,7 +617,6 @@ export namespace DiscordUtils {
             const guild = await Main.client.guilds.fetch(guildId);
             channel = await guild.channels.resolve(Channels.TEST_CHANNEL) as TextChannel;
         } else if (adminLog) {
-            // channel = await guild.channels.resolve(Channels.ADMIN_LOG) as TextChannel;
             channel = await channelManager.getAdminLogChannel(guildId);
         } else {
             channel = await channelManager.getLogChannel(guildId);

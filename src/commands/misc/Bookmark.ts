@@ -42,9 +42,9 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
                         text: "Get all of your bookmarks",
                         args: [
                             {
-                                name: "private",
+                                name: "public",
                                 type: "boolean",
-                                description: "Make this message private",
+                                description: "Make this message public",
                                 optional: false
                             }
                         ]
@@ -93,15 +93,15 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async getbookmark(
-        @SlashOption("private", {
-            description: "make message private",
-            required: false
+        @SlashOption("public", {
+            description: "make message public",
+            required: false,
         })
             ephemeral: boolean,
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply({
-            ephemeral
+            ephemeral: !ephemeral
         });
         const caller = InteractionUtils.getInteractionCaller(interaction);
         if (!caller) {
@@ -118,14 +118,15 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
         if (!ArrayUtils.isValidArray(bookMarks)) {
             embed.setDescription("No bookmarks saved");
         }
-        for (const bookmark of bookMarks) {
+        for (let i = 0; i < bookMarks.length; i++) {
+            const bookmark = bookMarks[i];
             const first20 = `${bookmark.content.substring(0, 20)} ...`;
             const messageDate = bookmark.createdAt;
             const month = messageDate.getUTCMonth() + 1;
             const day = messageDate.getUTCDate();
             const year = messageDate.getUTCFullYear();
             const date = year + "/" + month + "/" + day;
-            embed.addField(`${first20}`, `By: <@${bookmark.author.id}> on ${date} \n[Jump to Message](${bookmark.url})\nID: ${bookmark.id}`);
+            embed.addField(`**#${i + 1}:**`, `**Preview:** ${first20}\n**By:** <@${bookmark.author.id}> on ${date} \n[Jump to Message](${bookmark.url})\n**ID:** ${bookmark.id}`);
         }
         interaction.editReply({
             embeds: [embed]
