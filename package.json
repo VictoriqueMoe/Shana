@@ -70,7 +70,7 @@
     "promisify": "0.0.3",
     "reflect-metadata": "^0.1.13",
     "sanitize-filename": "^1.6.3",
-    "sequelize": "6.6.2",
+    "sequelize": "6.7.0",
     "sequelize-typescript": "^2.1.0",
     "sqlite3": "^5.0.2",
     "tmp": "^0.2.1",
