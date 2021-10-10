@@ -49,7 +49,7 @@
     "ffmpeg-static": "^4.4.0",
     "follow-redirects": "^1.14.4",
     "funcster": "0.0.5",
-    "get-urls": "^10.0.0",
+    "get-urls": "^10.0.1",
     "glob": "^7.1.7",
     "gm": "^1.23.1",
     "graphicsmagick": "^0.0.1",
