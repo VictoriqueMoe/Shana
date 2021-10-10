@@ -18,6 +18,8 @@ import {
     Role,
     StaticImageURLOptions,
     TextChannel,
+    ThreadAutoArchiveDuration,
+    ThreadChannel,
     User
 } from "discord.js";
 import cronstrue from 'cronstrue';
@@ -327,6 +329,7 @@ export namespace ChronUtils {
 
 export namespace DiscordUtils {
 
+    import ObjectChange = Typeings.ObjectChange;
     export namespace InteractionUtils {
 
         export function getUserFromUserContextInteraction(interaction: ContextMenuInteraction): GuildMember | undefined {
@@ -510,50 +513,97 @@ export namespace DiscordUtils {
 
 
     export type RoleChange = {
-        permissions?: {
-            added: string[]
-            removed: string[],
-        },
-        nameChange?: {
-            before: string,
-            after: string
-        },
-        colourChange?: {
-            before: HexColorString,
-            after: HexColorString
-        },
-        iconChange?: {
-            before: string,
-            after: string
-        }
+        permissions?: ObjectChange<Array<string>>
+        nameChange?: ObjectChange<string>,
+        colourChange?: ObjectChange<HexColorString>,
+        iconChange?: ObjectChange<string>
     };
 
-    export type ChannelChange = {
-        name?: {
-            before: string,
-            after: string
-        },
-        topic?: {
-            before: string,
-            after: string
-        },
-        slowMode?: {
-            before: number,
-            after: number
-        },
-        nsfw?: {
-            before: boolean,
-            after: boolean
-        },
-        parent?: {
-            before: CategoryChannel,
-            after: CategoryChannel
-        }
-
+    export type ChannelUpdate = {
+        name?: ObjectChange<string>,
+        topic?: ObjectChange<string>,
+        slowMode?: ObjectChange<number>,
+        nsfw?: ObjectChange<boolean>,
+        parent?: ObjectChange<CategoryChannel>
     };
 
-    export function getChannelChanges(oldChannel: GuildChannel, newChannel: GuildChannel): ChannelChange {
-        const retObj: ChannelChange = {};
+    export type ThreadUpdate = {
+        archived?: ObjectChange<boolean>,
+        type?: ObjectChange<"Public" | "Private" | null>
+        locked?: ObjectChange<boolean>,
+        name?: ObjectChange<string>,
+        slowMode?: ObjectChange<number>,
+        archiveDuration?: ObjectChange<ThreadAutoArchiveDuration | null>
+    };
+
+    export function getThreadChanges(oldThread: ThreadChannel, newThread: ThreadChannel): ThreadUpdate {
+        const retObj: ThreadUpdate = {};
+        const oldName = oldThread.name;
+        const newName = newThread.name;
+        if (oldName !== newName) {
+            retObj["name"] = {
+                before: oldName,
+                after: newName
+            };
+        }
+
+        const oldType = oldThread.type;
+        const newType = newThread.type;
+        if (oldType !== newType) {
+            let oldParsed: "Public" | "Private" | null = null;
+            let newParsed: "Public" | "Private" | null = null;
+            if (ObjectUtil.validString(oldType)) {
+                oldParsed = oldType === "GUILD_PRIVATE_THREAD" ? "Private" : "Public";
+            }
+            if (ObjectUtil.validString(newType)) {
+                newParsed = newType === "GUILD_PRIVATE_THREAD" ? "Private" : "Public";
+            }
+            retObj["type"] = {
+                before: oldParsed,
+                after: newParsed
+            };
+        }
+
+        const oldLocked = oldThread.locked;
+        const newLocked = newThread.locked;
+        if (oldLocked !== newLocked) {
+            retObj["locked"] = {
+                before: oldLocked,
+                after: newLocked
+            };
+        }
+
+        const oldArchived = oldThread.archived;
+        const newArchived = newThread.archived;
+        if (oldArchived !== newArchived) {
+            retObj["archived"] = {
+                before: oldArchived,
+                after: newArchived
+            };
+        }
+
+        const oldSlowMode = oldThread.rateLimitPerUser;
+        const newSlowMode = newThread.rateLimitPerUser;
+        if (oldSlowMode !== newSlowMode) {
+            retObj["slowMode"] = {
+                before: oldSlowMode,
+                after: newSlowMode
+            };
+        }
+
+        const oldArchiveDuration = oldThread.autoArchiveDuration;
+        const newArchiveDuration = newThread.autoArchiveDuration;
+        if (oldArchiveDuration !== newArchiveDuration) {
+            retObj["archiveDuration"] = {
+                before: oldArchiveDuration,
+                after: newArchiveDuration
+            };
+        }
+        return retObj;
+    }
+
+    export function getChannelChanges(oldChannel: GuildChannel, newChannel: GuildChannel): ChannelUpdate {
+        const retObj: ChannelUpdate = {};
         const oldName = oldChannel.name;
         const newName = newChannel.name;
         const isTextBasedChannel = oldChannel instanceof BaseGuildTextChannel && newChannel instanceof BaseGuildTextChannel;
@@ -594,11 +644,23 @@ export namespace DiscordUtils {
         }
         const oldParent = oldChannel.parent;
         const newParent = newChannel.parent;
-        if (oldParent.id !== newParent.id) {
+        if (oldParent == null && newParent !== null) {
             retObj["parent"] = {
-                before: oldParent,
+                before: null,
                 after: newParent
             };
+        } else if (newParent == null && oldParent !== null) {
+            retObj["parent"] = {
+                before: oldParent,
+                after: null
+            };
+        } else if (newParent && oldParent) {
+            if (oldParent.id !== newParent.id) {
+                retObj["parent"] = {
+                    before: oldParent,
+                    after: newParent
+                };
+            }
         }
         return retObj;
     }
@@ -614,8 +676,8 @@ export namespace DiscordUtils {
 
         if (added.length > 0 || removed.length > 0) {
             retObj["permissions"] = {
-                added,
-                removed
+                before: removed,
+                after: added
             };
         }
         const oldName = oldRole.name;

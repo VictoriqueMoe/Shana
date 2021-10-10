@@ -77,6 +77,10 @@ export namespace Typeings {
             output: string
         };
     }
+    export type ObjectChange<T> = {
+        before: T,
+        after: T
+    };
 }
 export type AutoResponderPayload = {
     title: string,

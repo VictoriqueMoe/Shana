@@ -1,7 +1,10 @@
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
-import {BaseGuildTextChannel, CategoryChannel, Channel, GuildChannel, MessageEmbed} from "discord.js";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../../utils/Utils";
+import {BaseGuildTextChannel, Channel, GuildChannel, MessageEmbed, ThreadChannel} from "discord.js";
+import TIME_UNIT = TimeUtils.TIME_UNIT;
+import ChannelUpdate = DiscordUtils.ChannelUpdate;
+import ThreadUpdate = DiscordUtils.ThreadUpdate;
 
 /**
  * Will log: <br/>
@@ -49,7 +52,7 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         const embed = new MessageEmbed()
             .setColor('#0099ff')
             .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
-            .setDescription(`Channel Deleted: (${channel.name})`)
+            .setDescription(`Channel Deleted: ${channel.name}`)
             .setTimestamp()
             .setFooter(`${channel.id}`);
         if (`id` in target) {
@@ -93,29 +96,126 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
                 }
             }
         }
-        for (const name in channelUpdate) {
-            if (channelUpdate.hasOwnProperty(name)) {
-                const value = channelUpdate[name];
+        ChannelLogger.appendChannelTypeChanges(embed, channelUpdate);
+        super.postToLog(embed, guildId);
+    }
+
+    @On("threadCreate")
+    private async threadCreate([thread]: ArgsOf<"threadCreate">, client: Client): Promise<void> {
+        const {guild} = thread;
+        const guildId = guild.id;
+        const architectTime = thread.autoArchiveDuration;
+        let timeToDisplay: string;
+        if (architectTime !== "MAX") {
+            const millis = TimeUtils.convertToMilli(thread.autoArchiveDuration as number, TIME_UNIT.minutes);
+            timeToDisplay = ObjectUtil.secondsToHuman(millis / 1000);
+        } else {
+            timeToDisplay = "max";
+        }
+        const ownerId = thread.ownerId;
+        const ownerMember = thread.guild.members.cache.get(ownerId);
+        const avatarUrl = ownerMember.displayAvatarURL({dynamic: true});
+        const ownerTag = ownerMember.user.tag;
+        const parent = thread.parent;
+        const type = thread.type === "GUILD_PRIVATE_THREAD" ? "Private" : "Public";
+        const embed = new MessageEmbed()
+            .setColor('#0099ff')
+            .setAuthor(ownerTag, avatarUrl)
+            .setDescription(`${type} thread Created: <#${thread.id}> (${thread.name})`)
+            .setTimestamp()
+            .addField("Timeout duration", timeToDisplay)
+            .setFooter(`${thread.id}`);
+        if (parent) {
+            embed.addField("Parent channel", `<#${parent.id}>`);
+        }
+        embed.addField("Thread created and owned by", ownerTag);
+        super.postToLog(embed, guildId);
+    }
+
+    @On("threadDelete")
+    private async threadDelete([thread]: ArgsOf<"threadDelete">, client: Client): Promise<void> {
+        const {guild} = thread;
+        const threadAuditEntry = await DiscordUtils.getAuditLogEntry("THREAD_DELETE", guild);
+        const {executor, target} = threadAuditEntry;
+        const guildId = guild.id;
+        const embed = new MessageEmbed()
+            .setColor('#0099ff')
+            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
+            .setDescription(`Thread Deleted: ${thread.name}`)
+            .setTimestamp()
+            .setFooter(`${thread.id}`);
+        if (`id` in target) {
+            if (target.id === thread.id) {
+                if (thread.createdAt <= threadAuditEntry.createdAt) {
+                    embed.addField("Thread deleted by", executor.tag);
+                }
+            }
+        }
+        super.postToLog(embed, guildId);
+    }
+
+    @On("threadUpdate")
+    private async threadUpdate([oldThread, newThread]: ArgsOf<"threadUpdate">, client: Client): Promise<void> {
+        if (!(oldThread instanceof ThreadChannel) || !(newThread instanceof ThreadChannel)) {
+            return;
+        }
+        const threadUpdate = DiscordUtils.getThreadChanges(oldThread, newThread);
+        if (!ObjectUtil.isValidObject(threadUpdate)) {
+            return;
+        }
+        const {guild} = newThread;
+        const guildId = guild.id;
+        const embed = new MessageEmbed()
+            .setColor('#0099ff')
+            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
+            .setDescription(`Thread Updated: <#${newThread.id}>`)
+            .setTimestamp()
+            .setFooter(`${newThread.id}`);
+        const auditEntry = await DiscordUtils.getAuditLogEntry("THREAD_UPDATE", guild);
+        if (auditEntry) {
+            const {target} = auditEntry;
+            if (`id` in target) {
+                if (target.id === newThread.id) {
+                    if (newThread.createdAt <= auditEntry.createdAt) {
+                        const executor = auditEntry.executor;
+                        const avatarUrl = executor.displayAvatarURL({dynamic: true});
+                        embed.setAuthor(executor.tag, avatarUrl);
+                        embed.addField("Changed by", executor.tag);
+                    }
+                }
+            }
+        }
+        ChannelLogger.appendChannelTypeChanges(embed, threadUpdate);
+        super.postToLog(embed, guildId);
+    }
+
+    private static appendChannelTypeChanges(embed: MessageEmbed, update: ThreadUpdate | ChannelUpdate): void {
+        for (const name in update) {
+            if (update.hasOwnProperty(name)) {
+                const value = update[name];
                 let beforeValue = value.before ? value.before : "None";
                 let afterValue = value.after ? value.after : "None";
-                if (typeof beforeValue === "number") {
-                    beforeValue = beforeValue.toString();
+
+                if (name === "archiveDuration") {
+                    const oldMillis = TimeUtils.convertToMilli(beforeValue as number, TIME_UNIT.minutes);
+                    const newMillis = TimeUtils.convertToMilli(afterValue as number, TIME_UNIT.minutes);
+                    beforeValue = ObjectUtil.secondsToHuman(oldMillis / 1000);
+                    afterValue = ObjectUtil.secondsToHuman(newMillis / 1000);
                 }
-                if (typeof afterValue === "number") {
-                    afterValue = afterValue.toString();
-                }
+
+                beforeValue = beforeValue.toString();
+                afterValue = afterValue.toString();
                 embed.addFields([
                     {
                         "name": `Old ${name}`,
-                        "value": beforeValue instanceof CategoryChannel ? `<#${beforeValue.id}>` : beforeValue
+                        "value": (beforeValue instanceof Channel || beforeValue instanceof BaseGuildTextChannel) ? `<#${beforeValue.id}>` : beforeValue
                     },
                     {
                         "name": `New ${name}`,
-                        "value": afterValue instanceof CategoryChannel ? `<#${afterValue.id}>` : afterValue
+                        "value": (beforeValue instanceof Channel || beforeValue instanceof BaseGuildTextChannel) ? `<#${afterValue.id}>` : afterValue
                     }
                 ]);
             }
         }
-        super.postToLog(embed, guildId);
     }
 }

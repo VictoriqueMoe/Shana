@@ -99,11 +99,11 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         }
         const permsChanges = roleChange.permissions;
         if (ObjectUtil.isValidObject(permsChanges)) {
-            const addedStr = permsChanges.added.join(", ");
+            const addedStr = permsChanges.after.join(", ");
             if (ObjectUtil.validString(addedStr)) {
                 embed.addField("Added Permission(s)", addedStr);
             }
-            const removedStr = permsChanges.removed.join(", ");
+            const removedStr = permsChanges.before.join(", ");
             if (ObjectUtil.validString(removedStr)) {
                 embed.addField("Removed Permission(s)", removedStr);
             }
