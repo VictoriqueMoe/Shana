@@ -145,7 +145,7 @@ export class ResourceListener {
                 .setDescription(`someone posted a video ${descriptionPostfix}`)
                 .setTimestamp();
             if (messageMember) {
-                const avatarUrl = messageMember.user.displayAvatarURL({format: 'jpg'});
+                const avatarUrl = messageMember.user.displayAvatarURL({dynamic: true});
                 embed.setAuthor(messageMember.user.tag, avatarUrl);
                 embed.setDescription(`<@${messageMember.id}> posted a video ${descriptionPostfix}`);
             }

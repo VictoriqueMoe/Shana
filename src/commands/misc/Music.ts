@@ -1,10 +1,11 @@
-import {ButtonComponent, Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {
     ButtonInteraction,
     CommandInteraction,
     GuildMember,
+    Message,
     MessageActionRow,
     MessageButton,
     MessageEmbed
@@ -69,19 +70,92 @@ export class Music extends AbstractCommandModule<any> {
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async playerControls(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
+        const guildQueue = this.getGuildQueue(interaction);
+        if (!guildQueue) {
+            return InteractionUtils.replyWithText(interaction, "No songs are currently queued");
+        }
         const nextButton = new MessageButton()
             .setLabel("Next")
             .setEmoji("⏭")
             .setStyle("PRIMARY")
+            .setDisabled(!guildQueue.isPlaying)
             .setCustomId("btn-next");
-        const row = new MessageActionRow().addComponents(nextButton);
-        interaction.editReply({
+        const pauseButton = new MessageButton()
+            .setLabel("Pause")
+            .setEmoji("⏸")
+            .setStyle("PRIMARY")
+            .setDisabled(!guildQueue.isPlaying)
+            .setCustomId("btn-pause");
+        const stopButton = new MessageButton()
+            .setLabel("Stop")
+            .setStyle("DANGER")
+            .setDisabled(!guildQueue.isPlaying)
+            .setCustomId("btn-stop");
+        const playButton = new MessageButton()
+            .setLabel("Play")
+            .setStyle("SUCCESS")
+            .setDisabled(guildQueue.isPlaying)
+            .setCustomId("btn-play");
+        const row = new MessageActionRow().addComponents(nextButton, playButton, pauseButton, stopButton);
+        const embed = new MessageEmbed()
+            .setTitle(`test`)
+            .setAuthor("test")
+            .setTimestamp();
+        const message = await interaction.followUp({
             content: "Music controls",
+            embeds: [embed],
+            fetchReply: true,
             components: [row]
+        });
+        if (!(message instanceof Message)) {
+            throw Error("InvalidMessage instance");
+        }
+        const collector = message.createMessageComponentCollector();
+        collector.on("collect", async (collectInteraction: ButtonInteraction) => {
+            await collectInteraction.deferUpdate();
+            const guildQueue = this.getGuildQueue(interaction);
+            const buttonId = collectInteraction.customId;
+            this.replaceButton(row, playButton);
+            switch (buttonId) {
+                case "btn-next":
+                    guildQueue.skip();
+                    break;
+                case "btn-pause":
+                    guildQueue.setPaused(true);
+                    break;
+                case "btn-stop":
+                    guildQueue.stop();
+                    break;
+                case "btn-play":
+                    guildQueue.setPaused(false);
+                    break;
+            }
+            await collectInteraction.editReply({
+                embeds: [embed],
+                components: [row]
+            });
+        });
+        collector.on("end", async () => {
+            if (!message.editable || message.deleted) {
+                return;
+            }
+            await message.edit({components: []});
         });
     }
 
-    @ButtonComponent("btn-next")
+    private replaceButton(row: MessageActionRow, button: MessageButton): void {
+        const buttonIdToSearch = button.customId;
+        const {components} = row;
+        for (let i = 0; i < components.length; i++) {
+            const component = components[i];
+            if (component.customId === buttonIdToSearch) {
+                components[i] = button;
+                break;
+            }
+        }
+    }
+
+    /*@ButtonComponent("btn-next")
     private async next(interaction: ButtonInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -108,7 +182,7 @@ export class Music extends AbstractCommandModule<any> {
         await interaction.editReply({
             embeds: [embed]
         });
-    }
+    }*/
 
     @Slash("nowplaying", {
         description: "View the current playlist"
@@ -203,7 +277,7 @@ export class Music extends AbstractCommandModule<any> {
             embed.setDescription(`Current Playlist`);
         }
         if (memberWhoAddedSong) {
-            const avatar = memberWhoAddedSong.user.displayAvatarURL({format: 'jpg'});
+            const avatar = memberWhoAddedSong.user.displayAvatarURL({dynamic: true});
             embed.setAuthor(`${memberWhoAddedSong.displayName}`, avatar);
         } else {
             const botImage = this._client.user.displayAvatarURL({dynamic: true});

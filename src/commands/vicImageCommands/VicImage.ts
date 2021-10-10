@@ -6,6 +6,8 @@ import {CommandInteraction} from "discord.js";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {container, injectable} from "tsyringe";
 import {Dropbox} from "dropbox";
+import {DiscordUtils} from "../../utils/Utils";
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @SlashGroup("vicimage", "Obtain images of Victorique#0002")
@@ -43,7 +45,6 @@ export class VicImage extends AbstractCommandModule<any> {
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async vicImage(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
-        const channel = interaction.channel;
         const vicDropbox = container.resolve(VicDropbox);
         const randomImageMetadata = vicDropbox.randomImage;
         const randomImage = (await this._dropbox.filesDownload({"path": randomImageMetadata.path_lower})).result;
@@ -57,7 +58,7 @@ export class VicImage extends AbstractCommandModule<any> {
                 }]
             });
         } catch (e) {
-            channel.send("Failed to send, maybe image is too large?");
+            InteractionUtils.replyWithText(interaction, "Failed to send, maybe image is too large?");
             console.error(e);
             console.log(`Failed to send ${randomImage.name}`);
         }

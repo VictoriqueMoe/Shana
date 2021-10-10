@@ -1,7 +1,7 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {BookmarkModel} from "../../DB/Bookmark.model";
 import {singleton} from "tsyringe";
-import {GuildMember, Message, TextChannel} from "discord.js";
+import {BaseGuildTextChannel, GuildMember, Message} from "discord.js";
 import {ArrayUtils} from "../../../utils/Utils";
 
 @singleton()
@@ -103,7 +103,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         outer:
             for (const messageId of allMessageIds) {
                 for (const [, channel] of guild.channels.cache) {
-                    if (channel instanceof TextChannel) {
+                    if (channel instanceof BaseGuildTextChannel) {
                         try {
                             const message = await channel.messages.fetch(messageId);
                             if (message.deleted) {

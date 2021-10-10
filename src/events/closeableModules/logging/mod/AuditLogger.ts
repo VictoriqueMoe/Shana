@@ -5,11 +5,11 @@ import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
 import {Message, MessageEmbed, User} from "discord.js";
 
 /**
- * Non admin audit Logger for quick logs. this will log:
- * Member join
- * Member ban
- * Member kick
- * Member leave
+ * Non admin audit Logger for quick logs. this will log:<br/>
+ * Member join<br/>
+ * Member ban<br/>
+ * Member kick<br/>
+ * Member leave<br/>
  */
 @Discord()
 export class AuditLogger extends CloseableModule<null> {

@@ -8,9 +8,9 @@ import {Imgur} from "../../../../model/Imgur";
 const isImageFast = require('is-image-fast');
 
 /**
- * Message Edited
- * Messaged Deleted
- * Bulk Message Deletion
+ * Message Edited<br/>
+ * Messaged Deleted<br/>
+ * Bulk Message Deletion<br/>
  */
 @Discord()
 export class MessageLogger extends AbstractAdminAuditLogger {
@@ -38,7 +38,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
         if (!member) {
             return;
         }
-        const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = member.user.displayAvatarURL({format: 'jpg', dynamic: true});
         const embed = new MessageEmbed()
             .setColor('#337FD5')
             .setAuthor(`${member.user.tag}`, avatarUrl)
@@ -82,7 +82,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
             executor = auditEntry ? auditEntry.executor.tag : '';
         }
 
-        const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = member.user.displayAvatarURL({dynamic: true});
         const messageContent = message.content;
         const description = StringUtils.truncate(`Message sent by <@${member.id}> deleted in <#${message.channel.id}> \n ${messageContent}`, MessageLogger.messageLimit);
         const embed = new MessageEmbed()

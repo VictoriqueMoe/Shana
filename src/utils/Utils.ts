@@ -1,5 +1,7 @@
 import {
     BaseCommandInteraction,
+    BaseGuildTextChannel,
+    CategoryChannel,
     ContextMenuInteraction,
     Guild,
     GuildAuditLogs,
@@ -526,6 +528,81 @@ export namespace DiscordUtils {
         }
     };
 
+    export type ChannelChange = {
+        name?: {
+            before: string,
+            after: string
+        },
+        topic?: {
+            before: string,
+            after: string
+        },
+        slowMode?: {
+            before: number,
+            after: number
+        },
+        nsfw?: {
+            before: boolean,
+            after: boolean
+        },
+        parent?: {
+            before: CategoryChannel,
+            after: CategoryChannel
+        }
+
+    };
+
+    export function getChannelChanges(oldChannel: GuildChannel, newChannel: GuildChannel): ChannelChange {
+        const retObj: ChannelChange = {};
+        const oldName = oldChannel.name;
+        const newName = newChannel.name;
+        const isTextBasedChannel = oldChannel instanceof BaseGuildTextChannel && newChannel instanceof BaseGuildTextChannel;
+        const isTextChannel = oldChannel instanceof TextChannel && newChannel instanceof TextChannel;
+        if (oldName !== newName) {
+            retObj["name"] = {
+                before: oldName,
+                after: newName
+            };
+        }
+        if (isTextBasedChannel) {
+            const oldTopic = oldChannel.topic;
+            const newTopic = newChannel.topic;
+            if (oldTopic !== newTopic) {
+                retObj["topic"] = {
+                    before: oldTopic,
+                    after: newTopic
+                };
+            }
+            if (isTextChannel) {
+                const oldSlowMode = oldChannel.rateLimitPerUser;
+                const newSlowMode = newChannel.rateLimitPerUser;
+                if (oldSlowMode !== newSlowMode) {
+                    retObj["slowMode"] = {
+                        before: oldSlowMode,
+                        after: newSlowMode
+                    };
+                }
+            }
+            const oldNsfw = oldChannel.nsfw;
+            const newNsfw = newChannel.nsfw;
+            if (oldNsfw !== newNsfw) {
+                retObj["nsfw"] = {
+                    before: oldNsfw,
+                    after: newNsfw
+                };
+            }
+        }
+        const oldParent = oldChannel.parent;
+        const newParent = newChannel.parent;
+        if (oldParent.id !== newParent.id) {
+            retObj["parent"] = {
+                before: oldParent,
+                after: newParent
+            };
+        }
+        return retObj;
+    }
+
     export function getRoleChanges(oldRole: Role, newRole: Role): RoleChange {
         const retObj: RoleChange = {};
         const iconUrlSettings: StaticImageURLOptions = {
@@ -619,12 +696,12 @@ export namespace DiscordUtils {
     }
 
     export async function postToLog(message: MessageEmbed[] | string, guildId: string, adminLog: boolean = false): Promise<Message | null> {
-        let channel: TextChannel;
+        let channel: BaseGuildTextChannel;
         const channelManager = container.resolve(ChannelManager);
         if (Main.testMode) {
             const client = container.resolve(Client);
             const guild = await client.guilds.fetch(guildId);
-            channel = await guild.channels.resolve(Channels.TEST_CHANNEL) as TextChannel;
+            channel = await guild.channels.resolve(Channels.TEST_CHANNEL) as BaseGuildTextChannel;
         } else if (adminLog) {
             channel = await channelManager.getAdminLogChannel(guildId);
         } else {

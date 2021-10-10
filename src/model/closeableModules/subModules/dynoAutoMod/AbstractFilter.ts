@@ -55,7 +55,7 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
             return null;
         }
         const {member} = message;
-        const avatarUrl = member.user.displayAvatarURL({format: 'jpg', size: 1024});
+        const avatarUrl = member.user.displayAvatarURL({size: 1024, dynamic: true});
         const embed = new MessageEmbed()
             .setColor(member.roles.highest.hexColor)
             .setAuthor(member.user.tag, avatarUrl)

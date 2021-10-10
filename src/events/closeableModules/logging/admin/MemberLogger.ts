@@ -6,14 +6,14 @@ import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 
 
 /**
- * admin audit Logger for Admin Audit logging. this will log:
- * Member join
- * Member ban
- * Member kick
- * Member leave
- * Member unBanned
- * Member username changed
- * Member joins/leaves VC
+ * admin audit Logger for Admin Audit logging. this will log: <br/>
+ * Member join<br/>
+ * Member ban<br/>
+ * Member kick<br/>
+ * Member leave<br/>
+ * Member unBanned<br/>
+ * Member username changed<br/>
+ * Member joins/leaves VC<br/>
  */
 @Discord()
 export class MemberLogger extends AbstractAdminAuditLogger {
@@ -23,7 +23,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         const {member} = newState;
         const {user} = member;
         const guildId = member.guild.id;
-        const avatarUrl = user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = user.displayAvatarURL({dynamic: true});
         const oldChannel = oldState.channelId;
         const newChannel = newState.channelId;
         const wasDisconnect = ObjectUtil.validString(oldChannel) && newChannel == null;
@@ -65,7 +65,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         if (!didNicknameChange) {
             return;
         }
-        const avatarUrl = user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = user.displayAvatarURL({dynamic: true});
         const embed = new MessageEmbed()
             .setColor('#337FD5')
             .setTitle('Member Nickname changed')
@@ -94,7 +94,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         const {guild, reason, user} = ban;
         const memberBannedId = user.id;
         const MemberBannedTag = user.tag;
-        const avatarUrl = user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = user.displayAvatarURL({dynamic: true});
         const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_REMOVE", guild);
         const embed = new MessageEmbed()
             .setColor('#337FD5')
@@ -114,7 +114,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const memberJoinedId = member.id;
         const memberJoinedTag = member.user.tag;
-        const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = member.user.displayAvatarURL({dynamic: true});
         const userJoinEmbed = new MessageEmbed()
             .setColor('#43B581')
             .setTitle('Member Joined')
@@ -147,7 +147,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         }
         const memberJoinedId = member.id;
         const memberJoinedTag = member.user.tag;
-        const avatarUrl = member.user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = member.user.displayAvatarURL({dynamic: true});
         const roles = member.roles.cache;
         const kickLog = await DiscordUtils.getAuditLogEntry("MEMBER_KICK", guild);
         let userJoinEmbed: MessageEmbed = null;
@@ -208,7 +208,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
             ban = await ban.fetch(true);
         }
         const {guild, reason, user} = ban;
-        const avatarUrl = user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = user.displayAvatarURL({dynamic: true});
         const userBanned = new MessageEmbed()
             .setColor('#FF470F')
             .setTitle('Member banned')

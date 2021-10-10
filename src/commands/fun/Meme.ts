@@ -898,7 +898,7 @@ export class Meme extends AbstractCommandModule<any> {
             return;
         }
         const member = message.member;
-        const avatarUrl = member.user.displayAvatarURL({format: 'jpg', size: 1024});
+        const avatarUrl = member.user.displayAvatarURL({format: 'jpg', size: 1024, dynamic: true});
         const request: GenerateEndPointRequest = {
             "endPoint": enumObj,
             "Body_Params": {
@@ -1097,11 +1097,11 @@ export class Meme extends AbstractCommandModule<any> {
         }
         const returnObj: avatarArr = {};
         if (members.length === 1) {
-            returnObj[`avatar`] = members[0].user.displayAvatarURL({format: 'jpg', size: 1024});
+            returnObj[`avatar`] = members[0].user.displayAvatarURL({format: 'jpg', size: 1024, dynamic: true});
         } else {
             for (let i = 0; i < members.length; i++) {
                 const member = members[i];
-                returnObj[`avatar${i + 1}`] = member.user.displayAvatarURL({format: 'jpg', size: 1024});
+                returnObj[`avatar${i + 1}`] = member.user.displayAvatarURL({format: 'jpg', size: 1024, dynamic: true});
             }
         }
         return returnObj;

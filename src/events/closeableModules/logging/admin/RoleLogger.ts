@@ -8,11 +8,11 @@ import {container} from "tsyringe";
 
 
 /**
- * Role Created
- * Role Deleted
- * Role Updated
- * Role Given
- * Role Removed
+ * Role Created<br/>
+ * Role Deleted<br/>
+ * Role Updated<br/>
+ * Role Given<br/>
+ * Role Removed<br/>
  */
 @Discord()
 export class RoleLogger extends AbstractAdminAuditLogger {
@@ -25,7 +25,7 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         if (!wasChange) {
             return;
         }
-        const avatarUrl = newMember.user.displayAvatarURL({format: 'jpg'});
+        const avatarUrl = newMember.user.displayAvatarURL({dynamic: true});
         const embed = new MessageEmbed()
             .setAuthor(newMember.user.tag, avatarUrl)
             .setTitle(`Role changed`)
@@ -91,7 +91,7 @@ export class RoleLogger extends AbstractAdminAuditLogger {
             if (target.id === newRole.id) {
                 if (newRole.createdAt <= auditEntry.createdAt) {
                     const executor = auditEntry.executor;
-                    const avatarUrl = executor.displayAvatarURL({format: 'jpg'});
+                    const avatarUrl = executor.displayAvatarURL({dynamic: true});
                     embed.setAuthor(executor.tag, avatarUrl);
                     embed.addField("Changed by", executor.tag);
                 }

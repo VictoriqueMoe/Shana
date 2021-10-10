@@ -1,6 +1,6 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {PostableChannelModel} from "../../DB/guild/PostableChannel.model";
-import {TextChannel} from "discord.js";
+import {BaseGuildTextChannel} from "discord.js";
 import {ObjectUtil} from "../../../utils/Utils";
 import {GuildManager} from "./GuildManager";
 import {singleton} from "tsyringe";
@@ -35,7 +35,7 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
         return result[1];
     }
 
-    public async getLogChannel(guildId: string): Promise<TextChannel | null> {
+    public async getLogChannel(guildId: string): Promise<BaseGuildTextChannel | null> {
         const model = await ChannelManager.getModel(guildId, "logChannel");
         if (!model || !ObjectUtil.validString(model.logChannel)) {
             return null;
@@ -43,13 +43,13 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
         const channelId = model.logChannel;
         const guild = await this._guildManager.getGuild(guildId);
         const channel = guild.channels.resolve(channelId);
-        if (channel instanceof TextChannel) {
+        if (channel instanceof BaseGuildTextChannel) {
             return channel;
         }
         throw new Error("Log channel is NOT text channel");
     }
 
-    public async getAdminLogChannel(guildId: string): Promise<TextChannel | null> {
+    public async getAdminLogChannel(guildId: string): Promise<BaseGuildTextChannel | null> {
         const model = await ChannelManager.getModel(guildId, "AdminLogchannel");
         if (!model || !ObjectUtil.validString(model.AdminLogchannel)) {
             return null;
@@ -57,13 +57,13 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
         const channelId = model.AdminLogchannel;
         const guild = await this._guildManager.getGuild(guildId);
         const channel = await guild.channels.resolve(channelId);
-        if (channel instanceof TextChannel) {
+        if (channel instanceof BaseGuildTextChannel) {
             return channel;
         }
         throw new Error("Admin log channel is NOT text channel");
     }
 
-    public async getJailChannel(guildId: string): Promise<TextChannel | null> {
+    public async getJailChannel(guildId: string): Promise<BaseGuildTextChannel | null> {
         const model = await ChannelManager.getModel(guildId, "JailChannel");
         if (!model || !ObjectUtil.validString(model.JailChannel)) {
             return null;
@@ -71,7 +71,7 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
         const channelId = model.JailChannel;
         const guild = await this._guildManager.getGuild(guildId);
         const channel = await guild.channels.resolve(channelId);
-        if (channel instanceof TextChannel) {
+        if (channel instanceof BaseGuildTextChannel) {
             return channel;
         }
         throw new Error("Jail Channel is NOT text channel");

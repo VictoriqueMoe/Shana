@@ -5,7 +5,7 @@ import {TimedSet} from "../../../model/Impl/TimedSet";
 import {AbstractFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
 import {ACTION} from "../../../enums/ACTION";
 import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
-import {GuildMember, TextChannel} from "discord.js";
+import {BaseGuildTextChannel, GuildMember} from "discord.js";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
 import {Main} from "../../../Main";
@@ -88,9 +88,9 @@ export class DynoAutoMod extends CloseableModule<null> {
                             }
                             if (fromArray.hasViolationLimitReached) {
                                 try {
-                                    let textChannel: TextChannel = null;
+                                    let textChannel: BaseGuildTextChannel = null;
                                     const channel = message.channel;
-                                    if (channel instanceof TextChannel) {
+                                    if (channel instanceof BaseGuildTextChannel) {
                                         textChannel = channel;
                                     }
                                     await this.muteUser(fromArray, member, "Auto mod violation limit reached", this._client.user.id, textChannel, AbstractFilter.autoMuteTimeout);
@@ -144,7 +144,7 @@ export class DynoAutoMod extends CloseableModule<null> {
             }
     }
 
-    private async muteUser(violationObj: MuteViolation, user: GuildMember, reason: string, creatorID: string, channel?: TextChannel, seconds?: number): Promise<MuteModel> {
+    private async muteUser(violationObj: MuteViolation, user: GuildMember, reason: string, creatorID: string, channel?: BaseGuildTextChannel, seconds?: number): Promise<MuteModel> {
         if (!user) {
             return;
         }
