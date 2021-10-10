@@ -71,8 +71,12 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
 
     @On("messageDelete")
     private async messageDeleted([message]: ArgsOf<"messageDelete">, client: Client): Promise<void> {
-        if (!(message instanceof Message)) {
-            message = await message.fetch();
+        if (!(message instanceof Message) || message.partial) {
+            try {
+                message = await message.fetch();
+            } catch {
+                return;
+            }
         }
         this._bookmarkManager.deleteBookmark(message.member, message);
     }

@@ -47,6 +47,9 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
 
     public async deleteBookmark(member: GuildMember, message: Message | string): Promise<boolean> {
         const messageToDeleteId = typeof message === "string" ? message : message.id;
+        if (!member) {
+            return false;
+        }
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
