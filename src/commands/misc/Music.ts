@@ -8,13 +8,28 @@ import {
     Message,
     MessageActionRow,
     MessageButton,
-    MessageEmbed
+    MessageEmbed,
+    Util
 } from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {Player, Playlist, Queue, Song} from "discord-music-player";
 import {DiscordUtils} from "../../utils/Utils";
 import {injectable} from "tsyringe";
 import InteractionUtils = DiscordUtils.InteractionUtils;
+
+type MutatedQueue = Queue & {
+    isPaused?: boolean
+}
+(<MutatedQueue>Queue.prototype).isPaused = false;
+(function (): void {
+    const originalPause = (<MutatedQueue>Queue.prototype).setPaused;
+    (<MutatedQueue>Queue.prototype).setPaused = function setPaused(state?: boolean): boolean | undefined {
+        const ret = originalPause.call(this, state);
+        this.isPaused = state;
+        return ret;
+    };
+}());
+
 
 @Discord()
 @SlashGroup("music", "Commands to play music from Youtube")
@@ -60,7 +75,7 @@ export class Music extends AbstractCommandModule<any> {
         });
     }
 
-    private getGuildQueue(interaction: CommandInteraction | ButtonInteraction): Queue {
+    private getGuildQueue(interaction: CommandInteraction | ButtonInteraction): MutatedQueue {
         return this._player.getQueue(interaction.guildId);
     }
 
@@ -81,8 +96,8 @@ export class Music extends AbstractCommandModule<any> {
             .setDisabled(!guildQueue.isPlaying)
             .setCustomId("btn-next");
         const pauseButton = new MessageButton()
-            .setLabel("Pause")
-            .setEmoji("⏸")
+            .setLabel("Play/Pause")
+            .setEmoji("⏯")
             .setStyle("PRIMARY")
             .setDisabled(!guildQueue.isPlaying)
             .setCustomId("btn-pause");
@@ -91,19 +106,10 @@ export class Music extends AbstractCommandModule<any> {
             .setStyle("DANGER")
             .setDisabled(!guildQueue.isPlaying)
             .setCustomId("btn-stop");
-        const playButton = new MessageButton()
-            .setLabel("Play")
-            .setStyle("SUCCESS")
-            .setDisabled(guildQueue.isPlaying)
-            .setCustomId("btn-play");
-        const row = new MessageActionRow().addComponents(nextButton, playButton, pauseButton, stopButton);
-        const embed = new MessageEmbed()
-            .setTitle(`test`)
-            .setAuthor("test")
-            .setTimestamp();
+        const row = new MessageActionRow().addComponents(stopButton, pauseButton, nextButton);
         const message = await interaction.followUp({
             content: "Music controls",
-            embeds: [embed],
+            embeds: [this.getNowPlayingEmbed(guildQueue)],
             fetchReply: true,
             components: [row]
         });
@@ -115,23 +121,25 @@ export class Music extends AbstractCommandModule<any> {
             await collectInteraction.deferUpdate();
             const guildQueue = this.getGuildQueue(interaction);
             const buttonId = collectInteraction.customId;
-            this.replaceButton(row, playButton);
             switch (buttonId) {
-                case "btn-next":
+                case "btn-next": {
                     guildQueue.skip();
+                    await Util.delayFor(900);
                     break;
+                }
                 case "btn-pause":
-                    guildQueue.setPaused(true);
+                    guildQueue.setPaused(!guildQueue.isPaused);
                     break;
                 case "btn-stop":
                     guildQueue.stop();
-                    break;
+                    await interaction.deleteReply();
+                    return;
                 case "btn-play":
                     guildQueue.setPaused(false);
                     break;
             }
             await collectInteraction.editReply({
-                embeds: [embed],
+                embeds: [this.getNowPlayingEmbed(guildQueue)],
                 components: [row]
             });
         });
@@ -141,6 +149,18 @@ export class Music extends AbstractCommandModule<any> {
             }
             await message.edit({components: []});
         });
+    }
+
+    private getNowPlayingEmbed(queue: MutatedQueue): MessageEmbed {
+        const currentlyPlaying = queue.nowPlaying;
+        const nextSong = queue.songs[1]?.name ?? "None";
+        const status = queue.isPlaying;
+        return new MessageEmbed()
+            .setTitle(`Controls`)
+            .addField("Status", queue.isPaused ? "Paused" : "Playing", true)
+            .addField("Song", currentlyPlaying.name, true)
+            .addField("Next Song", nextSong, false)
+            .setTimestamp();
     }
 
     private replaceButton(row: MessageActionRow, button: MessageButton): void {
@@ -154,35 +174,6 @@ export class Music extends AbstractCommandModule<any> {
             }
         }
     }
-
-    /*@ButtonComponent("btn-next")
-    private async next(interaction: ButtonInteraction): Promise<void> {
-        await interaction.deferReply({
-            ephemeral: true
-        });
-        const {guildId} = interaction;
-        const guildQueue = this.getGuildQueue(interaction);
-        if (!guildQueue) {
-            return InteractionUtils.replyWithText(interaction, "No songs are currently playing");
-        } else {
-            if (!guildQueue.isPlaying) {
-                return InteractionUtils.replyWithText(interaction, "No songs are currently playing");
-            }
-        }
-        const {member} = interaction;
-        if (!(member instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Internal Error");
-        }
-        const vc = member.voice.channel;
-        if (!vc) {
-            return InteractionUtils.replyWithText(interaction, "You must first join the voice channel before you can use this");
-        }
-        guildQueue.skip();
-        const embed = this.displayPlaylist(guildQueue);
-        await interaction.editReply({
-            embeds: [embed]
-        });
-    }*/
 
     @Slash("nowplaying", {
         description: "View the current playlist"
@@ -225,7 +216,7 @@ export class Music extends AbstractCommandModule<any> {
         const player = this._player;
         const {guildId} = interaction;
         const guildQueue = this.getGuildQueue(interaction);
-        const queue = player.createQueue(guildId);
+        const queue: MutatedQueue = player.createQueue(guildId);
         const member = InteractionUtils.getInteractionCaller(interaction);
         if (!(member instanceof GuildMember)) {
             return InteractionUtils.replyWithText(interaction, "Internal Error", false);
@@ -254,6 +245,7 @@ export class Music extends AbstractCommandModule<any> {
             if (!guildQueue) {
                 queue.stop();
             }
+            console.log(e.message);
             return InteractionUtils.replyWithText(interaction, `Unable to play ${search}`);
         }
         const embed = this.displayPlaylist(queue, newSong, member);
@@ -262,11 +254,9 @@ export class Music extends AbstractCommandModule<any> {
         });
     }
 
-    private displayPlaylist(queue: Queue, newSong?: Song | Playlist, memberWhoAddedSong?: GuildMember): MessageEmbed {
+    private displayPlaylist(queue: MutatedQueue, newSong?: Song | Playlist, memberWhoAddedSong?: GuildMember): MessageEmbed {
         const songs = queue.songs;
         const embed = new MessageEmbed().setColor('#FF470F').setTimestamp();
-        embed.addField("Currently playing", queue.nowPlaying.name);
-        embed.addField('\u200b', '\u200b');
         for (let i = 0; i < songs.length; i++) {
             const song = songs[i];
             embed.addField(`#${i + 1}`, song.name);
