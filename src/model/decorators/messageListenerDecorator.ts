@@ -24,11 +24,6 @@ export function MessageListenerDecorator(triggerOnEdit: boolean = false, ...cond
                 break;
             }
         }
-        if (context) {
-            map.get(context).push(entry);
-        } else {
-            context = constructor;
-            map.set(context, [entry]);
-        }
+        context ? map.get(context).push(entry) : map.set(constructor, [entry]);
     };
 }

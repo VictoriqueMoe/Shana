@@ -905,9 +905,7 @@ export class ObjectUtil {
                 return false;
             }
             for (p in y) {
-                if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-                    return false;
-                } else if (typeof y[p] !== typeof x[p]) {
+                if (y.hasOwnProperty(p) !== x.hasOwnProperty(p) || typeof y[p] !== typeof x[p]) {
                     return false;
                 }
             }

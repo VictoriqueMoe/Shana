@@ -2,9 +2,10 @@ import {AllowNull, BelongsTo, Column, DataType, Default, ForeignKey, Model, Tabl
 import {GuildUtils} from "../../../../utils/Utils";
 import {IGuildAware} from "../../IGuildAware";
 import {GuildableModel} from "../../guild/Guildable.model";
+import {Identifiable} from "../../Identifiable";
 
 @Table
-export class MuteModel extends Model implements IGuildAware {
+export class MuteModel extends Model implements IGuildAware, Identifiable {
 
     @Column({unique: false, allowNull: false})
     public userId: string;
