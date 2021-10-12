@@ -24,7 +24,7 @@ type MutatedQueue = Queue & {
 (function (): void {
     const originalPause = (<MutatedQueue>Queue.prototype).setPaused;
     (<MutatedQueue>Queue.prototype).setPaused = function setPaused(state?: boolean): boolean | undefined {
-        const ret = originalPause.call(this, state);
+        const ret: boolean | undefined = originalPause.call(this, state);
         this.isPaused = state;
         return ret;
     };
@@ -193,16 +193,15 @@ export class Music extends AbstractCommandModule<any> {
     @Slash("play", {
         description: "Plays or Queues a song"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
     private async play(
-        @SlashOption("search", {
+        @SlashOption("song", {
             description: "The song name or URL",
             required: true
         })
             search: string,
         @SlashOption("isplaylist", {
             description: "is this url a playlist",
-            required: true
+            required: false
         })
             isPlaylist: boolean,
         @SlashOption("timestamp", {
@@ -216,7 +215,7 @@ export class Music extends AbstractCommandModule<any> {
         const player = this._player;
         const {guildId} = interaction;
         const guildQueue = this.getGuildQueue(interaction);
-        const queue: MutatedQueue = player.createQueue(guildId);
+        const queue = player.createQueue(guildId);
         const member = InteractionUtils.getInteractionCaller(interaction);
         if (!(member instanceof GuildMember)) {
             return InteractionUtils.replyWithText(interaction, "Internal Error", false);
@@ -245,7 +244,6 @@ export class Music extends AbstractCommandModule<any> {
             if (!guildQueue) {
                 queue.stop();
             }
-            console.log(e.message);
             return InteractionUtils.replyWithText(interaction, `Unable to play ${search}`);
         }
         const embed = this.displayPlaylist(queue, newSong, member);
