@@ -742,9 +742,22 @@ export namespace DiscordUtils {
         }
     }
 
+    export function stripUrls(message: Message | string): string {
+        const regexp = /(http(s)?:\/\/.)(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/gm;
+        let retStr = typeof message === "string" ? message : message.content;
+        retStr = `${retStr}`;
+        if (!ObjectUtil.validString(retStr)) {
+            return retStr;
+        }
+        const matches = retStr.match(regexp);
+        for (const match of matches) {
+            retStr = retStr.replace(match, "");
+        }
+        return retStr.trim();
+    }
+
     export function stripAllEmojiFromText(message: Message | string): string {
         let retStr = typeof message === "string" ? message : message.content;
-        //clone the string
         retStr = `${retStr}`;
         if (!ObjectUtil.validString(retStr)) {
             return retStr;
