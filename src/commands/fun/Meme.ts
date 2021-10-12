@@ -15,6 +15,7 @@ import {injectable} from "tsyringe";
 @Discord()
 @injectable()
 export class Meme extends AbstractCommandModule<any> {
+
     public constructor(private _handler: ImageFun) {
         super(
             {

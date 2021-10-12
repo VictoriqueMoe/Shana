@@ -2,8 +2,10 @@ import {GuildMember, Role, User} from "discord.js";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils} from "../../../utils/Utils";
+import {singleton} from "tsyringe";
 
-export abstract class AbstractRoleApplier {
+@singleton()
+export class RoleApplier {
 
     /**
      * Give a role to a user
@@ -12,7 +14,7 @@ export abstract class AbstractRoleApplier {
      * @param reason
      * @protected
      */
-    protected async applyRole(role: Role, member: GuildMember, reason?: string): Promise<void> {
+    public async applyRole(role: Role, member: GuildMember, reason?: string): Promise<void> {
         await member.roles.add(role, reason);
     }
 
@@ -24,7 +26,7 @@ export abstract class AbstractRoleApplier {
      * @param model
      * @protected
      */
-    protected async onChange(role: Role, change: MemberRoleChange, model: typeof RolePersistenceModel): Promise<boolean> {
+    public async onChange(role: Role, change: MemberRoleChange, model: typeof RolePersistenceModel): Promise<boolean> {
         const isRoleRemoved = change.roleChanges.remove.includes(role.id);
         const userId = change.newUser.id;
         const roleId = role.id;
@@ -48,7 +50,7 @@ export abstract class AbstractRoleApplier {
      * @param model
      * @protected
      */
-    protected async roleJoins(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<boolean> {
+    public async roleJoins(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<boolean> {
         const userId = member.user.id;
         const res = await model.findOne({
             where: {
@@ -71,7 +73,7 @@ export abstract class AbstractRoleApplier {
      * @param model
      * @protected
      */
-    protected async roleLeaves(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<RolePersistenceModel> {
+    public async roleLeaves(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<RolePersistenceModel> {
         const roleId = role.id;
         const hasRole = member.roles.cache.has(roleId);
         if (!hasRole) {

@@ -11,7 +11,14 @@ import {
 } from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {CommandInteraction, ContextMenuInteraction, ImageURLOptions, MessageAttachment, MessageEmbed} from "discord.js";
+import {
+    ColorResolvable,
+    CommandInteraction,
+    ContextMenuInteraction,
+    ImageURLOptions,
+    MessageAttachment,
+    MessageEmbed
+} from "discord.js";
 import {TimedSet} from "../../model/Impl/TimedSet";
 import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
 import {Response} from "../../model/anime/AnimeTypings";
@@ -19,8 +26,10 @@ import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DeepAPI} from "../../model/DeepAPI";
 import {container, injectable} from "tsyringe";
+import * as locale from 'locale-codes';
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
+const translate = require("deepl");
 const Anilist = require('anilist-node');
 const reverseImageSearch = require("node-reverse-image-search");
 const getUrls = require('get-urls');
@@ -81,6 +90,21 @@ export class Misc extends AbstractCommandModule<any> {
                                 name: "user",
                                 type: "mention",
                                 description: "The user to get",
+                                optional: false
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: "translate",
+                    type: "contextMenu",
+                    description: {
+                        text: "Translate a message (to EN-GB)",
+                        args: [
+                            {
+                                name: "message",
+                                type: "text",
+                                description: "the message or text to translate",
                                 optional: false
                             }
                         ]
@@ -187,6 +211,54 @@ export class Misc extends AbstractCommandModule<any> {
         const avatarUrl = user.displayAvatarURL(ops);
         return interaction.reply({
             files: [avatarUrl]
+        });
+    }
+
+    @ContextMenu("MESSAGE", "translate")
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async translate(interaction: ContextMenuInteraction): Promise<void> {
+        await interaction.deferReply({
+            ephemeral: true
+        });
+        const message = await InteractionUtils.getMessageFromContextInteraction(interaction);
+        const text = message.content;
+        const auth_key = process.env.deepl;
+        const response = await translate({
+            free_api: true,
+            text,
+            target_lang: 'EN-GB',
+            auth_key
+        });
+        const {data, status, statusText} = response;
+        if (status !== 200) {
+            return InteractionUtils.replyWithText(interaction, statusText);
+        }
+        const translation = data.translations[0];
+        const sourceLanguage = translation.detected_source_language;
+        const result = translation.text;
+        const caller = InteractionUtils.getInteractionCaller(interaction);
+        let parsedLanguage = sourceLanguage;
+        try {
+            const parsedLocale = locale.getByTag(sourceLanguage);
+            const {location, name} = parsedLocale;
+            parsedLanguage = name;
+            if (ObjectUtil.validString(location)) {
+                parsedLanguage += ` (${location})`;
+            }
+        } catch {
+
+        }
+        let displayHexColor: ColorResolvable = '#337FD5';
+        if (caller) {
+            displayHexColor = caller.displayHexColor;
+        }
+        const embed = new MessageEmbed()
+            .setColor(displayHexColor)
+            .addField("Result", result)
+            .addField("Translated from", parsedLanguage)
+            .setTimestamp();
+        interaction.editReply({
+            embeds: [embed]
         });
     }
 

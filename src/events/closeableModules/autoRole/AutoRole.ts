@@ -2,8 +2,7 @@ import {CloseableModule} from "../../../model/closeableModules/impl/CloseableMod
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
 import * as schedule from "node-schedule";
-import {AbstractRoleApplier} from "../../customAutoMod/RoleApplier/AbstractRoleApplier";
-import {GuildMember, Role} from "discord.js";
+import {GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {GuildManager} from "../../../model/guild/manager/GuildManager";
@@ -11,18 +10,9 @@ import {UniqueViolationError} from "../../../DAO/BaseDAO";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
 import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings";
 import {TimedSet} from "../../../model/Impl/TimedSet";
-import {container} from "tsyringe";
+import {container, injectable} from "tsyringe";
+import {RoleApplier} from "../../customAutoMod/RoleApplier/RoleApplier";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
-
-class RoleProxy extends AbstractRoleApplier {
-    public override async applyRole(role: Role, member: GuildMember, reason?: string): Promise<void> {
-        return super.applyRole(role, member, reason);
-    }
-
-    public override async roleLeaves(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<RolePersistenceModel> {
-        return super.roleLeaves(role, member, model);
-    }
-}
 
 class JoinEntry {
     constructor(public joinCount: number) {
@@ -34,12 +24,12 @@ class JoinEntry {
 }
 
 @Discord()
+@injectable()
 export class AutoRole extends CloseableModule<AutoRoleSettings> {
 
     private static joinTimedSet = new TimedSet<JoinEntry>(10000);
-    private _roleApplier = new RoleProxy();
 
-    constructor() {
+    constructor(private _roleApplier: RoleApplier) {
         super(CloseOptionModel);
     }
 
@@ -151,9 +141,9 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                 const accountAgeHuman = ObjectUtil.secondsToHuman(convertedTime / 1000);
                 try {
                     await GuildUtils.applyYoungAccountConstraint(member, accountAgeHuman);
-                    return;
                 } catch {
                 }
+                return;
             }
         }
         if (settings.autoRoleTimeout > 0) {
