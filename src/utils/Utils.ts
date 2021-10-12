@@ -742,9 +742,23 @@ export namespace DiscordUtils {
         }
     }
 
-    export function getEmojiFromMessage(message: Message, includeDefaultEmoji: boolean = true): string[] {
+    export function stripAllEmojiFromText(message: Message | string): string {
+        let retStr = typeof message === "string" ? message : message.content;
+        //clone the string
+        retStr = `${retStr}`;
+        if (!ObjectUtil.validString(retStr)) {
+            return retStr;
+        }
+        const emojis = getEmojiFromMessage(retStr, true);
+        for (const emoji of emojis) {
+            retStr = retStr.replace(emoji, "");
+        }
+        return retStr.trim();
+    }
+
+    export function getEmojiFromMessage(message: Message | string, includeDefaultEmoji: boolean = true): string[] {
         const regex = new RegExp(/<(a?):(\w+):(\d+)>/, "g");
-        const messageText = message.content;
+        const messageText = typeof message === "string" ? message : message.content;
         const emojiArray = messageText.match(regex) || [];
         if (includeDefaultEmoji) {
             const emoJiRexp = emojiRegex();

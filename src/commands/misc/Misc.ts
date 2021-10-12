@@ -221,7 +221,10 @@ export class Misc extends AbstractCommandModule<any> {
             ephemeral: true
         });
         const message = await InteractionUtils.getMessageFromContextInteraction(interaction);
-        const text = message.content;
+        const text = DiscordUtils.stripAllEmojiFromText(message.content.trim());
+        if (!ObjectUtil.validString(text)) {
+            return InteractionUtils.replyWithText(interaction, "No text found");
+        }
         const auth_key = process.env.deepl;
         const response = await translate({
             free_api: true,
