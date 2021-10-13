@@ -1,14 +1,13 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
 import {GuildMember} from "discord.js";
-import {MetadataStorage} from "discordx";
+import {DIService} from "discordx";
 import {GuildUtils} from "../../../utils/Utils";
 import {AbstractCommandModule} from "../../../commands/AbstractCommandModule";
 import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
 import {container, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
-import {Method} from "discordx/build/decorators/classes/Method";
 import {PostConstruct} from "../../decorators/PostConstruct";
 import {CloseableModule} from "../../closeableModules/impl/CloseableModule";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
@@ -23,15 +22,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
 
     @PostConstruct
     private async init(): Promise<void> {
-        const dApplicationCommands = MetadataStorage.instance.allApplicationCommands;
-        const allEvents = MetadataStorage.instance.events;
-        const simpleCommands = MetadataStorage.instance.allSimpleCommands.map(value => value.command);
-        const merge: Method[] = [...dApplicationCommands, ...simpleCommands, ...allEvents];
-        const appClasses = new Set<Record<string, any>>();
-        for (const applicationCommand of merge) {
-            const classRef = applicationCommand.classRef;
-            appClasses.add(classRef);
-        }
+        const appClasses = DIService.allServices;
         this._commandsAndEvents = [];
         for (const classRef of appClasses) {
             const instance = container.resolve(classRef as constructor<any>);

@@ -41,7 +41,7 @@
     "deepl": "^1.0.13",
     "discord-music-player": "^8.1.0",
     "discord.js": "^13.2.0",
-    "discordx": "^6.1.2",
+    "discordx": "^6.2.0",
     "dotenv": "^10.0.0",
     "dropbox": "^10.13.0",
     "emoji-regex": "^10.0.0",
