@@ -24,9 +24,6 @@
   "bugs": {
     "url": "https://github.com/VictoriqueMoe/WeebBot/issues"
   },
-  "resolutions": {
-    "youtubei": "0.0.1-rc.24"
-  },
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
     "@discordx/utilities": "^1.1.8",
@@ -81,8 +78,7 @@
     "tmp": "^0.2.1",
     "tsyringe": "^4.6.0",
     "url-unshort": "^5.0.0",
-    "utf-8-validate": "^5.0.5",
-    "youtubei": "0.0.1-rc.24"
+    "utf-8-validate": "^5.0.7"
   },
   "homepage": "https://github.com/VictoriqueMoe/WeebBot#readme",
   "devDependencies": {
