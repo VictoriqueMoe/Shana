@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
-    "@discordx/utilities": "^1.1.8",
+    "@discordx/utilities": "^1.4.3",
     "@overnightjs/core": "^1.7.6",
     "@pm2/io": "^5.0.0",
     "anilist-node": "^1.9.1",
