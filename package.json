@@ -26,11 +26,11 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
-    "@discordx/utilities": "^1.1.8",
+    "@discordx/utilities": "^1.4.3",
     "@overnightjs/core": "^1.7.6",
     "@pm2/io": "^5.0.0",
     "anilist-node": "^1.9.1",
-    "bufferutil": "^4.0.3",
+    "bufferutil": "^4.0.5",
     "canvas": "^2.8.0",
     "cron-validator": "^1.2.1",
     "cronstrue": "^1.117.0",
@@ -78,7 +78,7 @@
     "tmp": "^0.2.1",
     "tsyringe": "^4.6.0",
     "url-unshort": "^5.0.0",
-    "utf-8-validate": "^5.0.5"
+    "utf-8-validate": "^5.0.7"
   },
   "homepage": "https://github.com/VictoriqueMoe/WeebBot#readme",
   "devDependencies": {
