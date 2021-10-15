@@ -12,6 +12,7 @@ import {Player} from "discord-music-player";
 import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 import {container} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
+
 // const https = require('http-debug').https;
 // https.debug = 1;
 const io = require('@pm2/io');

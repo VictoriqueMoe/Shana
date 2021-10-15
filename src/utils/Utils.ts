@@ -381,7 +381,6 @@ export namespace DiscordUtils {
         }
     }
 
-
     export type EmojiInfo = {
         "buffer"?: Buffer,
         "url": string,

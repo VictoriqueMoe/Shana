@@ -80,8 +80,7 @@ export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
         const {member, guild, guildId} = interaction;
 
         if (!(member instanceof GuildMember)) {
-            await InteractionUtils.followupWithText(interaction, "Unable to find role");
-            return;
+            return await InteractionUtils.followupWithText(interaction, "Unable to find role");
         }
         const roleIdsToAssign = interaction.values;
         const added: string[] = [];
