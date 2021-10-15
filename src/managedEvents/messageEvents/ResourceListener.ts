@@ -7,8 +7,8 @@ import {MessageListenerDecorator} from "../../model/decorators/messageListenerDe
 import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner";
 import {Main} from "../../Main";
 import {DirResult} from "tmp";
-import {notBot} from "../../guards/NotABot";
 import {singleton} from "tsyringe";
+import {Op} from "sequelize";
 import ffmpeg = require("ffmpeg");
 
 const getUrls = require('get-urls');
@@ -23,7 +23,74 @@ const md5 = require('md5');
 export class ResourceListener {
     private static readonly MAX_SIZE_BYTES: number = 10485760;
 
-    @MessageListenerDecorator(true, notBot)
+    @MessageListenerDecorator(true)
+    private async scanAttachments([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
+        const member = message.member;
+        if (!member) {
+            return;
+        }
+        const attachments = message.attachments;
+        const messageContent = message.content;
+        const arratchmentUrl: string[] = attachments.map(attachmentObject => attachmentObject.attachment as string);
+
+        if (ObjectUtil.validString(messageContent)) {
+            const urlsInMessage = getUrls(messageContent);
+            if (urlsInMessage && urlsInMessage.size > 0) {
+                arratchmentUrl.push(...urlsInMessage.values());
+            }
+        }
+        const embeds = message.embeds;
+        if (ArrayUtils.isValidArray(embeds)) {
+            for (const embed of embeds) {
+                if (embed.video) {
+                    arratchmentUrl.push(embed.video.url);
+                }
+            }
+        }
+        let shouldDelete = false;
+        let reason: string = null;
+        for (const url of arratchmentUrl) {
+            let attachment;
+            try {
+                attachment = await DiscordUtils.loadResourceFromURL(url);
+            } catch {
+                continue;
+            }
+            const attachmentHash = md5(attachment);
+            const exists = await BannedAttachmentsModel.findOne({
+                where: {
+                    guildId: message.guild.id,
+                    [Op.or]: [
+                        {
+                            attachmentHash
+                        }, {
+                            url
+                        }
+                    ]
+                }
+            });
+            if (exists) {
+                shouldDelete = true;
+                reason = exists.reason;
+                break;
+            }
+        }
+        if (shouldDelete) {
+            try {
+                const member = message.member;
+                await message.delete();
+                message.reply("Message contains a banned attachment");
+                DiscordUtils.postToLog(`Member: <@${member.id}> posted a banned attachment "${reason}"`, message.guild.id);
+                if (member) {
+                    await GuildUtils.sendToJail(member, `you have been placed here because you sent an attachment that was banned for the reason: "${reason}"`);
+                }
+            } catch {
+            }
+        }
+    }
+
+    //TODO: disabled
+    // @MessageListenerDecorator(true, notBot)
     private async discordMessageCrash([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         if (Main.testMode && message.member.id !== "697417252320051291") {
             return;
