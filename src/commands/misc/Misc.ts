@@ -221,7 +221,7 @@ export class Misc extends AbstractCommandModule<any> {
             ephemeral: true
         });
         const message = await InteractionUtils.getMessageFromContextInteraction(interaction);
-        const text = DiscordUtils.stripAllEmojiFromText(message.content.trim());
+        const text = DiscordUtils.sanitiseTextForApiConsumption(message.content.trim());
         if (!ObjectUtil.validString(text)) {
             return InteractionUtils.replyWithText(interaction, "No text found");
         }

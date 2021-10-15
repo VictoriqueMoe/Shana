@@ -749,10 +749,21 @@ export namespace DiscordUtils {
             return retStr;
         }
         const matches = retStr.match(regexp);
+        if (!matches) {
+            return retStr;
+        }
         for (const match of matches) {
             retStr = retStr.replace(match, "");
         }
         return retStr.trim();
+    }
+
+    export function sanitiseTextForApiConsumption(message: Message | string): string {
+        let retStr = typeof message === "string" ? message : message.content;
+        retStr = `${retStr}`;
+        retStr = stripAllEmojiFromText(retStr);
+        retStr = stripUrls(retStr);
+        return retStr;
     }
 
     export function stripAllEmojiFromText(message: Message | string): string {
@@ -771,6 +782,9 @@ export namespace DiscordUtils {
     export function getEmojiFromMessage(message: Message | string, includeDefaultEmoji: boolean = true): string[] {
         const regex = new RegExp(/<(a?):(\w+):(\d+)>/, "g");
         const messageText = typeof message === "string" ? message : message.content;
+        if (!ObjectUtil.validString(message)) {
+            return [];
+        }
         const emojiArray = messageText.match(regex) || [];
         if (includeDefaultEmoji) {
             const emoJiRexp = emojiRegex();
