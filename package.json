@@ -33,7 +33,7 @@
     "bufferutil": "^4.0.5",
     "canvas": "^2.8.0",
     "cron-validator": "^1.2.1",
-    "cronstrue": "^1.117.0",
+    "cronstrue": "^1.119.0",
     "deepai": "^1.0.17",
     "deepl": "^1.0.13",
     "discord-music-player": "^8.2.0",
