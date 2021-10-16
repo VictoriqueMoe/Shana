@@ -74,7 +74,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
             }
         });
         if (allModels.length === 0) {
-            InteractionUtils.editWithText(interaction, "No members in the database");
+            InteractionUtils.replyOrFollowUp(interaction, "No members in the database");
             return;
         }
         let messageDisplay = `\n`;
@@ -89,7 +89,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
 
             }
         }
-        InteractionUtils.editWithText(interaction, messageDisplay);
+        InteractionUtils.replyOrFollowUp(interaction, messageDisplay);
     }
 
     @Slash("username", {
@@ -116,7 +116,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
     ): Promise<void> {
         await interaction.deferReply();
         if (!(mentionedMember instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Unable to find user", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "Unable to find user", false);
         }
         const guildId = interaction.guild.id;
         const guildManager = container.resolve(GuildManager);
@@ -125,14 +125,14 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
         const botHighestRole = bot.roles.highest;
         const roleOfMember = mentionedMember.roles.highest;
         if (roleOfMember.position > botHighestRole.position) {
-            return InteractionUtils.replyWithText(interaction, "You can not use this command against a member who's highest role is above this bots highest role", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "You can not use this command against a member who's highest role is above this bots highest role", false);
         }
         const callee = InteractionUtils.getInteractionCaller(interaction);
         if (!(callee instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Internal Error", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "Internal Error", false);
         }
         if (roleOfMember.position >= callee.roles.highest.position) {
-            return InteractionUtils.replyWithText(interaction, "You can not use this command against a member who's role is higher than yours!", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "You can not use this command against a member who's role is higher than yours!", false);
         }
         const userId = mentionedMember.id;
         if (await UsernameModel.count({
@@ -168,6 +168,6 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
             }
         }
         await mentionedMember.setNickname(usernameToPersist);
-        InteractionUtils.editWithText(interaction, `user ${mentionedMember.user.username} has been persisted to always be "${usernameToPersist}"`);
+        InteractionUtils.replyOrFollowUp(interaction, `user ${mentionedMember.user.username} has been persisted to always be "${usernameToPersist}"`);
     }
 }

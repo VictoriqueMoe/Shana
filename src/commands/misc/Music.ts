@@ -73,7 +73,7 @@ export class Music extends AbstractCommandModule<any> {
         await interaction.deferReply();
         const guildQueue = this.getGuildQueue(interaction);
         if (!guildQueue) {
-            return InteractionUtils.replyWithText(interaction, "No songs are currently queued");
+            return InteractionUtils.replyOrFollowUp(interaction, "No songs are currently queued");
         }
         const nextButton = new MessageButton()
             .setLabel("Next")
@@ -168,7 +168,7 @@ export class Music extends AbstractCommandModule<any> {
     private async nowPlaying(interaction: CommandInteraction): Promise<void> {
         const guildQueue = this.getGuildQueue(interaction);
         if (!guildQueue || !guildQueue.isPlaying) {
-            return InteractionUtils.replyWithText(interaction, "No songs are currently playing");
+            return InteractionUtils.replyOrFollowUp(interaction, "No songs are currently playing");
         }
         const embed = this.displayPlaylist(guildQueue);
         await interaction.reply({
@@ -204,11 +204,11 @@ export class Music extends AbstractCommandModule<any> {
         const queue = player.createQueue(guildId);
         const member = InteractionUtils.getInteractionCaller(interaction);
         if (!(member instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Internal Error", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "Internal Error", false);
         }
         const vc = member.voice.channel;
         if (!vc) {
-            return InteractionUtils.replyWithText(interaction, "You must first join the voice channel you want me to connect to");
+            return InteractionUtils.replyOrFollowUp(interaction, "You must first join the voice channel you want me to connect to");
         }
         if (!queue.isPlaying) {
             await queue.join(member.voice.channel);
@@ -231,7 +231,7 @@ export class Music extends AbstractCommandModule<any> {
                 queue.stop();
             }
             console.error(e);
-            return InteractionUtils.replyWithText(interaction, `Unable to play ${search}`);
+            return InteractionUtils.replyOrFollowUp(interaction, `Unable to play ${search}`);
         }
         const embed = this.displayPlaylist(queue, newSong, member);
         await interaction.editReply({

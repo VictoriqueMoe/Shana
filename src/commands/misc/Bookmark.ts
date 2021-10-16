@@ -90,14 +90,14 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
         });
         const message = await InteractionUtils.getMessageFromContextInteraction(interaction);
         if (!message) {
-            return InteractionUtils.replyWithText(interaction, "Unable to find message");
+            return InteractionUtils.replyOrFollowUp(interaction, "Unable to find message");
         }
         const caller = InteractionUtils.getInteractionCaller(interaction);
         if (!caller) {
-            return InteractionUtils.replyWithText(interaction, "Unable to add bookmark");
+            return InteractionUtils.replyOrFollowUp(interaction, "Unable to add bookmark");
         }
         await this._bookmarkManager.addBookmark(caller, message);
-        InteractionUtils.replyWithText(interaction, "Bookmark added");
+        InteractionUtils.replyOrFollowUp(interaction, "Bookmark added");
     }
 
     @Slash("getbookmark", {
@@ -117,7 +117,7 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
         });
         const caller = InteractionUtils.getInteractionCaller(interaction);
         if (!caller) {
-            return InteractionUtils.replyWithText(interaction, "Unable to get bookmarks");
+            return InteractionUtils.replyOrFollowUp(interaction, "Unable to get bookmarks");
         }
         const bookMarks = await this._bookmarkManager.getBookmarksFromMember(caller);
         const displayHexColor = caller.displayHexColor;
@@ -162,12 +162,12 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
         });
         const caller = InteractionUtils.getInteractionCaller(interaction);
         if (!caller) {
-            return InteractionUtils.replyWithText(interaction, "Unable to delete bookmark");
+            return InteractionUtils.replyOrFollowUp(interaction, "Unable to delete bookmark");
         }
         const deleteResult = await this._bookmarkManager.deleteBookmark(caller, bookmarkId);
         if (deleteResult) {
-            return InteractionUtils.replyWithText(interaction, `Bookmark ${bookmarkId} has been deleted`);
+            return InteractionUtils.replyOrFollowUp(interaction, `Bookmark ${bookmarkId} has been deleted`);
         }
-        return InteractionUtils.replyWithText(interaction, `Bookmark ${bookmarkId} not found, please run /getbookmark for a list of ids`);
+        return InteractionUtils.replyOrFollowUp(interaction, `Bookmark ${bookmarkId} not found, please run /getbookmark for a list of ids`);
     }
 }

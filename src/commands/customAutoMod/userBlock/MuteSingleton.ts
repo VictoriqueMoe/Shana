@@ -133,7 +133,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
             const persistenceModelRowCount = await RolePersistenceModel.destroy(whereClaus);
             if (persistenceModelRowCount != 1) {
                 //the application has SHIT itself, if one table has an entry but the other not, fuck knows what to do here...
-                throw new Error("Unknown error occurred, error is a synchronisation issue between the Persistence model and the Mute Model ");
+                throw new Error("Unknown error occurred, error is a syncronisation issue between the Persistence model and the Mute Model ");
             }
         }
         let job: Job = null;

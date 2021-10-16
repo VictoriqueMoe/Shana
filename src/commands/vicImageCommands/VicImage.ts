@@ -58,7 +58,7 @@ export class VicImage extends AbstractCommandModule<any> {
                 }]
             });
         } catch (e) {
-            InteractionUtils.replyWithText(interaction, "Failed to send, maybe image is too large?");
+            InteractionUtils.replyOrFollowUp(interaction, "Failed to send, maybe image is too large?");
             console.error(e);
             console.log(`Failed to send ${randomImage.name}`);
         }

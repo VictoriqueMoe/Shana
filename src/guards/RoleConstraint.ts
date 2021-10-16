@@ -31,7 +31,7 @@ export const secureCommandInteraction: GuardFunction<CommandInteraction | Simple
     }
     if (!ObjectUtil.validString(commandName) || !ObjectUtil.validString(guildId) || !member) {
         if (!(arg instanceof SimpleCommandMessage)) {
-            return DiscordUtils.InteractionUtils.replyWithText(arg, "Unable to execute command", false);
+            return DiscordUtils.InteractionUtils.replyOrFollowUp(arg, "Unable to execute command", false);
         }
         return;
     }
@@ -49,9 +49,9 @@ export const secureCommandInteraction: GuardFunction<CommandInteraction | Simple
             const targetType = arg.targetType;
             if (targetType === "USER") {
                 const userTargeted = InteractionUtils.getUserFromUserContextInteraction(arg);
-                return DiscordUtils.InteractionUtils.replyWithText(arg, `<@${member.id}>, you do not have permissions to the command: "${commandName}" against ${userTargeted.user.tag} `, false);
+                return DiscordUtils.InteractionUtils.replyOrFollowUp(arg, `<@${member.id}>, you do not have permissions to the command: "${commandName}" against ${userTargeted.user.tag} `, false);
             }
         }
-        return DiscordUtils.InteractionUtils.replyWithText(arg, `<@${member.id}>, you do not have permissions to the command: "${commandName}"`, false);
+        return DiscordUtils.InteractionUtils.replyOrFollowUp(arg, `<@${member.id}>, you do not have permissions to the command: "${commandName}"`, false);
     }
 };

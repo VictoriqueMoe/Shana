@@ -174,7 +174,7 @@ export class Misc extends AbstractCommandModule<any> {
         await interaction.deferReply();
         const deepAPI = container.resolve(DeepAPI);
         const resp = await deepAPI.textGeneration(value);
-        await InteractionUtils.editWithText(interaction, resp);
+        await InteractionUtils.replyOrFollowUp(interaction, resp);
     }
 
     @SimpleCommand("posOrNeg")
@@ -223,7 +223,7 @@ export class Misc extends AbstractCommandModule<any> {
         const message = await InteractionUtils.getMessageFromContextInteraction(interaction);
         const text = DiscordUtils.sanitiseTextForApiConsumption(message.content.trim());
         if (!ObjectUtil.validString(text)) {
-            return InteractionUtils.replyWithText(interaction, "No text found");
+            return InteractionUtils.replyOrFollowUp(interaction, "No text found");
         }
         const auth_key = process.env.deepl;
         const response = await translate({
@@ -234,7 +234,7 @@ export class Misc extends AbstractCommandModule<any> {
         });
         const {data, status, statusText} = response;
         if (status !== 200) {
-            return InteractionUtils.replyWithText(interaction, statusText);
+            return InteractionUtils.replyOrFollowUp(interaction, statusText);
         }
         const translation = data.translations[0];
         const sourceLanguage = translation.detected_source_language;
@@ -276,7 +276,7 @@ export class Misc extends AbstractCommandModule<any> {
         const user = await InteractionUtils.getUserFromUserContextInteraction(interaction).fetch(true);
         const bannerUrl = (await user.user.fetch(true)).bannerURL(ops);
         if (!ObjectUtil.validString(bannerUrl)) {
-            return InteractionUtils.replyWithText(interaction, "User has no banner", true);
+            return InteractionUtils.replyOrFollowUp(interaction, "User has no banner", true);
         }
         await interaction.editReply({
             files: [bannerUrl]

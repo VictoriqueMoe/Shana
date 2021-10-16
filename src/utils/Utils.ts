@@ -49,11 +49,11 @@ const emojiRegex = require('emoji-regex');
 const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
 
-export class ChronException extends Error {
+export class cronException extends Error {
     constructor(e: string) {
         super(e);
 
-        Object.setPrototypeOf(this, ChronException.prototype);
+        Object.setPrototypeOf(this, cronException.prototype);
     }
 }
 
@@ -314,15 +314,15 @@ export namespace TimeUtils {
     }
 }
 
-export namespace ChronUtils {
-    export function chronToString(chron: string): string {
-        if (!isValidCron(chron, {
+export namespace cronUtils {
+    export function cronToString(cron: string): string {
+        if (!isValidCron(cron, {
             seconds: true,
             allowBlankDay: true
         })) {
-            throw new ChronException("Chron is not valid");
+            throw new cronException("cron is not valid");
         }
-        return cronstrue.toString(chron);
+        return cronstrue.toString(cron);
     }
 }
 
@@ -342,30 +342,20 @@ export namespace DiscordUtils {
             return interaction.channel.messages.fetch(messageId);
         }
 
-        export async function followupWithText(interaction: BaseCommandInteraction | MessageComponentInteraction, content: string, ephemeral: boolean = false): Promise<void> {
-            await interaction.followUp({
-                content,
-                ephemeral
-            });
-        }
-
-        export async function editWithText(interaction: BaseCommandInteraction | MessageComponentInteraction, content: string): Promise<void> {
-            await interaction.editReply({
+        export function replyOrFollowUp(interaction: BaseCommandInteraction | MessageComponentInteraction, content: string, ephemeral: boolean = false): Promise<void> {
+            if (interaction.replied) {
+                return interaction.followUp({
+                    ephemeral,
+                    content
+                }) as unknown as Promise<void>;
+            }
+            if (interaction.deferred) {  // Currently behaves the same but could change in the future
+                return interaction.editReply(content) as unknown as Promise<void>;
+            }
+            return interaction.reply({
+                ephemeral,
                 content
             });
-        }
-
-        export async function replyWithText(interaction: BaseCommandInteraction | MessageComponentInteraction, content: string, ephemeral: boolean = false): Promise<void> {
-            if (interaction.deferred) {
-                await interaction.editReply({
-                    content
-                });
-            } else {
-                return interaction.reply({
-                    content,
-                    ephemeral
-                });
-            }
         }
 
         export function getInteractionCaller(interaction: BaseCommandInteraction): GuildMember | null {

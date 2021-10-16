@@ -1,48 +1,39 @@
 import * as schedule from 'node-schedule';
 import {isValidCron} from 'cron-validator';
-import {ChronException, ObjectUtil} from '../../../utils/Utils';
-import {IScheduledJob} from "../IScheduledJob";
-import {ScheduledJob} from "../../Impl/ScheduledJob";
+import {cronException, ObjectUtil} from '../../../utils/Utils';
+import {IScheduledJob} from "./ScheduledJob/IScheduledJob";
+import {ScheduledJob} from "./ScheduledJob/impl/ScheduledJob";
+import {singleton} from "tsyringe";
+import {IScheduler} from "../Scheduler";
 
-export class Scheduler {
-
-    protected static instance: Scheduler;
+@singleton()
+export class Scheduler implements IScheduler {
 
     protected _jobs: IScheduledJob[] = [];
 
-    // @ts-ignore
-    public get jobs(): IScheduledJob[] {
+    get jobs(): IScheduledJob[] {
         return this._jobs;
     }
 
-    // @ts-ignore
     protected set jobs(jobs: IScheduledJob[]) {
         this._jobs = jobs;
     }
 
-    public static getInstance(): Scheduler {
-        if (!Scheduler.instance) {
-            Scheduler.instance = new this();
-        }
-
-        return Scheduler.instance;
-    }
-
     /**
-     * Execute this function at a given date or chron time
+     * Execute this function at a given date or cron time
      * @param name
      * @param whenToExecute
      * @param callBack
      */
     public register(name: string, whenToExecute: string | Date, callBack: () => void): IScheduledJob {
-        if (this.jobs.find(j => j.name === name) != null) {
+        if (this.getJob(name)) {
             this.cancelJob(name);
         }
         if (typeof whenToExecute === "string" && !isValidCron(whenToExecute, {
             seconds: true,
             allowBlankDay: true
         })) {
-            throw new ChronException("Chron is not valid");
+            throw new cronException("cron is not valid");
         }
 
         console.log(`Register function ${name}`);
@@ -52,12 +43,12 @@ export class Scheduler {
         return sJob;
     }
 
-    public getJob(name: string): schedule.Job {
-        return this.jobs.find(j => j.name === name)?.job;
+    public getJob(name: string): IScheduledJob {
+        return this.jobs.find(j => j.name === name);
     }
 
     public cancelJob(name: string): boolean {
-        const j = this.jobs.find(j => j.name === name);
+        const j = this.getJob(name);
         if (j == null) {
             return false;
         }
@@ -69,7 +60,7 @@ export class Scheduler {
     }
 
     public cancelAllJobs(): void {
-        this.jobs.forEach(scheduledMessage => scheduledMessage.job.cancel());
+        this.jobs.forEach(scheduledMessage => this.cancelJob(scheduledMessage.name));
         this.jobs = [];
     }
 

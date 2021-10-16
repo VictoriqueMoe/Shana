@@ -88,23 +88,23 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         await interaction.deferReply();
         const member = InteractionUtils.getUserFromUserContextInteraction(interaction);
         if (!(member instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Unable to mute non-guild members");
+            return InteractionUtils.replyOrFollowUp(interaction, "Unable to mute non-guild members");
         }
         const {guildId} = interaction;
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
         if (!mutedRole) {
-            return InteractionUtils.replyWithText(interaction, "This command has not been configured or is disabled", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "This command has not been configured or is disabled", false);
         }
         const creator = InteractionUtils.getInteractionCaller(interaction);
         if (!(creator instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Unable to inspect calle", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "Unable to inspect calle", false);
         }
         let replyMessage: string;
         try {
             replyMessage = await Mute.muteUser(member, creator, guildId, "N/A", 30, TIME_UNIT.minutes);
-            return InteractionUtils.replyWithText(interaction, replyMessage);
+            return InteractionUtils.replyOrFollowUp(interaction, replyMessage);
         } catch (e) {
-            return InteractionUtils.replyWithText(interaction, (<Error>e).message);
+            return InteractionUtils.replyOrFollowUp(interaction, (<Error>e).message);
         }
     }
 
@@ -139,23 +139,23 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
     ): Promise<void> {
         await interaction.deferReply();
         if (!(mentionedMember instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Unable to find user", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "Unable to find user", false);
         }
         const guildId = interaction.guild.id;
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
         if (!mutedRole) {
-            return InteractionUtils.replyWithText(interaction, "This command has not been configured or is disabled", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "This command has not been configured or is disabled", false);
         }
         const creator = InteractionUtils.getInteractionCaller(interaction);
         if (!(creator instanceof GuildMember)) {
-            return InteractionUtils.replyWithText(interaction, "Unable to inspect calle", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "Unable to inspect calle", false);
         }
         let replyMessage: string;
         try {
             replyMessage = await Mute.muteUser(mentionedMember, creator, guildId, reason, timeout, timeUnit);
-            return InteractionUtils.replyWithText(interaction, replyMessage);
+            return InteractionUtils.replyOrFollowUp(interaction, replyMessage);
         } catch (e) {
-            return InteractionUtils.replyWithText(interaction, (<Error>e).message);
+            return InteractionUtils.replyOrFollowUp(interaction, (<Error>e).message);
         }
     }
 
@@ -203,7 +203,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async getTimeUnits(interaction: CommandInteraction): Promise<void> {
-        return InteractionUtils.replyWithText(interaction, `\n ${this.getMuteTimeOutStr()}`);
+        return InteractionUtils.replyOrFollowUp(interaction, `\n ${this.getMuteTimeOutStr()}`);
     }
 
     @Slash("viewallmutes", {
@@ -219,7 +219,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
             }
         });
         if (currentBlocks.length === 0) {
-            return InteractionUtils.replyWithText(interaction, "No members are muted", false);
+            return InteractionUtils.replyOrFollowUp(interaction, "No members are muted", false);
         }
         let replyStr = `\n`;
         for (const block of currentBlocks) {
@@ -236,6 +236,6 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                 replyStr += `, This user has also attempted to post ${block.violationRules} times while blocked`;
             }
         }
-        await InteractionUtils.editWithText(interaction, replyStr);
+        await InteractionUtils.replyOrFollowUp(interaction, replyStr);
     }
 }

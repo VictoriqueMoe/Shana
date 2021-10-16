@@ -1,36 +1,33 @@
-import {Scheduler} from "./Scheduler";
-import {IScheduledMessageJob} from "../IScheduledMessageJob";
+import {IScheduledMessageJob} from "./ScheduledJob/IScheduledMessageJob";
 import * as schedule from 'node-schedule';
-import {GuildChannel} from "discord.js";
-import {ScheduledMessageJob} from "../../Impl/ScheduledMessageJob";
+import {BaseGuildTextChannel} from "discord.js";
+import {ScheduledMessageJob} from "./ScheduledJob/impl/ScheduledMessageJob";
+import {singleton} from "tsyringe";
+import {IMessageScheduler} from "../MessageScheduler";
+import {Scheduler} from "./Scheduler";
 
-export class MessageScheduler extends Scheduler {
+@singleton()
+export class MessageScheduler extends Scheduler implements IMessageScheduler {
 
-    private channel: GuildChannel = null;
+    private _channel: BaseGuildTextChannel = null;
 
-    protected constructor() {
-        super();
+    public get channel(): BaseGuildTextChannel {
+        return this._channel;
     }
 
     protected override _jobs: IScheduledMessageJob[] = [];
 
-    // @ts-ignore
-    public get jobs(): IScheduledMessageJob[] {
+    public override get jobs(): IScheduledMessageJob[] {
         return this._jobs;
     }
 
-    // @ts-ignore
-    protected set jobs(jobs: IScheduledMessageJob[]) {
+    protected override set jobs(jobs: IScheduledMessageJob[]) {
         this._jobs = jobs;
     }
 
-    public static override getInstance(): MessageScheduler {
-        return super.getInstance() as MessageScheduler;
-    }
-
-    public override register(name: string, chron: string, callBack: () => void, channel?: GuildChannel): IScheduledMessageJob {
-        this.channel = channel;
-        return super.register(name, chron, callBack) as IScheduledMessageJob;
+    public override register(name: string, cron: string, callBack: () => void, channel?: BaseGuildTextChannel): IScheduledMessageJob {
+        this._channel = channel;
+        return super.register(name, cron, callBack) as IScheduledMessageJob;
     }
 
     protected override registerJob(name: string, job: schedule.Job): IScheduledMessageJob {

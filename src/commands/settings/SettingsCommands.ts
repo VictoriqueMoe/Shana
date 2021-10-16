@@ -85,7 +85,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             case SETTINGS.MUTE_ROLE: {
                 const theRole = interaction.guild.roles.cache.get(value);
                 if (!theRole) {
-                    return InteractionUtils.replyWithText(interaction, `Unable to find role with id ${value}`);
+                    return InteractionUtils.replyOrFollowUp(interaction, `Unable to find role with id ${value}`);
                 }
                 const settingsManager = container.resolve(SettingsManager);
                 await settingsManager.saveOrUpdateSetting(setting as SETTINGS, value, guildId);
@@ -96,7 +96,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             case SAVABLE_SETTINGS.AutoRoleMinAccountAge: {
                 const settingValue = parseInt(value);
                 if (isNaN(settingValue)) {
-                    return InteractionUtils.replyWithText(interaction, "Please supply a number");
+                    return InteractionUtils.replyOrFollowUp(interaction, "Please supply a number");
                 }
                 const autoRole: ICloseableModule<AutoRoleSettings> = container.resolve(AutoRole);
                 const settingObj: AutoRoleSettings = {};
@@ -110,7 +110,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 try {
                     await autoRole.saveSettings(guildId, settingObj, true);
                 } catch (e) {
-                    return InteractionUtils.replyWithText(interaction, e.message);
+                    return InteractionUtils.replyOrFollowUp(interaction, e.message);
                 }
                 break;
             }
@@ -130,12 +130,12 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                 try {
                     await autoRole.saveSettings(guildId, settingObj, true);
                 } catch (e) {
-                    return InteractionUtils.replyWithText(interaction, e.message);
+                    return InteractionUtils.replyOrFollowUp(interaction, e.message);
                 }
                 break;
             }
         }
-        return InteractionUtils.replyWithText(interaction, `Setting "${setting}" has been saved with value ${value}`);
+        return InteractionUtils.replyOrFollowUp(interaction, `Setting "${setting}" has been saved with value ${value}`);
     }
 
 }

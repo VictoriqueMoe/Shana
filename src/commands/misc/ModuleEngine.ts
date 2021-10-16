@@ -70,17 +70,17 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
         const guildId = interaction.guild.id;
         const allModuleNames = await DiscordUtils.getAllClosableModules(guildId);
         if (!allModuleNames.includes(moduleId)) {
-            return InteractionUtils.replyWithText(interaction, `Unable to find that module, all available modules are: \n ${allModuleNames.join(", ")}`);
+            return InteractionUtils.replyOrFollowUp(interaction, `Unable to find that module, all available modules are: \n ${allModuleNames.join(", ")}`);
         }
         const module = DiscordUtils.getModule(moduleId);
         const subModules = module.submodules.filter(sm => sm.isActive);
         const subModulesStr = (subModules.map(s => s.id)).join(", ");
         if (isEnable) {
             const didOpen = await module.open(guildId);
-            didOpen ? InteractionUtils.editWithText(interaction, `module ${moduleId} (subModules: ${subModulesStr}) has been enabled`) : InteractionUtils.editWithText(interaction, `module ${moduleId} (subModules: ${subModulesStr}) can not be enabled`);
+            didOpen ? InteractionUtils.replyOrFollowUp(interaction, `module ${moduleId} (subModules: ${subModulesStr}) has been enabled`) : InteractionUtils.replyOrFollowUp(interaction, `module ${moduleId} (subModules: ${subModulesStr}) can not be enabled`);
         } else {
             const didClose = await module.close(guildId);
-            didClose ? InteractionUtils.editWithText(interaction, `module ${moduleId} (subModules: ${subModulesStr}) has been disabled`) : InteractionUtils.editWithText(interaction, `module ${moduleId} (subModules: ${subModulesStr}) can not be disabled`);
+            didClose ? InteractionUtils.replyOrFollowUp(interaction, `module ${moduleId} (subModules: ${subModulesStr}) has been disabled`) : InteractionUtils.replyOrFollowUp(interaction, `module ${moduleId} (subModules: ${subModulesStr}) can not be disabled`);
         }
     }
 
@@ -92,6 +92,6 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
         await interaction.deferReply();
         const guildId = interaction.guild.id;
         const allModuleNames = await DiscordUtils.getAllClosableModules(guildId);
-        InteractionUtils.replyWithText(interaction, `all available modules are: \n ${allModuleNames.join(", ")}`);
+        InteractionUtils.replyOrFollowUp(interaction, `all available modules are: \n ${allModuleNames.join(", ")}`);
     }
 }

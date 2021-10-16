@@ -47,7 +47,7 @@ export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
             }
         });
         if (!ObjectUtil.isValidObject(roleJoinerSettings)) {
-            return InteractionUtils.replyWithText(interaction, "Command not configured");
+            return InteractionUtils.replyOrFollowUp(interaction, "Command not configured");
         }
         const roles = roleJoinerSettings.rolesToJoin.map(roleId => {
             const roleObj = interaction.guild.roles.cache.get(roleId);
@@ -80,7 +80,7 @@ export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
         const {member, guild, guildId} = interaction;
 
         if (!(member instanceof GuildMember)) {
-            return await InteractionUtils.followupWithText(interaction, "Unable to find role");
+            return await InteractionUtils.replyOrFollowUp(interaction, "Unable to find role");
         }
         const roleIdsToAssign = interaction.values;
         const added: string[] = [];
@@ -99,7 +99,7 @@ export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
                         removed.push(role.name);
                     }
                 } catch (e) {
-                    await InteractionUtils.followupWithText(interaction, e.message);
+                    await InteractionUtils.replyOrFollowUp(interaction, e.message);
                     return;
                 }
             }
@@ -116,7 +116,7 @@ export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
                         added.push(role.name);
                     }
                 } catch (e) {
-                    await InteractionUtils.followupWithText(interaction, e.message);
+                    await InteractionUtils.replyOrFollowUp(interaction, e.message);
                     return;
                 }
             }

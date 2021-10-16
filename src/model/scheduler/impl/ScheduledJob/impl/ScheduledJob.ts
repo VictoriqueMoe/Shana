@@ -1,4 +1,4 @@
-import {IScheduledJob} from "../scheduler/IScheduledJob";
+import {IScheduledJob} from "../IScheduledJob";
 import * as schedule from "node-schedule";
 
 export class ScheduledJob implements IScheduledJob {
