@@ -9,12 +9,13 @@ import {BaseGuildTextChannel, GuildMember} from "discord.js";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
 import {Main} from "../../../Main";
-import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../utils/Utils";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import * as Immutable from "immutable";
 import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
 import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
 import {notBot} from "../../../guards/NotABot";
 import {container, singleton} from "tsyringe";
+import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 @singleton()
 export class DynoAutoMod extends CloseableModule<null> {
@@ -152,7 +153,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         const model = await muteSingleton.muteUser(user, reason, creatorID, seconds);
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
-            const humanMuted = ObjectUtil.secondsToHuman(seconds);
+            const humanMuted = ObjectUtil.timeToHuman(seconds, TIME_UNIT.seconds);
             await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${humanMuted}`, user.guild.id);
             if (channel) {
                 await channel.send(`<@${user.id}>, you have been muted for ${humanMuted} due to the violation of the ${violationObj.filterId}`);

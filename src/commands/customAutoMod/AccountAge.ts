@@ -67,7 +67,7 @@ export class AccountAge extends AbstractCommandModule<any> {
         const guildDate = toCall.createdAt;
         const timeStamp = guildDate.getTime();
         const age = Date.now() - timeStamp;
-        const ageHumanReadable = ObjectUtil.secondsToHuman(Math.round(age / 1000));
+        const ageHumanReadable = ObjectUtil.timeToHuman(age);
         const utcDate = guildDate.toUTCString();
         return {
             ageHumanReadable,

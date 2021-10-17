@@ -99,10 +99,6 @@ export namespace GuildUtils {
             return getRole(guildId, SETTINGS.MUTE_ROLE);
         }
 
-        export function getAutoRole(guildId: string): Promise<Role | null> {
-            return getRole(guildId, SETTINGS.AUTO_ROLE);
-        }
-
         async function getRole(guildId: string, setting: SETTINGS): Promise<Role | null> {
             const role = await settingsManager.getSetting(setting, guildId);
             if (!ObjectUtil.validString(role)) {
@@ -282,6 +278,7 @@ export namespace ArrayUtils {
 
 export namespace TimeUtils {
     export enum TIME_UNIT {
+        milliseconds = "mil",
         seconds = "s",
         minutes = "mi",
         hours = "h",
@@ -725,7 +722,7 @@ export namespace DiscordUtils {
         const createdDate = user.createdAt.getTime();
         const accountAge = Date.now() - createdDate;
         if (format) {
-            return ObjectUtil.secondsToHuman(Math.round(accountAge / 1000));
+            return ObjectUtil.timeToHuman(accountAge);
         } else {
             return accountAge;
         }
@@ -1004,7 +1001,18 @@ export class ObjectUtil {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
 
-    public static secondsToHuman(seconds: number): string {
+    public static timeToHuman(value: number, timeUnit: TimeUtils.TIME_UNIT = TimeUtils.TIME_UNIT.milliseconds): string {
+        let seconds: number;
+        if (timeUnit === TimeUtils.TIME_UNIT.milliseconds) {
+            seconds = Math.round(value / 1000);
+        } else if (timeUnit !== TimeUtils.TIME_UNIT.seconds) {
+            seconds = Math.round(TimeUtils.convertToMilli(value, timeUnit) / 1000);
+        } else {
+            seconds = value;
+        }
+        if (Number.isNaN(seconds)) {
+            throw new Error("Unknown error");
+        }
         const levels = [
             [Math.floor(seconds / 31536000), 'years'],
             [Math.floor((seconds % 31536000) / 86400), 'days'],

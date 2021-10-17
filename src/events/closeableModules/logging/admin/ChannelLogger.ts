@@ -108,7 +108,7 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         let timeToDisplay: string;
         if (architectTime !== "MAX") {
             const millis = TimeUtils.convertToMilli(thread.autoArchiveDuration as number, TIME_UNIT.minutes);
-            timeToDisplay = ObjectUtil.secondsToHuman(millis / 1000);
+            timeToDisplay = ObjectUtil.timeToHuman(millis);
         } else {
             timeToDisplay = "max";
         }
@@ -199,8 +199,8 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
                 if (name === "archiveDuration") {
                     const oldMillis = TimeUtils.convertToMilli(beforeValue as number, TIME_UNIT.minutes);
                     const newMillis = TimeUtils.convertToMilli(afterValue as number, TIME_UNIT.minutes);
-                    beforeValue = ObjectUtil.secondsToHuman(oldMillis / 1000);
-                    afterValue = ObjectUtil.secondsToHuman(newMillis / 1000);
+                    beforeValue = ObjectUtil.timeToHuman(oldMillis);
+                    afterValue = ObjectUtil.timeToHuman(newMillis);
                 }
 
                 beforeValue = beforeValue.toString();

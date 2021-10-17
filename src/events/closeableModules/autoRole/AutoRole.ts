@@ -53,7 +53,6 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (filter.isActive && await filter.checkUsername(member)) {
             return;
         }
-        const autoRole = await GuildUtils.RoleUtils.getAutoRole(guildId);
         const persistedRole = await RolePersistenceModel.findOne({
             where: {
                 userId: member.id,
@@ -86,10 +85,14 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             }
         } catch {
         }
-        if (autoRole) {
-            try {
-                await this._roleApplier.applyRole(autoRole, member, `added via ${botUsername}`);
-            } catch {
+        const autoRoleId = settings.role;
+        if (autoRoleId) {
+            const autoRole = guild.roles.cache.get(autoRoleId);
+            if (autoRole) {
+                try {
+                    await this._roleApplier.applyRole(autoRole, member, `added via ${botUsername}`);
+                } catch {
+                }
             }
         }
     }
@@ -138,7 +141,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             const now = Date.now();
             const accountAge = now - memberCreated;
             if (accountAge < convertedTime) {
-                const accountAgeHuman = ObjectUtil.secondsToHuman(convertedTime / 1000);
+                const accountAgeHuman = ObjectUtil.timeToHuman(convertedTime);
                 try {
                     await GuildUtils.applyYoungAccountConstraint(member, accountAgeHuman);
                 } catch {

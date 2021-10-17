@@ -12,7 +12,7 @@ export abstract class BabyAccountDetector {
         const oneWeek = 604800000;
         const accountAge = now - memberCreated;
         if (accountAge <= oneWeek) {
-            DiscordUtils.postToLog(`Account joined <@${member.id}> is ${ObjectUtil.secondsToHuman(Math.round(accountAge / 1000))} old`, member.guild.id);
+            DiscordUtils.postToLog(`Account joined <@${member.id}> is ${ObjectUtil.timeToHuman(accountAge)} old`, member.guild.id);
         }
     }
 }

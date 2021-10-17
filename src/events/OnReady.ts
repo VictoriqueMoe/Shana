@@ -63,7 +63,7 @@ export class OnReady extends BaseDAO<any> {
                     }
                 });
             } else {
-                console.log(`Re-creating timed mute for ${mute.username}, time remaining is: ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))}`);
+                console.log(`Re-creating timed mute for ${mute.username}, time remaining is: ${ObjectUtil.timeToHuman(timeLeft)}`);
                 muteSingleton.createTimeout(mute.userId, mute.username, timeLeft, guild, mutedRole.id);
             }
         }

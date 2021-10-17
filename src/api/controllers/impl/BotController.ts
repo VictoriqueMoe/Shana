@@ -266,7 +266,7 @@ export class BotController extends baseController {
             }
             const dateCreated = (createdAt as Date).getTime();
             const timeLeft = timeout - (Date.now() - dateCreated);
-            const tmeLeftStr = ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000));
+            const tmeLeftStr = ObjectUtil.timeToHuman(timeLeft);
             data.push([null, username, nickName, tmeLeftStr, creatorTag, reason, currentBlock.userId]);
         }
         return super.ok(res, data);

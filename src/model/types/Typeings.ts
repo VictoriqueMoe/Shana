@@ -1,5 +1,6 @@
 import {ArgsOf, Client} from "discordx";
 import {GuildChannel, Message, ThreadChannel} from "discord.js";
+import {SETTINGS} from "../../enums/SETTINGS";
 
 export namespace Typeings {
     export type CommandArgs = {
@@ -81,6 +82,20 @@ export namespace Typeings {
         before: T,
         after: T
     };
+
+    export namespace SETTINGS_RESOLVER {
+        export enum AutoRoleSettingsEnum {
+            "ROLE" = "Role",
+            "AUTO_MUTE" = "autoMute",
+            "AUTO_JAIL" = "autoJail",
+            "PANIC_MODE" = "panicMode",
+            "MIN_ACCOUNT_AGE" = "minAccountAge",
+            "MASS_JOIN_PROTECTION" = "massJoinProtection"
+        }
+
+        export const CombinedSettings = {...SETTINGS, ...AutoRoleSettingsEnum};
+        export type CombinedSettings = keyof typeof CombinedSettings;
+    }
 }
 export type AutoResponderPayload = {
     title: string,

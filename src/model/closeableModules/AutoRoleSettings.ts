@@ -3,6 +3,11 @@ import {ModuleSettings} from "./ModuleSettings";
 export interface AutoRoleSettings extends ModuleSettings {
 
     /**
+     * The ID of the role to apply after the `autoRoleTimeout`
+     */
+    role?: string
+
+    /**
      * Minimum account age required in order to be allowed into this server, anyone under this account age will have the `YOUNG_ACCOUNT_ROLE` role applied
      */
     minAccountAge?: number,

@@ -1,32 +1,47 @@
-import {Discord, Guard, Slash, SlashChoice, SlashOption} from "discordx";
+import {Discord, Guard, Slash, SlashChoice, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {DiscordUtils} from "../../utils/Utils";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
-import {ICloseableModule} from "../../model/closeableModules/ICloseableModule";
 import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
 import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {CommandInteraction} from "discord.js";
-import {container} from "tsyringe";
+import {CommandInteraction, MessageEmbed} from "discord.js";
+import {injectable} from "tsyringe";
+import {Typeings} from "../../model/types/Typeings";
 import InteractionUtils = DiscordUtils.InteractionUtils;
+import TIME_UNIT = TimeUtils.TIME_UNIT;
+import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
 
-enum SAVABLE_SETTINGS {
-    AutoRoleAutoMute = "AutoRoleAutoMute",
-    AutoAutoJail = "AutoAutoJail",
-    AutoRoleMinAccountAge = "AutoRoleMinAccountAge",
-    massJoinProtection = "massJoinProtection",
-    autoRoleTimeout = "autoRoleTimeout"
-}
 
-const SETTINGS_SAVABLE = {...SETTINGS, ...SAVABLE_SETTINGS};
-type SETTINGS_SAVABLE = keyof typeof SETTINGS_SAVABLE;
+const settingArgument: Typeings.Command["description"] = {
+    text: "Change or set any global setting",
+    args: [
+        {
+            name: "setting",
+            optional: false,
+            type: "text",
+            description: "the name of the setting you wish to change"
+        },
+        {
+            name: "value",
+            optional: false,
+            type: "text",
+            description: "the value of the setting"
+        }
+    ]
+};
 
 @Discord()
+@SlashGroup("settings", "Get and Set settings for this bot", {
+    set: "Command to set settings",
+    get: "Commands to get settings"
+})
+@injectable()
 export class SettingsCommands extends AbstractCommandModule<any> {
 
-    constructor() {
+    constructor(private _settingsManager: SettingsManager, private _autoRole: AutoRole) {
         super({
             module: {
                 name: "Settings",
@@ -34,41 +49,33 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             },
             commands: [
                 {
-                    name: "setting",
+                    name: "globalSettings",
+                    type: "slash",
+                    description: settingArgument
+                },
+                {
+                    name: "autorole",
                     type: "slash",
                     description: {
-                        text: "Change or set any setting",
-                        args: [
-                            {
-                                name: "setting",
-                                optional: false,
-                                type: "text",
-                                description: "the name of the setting you wish to change"
-                            },
-                            {
-                                name: "value",
-                                optional: false,
-                                type: "text",
-                                description: "the value of the setting"
-                            }
-                        ]
+                        text: "Get and set all the Auto Role settings"
                     }
                 }
             ]
         });
     }
 
-    @Slash("setting", {
-        description: "Change or set any setting"
+    @Slash("globalsettings", {
+        description: "Change or set any global setting"
     })
+    @SlashGroup("set")
     @Guard(NotBotInteraction, secureCommandInteraction)
-    private async mute(
-        @SlashChoice(SETTINGS_SAVABLE)
+    private async globalSettings(
+        @SlashChoice(SETTINGS)
         @SlashOption("setting", {
             description: "the name of the setting you wish to change",
             required: true
         })
-            setting: SETTINGS_SAVABLE,
+            setting: SETTINGS,
         @SlashOption("value", {
             description: "the value of the setting",
             required: true
@@ -80,62 +87,114 @@ export class SettingsCommands extends AbstractCommandModule<any> {
         const guildId = interaction.guild.id;
         switch (setting) {
             case SETTINGS.JAIL_ROLE:
-            case SETTINGS.AUTO_ROLE:
             case SETTINGS.YOUNG_ACCOUNT_ROLE:
             case SETTINGS.MUTE_ROLE: {
                 const theRole = interaction.guild.roles.cache.get(value);
                 if (!theRole) {
                     return InteractionUtils.replyOrFollowUp(interaction, `Unable to find role with id ${value}`);
                 }
-                const settingsManager = container.resolve(SettingsManager);
-                await settingsManager.saveOrUpdateSetting(setting as SETTINGS, value, guildId);
-                break;
-            }
-            case SAVABLE_SETTINGS.massJoinProtection:
-            case SAVABLE_SETTINGS.autoRoleTimeout:
-            case SAVABLE_SETTINGS.AutoRoleMinAccountAge: {
-                const settingValue = parseInt(value);
-                if (isNaN(settingValue)) {
-                    return InteractionUtils.replyOrFollowUp(interaction, "Please supply a number");
-                }
-                const autoRole: ICloseableModule<AutoRoleSettings> = container.resolve(AutoRole);
-                const settingObj: AutoRoleSettings = {};
-                if (setting === SAVABLE_SETTINGS.massJoinProtection) {
-                    settingObj["massJoinProtection"] = settingValue;
-                } else if (setting === SAVABLE_SETTINGS.AutoRoleMinAccountAge) {
-                    settingObj["minAccountAge"] = settingValue;
-                } else {
-                    settingObj["autoRoleTimeout"] = settingValue;
-                }
-                try {
-                    await autoRole.saveSettings(guildId, settingObj, true);
-                } catch (e) {
-                    return InteractionUtils.replyOrFollowUp(interaction, e.message);
-                }
-                break;
-            }
-            case SAVABLE_SETTINGS.AutoAutoJail:
-            case SAVABLE_SETTINGS.AutoRoleAutoMute:
-            case SETTINGS.PANIC_MODE: {
-                const settingValue = value === "true";
-                const autoRole: ICloseableModule<AutoRoleSettings> = container.resolve(AutoRole);
-                const settingObj: AutoRoleSettings = {};
-                if (setting === SAVABLE_SETTINGS.AutoAutoJail) {
-                    settingObj["autoJail"] = settingValue;
-                } else if (setting === SAVABLE_SETTINGS.AutoRoleAutoMute) {
-                    settingObj["autoMute"] = settingValue;
-                } else if (setting === SETTINGS.PANIC_MODE) {
-                    settingObj["panicMode"] = settingValue;
-                }
-                try {
-                    await autoRole.saveSettings(guildId, settingObj, true);
-                } catch (e) {
-                    return InteractionUtils.replyOrFollowUp(interaction, e.message);
-                }
+                await this._settingsManager.saveOrUpdateSetting(setting as SETTINGS, value, guildId);
                 break;
             }
         }
         return InteractionUtils.replyOrFollowUp(interaction, `Setting "${setting}" has been saved with value ${value}`);
     }
+
+    @Slash("autorole", {
+        description: "Change or set any setting to do with Auto roles"
+    })
+    @SlashGroup("set")
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async autoMuteSettings(
+        @SlashChoice(AutoRoleSettingsEnum)
+        @SlashOption("setting", {
+            description: "the name of the setting you wish to change",
+            required: true
+        })
+            setting: AutoRoleSettingsEnum,
+        @SlashOption("value", {
+            description: "the value of the setting",
+            required: true
+        })
+            value: string,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        const guildId = interaction.guild.id;
+        const settingObj: AutoRoleSettings = {};
+        switch (setting) {
+            // numbers
+            case AutoRoleSettingsEnum.MASS_JOIN_PROTECTION:
+            case AutoRoleSettingsEnum.MIN_ACCOUNT_AGE: {
+                const settingValue = parseInt(value);
+                if (isNaN(settingValue)) {
+                    return InteractionUtils.replyOrFollowUp(interaction, "Please supply a number");
+                }
+                settingObj[setting] = settingValue;
+                break;
+            }
+            // booleans
+            case AutoRoleSettingsEnum.AUTO_JAIL:
+            case AutoRoleSettingsEnum.AUTO_MUTE:
+            case AutoRoleSettingsEnum.PANIC_MODE: {
+                settingObj[setting] = value === "true";
+                break;
+            }
+            // strings
+            case AutoRoleSettingsEnum.ROLE:
+                settingObj[setting] = value;
+                break;
+        }
+        try {
+            await this._autoRole.saveSettings(guildId, settingObj, true);
+        } catch (e) {
+            return InteractionUtils.replyOrFollowUp(interaction, e.message);
+        }
+    }
+
+
+    @Slash("autorole", {
+        description: "Get all the auto role settings"
+    })
+    @SlashGroup("get")
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async getGlobalSettings(interaction: CommandInteraction): Promise<void> {
+        const {guild} = interaction;
+        const guildId = guild.id;
+        const settings = await this._autoRole.getSettings(guildId);
+        const embed = new MessageEmbed()
+            .setColor('#0099ff')
+            .setDescription("Below are the auto role settings of this server")
+            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
+            .setTimestamp();
+        for (const setting in settings) {
+            if (!settings.hasOwnProperty(setting)) {
+                continue;
+            }
+            let value = settings[setting];
+            switch (setting as keyof AutoRoleSettings) {
+                case "minAccountAge": {
+                    value = ObjectUtil.timeToHuman(value, TIME_UNIT.days);
+                    break;
+                }
+                case "autoRoleTimeout": {
+                    value = ObjectUtil.timeToHuman(value);
+                    break;
+                }
+                case "role": {
+                    const role = guild.roles.cache.get(value);
+                    if (role) {
+                        value = `<@&${value}>`;
+                    }
+                    break;
+                }
+            }
+            embed.addField(setting, String(value));
+        }
+        interaction.reply({
+            embeds: [embed],
+            ephemeral: true
+        });
+    }
+
 
 }

@@ -185,8 +185,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
         const muteSingleton = container.resolve(MuteSingleton);
         await muteSingleton.muteUser(mentionedMember, reason, creatorID, timeout, timeUnit);
-        const seconds = TimeUtils.convertToMilli(timeout, timeUnit) / 1000;
-        replyMessage += ` for ${ObjectUtil.secondsToHuman(seconds)}`;
+        replyMessage += ` for ${ObjectUtil.timeToHuman(timeout, timeUnit)}`;
         return replyMessage;
     }
 
@@ -230,7 +229,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
                 const now = Date.now();
                 const dateCreated = (block.createdAt as Date).getTime();
                 const timeLeft = timeOutOrigValue - (now - dateCreated);
-                replyStr += `, for ${ObjectUtil.secondsToHuman(Math.round(timeOutOrigValue / 1000))} and has ${ObjectUtil.secondsToHuman(Math.round(timeLeft / 1000))} left`;
+                replyStr += `, for ${ObjectUtil.timeToHuman(timeOutOrigValue)} and has ${ObjectUtil.timeToHuman(timeLeft)} left`;
             }
             if (block.violationRules > 0) {
                 replyStr += `, This user has also attempted to post ${block.violationRules} times while blocked`;
