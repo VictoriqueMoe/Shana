@@ -9,6 +9,7 @@ import {singleton} from "tsyringe";
 import {GuildManager} from "../../../model/guild/manager/GuildManager";
 import {Sequelize} from "sequelize-typescript";
 import {Client} from "discordx";
+import {Transaction} from "sequelize/types/lib/transaction";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 @singleton()
@@ -93,8 +94,8 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         userObject = await user.guild.members.fetch(blockedUserId);
         try {
             savedModel = await this._dao.transaction(async t => {
-                const m = await super.commitToDatabase(model) as MuteModel;
-                await this.addRolePersist(userObject, muteRoleId);
+                const m = await super.commitToDatabase(model, {}, false, t) as MuteModel;
+                await this.addRolePersist(userObject, muteRoleId, t);
                 return m;
             }) as MuteModel;
         } catch {
@@ -113,8 +114,9 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         return savedModel;
     }
 
-    public async doRemove(userId: string, guildId: string, muteRoleId: string, skipPersistence: boolean = false): Promise<void> {
+    public async doRemove(userId: string, guildId: string, muteRoleId: string, skipPersistence: boolean = false, t?: Transaction): Promise<void> {
         const whereClaus = {
+            transaction: t,
             where: {
                 userId,
                 guildId
@@ -185,7 +187,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         try {
             const job = schedule.scheduleJob(userId, newDate, async () => {
                 await this._dao.transaction(async t => {
-                    await this.doRemove(userId, guild.id, muteRoleId);
+                    await this.doRemove(userId, guild.id, muteRoleId, false, t);
                 });
                 DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);
             });
@@ -194,7 +196,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
     }
 
-    private addRolePersist(user: GuildMember, muteRoleId: string): Promise<RolePersistenceModel> {
+    private addRolePersist(user: GuildMember, muteRoleId: string, t?: Transaction): Promise<RolePersistenceModel> {
         return super.commitToDatabase(new RolePersistenceModel({
             "userId": user.id,
             "roleId": muteRoleId,

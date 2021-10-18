@@ -42,11 +42,11 @@ export class BotController extends baseController {
         }
         const body: payload = req.body;
         const muteSingleton = container.resolve(MuteSingleton);
-        for (const userId of body) {
-            await this._dao.transaction(async t => {
-                await muteSingleton.doRemove(userId, guild.id, muteRole.id);
-            });
-        }
+        await this._dao.transaction(async t => {
+            for (const userId of body) {
+                await muteSingleton.doRemove(userId, guild.id, muteRole.id, false, t);
+            }
+        });
         return super.ok(res, {});
     }
 

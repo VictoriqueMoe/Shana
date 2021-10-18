@@ -23,6 +23,10 @@ export const secureCommandInteraction: GuardFunction<CommandInteraction | Simple
             } catch {
                 commandName = arg.commandName;
             }
+            const group = arg.options.getSubcommandGroup(false);
+            if (ObjectUtil.validString(group)) {
+                commandName = group + commandName;
+            }
             if (arg.member instanceof GuildMember) {
                 member = arg.member;
             }

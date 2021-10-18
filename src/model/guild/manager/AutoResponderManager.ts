@@ -11,10 +11,16 @@ export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
     }
 
     public async editAutoResponder(obj: AutoResponderModel, currentTitle: string): Promise<AutoResponderModel> {
-        return this._dao.transaction(async t => {
+        const transaction = await this._dao.transaction();
+        try {
             await this.deleteAutoResponse(obj.guildId, currentTitle);
-            return this.addAutoResponder(obj);
-        });
+            const ret = this.addAutoResponder(obj);
+            await transaction.commit();
+            return ret;
+        } catch (e) {
+            await transaction.rollback();
+            throw new Error(e.message);
+        }
     }
 
     public async addAutoResponder(obj: AutoResponderModel): Promise<AutoResponderModel> {

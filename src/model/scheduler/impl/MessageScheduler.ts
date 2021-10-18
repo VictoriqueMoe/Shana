@@ -43,11 +43,11 @@ export class MessageScheduler extends Scheduler implements IMessageScheduler {
         }) as IScheduledMessageJob;
     }
 
-    protected override registerJob(name: string, job: schedule.Job, {
+    protected override registerJob(name: string, job: schedule.Job, cron: string | Date, {
         channel,
         message
     }: { channel: BaseGuildTextChannel, message: string }): IScheduledMessageJob {
-        return new ScheduledMessageJob(name, job, channel, message);
+        return new ScheduledMessageJob(name, job, cron, channel, message);
     }
 
 }

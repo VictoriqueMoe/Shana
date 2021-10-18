@@ -39,7 +39,7 @@ export class Scheduler implements IScheduler {
 
         console.log(`Register schedule "${name}"`);
         const job = schedule.scheduleJob(name, whenToExecute, callBack);
-        const sJob = this.registerJob(name, job, additionalArgs);
+        const sJob = this.registerJob(name, job, whenToExecute, additionalArgs);
         this.jobs.push(sJob);
         return sJob;
     }
@@ -53,7 +53,7 @@ export class Scheduler implements IScheduler {
         if (j == null) {
             return false;
         }
-        console.log(`job ${name} has been cancelled`);
+        console.log(`job "${name}" has been cancelled`);
         const jobObj = j.job;
         const b = jobObj.cancel();
         ObjectUtil.removeObjectFromArray(j, this.jobs);
@@ -65,8 +65,8 @@ export class Scheduler implements IScheduler {
         this.jobs = [];
     }
 
-    protected registerJob(name: string, job: schedule.Job, additionalArgs?: Record<string, any>): IScheduledJob {
-        return new ScheduledJob(name, job);
+    protected registerJob(name: string, job: schedule.Job, cron: string | Date, additionalArgs?: Record<string, any>): IScheduledJob {
+        return new ScheduledJob(name, job, cron);
     }
 }
 

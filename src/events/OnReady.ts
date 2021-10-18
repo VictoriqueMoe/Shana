@@ -245,27 +245,29 @@ export class OnReady extends BaseDAO<any> {
         const commandSecurityManager = container.resolve(CommandSecurityManager);
         const allModules: CloseableModule<any>[] = commandSecurityManager.events;
         for (const module of allModules) {
-            await this._dao.transaction(async t => {
+            await this._dao.transaction(async transaction => {
                 for (const [guildId, guild] of this._client.guilds.cache) {
                     const moduleId = module.moduleId;
-                    const modelPercisted = await CloseOptionModel.findOne({
+                    const modelPersisted = await CloseOptionModel.findOne({
+                        transaction,
                         where: {
                             moduleId,
                             guildId
                         }
                     });
-                    if (modelPercisted) {
-                        if (modelPercisted.status) {
+                    if (modelPersisted) {
+                        if (modelPersisted.status) {
                             const moduleName = ObjectUtil.validString(module.constructor.name) ? module.constructor.name : "";
-                            console.log(`Module: ${modelPercisted.moduleId} (${moduleName})for guild "${guild.name}" (${guildId}) enabled`);
+                            console.log(`Module: ${modelPersisted.moduleId} (${moduleName})for guild "${guild.name}" (${guildId}) enabled`);
                         }
                     } else {
                         const m = new CloseOptionModel({
+                            transaction,
                             moduleId,
                             guildId
                         });
                         try {
-                            await super.commitToDatabase(m);
+                            await super.commitToDatabase(m, {}, false, transaction);
                         } catch (e) {
                             if (!(e instanceof UniqueViolationError)) {
                                 throw e;
@@ -285,13 +287,13 @@ export class OnReady extends BaseDAO<any> {
 
     private async populateGuilds(): Promise<void> {
         const guilds = this._client.guilds.cache;
-        return this._dao.transaction(async t => {
+        return this._dao.transaction(async transaction => {
             for (const [guildId] of guilds) {
                 const guild = new GuildableModel({
                     guildId
                 });
                 try {
-                    await super.commitToDatabase(guild, {}, true);
+                    await super.commitToDatabase(guild, {}, true, transaction);
                 } catch (e) {
                     if (!(e instanceof UniqueViolationError)) {
                         throw e;
@@ -306,19 +308,19 @@ export class OnReady extends BaseDAO<any> {
         const allCommands: AbstractCommandModule<any>[] = securityManager.commands;
 
         async function addNewCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
-            for (const guildModel of guildModels) {
-                const guildId = guildModel.guildId;
-                const commandSecurity = guildModel.commandSecurityModel;
-                await this._dao.transaction(async t => {
-                    const models: {
-                        commandName: string, guildId: string
-                    }[] = [];
-                    for (const commandCLazz of allCommands) {
-                        if (!ObjectUtil.isValidObject(commandCLazz.commandDescriptors)) {
-                            continue;
-                        }
-                        const {commands} = commandCLazz.commandDescriptors;
-                        for (const {name} of commands) {
+            await this._dao.transaction(async transaction => {
+                const models: {
+                    commandName: string, guildId: string
+                }[] = [];
+                for (const commandCLazz of allCommands) {
+                    if (!ObjectUtil.isValidObject(commandCLazz.commandDescriptors)) {
+                        continue;
+                    }
+                    const {commands} = commandCLazz.commandDescriptors;
+                    for (const {name} of commands) {
+                        for (const guildModel of guildModels) {
+                            const guildId = guildModel.guildId;
+                            const commandSecurity = guildModel.commandSecurityModel;
                             const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName === name);
                             if (!inArray) {
                                 models.push({
@@ -328,42 +330,47 @@ export class OnReady extends BaseDAO<any> {
                             }
                         }
                     }
-                    if (models.length > 0) {
-                        console.log(`adding commands: ${models.map(value => value.commandName)}`);
-                        return CommandSecurityModel.bulkCreate(models);
-                    }
-                });
-            }
+                }
+                if (models.length > 0) {
+                    console.log(`adding commands: ${models.map(value => value.commandName)}`);
+                    return CommandSecurityModel.bulkCreate(models, {
+                        transaction
+                    });
+                }
+            });
         }
 
         async function removeOldCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
-            for (const guildModel of guildModels) {
-                const {guildId} = guildModel;
-                const commandSecurity = guildModel.commandSecurityModel;
-                const commandsToDestory: string[] = [];
-                for (const {commandName} of commandSecurity) {
-                    let found = false;
-                    for (const commandClazz of allCommands) {
-                        const commandFromSystem = await commandClazz.getCommand(commandName);
-                        if (ObjectUtil.isValidObject(commandFromSystem)) {
-                            found = true;
-                            break;
+            await this._dao.transaction(async transaction => {
+                for (const guildModel of guildModels) {
+                    const {guildId} = guildModel;
+                    const commandSecurity = guildModel.commandSecurityModel;
+                    const commandsToDestory: string[] = [];
+                    for (const {commandName} of commandSecurity) {
+                        let found = false;
+                        for (const commandClazz of allCommands) {
+                            const commandFromSystem = await commandClazz.getCommand(commandName);
+                            if (ObjectUtil.isValidObject(commandFromSystem)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            console.log(`delete command ${commandName}`);
+                            commandsToDestory.push(commandName);
                         }
                     }
-                    if (!found) {
-                        console.log(`delete command ${commandName}`);
-                        commandsToDestory.push(commandName);
+                    if (ArrayUtils.isValidArray(commandsToDestory)) {
+                        await CommandSecurityModel.destroy({
+                            transaction,
+                            where: {
+                                "commandName": commandsToDestory,
+                                guildId
+                            }
+                        });
                     }
                 }
-                if (ArrayUtils.isValidArray(commandsToDestory)) {
-                    await CommandSecurityModel.destroy({
-                        where: {
-                            "commandName": commandsToDestory,
-                            guildId
-                        }
-                    });
-                }
-            }
+            });
         }
 
         const guilds = await GuildableModel.findAll({
@@ -381,7 +388,7 @@ export class OnReady extends BaseDAO<any> {
         const models: {
             guildId: string
         }[] = [];
-        await this._dao.transaction(async t => {
+        await this._dao.transaction(async transaction => {
             for (const guildModel of guildModels) {
                 const guildId = guildModel.guildId;
                 if (currentModels.some(m => m.guildId === guildId)) {
@@ -391,7 +398,9 @@ export class OnReady extends BaseDAO<any> {
                     guildId
                 });
             }
-            return PostableChannelModel.bulkCreate(models);
+            return PostableChannelModel.bulkCreate(models, {
+                transaction
+            });
         });
     }
 

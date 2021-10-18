@@ -4,8 +4,8 @@ import {GuildChannel} from "discord.js";
 import {IScheduledMessageJob} from "../IScheduledMessageJob";
 
 export class ScheduledMessageJob extends ScheduledJob implements IScheduledMessageJob {
-    constructor(_name: string, _job: schedule.Job, private _channel: GuildChannel, private _message: string) {
-        super(_name, _job);
+    constructor(_name: string, _job: schedule.Job, _cron: string | Date, private _channel: GuildChannel, private _message: string) {
+        super(_name, _job, _cron);
     }
 
     public get channel(): GuildChannel {
