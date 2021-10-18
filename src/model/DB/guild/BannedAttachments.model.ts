@@ -1,6 +1,6 @@
 import {BelongsTo, Column, ForeignKey, Model, Table} from "sequelize-typescript";
-import {IGuildAware} from "./IGuildAware";
-import {GuildableModel} from "./guild/Guildable.model";
+import {IGuildAware} from "../IGuildAware";
+import {GuildableModel} from "./Guildable.model";
 
 @Table
 export class BannedAttachmentsModel extends Model implements IGuildAware {

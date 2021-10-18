@@ -49,11 +49,11 @@ const emojiRegex = require('emoji-regex');
 const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
 
-export class cronException extends Error {
+export class CronException extends Error {
     constructor(e: string) {
         super(e);
 
-        Object.setPrototypeOf(this, cronException.prototype);
+        Object.setPrototypeOf(this, CronException.prototype);
     }
 }
 
@@ -311,13 +311,13 @@ export namespace TimeUtils {
     }
 }
 
-export namespace cronUtils {
+export namespace CronUtils {
     export function cronToString(cron: string): string {
         if (!isValidCron(cron, {
             seconds: true,
             allowBlankDay: true
         })) {
-            throw new cronException("cron is not valid");
+            throw new CronException("cron is not valid");
         }
         return cronstrue.toString(cron);
     }

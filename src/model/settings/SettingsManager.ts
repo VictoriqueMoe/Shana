@@ -1,5 +1,5 @@
 import {BaseDAO} from "../../DAO/BaseDAO";
-import {SettingsModel} from "../DB/Settings.model";
+import {SettingsModel} from "../DB/guild/Settings.model";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {ArrayUtils} from "../../utils/Utils";
 import {singleton} from "tsyringe";

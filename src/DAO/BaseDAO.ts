@@ -2,14 +2,18 @@ import {Model} from "sequelize-typescript";
 import {SaveOptions} from "sequelize/types/lib/model";
 import {UniqueConstraintError, ValidationError} from "sequelize";
 import {ObjectUtil} from "../utils/Utils";
+import {Transaction} from "sequelize/types/lib/transaction";
 
 export abstract class BaseDAO<T extends Model> {
 
-    protected async commitToDatabase(model: T, options?: SaveOptions, silentOnDupe: boolean = false): Promise<T> {
+    protected async commitToDatabase(model: T, options?: SaveOptions, silentOnDupe: boolean = false, t?: Transaction): Promise<T> {
         let errorStr = "";
         // hacky 'mc hack
         try {
             try {
+                if (t) {
+                    options["transaction"] = t;
+                }
                 return await model.save(options);
             } catch (e) {
                 if (e instanceof UniqueConstraintError) {

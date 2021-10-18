@@ -1,5 +1,5 @@
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {RoleJoinerModel} from "../../model/DB/RoleJoiner.model";
+import {RoleJoinerModel} from "../../model/DB/guild/RoleJoiner.model";
 import {Discord, SelectMenuComponent, Slash, SlashGroup} from "discordx";
 import {
     CommandInteraction,

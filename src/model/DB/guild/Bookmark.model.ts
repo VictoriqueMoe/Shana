@@ -1,8 +1,8 @@
 import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
-import {IGuildAware} from "./IGuildAware";
-import {GuildableModel} from "./guild/Guildable.model";
-import {ArrayUtils, ObjectUtil} from "../../utils/Utils";
-import {Identifiable} from "./Identifiable";
+import {IGuildAware} from "../IGuildAware";
+import {GuildableModel} from "./Guildable.model";
+import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
+import {Identifiable} from "../Identifiable";
 
 @Table
 export class BookmarkModel extends Model implements IGuildAware, Identifiable {

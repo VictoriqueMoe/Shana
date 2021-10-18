@@ -1,6 +1,6 @@
 import * as schedule from 'node-schedule';
 import {isValidCron} from 'cron-validator';
-import {cronException, ObjectUtil} from '../../../utils/Utils';
+import {CronException, ObjectUtil} from '../../../utils/Utils';
 import {IScheduledJob} from "./ScheduledJob/IScheduledJob";
 import {ScheduledJob} from "./ScheduledJob/impl/ScheduledJob";
 import {singleton} from "tsyringe";
@@ -24,8 +24,9 @@ export class Scheduler implements IScheduler {
      * @param name
      * @param whenToExecute
      * @param callBack
+     * @param additionalArgs
      */
-    public register(name: string, whenToExecute: string | Date, callBack: () => void): IScheduledJob {
+    public register(name: string, whenToExecute: string | Date, callBack: () => void, additionalArgs?: Record<string, any>): IScheduledJob {
         if (this.getJob(name)) {
             this.cancelJob(name);
         }
@@ -33,12 +34,12 @@ export class Scheduler implements IScheduler {
             seconds: true,
             allowBlankDay: true
         })) {
-            throw new cronException("cron is not valid");
+            throw new CronException("cron is not valid");
         }
 
-        console.log(`Register function ${name}`);
+        console.log(`Register schedule "${name}"`);
         const job = schedule.scheduleJob(name, whenToExecute, callBack);
-        const sJob = this.registerJob(name, job);
+        const sJob = this.registerJob(name, job, additionalArgs);
         this.jobs.push(sJob);
         return sJob;
     }
@@ -64,7 +65,7 @@ export class Scheduler implements IScheduler {
         this.jobs = [];
     }
 
-    protected registerJob(name: string, job: schedule.Job): IScheduledJob {
+    protected registerJob(name: string, job: schedule.Job, additionalArgs?: Record<string, any>): IScheduledJob {
         return new ScheduledJob(name, job);
     }
 }

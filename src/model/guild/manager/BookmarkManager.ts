@@ -1,5 +1,5 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
-import {BookmarkModel} from "../../DB/Bookmark.model";
+import {BookmarkModel} from "../../DB/guild/Bookmark.model";
 import {singleton} from "tsyringe";
 import {BaseGuildTextChannel, GuildMember, Message} from "discord.js";
 import {ArrayUtils} from "../../../utils/Utils";

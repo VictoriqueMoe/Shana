@@ -1,7 +1,7 @@
 import {ArgsOf, Client} from "discordx";
 import fetch from "node-fetch";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
-import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
+import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
 import {Main} from "../../Main";
 import {DMChannel, GuildMember, Message, Role, User} from "discord.js";
 import {Op} from "sequelize";

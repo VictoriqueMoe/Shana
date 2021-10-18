@@ -1,6 +1,6 @@
 import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {BannedAttachmentsModel} from "../../model/DB/BannedAttachments.model";
+import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
 import {Collection, Message, Snowflake} from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {NotBotInteraction} from "../../guards/NotABot";

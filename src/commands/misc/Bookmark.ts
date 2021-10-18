@@ -1,6 +1,6 @@
 import {ArgsOf, Client, ContextMenu, Discord, Guard, On, Slash, SlashGroup, SlashOption} from "discordx";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {BookmarkModel} from "../../model/DB/Bookmark.model";
+import {BookmarkModel} from "../../model/DB/guild/Bookmark.model";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";

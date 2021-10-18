@@ -4,13 +4,14 @@ import {MuteModel} from "../autoMod/impl/Mute.model";
 import {RolePersistenceModel} from "../autoMod/impl/RolePersistence.model";
 import {UsernameModel} from "../autoMod/impl/Username.model";
 import {CloseOptionModel} from "../autoMod/impl/CloseOption.model";
-import {BannedAttachmentsModel} from "../BannedAttachments.model";
-import {SettingsModel} from "../Settings.model";
+import {BannedAttachmentsModel} from "./BannedAttachments.model";
+import {SettingsModel} from "./Settings.model";
 import {PostableChannelModel} from "./PostableChannel.model";
 import {CommandSecurityModel} from "./CommandSecurity.model";
 import {AutoResponderModel} from "../autoMod/impl/AutoResponder.model";
-import {RoleJoinerModel} from "../RoleJoiner.model";
-import {BookmarkModel} from "../Bookmark.model";
+import {RoleJoinerModel} from "./RoleJoiner.model";
+import {BookmarkModel} from "./Bookmark.model";
+import {MessageScheduleModel} from "./MessageSchedule.model";
 
 @Table
 export class GuildableModel extends Model implements IGuildAware {
@@ -50,4 +51,7 @@ export class GuildableModel extends Model implements IGuildAware {
 
     @HasMany(() => BookmarkModel)
     public bookmarkModel: BookmarkModel[];
+
+    @HasMany(() => MessageScheduleModel)
+    public messageScheduleModel: MessageScheduleModel[];
 }

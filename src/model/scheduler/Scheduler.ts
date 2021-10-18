@@ -12,8 +12,9 @@ export interface IScheduler {
      * @param name
      * @param whenToExecute
      * @param callBack
+     * @param additionalArgs
      */
-    register(name: string, whenToExecute: string | Date, callBack: () => void): IScheduledJob;
+    register(name: string, whenToExecute: string | Date, callBack: () => void, additionalArgs: Record<string, any>): IScheduledJob;
 
     /**
      * Get all the jobs currently registered
