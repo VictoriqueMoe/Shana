@@ -196,12 +196,12 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
     }
 
-    private addRolePersist(user: GuildMember, muteRoleId: string, t?: Transaction): Promise<RolePersistenceModel> {
+    private addRolePersist(user: GuildMember, muteRoleId: string, transaction?: Transaction): Promise<RolePersistenceModel> {
         return super.commitToDatabase(new RolePersistenceModel({
             "userId": user.id,
             "roleId": muteRoleId,
             guildId: user.guild.id
-        })) as Promise<RolePersistenceModel>;
+        }), {}, false, transaction) as Promise<RolePersistenceModel>;
     }
 
 }
