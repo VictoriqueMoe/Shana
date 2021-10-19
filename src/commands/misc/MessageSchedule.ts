@@ -29,7 +29,7 @@ export class MessageSchedule extends AbstractCommandModule<MessageScheduleModel>
                             {
                                 name: "name",
                                 type: "text",
-                                description: "The Unique ID of this schedule schedule",
+                                description: "The Unique ID of this scheduled job",
                                 optional: false
                             },
                             {
@@ -72,7 +72,7 @@ export class MessageSchedule extends AbstractCommandModule<MessageScheduleModel>
                     name: "getScheduledMessage",
                     type: "slash",
                     description: {
-                        text: "get all scheduled post by name and or channel",
+                        text: "get all scheduled posts optionally by channel",
                         args: [
                             {
                                 name: "channel",
@@ -88,7 +88,7 @@ export class MessageSchedule extends AbstractCommandModule<MessageScheduleModel>
     }
 
     @Slash("getscheduledmessage", {
-        description: "get a scheduled post by name"
+        description: "get all scheduled posts optionally by channel"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async getScheduledMessage(

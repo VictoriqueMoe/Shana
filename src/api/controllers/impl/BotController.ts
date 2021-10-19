@@ -7,7 +7,7 @@ import {StatusCodes} from "http-status-codes";
 import {SETTINGS} from "../../../enums/SETTINGS";
 import {SettingsManager} from "../../../model/settings/SettingsManager";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
-import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
+import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {ModuleController} from "./modules/impl/ModuleController";
 import {CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager";
 import {Typeings} from "../../../model/types/Typeings";
@@ -41,7 +41,7 @@ export class BotController extends baseController {
             return;
         }
         const body: payload = req.body;
-        const muteSingleton = container.resolve(MuteSingleton);
+        const muteSingleton = container.resolve(MuteManager);
         await this._dao.transaction(async t => {
             for (const userId of body) {
                 await muteSingleton.doRemove(userId, guild.id, muteRole.id, false, t);

@@ -1,19 +1,19 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
-import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
+import {MuteModel} from "../../DB/autoMod/impl/Mute.model";
+import {RolePersistenceModel} from "../../DB/autoMod/impl/RolePersistence.model";
 import {Guild, GuildMember} from "discord.js";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import * as schedule from "node-schedule";
 import {Job} from "node-schedule";
 import {singleton} from "tsyringe";
-import {GuildManager} from "../../../model/guild/manager/GuildManager";
+import {GuildManager} from "./GuildManager";
 import {Sequelize} from "sequelize-typescript";
 import {Client} from "discordx";
 import {Transaction} from "sequelize/types/lib/transaction";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 @singleton()
-export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
+export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
     private readonly _mutes: Set<Job>;
 
     public constructor(private _guildManager: GuildManager, private _dao: Sequelize, private _client: Client) {
@@ -135,7 +135,7 @@ export class MuteSingleton extends BaseDAO<MuteModel | RolePersistenceModel> {
             const persistenceModelRowCount = await RolePersistenceModel.destroy(whereClaus);
             if (persistenceModelRowCount != 1) {
                 //the application has SHIT itself, if one table has an entry but the other not, fuck knows what to do here...
-                throw new Error("Unknown error occurred, error is a syncronisation issue between the Persistence model and the Mute Model ");
+                throw new Error("Unknown error occurred, error is a synchronisation issue between the Persistence model and the Mute Model ");
             }
         }
         let job: Job = null;

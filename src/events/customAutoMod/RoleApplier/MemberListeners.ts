@@ -4,7 +4,7 @@ import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoA
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
-import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
+import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {container, injectable} from "tsyringe";
 import {RoleApplier} from "./RoleApplier";
 
@@ -12,7 +12,7 @@ import {RoleApplier} from "./RoleApplier";
 @injectable()
 export class MemberListeners extends BaseDAO<RolePersistenceModel> {
 
-    public constructor(private _roleApplier: RoleApplier) {
+    public constructor(private _roleApplier: RoleApplier, private _muteManager: MuteManager) {
         super();
     }
 
@@ -34,8 +34,7 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
         // mute was removed, so clear the timeout and mute Model if one exists
         if (didRemove) {
             try {
-                const muteSingleton = container.resolve(MuteSingleton);
-                await muteSingleton.doRemove(newUser.id, newUser.guild.id, mutedRole.id, true);
+                await this._muteManager.doRemove(newUser.id, newUser.guild.id, mutedRole.id, true);
             } catch {
             }
         }

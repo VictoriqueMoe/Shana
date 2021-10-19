@@ -6,7 +6,7 @@ import {ArrayUtils, GuildUtils, loadClasses, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
-import {MuteSingleton} from "../commands/customAutoMod/userBlock/MuteSingleton";
+import {MuteManager} from "../model/guild/manager/MuteManager";
 import {BotServer} from "../api/BotServer";
 import {GuildableModel} from "../model/DB/guild/Guildable.model";
 import {CommandSecurityModel} from "../model/DB/guild/CommandSecurity.model";
@@ -44,7 +44,7 @@ export class OnReady extends BaseDAO<any> {
             }
         });
         const now = Date.now();
-        const muteSingleton = container.resolve(MuteSingleton);
+        const muteSingleton = container.resolve(MuteManager);
         for (const mute of mutesWithTimers) {
             const mutedRole = await GuildUtils.RoleUtils.getMuteRole(mute.guildId);
             if (!mutedRole) {

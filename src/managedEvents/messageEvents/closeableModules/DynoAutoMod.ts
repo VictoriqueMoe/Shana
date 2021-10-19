@@ -7,7 +7,7 @@ import {ACTION} from "../../../enums/ACTION";
 import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
-import {MuteSingleton} from "../../../commands/customAutoMod/userBlock/MuteSingleton";
+import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {Main} from "../../../Main";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import * as Immutable from "immutable";
@@ -65,7 +65,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         violatedFilters.sort((a, b) => a.priority - b.priority);
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(message.guild.id);
         const guildid = member.guild.id;
-        const muteSingleton = container.resolve(MuteSingleton);
+        const muteSingleton = container.resolve(MuteManager);
         outer:
             for (const filter of violatedFilters) {
                 const actionsToTake = filter.actions;
@@ -149,7 +149,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         if (!user) {
             return;
         }
-        const muteSingleton = container.resolve(MuteSingleton);
+        const muteSingleton = container.resolve(MuteManager);
         const model = await muteSingleton.muteUser(user, reason, creatorID, seconds);
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
