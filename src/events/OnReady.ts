@@ -2,7 +2,7 @@ import {Main} from "../Main";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {Op} from "sequelize";
-import {ArrayUtils, GuildUtils, loadClasses, ObjectUtil} from "../utils/Utils";
+import {ArrayUtils, EnumEx, GuildUtils, loadClasses, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
@@ -22,6 +22,9 @@ import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityMana
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {AbstractCommandModule} from "../commands/AbstractCommandModule";
 import {Sequelize} from "sequelize-typescript";
+import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS";
+import {Player} from "discord-music-player";
+import {registerInstance} from "../DI/moduleRegistrar";
 
 const io = require('@pm2/io');
 
@@ -64,7 +67,7 @@ export class OnReady extends BaseDAO<any> {
                 });
             } else {
                 console.log(`Re-creating timed mute for ${mute.username}, time remaining is: ${ObjectUtil.timeToHuman(timeLeft)}`);
-                muteSingleton.createTimeout(mute.userId, mute.username, timeLeft, guild, mutedRole.id);
+                muteSingleton.createTimeout(mute.userId, mute.username, timeLeft, guild);
             }
         }
     }
@@ -167,10 +170,13 @@ export class OnReady extends BaseDAO<any> {
         });
     }
 
+    /**
+     * Commands that are run on application start AND on join new guild
+     */
     public init(): Promise<any>[] {
         const pArr: Promise<any>[] = [];
         pArr.push(this.populateClosableEvents());
-        pArr.push(Main.setDefaultSettings());
+        pArr.push(this.setDefaultSettings());
         pArr.push(this.populateCommandSecurity());
         pArr.push(this.populatePostableChannels());
         pArr.push(this.cleanUpGuilds());
@@ -197,7 +203,7 @@ export class OnReady extends BaseDAO<any> {
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
         // await OnReady.cleanCommands(true);
-        Main.initMusicPlayer();
+        this.initMusicPlayer();
         pArr.push(vicDropbox.index());
         pArr.push(this.initiateMuteTimers());
         pArr.push(this.initUsernames());
@@ -212,6 +218,31 @@ export class OnReady extends BaseDAO<any> {
                 process.send('ready');
             }
         });
+    }
+
+    public initMusicPlayer(): void {
+        const player = new Player(this._client, {
+            leaveOnEmpty: true,
+            quality: "high"
+        });
+        registerInstance(player);
+    }
+
+    public async setDefaultSettings(): Promise<void> {
+        const guilds = this._client.guilds;
+        const cache = guilds.cache;
+        const nameValue = EnumEx.getNamesAndValues(DEFAULT_SETTINGS) as any;
+        const settingsManager = container.resolve(SettingsManager);
+        for (const [guildId] of cache) {
+            for (const keyValuesObj of nameValue) {
+                const setting: SETTINGS = keyValuesObj.name;
+                let value = keyValuesObj.value;
+                if (!ObjectUtil.validString(value)) {
+                    value = null;
+                }
+                await settingsManager.saveOrUpdateSetting(setting, value, guildId, true);
+            }
+        }
     }
 
     private async initAppCommands(): Promise<void> {

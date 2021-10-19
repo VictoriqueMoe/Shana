@@ -34,7 +34,7 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
         // mute was removed, so clear the timeout and mute Model if one exists
         if (didRemove) {
             try {
-                await this._muteManager.doRemove(newUser.id, newUser.guild.id, mutedRole.id, true);
+                await this._muteManager.unMute(newUser.id, newUser.guild.id, true);
             } catch {
             }
         }

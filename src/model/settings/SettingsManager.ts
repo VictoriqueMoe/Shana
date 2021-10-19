@@ -1,8 +1,9 @@
 import {BaseDAO} from "../../DAO/BaseDAO";
 import {SettingsModel} from "../DB/guild/Settings.model";
 import {SETTINGS} from "../../enums/SETTINGS";
-import {ArrayUtils} from "../../utils/Utils";
-import {singleton} from "tsyringe";
+import {ArrayUtils, ObjectUtil} from "../../utils/Utils";
+import {container, singleton} from "tsyringe";
+import {Message} from "discord.js";
 
 export type ALL_SETTINGS_TYPE = {
     [key in keyof typeof SETTINGS]?: string
@@ -23,6 +24,16 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
 
     public refresh(): void {
         this._cache.clear();
+    }
+
+    public async getPrefix(message: Message): Promise<string> {
+        const guildId = message?.guild?.id;
+        if (!ObjectUtil.validString(guildId)) {
+            return "~";
+        }
+        // closure crap
+        const that = container.resolve(SettingsManager);
+        return that.getSetting(SETTINGS.PREFIX, guildId);
     }
 
     /**

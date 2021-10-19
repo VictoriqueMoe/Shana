@@ -71,7 +71,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
                     throw new Error("Message Schedule already exists in this server with this name");
                 }
             }
-            return this._messageScheduler.register(name, cron, null, channel, message);
+            return this._messageScheduler.register(name, cron, null, null, channel, message);
         });
     }
 
@@ -85,7 +85,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
                 }
             });
             for (const model of allMessageSchedules) {
-                this._messageScheduler.register(model.name, model.cron, null, model.channel, model.message);
+                this._messageScheduler.register(model.name, model.cron, null, null, model.channel, model.message);
             }
         }
     }

@@ -21,9 +21,12 @@ export class MessageScheduler extends Scheduler implements IMessageScheduler {
     }
 
 
-    public override register(name: string, cron: string, proxy?: () => void, channel?: BaseGuildTextChannel, message?: string): IScheduledMessageJob {
+    public override register(name: string, cron: string, proxy?: () => void, guildId?: string, channel?: BaseGuildTextChannel, message?: string): IScheduledMessageJob {
         if (!ObjectUtil.isValidObject(channel)) {
             throw new Error("Message Scheduler requires a channel to send on");
+        }
+        if (!ObjectUtil.validString(guildId)) {
+            guildId = channel.guildId;
         }
         if (typeof proxy !== "function") {
             proxy = (): void => {
@@ -37,13 +40,13 @@ export class MessageScheduler extends Scheduler implements IMessageScheduler {
         if (!ObjectUtil.validString(message)) {
             throw new Error("Message Scheduler requires a message to send");
         }
-        return super.register(name, cron, proxy, {
+        return super.register(name, cron, proxy, guildId, {
             channel,
             message
         }) as IScheduledMessageJob;
     }
 
-    protected override registerJob(name: string, job: schedule.Job, cron: string | Date, {
+    protected override registerJob(name: string, job: schedule.Job, cron: string | Date, guildId: string, {
         channel,
         message
     }: { channel: BaseGuildTextChannel, message: string }): IScheduledMessageJob {

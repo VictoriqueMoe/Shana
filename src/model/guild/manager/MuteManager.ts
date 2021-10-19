@@ -109,12 +109,17 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
         await userObject.roles.add(muteRoleId);
         if (hasTimeout) {
-            this.createTimeout(blockUserObject.id, blockUserObject.username, millis, user.guild, muteRoleId);
+            this.createTimeout(blockUserObject.id, blockUserObject.username, millis, user.guild);
         }
         return savedModel;
     }
 
-    public async doRemove(userId: string, guildId: string, muteRoleId: string, skipPersistence: boolean = false, t?: Transaction): Promise<void> {
+    public async unMute(userId: string, guildId: string, skipPersistence: boolean = false, t?: Transaction): Promise<void> {
+        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(userId);
+        if (!mutedRole) {
+            return;
+        }
+        const muteRoleId = mutedRole.id;
         const whereClaus = {
             transaction: t,
             where: {
@@ -157,7 +162,6 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         } catch {
             return;
         }
-
         await member.roles.remove(muteRoleId);
 
         for (const roleId of prevRoles) {
@@ -175,7 +179,7 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
     }
 
-    public createTimeout(userId: string, username: string, millis: number, guild: Guild, muteRoleId: string): void {
+    public createTimeout(userId: string, username: string, millis: number, guild: Guild): void {
         const now = Date.now();
         const future = now + millis;
         const newDate = new Date(future);
@@ -187,7 +191,7 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         try {
             const job = schedule.scheduleJob(userId, newDate, async () => {
                 await this._dao.transaction(async t => {
-                    await this.doRemove(userId, guild.id, muteRoleId, false, t);
+                    await this.unMute(userId, guild.id, false, t);
                 });
                 DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);
             });

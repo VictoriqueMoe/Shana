@@ -9,8 +9,9 @@ export interface IMessageScheduler extends IScheduler {
      * @param name - name of this Schedule
      * @param cron - the cron used to define when this should be posted
      * @param proxy - the method called when the cron is triggered, leave null to default this to simply post on a channel
+     * @param guildId - will be derived from the channel id unless stated otherwise
      * @param channel - the channel to post to
      * @param message - the message to post
      */
-    register(name: string, cron: string, proxy?: () => void, channel?: BaseGuildTextChannel, message?: string): IScheduledMessageJob;
+    register(name: string, cron: string, proxy?: () => void, guildId?: string, channel?: BaseGuildTextChannel, message?: string): IScheduledMessageJob;
 }

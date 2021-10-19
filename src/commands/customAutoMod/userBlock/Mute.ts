@@ -7,15 +7,16 @@ import {CommandInteraction, ContextMenuInteraction, GuildMember, User} from "dis
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {AbstractCommandModule} from "../../AbstractCommandModule";
-import {container} from "tsyringe";
+import {injectable} from "tsyringe";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @SlashGroup("mute", "Commands to mute people from servers")
-export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
+@injectable()
+export class Mute extends AbstractCommandModule<RolePersistenceModel> {
 
-    public constructor() {
+    public constructor(private _muteManager: MuteManager) {
         super({
             module: {
                 name: "Mute",
@@ -101,7 +102,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         }
         let replyMessage: string;
         try {
-            replyMessage = await Mute.muteUser(member, creator, guildId, "N/A", 30, TIME_UNIT.minutes);
+            replyMessage = await this.muteUser(member, creator, guildId, "N/A", 30, TIME_UNIT.minutes);
             return InteractionUtils.replyOrFollowUp(interaction, replyMessage);
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, (<Error>e).message);
@@ -152,14 +153,14 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         }
         let replyMessage: string;
         try {
-            replyMessage = await Mute.muteUser(mentionedMember, creator, guildId, reason, timeout, timeUnit);
+            replyMessage = await this.muteUser(mentionedMember, creator, guildId, reason, timeout, timeUnit);
             return InteractionUtils.replyOrFollowUp(interaction, replyMessage);
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, (<Error>e).message);
         }
     }
 
-    private static async muteUser(mentionedMember: GuildMember, creator: GuildMember, guildId: string, reason: string, timeout: number, timeUnit: TIME_UNIT): Promise<string> {
+    private async muteUser(mentionedMember: GuildMember, creator: GuildMember, guildId: string, reason: string, timeout: number, timeUnit: TIME_UNIT): Promise<string> {
         const creatorID = creator.id;
         const blockedUserId = mentionedMember.id;
         const didYouBlockABot = mentionedMember.user.bot;
@@ -183,8 +184,7 @@ export abstract class Mute extends AbstractCommandModule<RolePersistenceModel> {
         }
 
         let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
-        const muteSingleton = container.resolve(MuteManager);
-        await muteSingleton.muteUser(mentionedMember, reason, creatorID, timeout, timeUnit);
+        await this._muteManager.muteUser(mentionedMember, reason, creatorID, timeout, timeUnit);
         replyMessage += ` for ${ObjectUtil.timeToHuman(timeout, timeUnit)}`;
         return replyMessage;
     }

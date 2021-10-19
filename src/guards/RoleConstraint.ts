@@ -1,9 +1,9 @@
 import {DiscordUtils, ObjectUtil} from "../utils/Utils";
 import {GuardFunction, SimpleCommandMessage} from "discordx";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
-import {getPrefix} from "../Main";
 import {CommandInteraction, ContextMenuInteraction, GuildMember} from "discord.js";
 import {container} from "tsyringe";
+import {SettingsManager} from "../model/settings/SettingsManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 export const secureCommandInteraction: GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> = async (arg, client, next) => {
@@ -12,7 +12,8 @@ export const secureCommandInteraction: GuardFunction<CommandInteraction | Simple
     let guildId = "";
     if (arg instanceof SimpleCommandMessage) {
         const message = arg.message;
-        const prefix = await getPrefix(message);
+        const settingsManager = container.resolve(SettingsManager);
+        const prefix = await settingsManager.getPrefix(message);
         commandName = message.content.split(prefix)[1].split(" ")[0];
         member = message.member;
         guildId = message.guildId;
@@ -47,7 +48,7 @@ export const secureCommandInteraction: GuardFunction<CommandInteraction | Simple
     }
     if (arg instanceof SimpleCommandMessage) {
         const message = arg.message;
-        message.reply("you do not have permissions to use this command");
+        return message.reply("you do not have permissions to use this command");
     } else {
         if (arg.isContextMenu()) {
             const targetType = arg.targetType;
