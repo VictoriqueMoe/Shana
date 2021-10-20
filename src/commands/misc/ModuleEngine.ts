@@ -3,39 +3,50 @@ import {DiscordUtils} from "../../utils/Utils";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction} from "discord.js";
-import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-@Category("closeableModules", "Commands to enable or disable features")
-@Category("closeableModules", [
-    {
-        "name": "enableModule",
-        "type": "SLASH",
-        "options": [
-            {
-                "name": "moduleId",
-                "description": "the name of the module to close or open, Please run 'getModuleNames' to get a list of module names for this argument",
-                "optional": false,
-                "type": "STRING"
-            },
-            {
-                "name": "enable/Disable",
-                "description": "true = enable, false = disable",
-                "optional": false,
-                "type": "BOOLEAN"
-            }
-        ],
-        "description": "Enable a module to run. These modules are designed to be shut down and started dynamically"
-    },
-    {
-        "name": "getModuleNames",
-        "type": "SLASH",
-        "options": [],
-        "description": "Return a list of all modules to use with the 'enableModule' command"
-    }
-])
 export abstract class ModuleEngine extends AbstractCommandModule {
+
+    constructor() {
+        super(/*{
+            module: {
+                name: "closeableModules",
+                description: "Commands to enable or disable features"
+            },
+            commands: [
+                {
+                    name: "enableModule",
+                    type: "slash",
+                    description: {
+                        text: "Enable a module to run. These modules are designed to be shut down and started dynamically",
+                        examples: ["enableModule AdminLog true = enable module AdminLog", "enableModule AdminLog false = disable module AdminLog"],
+                        args: [
+                            {
+                                name: "moduleId",
+                                type: "text",
+                                optional: false,
+                                description: "the name of the module to close or open, Please run 'getModuleNames' to get a list of module names for this argument"
+                            },
+                            {
+                                name: "enable/Disable",
+                                type: "boolean",
+                                optional: false,
+                                description: "true = enable, false = disable"
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: "getModuleNames",
+                    type: "slash",
+                    description: {
+                        text: "Return a list of all modules to use with the 'enableModule' command"
+                    }
+                }
+            ]
+        }*/);
+    }
 
     @Slash("enablemodule", {
         description: "Enable a module to run. These modules are designed to be shut down and started dynamically"

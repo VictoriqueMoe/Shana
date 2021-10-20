@@ -11,21 +11,29 @@ import {
     SelectMenuInteraction
 } from "discord.js";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
-import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-@Category("RoleJoiner", "Commands to allow users to join vanity roles")
-@Category("RoleJoiner", [
-    {
-        "name": "displayJoinUi",
-        "type": "SLASH",
-        "options": [],
-        "description": "Initialise the role join dropdown and buttons"
-    }
-])
 @SlashGroup("rolejoiner", "Commands to allow users to join vanity roles")
 export class RoleJoiner extends AbstractCommandModule {
+
+    public constructor() {
+        super(/*{
+            module: {
+                name: "RoleJoiner",
+                description: "Commands to allow users to join vanity roles"
+            },
+            commands: [
+                {
+                    name: "displayJoinUi",
+                    description: {
+                        text: "Initialise the role join dropdown and buttons"
+                    },
+                    type: "slash",
+                }
+            ]
+        }*/);
+    }
 
     @Slash("displayjoinui", {
         description: "Initialise the role join dropdown and buttons"

@@ -11,12 +11,11 @@ const getUrls = require('get-urls');
 const md5 = require('md5');
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
-@Discord()
 @Category("ResourceBanner", "Commands deal with banning attachments, embeds and emojis from messages")
-@Category("ResourceBanner", [
+@Category("Admin Commands", [
     {
         name: "banAttachment",
-        description: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \n banning an attachment means that if it is posted again, it is automatically deleted and logged",
+        description: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \\n banning an attachment means that if it is posted again, it is automatically deleted and logged",
         type: "SIMPLECOMMAND",
         options: [],
         examples: ["banAttachment = while replying to a message you wish to ban"]
@@ -28,6 +27,7 @@ import EmojiInfo = DiscordUtils.EmojiInfo;
         options: []
     }
 ])
+@Discord()
 export abstract class ResourceBanner extends AbstractCommandModule {
 
     public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false): Promise<BannedAttachmentsModel> {
