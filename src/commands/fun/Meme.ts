@@ -14,11 +14,11 @@ import {injectable} from "tsyringe";
 
 @Discord()
 @injectable()
-export class Meme extends AbstractCommandModule<any> {
+export class Meme extends AbstractCommandModule {
 
     public constructor(private _handler: ImageFun) {
         super(
-            {
+            /*{
                 module: {
                     name: "Memes",
                     description: "Commands generate memes. All commands that are marked as type 'attachment' can take both an uploaded image (has to be jpg) OR a mention"
@@ -883,7 +883,7 @@ export class Meme extends AbstractCommandModule<any> {
                         }
                     }
                 ]
-            }
+            }*/
         );
     }
 

@@ -1,7 +1,6 @@
 import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
 import {injectable} from "tsyringe";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {MessageScheduleModel} from "../../model/DB/guild/MessageSchedule.model";
 import {MessageScheduleManager} from "../../model/guild/manager/MessageScheduleManager";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
@@ -12,9 +11,9 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Discord()
 @SlashGroup("messageschedule", "Commands to schedule posts to channels")
 @injectable()
-export class MessageSchedule extends AbstractCommandModule<MessageScheduleModel> {
+export class MessageSchedule extends AbstractCommandModule {
     public constructor(private _messageScheduleManager: MessageScheduleManager, private _client: Client) {
-        super({
+        super(/*{
             module: {
                 name: "messageschedule",
                 description: "Commands to schedule posts to channels"
@@ -84,7 +83,7 @@ export class MessageSchedule extends AbstractCommandModule<MessageScheduleModel>
                     }
                 }
             ]
-        });
+        }*/);
     }
 
     @Slash("getscheduledmessage", {

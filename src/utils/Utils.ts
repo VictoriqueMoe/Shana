@@ -41,8 +41,9 @@ import {Typeings} from "../model/types/Typeings";
 import {FindOptions} from "sequelize/types/lib/model";
 import {container} from "tsyringe";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
-import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {Client} from "discordx";
+import {Beans} from "../DI/Beans";
+import {TriggerConstraint} from "../model/closeableModules/impl/TriggerConstraint";
 
 const emojiRegex = require('emoji-regex');
 
@@ -867,8 +868,7 @@ export namespace DiscordUtils {
     }
 
     export function getCloseableModules(): CloseableModule<any>[] {
-        const commandSecurityManager = container.resolve(CommandSecurityManager);
-        return commandSecurityManager.events;
+        return container.resolveAll<TriggerConstraint<any>>(Beans.CloseableModuleProxyDescriptor.token);
     }
 
     export function getModule(moduleId: string): ICloseableModule<any> {

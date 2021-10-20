@@ -5,60 +5,47 @@ import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Channel, CommandInteraction, GuildMember, User} from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {injectable} from "tsyringe";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@Category("Ages", "commands to get ages of accounts and servers")
+@Category("Admin Commands", [
+    {
+        name: "userAge",
+        description: "Get the age on an account",
+        type: "SLASH",
+        options: [{
+            name: "user",
+            type: "USER",
+            optional: false,
+            description: "The user you want to check the account age of"
+        }]
+    },
+    {
+        name: "serverAge",
+        description: "Get the age of this server",
+        type: "SLASH",
+        options: []
+    },
+    {
+        name: "channelAge",
+        description: "View the age of a channel",
+        type: "SLASH",
+        options: [{
+            name: "Channel",
+            type: "CHANNEL",
+            optional: false,
+            description: "The reference to the channel"
+        }]
+    }
+])
 @SlashGroup("ages", "commands to get ages of accounts and servers")
 @injectable()
 export class AccountAge extends AbstractCommandModule {
 
     public constructor(private _client: Client) {
         super();
-        /*        super({
-                    module: {
-                        name: "Ages",
-                        description: "commands to get ages of accounts and servers"
-                    },
-                    commands: [
-                        {
-                            name: "age",
-                            type: "slash",
-                            description: {
-                                text: "Get the age on an account",
-                                args: [
-                                    {
-                                        name: "user",
-                                        type: "mention",
-                                        optional: false,
-                                        description: "The user you want to check the account age of"
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            name: "serverAge",
-                            type: "slash",
-                            description: {
-                                text: "Get the age of this server"
-                            }
-                        },
-                        {
-                            name: "channelAge",
-                            type: "slash",
-                            description: {
-                                text: "View the age of a channel",
-                                args: [
-                                    {
-                                        name: "Channel",
-                                        type: "mention",
-                                        description: "The reference to the channel",
-                                        optional: false
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                });*/
     }
 
     private static getAge(toCall: { createdAt: Date }): { ageHumanReadable: string, utcDate: string } {

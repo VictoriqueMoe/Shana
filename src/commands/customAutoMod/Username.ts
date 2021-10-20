@@ -11,10 +11,10 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @SlashGroup("username", "Commands to set usernames for people")
-export abstract class Username extends AbstractCommandModule<UsernameModel> {
+export abstract class Username extends AbstractCommandModule {
 
     protected constructor() {
-        super({
+        super(/*{
             module: {
                 name: "Username",
                 description: "Commands to set usernames for people"
@@ -56,7 +56,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
                     }
                 }
             ]
-        });
+        }*/);
     }
 
 
@@ -163,7 +163,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
 
             const model = new UsernameModel(obj);
             try {
-                await super.commitToDatabase(model, undefined, true);
+                await model.save();
             } catch (e) {
             }
         }

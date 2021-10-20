@@ -10,6 +10,14 @@ import {MassMentionsFilter} from "../model/closeableModules/subModules/dynoAutoM
 import {DiscordInviteFilter} from "../model/closeableModules/subModules/dynoAutoMod/impl/DiscordInviteFilter";
 import {AllCapsFilter} from "../model/closeableModules/subModules/dynoAutoMod/impl/AllCapsFilter";
 import {BannedWordFilter} from "../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
+import {AuditLogger} from "../events/closeableModules/logging/mod/AuditLogger";
+import {DynoAutoMod} from "../managedEvents/messageEvents/closeableModules/DynoAutoMod";
+import {RoleLogger} from "../events/closeableModules/logging/admin/RoleLogger";
+import {MemberLogger} from "../events/closeableModules/logging/admin/MemberLogger";
+import {MessageLogger} from "../events/closeableModules/logging/admin/MessageLogger";
+import {ChannelLogger} from "../events/closeableModules/logging/admin/ChannelLogger";
+import {AutoRole} from "../events/closeableModules/autoRole/AutoRole";
+import {AutoResponder} from "../managedEvents/messageEvents/closeableModules/AutoResponder";
 
 export namespace Beans {
 
@@ -28,6 +36,22 @@ export namespace Beans {
     ])
     export abstract class SubModuleProxyDescriptor {
         static readonly token = Symbol("ISubModule");
+    }
+
+
+    @registry([
+        {token: CloseableModuleProxyDescriptor.token, useToken: AuditLogger},
+        {token: CloseableModuleProxyDescriptor.token, useToken: DynoAutoMod},
+        {token: CloseableModuleProxyDescriptor.token, useToken: AuditLogger},
+        {token: CloseableModuleProxyDescriptor.token, useToken: RoleLogger},
+        {token: CloseableModuleProxyDescriptor.token, useToken: MemberLogger},
+        {token: CloseableModuleProxyDescriptor.token, useToken: ChannelLogger},
+        {token: CloseableModuleProxyDescriptor.token, useToken: MessageLogger},
+        {token: CloseableModuleProxyDescriptor.token, useToken: AutoRole},
+        {token: CloseableModuleProxyDescriptor.token, useToken: AutoResponder}
+    ])
+    export abstract class CloseableModuleProxyDescriptor {
+        static readonly token = Symbol("ICloseableModule");
     }
 }
 

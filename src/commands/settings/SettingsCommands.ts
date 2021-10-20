@@ -15,7 +15,7 @@ import TIME_UNIT = TimeUtils.TIME_UNIT;
 import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
 
 
-const settingArgument: Typeings.Command["description"] = {
+/*const settingArgument: Typeings.Command["description"] = {
     text: "Change or set any global setting",
     args: [
         {
@@ -31,7 +31,7 @@ const settingArgument: Typeings.Command["description"] = {
             description: "the value of the setting"
         }
     ]
-};
+};*/
 
 @Discord()
 @SlashGroup("settings", "Get and Set settings for this bot", {
@@ -39,10 +39,10 @@ const settingArgument: Typeings.Command["description"] = {
     get: "Commands to get settings"
 })
 @injectable()
-export class SettingsCommands extends AbstractCommandModule<any> {
+export class SettingsCommands extends AbstractCommandModule {
 
     constructor(private _settingsManager: SettingsManager, private _autoRole: AutoRole) {
-        super({
+        super(/*{
             module: {
                 name: "Settings",
                 description: "Commands to change internal seetings of this bot"
@@ -61,7 +61,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
                     }
                 }
             ]
-        });
+        }*/);
     }
 
     @Slash("globalsettings", {

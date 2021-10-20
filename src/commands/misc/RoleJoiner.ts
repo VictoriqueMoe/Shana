@@ -15,10 +15,10 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @SlashGroup("rolejoiner", "Commands to allow users to join vanity roles")
-export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
+export class RoleJoiner extends AbstractCommandModule {
 
     public constructor() {
-        super({
+        super(/*{
             module: {
                 name: "RoleJoiner",
                 description: "Commands to allow users to join vanity roles"
@@ -32,7 +32,7 @@ export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
                     type: "slash",
                 }
             ]
-        });
+        }*/);
     }
 
     @Slash("displayjoinui", {

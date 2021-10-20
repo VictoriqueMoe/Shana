@@ -5,7 +5,6 @@ import {ObjectUtil} from "./utils/Utils";
 import * as v8 from "v8";
 import {Client, DIService} from "discordx";
 import {Intents} from "discord.js";
-import {Dropbox} from "dropbox";
 import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 import {container} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
@@ -28,7 +27,6 @@ export class Main {
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         await moduleRegistrar();
-        const dropBox = new Dropbox({accessToken: process.env.dropboxToken});
         const dao = new Sequelize('database', '', '', {
             host: 'localhost',
             dialect: 'sqlite',
@@ -68,7 +66,7 @@ export class Main {
             }],
             silent: false,
         });
-        registerInstance(dropBox, dao, client);
+        registerInstance(dao, client);
         await client.login(process.env.token);
     }
 }

@@ -5,40 +5,30 @@ import {Collection, Message, Snowflake} from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {Category} from "@discordx/utilities";
 
 const getUrls = require('get-urls');
 const md5 = require('md5');
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
-
-@Discord()
-export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachmentsModel> {
-
-    constructor() {
-        super({
-            module: {
-                name: "ResourceBanner",
-                description: "Commands deal with banning attachments, embeds and emojis from messages"
-            },
-            commands: [
-                {
-                    type: "command",
-                    name: "banAttachment",
-                    description: {
-                        text: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \n banning an attachment means that if it is posted again, it is automatically deleted and logged",
-                        examples: ["banAttachment = while replying to a message you wish to ban"],
-                    }
-                },
-                {
-                    name: "banEmoji",
-                    type: "command",
-                    description: {
-                        text: "This command is used to ban emojis from other servers, to use it, reply to a message that contains the emoji you want banned, if the replied message contains more than one emoji, this bot will ask you what one you wish to ban",
-                    }
-                }
-            ]
-        });
+@Category("ResourceBanner", "Commands deal with banning attachments, embeds and emojis from messages")
+@Category("Admin Commands", [
+    {
+        name: "banAttachment",
+        description: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \\n banning an attachment means that if it is posted again, it is automatically deleted and logged",
+        type: "SIMPLECOMMAND",
+        options: [],
+        examples: ["banAttachment = while replying to a message you wish to ban"]
+    },
+    {
+        name: "banEmoji",
+        description: "This command is used to ban emojis from other servers, to use it, reply to a message that contains the emoji you want banned, if the replied message contains more than one emoji, this bot will ask you what one you wish to ban",
+        type: "SIMPLECOMMAND",
+        options: []
     }
+])
+@Discord()
+export abstract class ResourceBanner extends AbstractCommandModule {
 
     public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false): Promise<BannedAttachmentsModel> {
         const attachmentHash = md5(attachment);
@@ -58,7 +48,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
             guildId,
             isEmoji
         });
-        return await entry.save();
+        return entry.save();
     }
 
     @SimpleCommand("banEmoji")
@@ -156,7 +146,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
             urlsInMessage = getUrls(repliedMessageObj.content);
         }
         const attachmentArray = repliedMessageObj.attachments;
-        if (attachmentArray.size === 0 && urlsInMessage.size === 0) {
+        if (attachmentArray.size === 0 && (urlsInMessage && urlsInMessage.size === 0)) {
             message.reply("Linked message contains no attachments");
             return;
         }

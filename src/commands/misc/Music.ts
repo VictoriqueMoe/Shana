@@ -20,9 +20,9 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Discord()
 @SlashGroup("music", "Commands to play music from Youtube")
 @injectable()
-export class Music extends AbstractCommandModule<any> {
+export class Music extends AbstractCommandModule {
     constructor(private _player: Player, private _client: Client) {
-        super({
+        super(/*{
             module: {
                 name: "Music",
                 description: "Commands to play music from Youtube"
@@ -58,7 +58,7 @@ export class Music extends AbstractCommandModule<any> {
                     }
                 }
             ]
-        });
+        }*/);
     }
 
     private getGuildQueue(interaction: CommandInteraction | ButtonInteraction): Queue {

@@ -38,13 +38,13 @@ const isImageFast = require('is-image-fast');
 @Discord()
 @SlashGroup("miscellaneous", "Miscellaneous commands")
 @injectable()
-export class Misc extends AbstractCommandModule<any> {
+export class Misc extends AbstractCommandModule {
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
     private readonly animeTractApi = new AnimeTractApi();
     private readonly anilist = new Anilist();
 
     constructor(private _client: Client) {
-        super({
+        super(/*{
             module: {
                 name: "Miscellaneous",
                 description: "Miscellaneous commands"
@@ -156,7 +156,7 @@ export class Misc extends AbstractCommandModule<any> {
                     }
                 }
             ]
-        });
+        }*/);
     }
 
     @Slash("generatetext", {

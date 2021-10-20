@@ -6,10 +6,10 @@ import {CommandInteraction} from "discord.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-export abstract class ModuleEngine extends AbstractCommandModule<any> {
+export abstract class ModuleEngine extends AbstractCommandModule {
 
     constructor() {
-        super({
+        super(/*{
             module: {
                 name: "closeableModules",
                 description: "Commands to enable or disable features"
@@ -45,7 +45,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
                     }
                 }
             ]
-        });
+        }*/);
     }
 
     @Slash("enablemodule", {

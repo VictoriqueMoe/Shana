@@ -1,23 +1,68 @@
 import {ContextMenu, Discord, Guard, Slash, SlashChoice, SlashGroup, SlashOption} from "discordx";
-import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {NotBotInteraction} from "../../../guards/NotABot";
 import {secureCommandInteraction} from "../../../guards/RoleConstraint";
 import {CommandInteraction, ContextMenuInteraction, GuildMember, User} from "discord.js";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {AbstractCommandModule} from "../../AbstractCommandModule";
 import {injectable} from "tsyringe";
+import {Category} from "@discordx/utilities";
 import TIME_UNIT = TimeUtils.TIME_UNIT;
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@Category("Mute", "Commands to mute people from servers")
+@Category("Admin Commands", [
+    {
+        name: "mute",
+        description: "Block a user from sending any messages with an optional timeout",
+        type: "SLASH",
+        options: [
+            {
+                name: "User",
+                optional: false,
+                type: "USER",
+                description: "User you wish to mute"
+            },
+            {
+                name: "Reason",
+                optional: false,
+                type: "STRING",
+                description: "The reason why this user is muted"
+            },
+            {
+                name: "Timeout",
+                optional: false,
+                type: "NUMBER",
+                description: "timeout in seconds for how long this user should be muted"
+            },
+            {
+                name: "TimeUnit",
+                optional: false,
+                type: "STRING",
+                description: "The time unit used to specify how long a user should be muted"
+            }
+        ]
+    },
+    {
+        name: "Mute User for 30 mins",
+        description: "Mute the current user for 30 mins",
+        type: "CONTEXT USER"
+    },
+    {
+        name: "viewAllMutes",
+        description: "View all the currently active mutes",
+        type: "SLASH",
+        options: []
+    }
+])
 @SlashGroup("mute", "Commands to mute people from servers")
 @injectable()
-export class Mute extends AbstractCommandModule<RolePersistenceModel> {
+export class Mute extends AbstractCommandModule {
 
     public constructor(private _muteManager: MuteManager) {
-        super({
+        super(/*{
             module: {
                 name: "Mute",
                 description: "Commands to mute people from servers"
@@ -79,7 +124,7 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
                     }
                 }
             ]
-        });
+        }*/);
     }
 
 
@@ -187,22 +232,6 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
         await this._muteManager.muteUser(mentionedMember, reason, creatorID, timeout, timeUnit);
         replyMessage += ` for ${ObjectUtil.timeToHuman(timeout, timeUnit)}`;
         return replyMessage;
-    }
-
-    private getMuteTimeOutStr(): string {
-        const keyValuePair: Array<{ name: TIME_UNIT, value: string }> = EnumEx.getNamesAndValues(TIME_UNIT) as Array<{ name: TIME_UNIT, value: string }>;
-        return keyValuePair.map(kv => {
-            const {name, value}: { name: TIME_UNIT, value: string } = kv;
-            return `'${value}' -> ${name}`;
-        }).join("\n ");
-    }
-
-    @Slash("mutetimeunits", {
-        description: "Get all the available time units you can use in mute"
-    })
-    @Guard(NotBotInteraction, secureCommandInteraction)
-    private async getTimeUnits(interaction: CommandInteraction): Promise<void> {
-        return InteractionUtils.replyOrFollowUp(interaction, `\n ${this.getMuteTimeOutStr()}`);
     }
 
     @Slash("viewallmutes", {

@@ -13,10 +13,10 @@ import Command = Typeings.Command;
 
 @Discord()
 @injectable()
-export class Help extends AbstractCommandModule<any> {
+export class Help extends AbstractCommandModule {
 
     constructor(@inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager, private _client: Client) {
-        super({
+        super(/*{
             module: {
                 name: "Help",
                 description: "Commands to display help and info"
@@ -51,7 +51,7 @@ export class Help extends AbstractCommandModule<any> {
                     }
                 }
             ]
-        });
+        }*/);
     }
 
     @SimpleCommand("help")
