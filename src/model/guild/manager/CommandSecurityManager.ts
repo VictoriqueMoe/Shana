@@ -1,20 +1,21 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
 import {GuildMember} from "discord.js";
-import {DIService} from "discordx";
+import {DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
 import {GuildUtils} from "../../../utils/Utils";
-import {AbstractCommandModule} from "../../../commands/AbstractCommandModule";
 import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
 import {container, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
 import {PostConstruct} from "../../decorators/PostConstruct";
-import {CloseableModule} from "../../closeableModules/impl/CloseableModule";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
+
+export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
 
 @singleton()
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
-    private _commandsAndEvents: (CloseableModule<any> | AbstractCommandModule<any>)[];
+
+    private readonly _metadata = MetadataStorage.instance;
 
     public constructor() {
         super();
@@ -23,60 +24,52 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
     @PostConstruct
     private async init(): Promise<void> {
         const appClasses = DIService.allServices;
-        this._commandsAndEvents = [];
         for (const classRef of appClasses) {
-            const instance = container.resolve(classRef as constructor<any>);
-            this._commandsAndEvents.push(instance);
+            container.resolve(classRef as constructor<any>);
         }
     }
 
-    public get commandsAndEvents(): (CloseableModule<any> | AbstractCommandModule<any>)[] {
-        return this._commandsAndEvents;
+
+    public get events(): readonly DOn[] {
+        return this._metadata.events;
     }
 
-    public get events(): CloseableModule<any>[] {
-        return this.commandsAndEvents.filter(c => c instanceof CloseableModule) as CloseableModule<any>[];
-    }
-
-    public get commands(): AbstractCommandModule<any>[] {
-        return this.commandsAndEvents.filter(c => c instanceof AbstractCommandModule) as AbstractCommandModule<any>[];
+    public get commands(): AllCommands {
+        const simpleCommands = this._metadata.allSimpleCommands.map(value => value.command);
+        const appCommands = this._metadata.allApplicationCommands;
+        return [...simpleCommands, ...appCommands];
     }
 
     /**
      * Change to return JSON object with modules and commands for the user
      * @param member
      */
-    public async getCommandModulesForMember(member: GuildMember): Promise<AbstractCommandModule<any> []> {
+    public async getCommandModulesForMember(member: GuildMember): Promise<AllCommands> {
         if (GuildUtils.isMemberAdmin(member)) {
             return this.commands;
         }
-        const retArray: AbstractCommandModule<any>[] = [];
+        const retArray: AllCommands = [];
         const memberRoles = [...member.roles.cache.keys()];
         const allCommands = await CommandSecurityModel.findAll({
             where: {
                 guildId: member.guild.id
             }
         });
-        outer:
-            for (const commandClass of this.commands) {
-                const {commands} = commandClass.commandDescriptors;
-                for (const commandDescriptor of commands) {
-                    const {name} = commandDescriptor;
-                    const command = allCommands.find(command => command.commandName === name);
-                    if (!command) {
-                        continue outer;
-                    }
-                    if (command.allowedRoles.includes("*")) {
-                        retArray.push(commandClass);
-                        continue outer;
-                    }
-                    const inArray = command.allowedRoles.some(value => memberRoles.includes(value));
-                    if (inArray) {
-                        retArray.push(commandClass);
-                        continue outer;
-                    }
-                }
+        for (const commandClass of this.commands) {
+            const {name} = commandClass;
+            const command = allCommands.find(command => command.commandName === name);
+            if (!command) {
+                continue;
             }
+            if (command.allowedRoles.includes("*")) {
+                retArray.push(commandClass);
+                continue;
+            }
+            const inArray = command.allowedRoles.some(value => memberRoles.includes(value));
+            if (inArray) {
+                retArray.push(commandClass);
+            }
+        }
         return retArray;
     }
 
@@ -118,23 +111,20 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         });
         const memberRoles = [...member.roles.cache.keys()];
         for (const commandClass of this.commands) {
-            const {commands} = commandClass.commandDescriptors;
-            for (const commandDescriptor of commands) {
-                const {name} = commandDescriptor;
-                if (commandName.toUpperCase() !== name.toUpperCase()) {
-                    continue;
-                }
-                const command = allCommands.find(command => command.commandName === name);
-                if (!command) {
-                    continue;
-                }
-                if (command.allowedRoles.includes("*")) {
-                    return true;
-                }
-                const inArray = command.allowedRoles.some(value => memberRoles.includes(value));
-                if (inArray) {
-                    return true;
-                }
+            const {name} = commandClass;
+            if (commandName.toUpperCase() !== name.toUpperCase()) {
+                continue;
+            }
+            const command = allCommands.find(command => command.commandName === name);
+            if (!command) {
+                continue;
+            }
+            if (command.allowedRoles.includes("*")) {
+                return true;
+            }
+            const inArray = command.allowedRoles.some(value => memberRoles.includes(value));
+            if (inArray) {
+                return true;
             }
         }
         return false;

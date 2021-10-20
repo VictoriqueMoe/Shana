@@ -1,6 +1,5 @@
 import {ArgsOf, Client, ContextMenu, Discord, Guard, On, Slash, SlashGroup, SlashOption} from "discordx";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {BookmarkModel} from "../../model/DB/guild/Bookmark.model";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";
@@ -12,9 +11,10 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Discord()
 @SlashGroup("bookmarks", "Commands to manage bookmarks")
 @injectable()
-export class Bookmark extends AbstractCommandModule<BookmarkModel> {
+export class Bookmark extends AbstractCommandModule {
     constructor(private _bookmarkManager: BookmarkManager) {
-        super({
+        super();
+        /*super({
             module: {
                 name: "Bookmarks",
                 description: "Commands to manage bookmarks"
@@ -66,7 +66,7 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
                     }
                 }
             ]
-        });
+        });*/
     }
 
     @On("messageDelete")

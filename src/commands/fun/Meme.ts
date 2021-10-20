@@ -888,7 +888,7 @@ export class Meme extends AbstractCommandModule<any> {
     }
 
     @SimpleCommand("waifu", {
-        aliases: EnumEx.getNames(GENERATE_ENDPOINT)
+        aliases: EnumEx.getNames(GENERATE_ENDPOINT).filter(r => r !== "waifu")
     })
     @Guard(secureCommandInteraction)
     private async generate(command: SimpleCommandMessage): Promise<void> {

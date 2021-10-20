@@ -10,54 +10,55 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Discord()
 @SlashGroup("ages", "commands to get ages of accounts and servers")
 @injectable()
-export class AccountAge extends AbstractCommandModule<any> {
+export class AccountAge extends AbstractCommandModule {
 
     public constructor(private _client: Client) {
-        super({
-            module: {
-                name: "Ages",
-                description: "commands to get ages of accounts and servers"
-            },
-            commands: [
-                {
-                    name: "age",
-                    type: "slash",
-                    description: {
-                        text: "Get the age on an account",
-                        args: [
-                            {
-                                name: "user",
-                                type: "mention",
-                                optional: false,
-                                description: "The user you want to check the account age of"
+        super();
+        /*        super({
+                    module: {
+                        name: "Ages",
+                        description: "commands to get ages of accounts and servers"
+                    },
+                    commands: [
+                        {
+                            name: "age",
+                            type: "slash",
+                            description: {
+                                text: "Get the age on an account",
+                                args: [
+                                    {
+                                        name: "user",
+                                        type: "mention",
+                                        optional: false,
+                                        description: "The user you want to check the account age of"
+                                    }
+                                ]
                             }
-                        ]
-                    }
-                },
-                {
-                    name: "serverAge",
-                    type: "slash",
-                    description: {
-                        text: "Get the age of this server"
-                    }
-                },
-                {
-                    name: "channelAge",
-                    type: "slash",
-                    description: {
-                        text: "View the age of a channel",
-                        args: [
-                            {
-                                name: "Channel",
-                                type: "mention",
-                                description: "The reference to the channel",
-                                optional: false
+                        },
+                        {
+                            name: "serverAge",
+                            type: "slash",
+                            description: {
+                                text: "Get the age of this server"
                             }
-                        ]
-                    }
-                }
-            ]
-        });
+                        },
+                        {
+                            name: "channelAge",
+                            type: "slash",
+                            description: {
+                                text: "View the age of a channel",
+                                args: [
+                                    {
+                                        name: "Channel",
+                                        type: "mention",
+                                        description: "The reference to the channel",
+                                        optional: false
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                });*/
     }
 
     private static getAge(toCall: { createdAt: Date }): { ageHumanReadable: string, utcDate: string } {
