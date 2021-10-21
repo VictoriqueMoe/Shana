@@ -15,7 +15,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Category("Mute", "Commands to mute people from servers")
 @Category("Mute", [
     {
-        name: "mute",
+        name: "shut",
         description: "Block a user from sending any messages with an optional timeout",
         type: "SLASH",
         options: [
@@ -62,69 +62,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 export class Mute extends AbstractCommandModule {
 
     public constructor(private _muteManager: MuteManager) {
-        super(/*{
-            module: {
-                name: "Mute",
-                description: "Commands to mute people from servers"
-            },
-            commands: [
-                {
-                    name: "shut",
-                    type: "slash",
-                    description: {
-                        text: "Block a user from sending any messages with an optional timeout",
-                        examples: ['mute @user "they where annoying" 2d = Mute user for 2 days', 'mute @user "they where not so annoying" 60 = Mute user for 60 seconds', 'mute @user "they where REALLY annoying" = Mute user indefinitely until unmute'],
-                        args: [
-                            {
-                                name: "User",
-                                optional: false,
-                                type: "mention",
-                                description: "User you wish to mute"
-                            },
-                            {
-                                name: "Reason",
-                                optional: false,
-                                type: "text",
-                                description: "The reason why this user is muted"
-                            },
-                            {
-                                name: "Timeout",
-                                optional: false,
-                                type: "number",
-                                description: "timeout in seconds for how long this user should be muted"
-                            },
-                            {
-                                name: "Timeout",
-                                optional: false,
-                                type: "text",
-                                description: "The time unit used to specify how long a user should be muted \n see muteTimeUnits for values"
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "muteTimeUnits",
-                    type: "slash",
-                    description: {
-                        text: "Get all the available time units you can use in mute"
-                    }
-                },
-                {
-                    name: "Mute User for 30 mins",
-                    type: "contextMenu",
-                    description: {
-                        text: "Mute the current user for 30 mins"
-                    }
-                },
-                {
-                    name: "viewAllMutes",
-                    type: "slash",
-                    description: {
-                        text: "View all the currently active mutes"
-                    }
-                }
-            ]
-        }*/);
+        super();
     }
 
 
@@ -158,7 +96,7 @@ export class Mute extends AbstractCommandModule {
         description: "Block a user from sending any messages with a timeout"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
-    private async mute(
+    private async shut(
         @SlashOption("user", {
             description: "User you wish to mute",
             required: true
