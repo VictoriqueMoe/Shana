@@ -8,50 +8,44 @@ import {Typeings} from "../../model/types/Typeings";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {container, delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+import {Category} from "@discordx/utilities";
 import Command = Typeings.Command;
 
 
 @Discord()
+@Category("Help", "Commands to display help and info")
+@Category("Help", [
+    {
+        "name": "help",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "Module",
+                "description": "The module that you want to drill into",
+                "optional": true,
+                "type": "STRING"
+            },
+            {
+                "name": "PageNumber",
+                "description": "Some modules contain a lot of commands, and can't be displayed all at once, if this is the case, you can supply a page number \n NOTE: the 'Command' argument is invalid when this is supplied",
+                "optional": true,
+                "type": "NUMBER"
+            },
+            {
+                "name": "Command",
+                "description": "The command you want to see details of, This must be used conjunction with the Module argument",
+                "optional": true,
+                "type": "STRING"
+            }
+        ],
+        "description": "Get the description of a command or all commands"
+    }
+])
 @injectable()
 export class Help extends AbstractCommandModule {
 
     constructor(@inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager, private _client: Client) {
-        super(/*{
-            module: {
-                name: "Help",
-                description: "Commands to display help and info"
-            },
-            commands: [
-                {
-                    name: "help",
-                    type: "command",
-                    description: {
-                        text: "Get the description of a command or all commands",
-                        examples: ['help = display ALL modules', 'help memes = display all the commands in the "memes" modules ', 'help memes 2 = get page 2 of commands in the memes module', 'help memes missionpassed = see the arguments and info for the "missionpassed" command'],
-                        args: [
-                            {
-                                name: "Module",
-                                optional: true,
-                                type: "text",
-                                description: "The module that you want to drill into"
-                            },
-                            {
-                                name: "PageNumber",
-                                optional: true,
-                                type: "number",
-                                description: "Some modules contain a lot of commands, and can't be displayed all at once, if this is the case, you can supply a page number \n NOTE: the 'Command' argument is invalid when this is supplied"
-                            },
-                            {
-                                name: "Command",
-                                optional: true,
-                                type: "text",
-                                description: "The command you want to see details of, This must be used conjunction with the Module argument"
-                            }
-                        ]
-                    }
-                }
-            ]
-        }*/);
+        super();
     }
 
     @SimpleCommand("help")

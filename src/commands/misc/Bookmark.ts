@@ -6,67 +6,49 @@ import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from 
 import {injectable} from "tsyringe";
 import {BookmarkManager} from "../../model/guild/manager/BookmarkManager";
 import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@Category("Bookmarks", "Commands to manage bookmarks")
+@Category("Bookmarks", [
+    {
+        "name": "bookmark",
+        "type": "CONTEXT MESSAGE",
+        "description": "Bookmark a message"
+    },
+    {
+        "name": "getbookmark",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "public",
+                "description": "Make this message public",
+                "optional": false,
+                "type": "BOOLEAN"
+            }
+        ],
+        "description": "Get all of your bookmarks"
+    },
+    {
+        "name": "deleteBookmarks",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "id",
+                "description": "Id of the bookmark to delete",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "Delete a bookmark"
+    }
+])
 @SlashGroup("bookmarks", "Commands to manage bookmarks")
 @injectable()
 export class Bookmark extends AbstractCommandModule {
     constructor(private _bookmarkManager: BookmarkManager) {
         super();
-        /*super({
-            module: {
-                name: "Bookmarks",
-                description: "Commands to manage bookmarks"
-            },
-            commands: [
-                {
-                    name: "bookmark",
-                    type: "contextMenu",
-                    description: {
-                        text: "Bookmark a message",
-                        args: [
-                            {
-                                name: "messageUrl",
-                                type: "text",
-                                description: "the URL of the message",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "getbookmark",
-                    type: "slash",
-                    description: {
-                        text: "Get all of your bookmarks",
-                        args: [
-                            {
-                                name: "public",
-                                type: "boolean",
-                                description: "Make this message public",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "deleteBookmarks",
-                    type: "slash",
-                    description: {
-                        text: "Delete a bookmark",
-                        args: [
-                            {
-                                name: "id",
-                                type: "text",
-                                description: "Id of the bookmark to delete",
-                                optional: false
-                            }
-                        ]
-                    }
-                }
-            ]
-        });*/
     }
 
     @On("messageDelete")

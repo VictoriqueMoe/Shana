@@ -6,84 +6,75 @@ import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {BaseGuildTextChannel, Channel, CommandInteraction, MessageEmbed} from "discord.js";
 import {ArrayUtils, CronUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@Category("messageschedule", "Commands to schedule posts to channels")
+@Category("messageschedule", [
+    {
+        "name": "addScheduleMessage",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "name",
+                "description": "The Unique ID of this scheduled job",
+                "optional": false,
+                "type": "STRING"
+            },
+            {
+                "name": "channel",
+                "description": "The channel to post to",
+                "optional": false,
+                "type": "USER"
+            },
+            {
+                "name": "cron",
+                "description": "the cron string to represent the time",
+                "optional": false,
+                "type": "STRING"
+            },
+            {
+                "name": "message",
+                "description": "the message to post",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "create a message to schedule to a channel"
+    },
+    {
+        "name": "removeScheduledMessage",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "name",
+                "description": "The Unique ID of the schedule schedule you want to remove",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "remove a scheduled post by name"
+    },
+    {
+        "name": "getScheduledMessage",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "channel",
+                "description": "A filter for all scheduled messages by channel",
+                "optional": false,
+                "type": "USER"
+            }
+        ],
+        "description": "get all scheduled posts optionally by channel"
+    }
+])
 @SlashGroup("messageschedule", "Commands to schedule posts to channels")
 @injectable()
 export class MessageSchedule extends AbstractCommandModule {
     public constructor(private _messageScheduleManager: MessageScheduleManager, private _client: Client) {
-        super(/*{
-            module: {
-                name: "messageschedule",
-                description: "Commands to schedule posts to channels"
-            },
-            commands: [
-                {
-                    name: "addScheduleMessage",
-                    type: "slash",
-                    description: {
-                        text: "create a message to schedule to a channel",
-                        args: [
-                            {
-                                name: "name",
-                                type: "text",
-                                description: "The Unique ID of this scheduled job",
-                                optional: false
-                            },
-                            {
-                                name: "channel",
-                                type: "mention",
-                                description: "The channel to post to",
-                                optional: false
-                            },
-                            {
-                                name: "cron",
-                                type: "text",
-                                description: "the cron string to represent the time",
-                                optional: false
-                            },
-                            {
-                                name: "message",
-                                type: "text",
-                                description: "the message to post",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "removeScheduledMessage",
-                    type: "slash",
-                    description: {
-                        text: "remove a scheduled post by name",
-                        args: [
-                            {
-                                name: "name",
-                                type: "text",
-                                description: "The Unique ID of the schedule schedule you want to remove",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "getScheduledMessage",
-                    type: "slash",
-                    description: {
-                        text: "get all scheduled posts optionally by channel",
-                        args: [
-                            {
-                                name: "channel",
-                                type: "mention",
-                                description: "A filter for all scheduled messages by channel",
-                                optional: false
-                            }
-                        ]
-                    }
-                }
-            ]
-        }*/);
+        super();
     }
 
     @Slash("getscheduledmessage", {
