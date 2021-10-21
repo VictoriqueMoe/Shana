@@ -11,6 +11,7 @@ const getUrls = require('get-urls');
 const md5 = require('md5');
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
+@Discord()
 @Category("ResourceBanner", "Commands deal with banning attachments, embeds and emojis from messages")
 @Category("ResourceBanner", [
     {
@@ -27,7 +28,6 @@ import EmojiInfo = DiscordUtils.EmojiInfo;
         options: []
     }
 ])
-@Discord()
 export abstract class ResourceBanner extends AbstractCommandModule {
 
     public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false): Promise<BannedAttachmentsModel> {

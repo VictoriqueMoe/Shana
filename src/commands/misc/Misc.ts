@@ -27,6 +27,7 @@ import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DeepAPI} from "../../model/DeepAPI";
 import {container, injectable} from "tsyringe";
 import * as locale from 'locale-codes';
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const translate = require("deepl");
@@ -36,6 +37,86 @@ const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
 
 @Discord()
+@Category("Miscellaneous", "Miscellaneous commands")
+@Category("Miscellaneous", [
+    {
+        "name": "findSource",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "image",
+                "description": "The image to search",
+                "optional": false,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ],
+        "description": "Perform a reverse image search"
+    },
+    {
+        "name": "findAnime",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Source",
+                "description": "The source of the anime to look for, can be attachment or a reply to a message with ONE attachment\nPlease note: ONLY screenshots are allowed, please make sure there is NO border",
+                "optional": false,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ],
+        "description": "Find anime source, including episode and preview"
+    },
+    {
+        "name": "avatar",
+        "type": "CONTEXT USER",
+        "description": "Display a users avatar"
+    },
+    {
+        "name": "translate",
+        "type": "CONTEXT MESSAGE",
+        "description": "Translate a message (to EN-GB)"
+    },
+    {
+        "name": "banner",
+        "type": "CONTEXT USER",
+        "description": "Display a users profile banner"
+    },
+    {
+        "name": "posOrNeg",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "text",
+                "description": "the text to analyse",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "This algorithm classifies each sentence in the input as very negative, negative, neutral, positive, or very positive"
+    },
+    {
+        "name": "generateText",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "text",
+                "description": "the text to include",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text."
+    }
+])
 @SlashGroup("miscellaneous", "Miscellaneous commands")
 @injectable()
 export class Misc extends AbstractCommandModule {
@@ -44,119 +125,7 @@ export class Misc extends AbstractCommandModule {
     private readonly anilist = new Anilist();
 
     constructor(private _client: Client) {
-        super(/*{
-            module: {
-                name: "Miscellaneous",
-                description: "Miscellaneous commands"
-            },
-            commands: [
-                {
-                    name: "findSource",
-                    type: "command",
-                    description: {
-                        text: "Perform a reverse image search",
-                        args: [
-                            {
-                                type: "attachment",
-                                optional: false,
-                                name: "image",
-                                description: "The image to search"
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "findAnime",
-                    type: "command",
-                    description: {
-                        text: "Find anime source, including episode and preview",
-                        args: [
-                            {
-                                name: "Source",
-                                type: "attachment",
-                                description: "The source of the anime to look for, can be attachment or a reply to a message with ONE attachment\nPlease note: ONLY screenshots are allowed, please make sure there is NO border",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "avatar",
-                    type: "contextMenu",
-                    description: {
-                        text: "Display a users avatar",
-                        args: [
-                            {
-                                name: "user",
-                                type: "mention",
-                                description: "The user to get",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "translate",
-                    type: "contextMenu",
-                    description: {
-                        text: "Translate a message (to EN-GB)",
-                        args: [
-                            {
-                                name: "message",
-                                type: "text",
-                                description: "the message or text to translate",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "banner",
-                    type: "contextMenu",
-                    description: {
-                        text: "Display a users profile banner",
-                        args: [
-                            {
-                                name: "user",
-                                type: "mention",
-                                description: "The user to get",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "posOrNeg",
-                    type: "command",
-                    description: {
-                        text: "This algorithm classifies each sentence in the input as very negative, negative, neutral, positive, or very positive",
-                        args: [
-                            {
-                                name: "text",
-                                type: "text",
-                                description: "the text to analyse",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "generateText",
-                    type: "slash",
-                    description: {
-                        text: "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text.",
-                        args: [
-                            {
-                                name: "text",
-                                type: "text",
-                                description: "the text to include",
-                                optional: false
-                            }
-                        ]
-                    }
-                }
-            ]
-        }*/);
+        super();
     }
 
     @Slash("generatetext", {
