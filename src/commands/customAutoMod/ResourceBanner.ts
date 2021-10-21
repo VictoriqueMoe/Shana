@@ -12,10 +12,10 @@ const md5 = require('md5');
 import EmojiInfo = DiscordUtils.EmojiInfo;
 
 @Category("ResourceBanner", "Commands deal with banning attachments, embeds and emojis from messages")
-@Category("Admin Commands", [
+@Category("ResourceBanner", [
     {
         name: "banAttachment",
-        description: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \\n banning an attachment means that if it is posted again, it is automatically deleted and logged",
+        description: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \n banning an attachment means that if it is posted again, it is automatically deleted and logged",
         type: "SIMPLECOMMAND",
         options: [],
         examples: ["banAttachment = while replying to a message you wish to ban"]
