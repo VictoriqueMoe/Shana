@@ -24,7 +24,7 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
             },
             commands: [
                 {
-                    name: "mute",
+                    name: "shut",
                     type: "slash",
                     description: {
                         text: "Block a user from sending any messages with an optional timeout",
@@ -109,7 +109,7 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
         }
     }
 
-    @Slash("mute", {
+    @Slash("shut", {
         description: "Block a user from sending any messages with a timeout"
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
@@ -210,7 +210,9 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
     })
     @Guard(NotBotInteraction, secureCommandInteraction)
     private async viewAllMutes(interaction: CommandInteraction): Promise<void> {
-        await interaction.deferReply();
+        await interaction.deferReply({
+            ephemeral: true
+        });
         const guildId = interaction.guild.id;
         const currentBlocks = await MuteModel.findAll({
             where: {
