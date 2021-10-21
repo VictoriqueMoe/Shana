@@ -1,4 +1,4 @@
-import {Discord, Guard, Slash, SlashGroup} from "discordx";
+import {Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {AbstractCommandModule} from "../AbstractCommandModule";
@@ -8,6 +8,7 @@ import {injectable} from "tsyringe";
 import {DiscordUtils} from "../../utils/Utils";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
+
 
 @Discord()
 @Category("VicImage", "Commands to obtain images of <@697417252320051291>")
@@ -25,6 +26,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         options: []
     }
 ])
+
+
 @SlashGroup("vicimage", "Obtain images of Victorique#0002")
 @injectable()
 export class VicImage extends AbstractCommandModule {
@@ -33,6 +36,8 @@ export class VicImage extends AbstractCommandModule {
         super();
     }
 
+    @Permission(false)
+    @Permission(guild => AbstractCommandModule.getPermissions(guild, "vicimage"))
     @Slash("vicimage", {
         description: "Get a random image of Victorique#0002"
     })
@@ -58,6 +63,8 @@ export class VicImage extends AbstractCommandModule {
     }
 
 
+    @Permission(false)
+    @Permission(guild => AbstractCommandModule.getPermissions(guild, "vicreindex"))
     @Slash("vicreindex", {
         description: "Get a random image of Victorique#0002"
     })

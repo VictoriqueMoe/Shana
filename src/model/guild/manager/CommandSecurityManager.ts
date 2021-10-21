@@ -1,8 +1,8 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
-import {GuildMember} from "discord.js";
+import {ApplicationCommandPermissionData, Guild, GuildMember} from "discord.js";
 import {DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
-import {GuildUtils} from "../../../utils/Utils";
+import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
 import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
 import {container, singleton} from "tsyringe";
@@ -73,6 +73,32 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         return retArray;
     }
 
+    public async getPermissions(guild: Guild, commandName: string): Promise<ApplicationCommandPermissionData[]> {
+        const guildId = guild.id;
+        const commands = await this.getAllCommandModel(guildId, commandName, "allowedRoles");
+        const allRoles = guild.roles.cache.map(role => role.id);
+        return commands.flatMap(command => {
+            let {allowedRoles} = command;
+            let permission = true;
+            if (!ArrayUtils.isValidArray(allowedRoles)) {
+                // if empty array then only admins
+                allowedRoles = allRoles;
+                permission = false;
+            } else if (allowedRoles.length === 1 && allowedRoles[0] === "*") {
+                // if "*"  then everyone
+                allowedRoles = allRoles;
+                permission = true;
+            }
+            return allowedRoles.map(allowedRole => {
+                return {
+                    id: allowedRole,
+                    type: "ROLE",
+                    permission
+                };
+            });
+        });
+    }
+
     public async updateCommand(commandName: string, guildId: string, settings: UpdateCommandSettings): Promise<boolean> {
         return (await CommandSecurityModel.update({
             allowedRoles: settings.roles,
@@ -86,18 +112,32 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
     }
 
     public async isEnabled(commandName: string, guildId: string): Promise<boolean> {
-        const command = await CommandSecurityModel.findOne({
-            attributes: ["enabled"],
-            where: {
-                guildId,
-                "commandName": Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('commandName')), 'LIKE', `%${commandName}%`)
-            }
-        });
+        const command = await this.getCommandModel(guildId, commandName, "enabled");
         if (!command) {
             console.error(`Unable to find command with name "${commandName}" from guildId: "${guildId}`);
             return false;
         }
         return command.enabled;
+    }
+
+    private async getCommandModel(guildId: string, commandName: string, ...attributes: string[]): Promise<CommandSecurityModel> {
+        return CommandSecurityModel.findOne({
+            attributes,
+            where: {
+                guildId,
+                "commandName": Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('commandName')), 'LIKE', `%${commandName}%`)
+            }
+        });
+    }
+
+    private async getAllCommandModel(guildId: string, commandName: string, ...attributes: string[]): Promise<CommandSecurityModel[]> {
+        return CommandSecurityModel.findAll({
+            attributes,
+            where: {
+                guildId,
+                "commandName": Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('commandName')), 'LIKE', `%${commandName}%`)
+            }
+        });
     }
 
     public async canRunCommand(member: GuildMember, commandName: string): Promise<boolean> {

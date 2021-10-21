@@ -48,6 +48,7 @@ export class Help extends AbstractCommandModule {
         super();
     }
 
+
     @SimpleCommand("help")
     @Guard(NotBotInteraction)
     private async help({message}: SimpleCommandMessage): Promise<void> {
