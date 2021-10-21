@@ -13,7 +13,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @Category("Mute", "Commands to mute people from servers")
-@Category("Admin Commands", [
+@Category("Mute", [
     {
         name: "mute",
         description: "Block a user from sending any messages with an optional timeout",

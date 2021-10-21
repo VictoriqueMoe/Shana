@@ -11,7 +11,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @Category("VicImage", "Commands to obtain images of <@697417252320051291>")
-@Category("Admin Commands", [
+@Category("VicImage", [
     {
         name: "vicImage",
         description: "Get a random image of <@697417252320051291>",

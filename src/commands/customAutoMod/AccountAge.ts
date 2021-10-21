@@ -10,7 +10,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @Category("Ages", "commands to get ages of accounts and servers")
-@Category("Admin Commands", [
+@Category("Ages", [
     {
         name: "userAge",
         description: "Get the age on an account",
