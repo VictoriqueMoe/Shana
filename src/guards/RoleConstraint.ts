@@ -11,11 +11,7 @@ export const secureCommandInteraction: GuardFunction<CommandInteraction | Simple
         commandName = arg.name;
     } else {
         if (arg.isContextMenu() || arg.isCommand()) {
-            try {
-                commandName = arg.options.getSubcommand(true);
-            } catch {
-                commandName = arg.commandName;
-            }
+            commandName = arg.commandName;
             guildId = arg.guildId;
         }
     }

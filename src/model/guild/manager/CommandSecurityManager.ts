@@ -1,6 +1,6 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
-import {ApplicationCommandPermissionData, Guild, GuildMember} from "discord.js";
+import {ApplicationCommandPermissionData, ClientEvents, Guild, GuildMember} from "discord.js";
 import {Client, DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
 import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
 import {Typeings} from "../../types/Typeings";
@@ -17,6 +17,10 @@ import {AutoResponder} from "../../../managedEvents/messageEvents/closeableModul
 import {ChannelLogger} from "../../../events/closeableModules/logging/admin/ChannelLogger";
 import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {AutoRole} from "../../../events/closeableModules/autoRole/AutoRole";
+import {
+    IPermissionEventListener,
+    RoleUpdateTrigger
+} from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
@@ -33,12 +37,16 @@ export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
     {token: Beans.ICloseableModuleToken, useToken: AutoResponder}
 ])
 @singleton()
-export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
+export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implements IPermissionEventListener {
 
     private readonly _metadata = MetadataStorage.instance;
 
     public constructor(private _client: Client) {
         super();
+    }
+
+    public async trigger(event: RoleUpdateTrigger, type: keyof ClientEvents): Promise<void> {
+        console.log(type);
     }
 
     @PostConstruct
@@ -56,7 +64,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
 
     public get commands(): AllCommands {
         const simpleCommands = this._metadata.simpleCommands;
-        const appCommands = this._metadata.allApplicationCommands;
+        const appCommands = this._metadata.applicationCommands;
         return [...simpleCommands, ...appCommands];
     }
 
@@ -96,6 +104,9 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
     public async getDefaultPermissionAllow(guild: Guild, commandName: string): Promise<boolean> {
         const guildId = guild.id;
         const command = await this.getCommandModel(guildId, commandName, "allowedRoles");
+        if (!ArrayUtils.isValidArray(command.allowedRoles)) {
+            return false;
+        }
         const {allowedRoles} = command;
         return allowedRoles.length === 1 && allowedRoles[0] === "*";
     }
