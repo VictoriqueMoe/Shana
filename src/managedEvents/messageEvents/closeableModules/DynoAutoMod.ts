@@ -66,6 +66,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(message.guild.id);
         const guildid = member.guild.id;
         const muteSingleton = container.resolve(MuteManager);
+        const {channel} = message;
         outer:
             for (const filter of violatedFilters) {
                 const actionsToTake = filter.actions;
@@ -104,7 +105,10 @@ export class DynoAutoMod extends CloseableModule<null> {
                             break;
                         }
                         case ACTION.WARN: {
-                            const warnResponse = await message.reply(filter.warnMessage);
+                            if (!(channel instanceof BaseGuildTextChannel)) {
+                                continue;
+                            }
+                            const warnResponse = await channel.send(filter.warnMessage);
                             setTimeout(async () => {
                                 try {
                                     await warnResponse.delete();

@@ -115,7 +115,7 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
     }
 
     public async unMute(userId: string, guildId: string, skipPersistence: boolean = false, t?: Transaction): Promise<void> {
-        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(userId);
+        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
         if (!mutedRole) {
             return;
         }
