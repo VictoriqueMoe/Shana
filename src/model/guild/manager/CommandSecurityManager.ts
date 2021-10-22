@@ -75,7 +75,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
 
     public async getPermissions(guild: Guild, commandName: string): Promise<ApplicationCommandPermissionData[]> {
         const guildId = guild.id;
-        const commands = await this.getAllCommandModel(guildId, commandName, "allowedRoles");
+        const commands = await this.getAllCommandModels(guildId, commandName, "allowedRoles");
         const allRoles = guild.roles.cache.map(role => role.id);
         return commands.flatMap(command => {
             let {allowedRoles} = command;
@@ -130,7 +130,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         });
     }
 
-    private async getAllCommandModel(guildId: string, commandName: string, ...attributes: string[]): Promise<CommandSecurityModel[]> {
+    private async getAllCommandModels(guildId: string, commandName: string, ...attributes: string[]): Promise<CommandSecurityModel[]> {
         return CommandSecurityModel.findAll({
             attributes,
             where: {
