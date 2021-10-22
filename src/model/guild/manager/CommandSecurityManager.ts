@@ -1,6 +1,6 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
-import {ApplicationCommandPermissionData, ClientEvents, Guild, GuildMember} from "discord.js";
+import {ApplicationCommandPermissionData, Guild, GuildMember} from "discord.js";
 import {Client, DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
 import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
 import {Typeings} from "../../types/Typeings";
@@ -19,6 +19,7 @@ import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules
 import {AutoRole} from "../../../events/closeableModules/autoRole/AutoRole";
 import {
     IPermissionEventListener,
+    RoleTypes,
     RoleUpdateTrigger
 } from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
@@ -45,7 +46,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         super();
     }
 
-    public async trigger(event: RoleUpdateTrigger, type: keyof ClientEvents): Promise<void> {
+    public async trigger(event: RoleUpdateTrigger, type: RoleTypes): Promise<void> {
         console.log(type);
     }
 
