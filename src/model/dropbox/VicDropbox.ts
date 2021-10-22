@@ -5,7 +5,7 @@ import {singleton} from "tsyringe";
 export class VicDropbox extends Dropbox {
     private imageCache: files.FolderMetadataReference[];
 
-    public constructor(private _dropbox?: Dropbox) {
+    public constructor() {
         super({
             accessToken: process.env.dropboxToken
         });
@@ -28,7 +28,7 @@ export class VicDropbox extends Dropbox {
 
     public async index(): Promise<void> {
         console.log("Indexing images...");
-        this.imageCache = ((await this._dropbox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
+        this.imageCache = ((await this.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
         console.log(`Indexed ${this.imageCache.length} images`);
     }
 }

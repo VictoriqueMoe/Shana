@@ -20,7 +20,7 @@ io.init({
 dotenv.config({path: __dirname + '/../.env'});
 
 export class Main {
-    public static testMode = false;
+    public static testMode = true;
 
     public static async start(): Promise<void> {
         DIService.container = container;

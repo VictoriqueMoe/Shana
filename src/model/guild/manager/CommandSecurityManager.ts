@@ -1,7 +1,7 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
 import {ApplicationCommandPermissionData, Guild, GuildMember} from "discord.js";
-import {DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
+import {Client, DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
 import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
 import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
@@ -37,7 +37,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
 
     private readonly _metadata = MetadataStorage.instance;
 
-    public constructor() {
+    public constructor(private _client: Client) {
         super();
     }
 
@@ -55,7 +55,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
     }
 
     public get commands(): AllCommands {
-        const simpleCommands = this._metadata.allSimpleCommands.map(value => value.command);
+        const simpleCommands = this._metadata.simpleCommands;
         const appCommands = this._metadata.allApplicationCommands;
         return [...simpleCommands, ...appCommands];
     }
@@ -118,7 +118,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
     }
 
     public async updateCommand(commandName: string, guildId: string, settings: UpdateCommandSettings): Promise<boolean> {
-        return (await CommandSecurityModel.update({
+        const result = await CommandSecurityModel.update({
             allowedRoles: settings.roles,
             enabled: settings.enabled
         }, {
@@ -126,7 +126,12 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
                 guildId,
                 commandName
             }
-        }))[0] === 1;
+        });
+        if (result[0] === 1) {
+            await this._client.initApplicationPermissions();
+            return true;
+        }
+        return false;
     }
 
     public async isEnabled(commandName: string, guildId: string): Promise<boolean> {
@@ -148,17 +153,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         });
     }
 
-    private async getAllCommandModels(guildId: string, commandName: string, ...attributes: string[]): Promise<CommandSecurityModel[]> {
-        return CommandSecurityModel.findAll({
-            attributes,
-            where: {
-                guildId,
-                "commandName": Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('commandName')), 'LIKE', `%${commandName}%`)
-            }
-        });
-    }
-
-    public async canRunCommand(member: GuildMember, commandName: string): Promise<boolean> {
+    /*public async canRunCommand(member: GuildMember, commandName: string): Promise<boolean> {
         if (GuildUtils.isMemberAdmin(member)) {
             return true;
         }
@@ -186,5 +181,5 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
             }
         }
         return false;
-    }
+    }*/
 }

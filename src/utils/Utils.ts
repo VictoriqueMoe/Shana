@@ -24,12 +24,10 @@ import {
 } from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
-import {Main} from "../Main";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {Model, Sequelize} from "sequelize-typescript";
 import {glob} from "glob";
 import * as path from "path";
-import {Channels} from "../enums/Channels";
 import {ChannelManager} from "../model/guild/manager/ChannelManager";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import {SettingsManager} from "../model/settings/SettingsManager";
@@ -42,7 +40,6 @@ import {FindOptions} from "sequelize/types/lib/model";
 import {container} from "tsyringe";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {Client} from "discordx";
-import {TriggerConstraint} from "../model/closeableModules/impl/TriggerConstraint";
 import {Beans} from "../DI/Beans";
 
 const emojiRegex = require('emoji-regex');
@@ -785,11 +782,7 @@ export namespace DiscordUtils {
     export async function postToLog(message: MessageEmbed[] | string, guildId: string, adminLog: boolean = false): Promise<Message | null> {
         let channel: BaseGuildTextChannel;
         const channelManager = container.resolve(ChannelManager);
-        if (Main.testMode) {
-            const client = container.resolve(Client);
-            const guild = await client.guilds.fetch(guildId);
-            channel = await guild.channels.resolve(Channels.TEST_CHANNEL) as BaseGuildTextChannel;
-        } else if (adminLog) {
+        if (adminLog) {
             channel = await channelManager.getAdminLogChannel(guildId);
         } else {
             channel = await channelManager.getLogChannel(guildId);
@@ -868,7 +861,7 @@ export namespace DiscordUtils {
     }
 
     export function getCloseableModules(): CloseableModule<any>[] {
-        return container.resolveAll<TriggerConstraint<any>>(Beans.ICloseableModuleToken);
+        return container.resolveAll<CloseableModule<any>>(Beans.ICloseableModuleToken);
     }
 
     export function getModule(moduleId: string): ICloseableModule<any> {
