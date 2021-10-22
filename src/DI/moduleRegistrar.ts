@@ -6,7 +6,7 @@ import {AbstractFilter} from "../model/closeableModules/subModules/dynoAutoMod/A
 
 export async function moduleRegistrar(): Promise<void> {
     container.afterResolution(
-        Beans.SubModuleProxyDescriptor.token,
+        Beans.ISubModuleToken,
         (_t, result: ISubModule[], resolutionType) => {
             const dynoAutoMod = container.resolve(DynoAutoMod);
             for (const subModule of result) {

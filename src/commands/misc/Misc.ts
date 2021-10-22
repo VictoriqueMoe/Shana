@@ -1,8 +1,10 @@
 import {
     Client,
     ContextMenu,
+    DefaultPermissionResolver,
     Discord,
     Guard,
+    Permission,
     SimpleCommand,
     SimpleCommandMessage,
     Slash,
@@ -118,6 +120,8 @@ const isImageFast = require('is-image-fast');
     }
 ])
 @SlashGroup("miscellaneous", "Miscellaneous commands")
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
 export class Misc extends AbstractCommandModule {
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);

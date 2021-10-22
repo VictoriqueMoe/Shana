@@ -1,4 +1,4 @@
-import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {injectable} from "tsyringe";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {MessageScheduleManager} from "../../model/guild/manager/MessageScheduleManager";
@@ -71,6 +71,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
     }
 ])
 @SlashGroup("messageschedule", "Commands to schedule posts to channels")
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
 export class MessageSchedule extends AbstractCommandModule {
     public constructor(private _messageScheduleManager: MessageScheduleManager, private _client: Client) {

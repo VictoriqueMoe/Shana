@@ -12,7 +12,6 @@ import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings
 import {TimedSet} from "../../../model/Impl/TimedSet";
 import {container, injectable} from "tsyringe";
 import {RoleApplier} from "../../customAutoMod/RoleApplier/RoleApplier";
-import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 class JoinEntry {
     constructor(public joinCount: number) {
@@ -136,7 +135,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             return;
         }
         if (settings.minAccountAge > 0) {
-            const convertedTime = TimeUtils.convertToMilli(settings.minAccountAge, TIME_UNIT.days);
+            const convertedTime = TimeUtils.convertToMilli(settings.minAccountAge, TimeUtils.TIME_UNIT.days);
             const memberCreated = member.user.createdAt.getTime();
             const now = Date.now();
             const accountAge = now - memberCreated;

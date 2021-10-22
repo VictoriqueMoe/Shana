@@ -1,4 +1,4 @@
-import {DiscordUtils, ObjectUtil} from "../utils/Utils";
+import {DiscordUtils} from "../utils/Utils";
 import {GuardFunction, SimpleCommandMessage} from "discordx";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {CommandInteraction, ContextMenuInteraction} from "discord.js";
@@ -21,22 +21,13 @@ export const secureCommandInteraction: GuardFunction<CommandInteraction | Simple
     }
     const securityManager = container.resolve(CommandSecurityManager);
     const isEnabled = await securityManager.isEnabled(commandName, guildId);
+    if (isEnabled) {
+        return next();
+    }
     if (arg instanceof SimpleCommandMessage) {
-        const message = arg.message;
-        const member = message.member;
-        const guildId = message.guildId;
-        if (!ObjectUtil.validString(commandName) || !ObjectUtil.validString(guildId) || !member) {
-            return;
-        }
-        const canRun = await securityManager.canRunCommand(member, commandName);
-        if (canRun && isEnabled) {
-            return next();
-        }
-        return message.reply("you do not have permissions to use this command");
+        const {message} = arg;
+        return message.reply("This command is not enabled");
     } else {
-        if (isEnabled) {
-            return next();
-        }
-        return DiscordUtils.InteractionUtils.replyOrFollowUp(arg, `you do not have permissions to the command: "${commandName}"`, false);
+        return DiscordUtils.InteractionUtils.replyOrFollowUp(arg, `This command is not enabled`, true);
     }
 };

@@ -1,5 +1,5 @@
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
-import {Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {DiscordUtils} from "../../utils/Utils";
@@ -45,6 +45,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         ]
     }
 ])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("username", "Commands to set usernames for people")
 export abstract class Username extends AbstractCommandModule {
 

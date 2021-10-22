@@ -1,6 +1,6 @@
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {RoleJoinerModel} from "../../model/DB/guild/RoleJoiner.model";
-import {Discord, SelectMenuComponent, Slash, SlashGroup} from "discordx";
+import {DefaultPermissionResolver, Discord, Permission, SelectMenuComponent, Slash, SlashGroup} from "discordx";
 import {
     CommandInteraction,
     GuildMember,
@@ -24,6 +24,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         "description": "Initialise the role join dropdown and buttons"
     }
 ])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("rolejoiner", "Commands to allow users to join vanity roles")
 export class RoleJoiner extends AbstractCommandModule {
 

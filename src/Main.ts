@@ -27,6 +27,7 @@ export class Main {
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         await moduleRegistrar();
+        const dbName = Main.testMode ? "database_test.sqlite" : "database.sqlite";
         const dao = new Sequelize('database', '', '', {
             host: 'localhost',
             dialect: 'sqlite',
@@ -35,7 +36,7 @@ export class Main {
                     // console.log(sql, timing);
                 }
             },
-            storage: 'database.sqlite',
+            storage: dbName,
             models: [__dirname + '/model/DB/**/*.model.{ts,js}'],
             modelMatch: (filename, member): boolean => {
                 return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
@@ -44,7 +45,9 @@ export class Main {
         await dao.sync({force: false});
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
-            prefix: container.resolve(SettingsManager).getPrefix,
+            simpleCommand: {
+                prefix: container.resolve(SettingsManager).getPrefix
+            },
             classes: [
                 `${__dirname}/{commands,events}/**/*.{ts,js}`
             ],
@@ -67,7 +70,7 @@ export class Main {
             silent: false,
         });
         registerInstance(dao, client);
-        await client.login(process.env.token);
+        await client.login(Main.testMode ? process.env.test_token : process.env.token);
     }
 }
 

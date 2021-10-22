@@ -2,7 +2,6 @@ import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../../utils/Utils";
 import {BaseGuildTextChannel, Channel, GuildChannel, MessageEmbed, ThreadChannel} from "discord.js";
-import TIME_UNIT = TimeUtils.TIME_UNIT;
 import ChannelUpdate = DiscordUtils.ChannelUpdate;
 import ThreadUpdate = DiscordUtils.ThreadUpdate;
 
@@ -107,7 +106,7 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         const architectTime = thread.autoArchiveDuration;
         let timeToDisplay: string;
         if (architectTime !== "MAX") {
-            const millis = TimeUtils.convertToMilli(thread.autoArchiveDuration as number, TIME_UNIT.minutes);
+            const millis = TimeUtils.convertToMilli(thread.autoArchiveDuration as number, TimeUtils.TIME_UNIT.minutes);
             timeToDisplay = ObjectUtil.timeToHuman(millis);
         } else {
             timeToDisplay = "max";
@@ -197,8 +196,8 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
                 let afterValue = value.after ? value.after : "None";
 
                 if (name === "archiveDuration") {
-                    const oldMillis = TimeUtils.convertToMilli(beforeValue as number, TIME_UNIT.minutes);
-                    const newMillis = TimeUtils.convertToMilli(afterValue as number, TIME_UNIT.minutes);
+                    const oldMillis = TimeUtils.convertToMilli(beforeValue as number, TimeUtils.TIME_UNIT.minutes);
+                    const newMillis = TimeUtils.convertToMilli(afterValue as number, TimeUtils.TIME_UNIT.minutes);
                     beforeValue = ObjectUtil.timeToHuman(oldMillis);
                     afterValue = ObjectUtil.timeToHuman(newMillis);
                 }

@@ -1,10 +1,21 @@
 import {ApplicationCommandPermissionData, Guild} from "discord.js";
 import {container} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
+import {ApplicationCommandMixin, ApplicationGuildMixin, SimpleCommandMessage} from "discordx";
 
 export abstract class AbstractCommandModule {
-    protected static async getPermissions(guild: Guild, commandName: string): Promise<ApplicationCommandPermissionData[]> {
+    protected static async getPermissions(guild: Guild, command: ApplicationCommandMixin | SimpleCommandMessage): Promise<ApplicationCommandPermissionData[]> {
         const securityManger = container.resolve(CommandSecurityManager);
-        return securityManger.getPermissions(guild, commandName);
+        return securityManger.getPermissions(guild, command.name);
+    }
+
+    protected static async getDefaultPermissionAllow(mixin: SimpleCommandMessage | ApplicationGuildMixin): Promise<boolean> {
+        const {name} = mixin;
+        const guild = mixin instanceof SimpleCommandMessage ? mixin?.message?.guild : mixin.guild;
+        if (!guild) {
+            return false;
+        }
+        const securityManger = container.resolve(CommandSecurityManager);
+        return securityManger.getDefaultPermissionAllow(guild, name);
     }
 }

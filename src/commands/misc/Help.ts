@@ -1,4 +1,13 @@
-import {Client, Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
+/*
+import {
+    Client,
+    DefaultPermissionResolver,
+    Discord,
+    Guard,
+    Permission,
+    SimpleCommand,
+    SimpleCommandMessage
+} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {ArrayUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {GuildMember, MessageEmbed} from "discord.js";
@@ -41,6 +50,8 @@ import Command = Typeings.Command;
         "description": "Get the description of a command or all commands"
     }
 ])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
 export class Help extends AbstractCommandModule {
 
@@ -188,4 +199,4 @@ export class Help extends AbstractCommandModule {
             embed.addField(nameToDisplay, fieldValue, resultOfPage.length > 5);
         }
     }
-}
+}*/

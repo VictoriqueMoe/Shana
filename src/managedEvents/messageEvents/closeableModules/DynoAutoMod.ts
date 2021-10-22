@@ -15,14 +15,13 @@ import {MessageListenerDecorator} from "../../../model/decorators/messageListene
 import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
 import {notBot} from "../../../guards/NotABot";
 import {container, singleton} from "tsyringe";
-import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 @singleton()
 export class DynoAutoMod extends CloseableModule<null> {
 
     private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
 
-    constructor(private _client: Client) {
+    constructor(private _client: Client, private _muteManager: MuteManager) {
         super(CloseOptionModel);
     }
 
@@ -65,7 +64,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         violatedFilters.sort((a, b) => a.priority - b.priority);
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(message.guild.id);
         const guildid = member.guild.id;
-        const muteSingleton = container.resolve(MuteManager);
+        const {channel} = message;
         outer:
             for (const filter of violatedFilters) {
                 const actionsToTake = filter.actions;
@@ -76,7 +75,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                             if (!mutedRole) {
                                 continue;
                             }
-                            if (await muteSingleton.isMuted(member)) {
+                            if (await this._muteManager.isMuted(member)) {
                                 continue;
                             }
                             let fromArray = this.getFromArray(userId, guildid);
@@ -104,6 +103,9 @@ export class DynoAutoMod extends CloseableModule<null> {
                             break;
                         }
                         case ACTION.WARN: {
+                            if (!(channel instanceof BaseGuildTextChannel)) {
+                                continue;
+                            }
                             const warnResponse = await message.reply(filter.warnMessage);
                             setTimeout(async () => {
                                 try {
@@ -153,7 +155,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         const model = await muteSingleton.muteUser(user, reason, creatorID, seconds);
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
-            const humanMuted = ObjectUtil.timeToHuman(seconds, TIME_UNIT.seconds);
+            const humanMuted = ObjectUtil.timeToHuman(seconds, TimeUtils.TIME_UNIT.seconds);
             await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${humanMuted}`, user.guild.id);
             if (channel) {
                 await channel.send(`<@${user.id}>, you have been muted for ${humanMuted} due to the violation of the ${violationObj.filterId}`);

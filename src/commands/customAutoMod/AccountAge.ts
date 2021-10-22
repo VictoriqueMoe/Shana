@@ -1,4 +1,4 @@
-import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
@@ -40,6 +40,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         }]
     }
 ])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("ages", "commands to get ages of accounts and servers")
 @injectable()
 export class AccountAge extends AbstractCommandModule {

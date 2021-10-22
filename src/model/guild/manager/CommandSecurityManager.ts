@@ -5,13 +5,33 @@ import {DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} fr
 import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
 import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
-import {container, singleton} from "tsyringe";
+import {container, registry, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
 import {PostConstruct} from "../../decorators/PostConstruct";
+import {MemberLogger} from "../../../events/closeableModules/logging/admin/MemberLogger";
+import {AuditLogger} from "../../../events/closeableModules/logging/mod/AuditLogger";
+import {RoleLogger} from "../../../events/closeableModules/logging/admin/RoleLogger";
+import {MessageLogger} from "../../../events/closeableModules/logging/admin/MessageLogger";
+import {Beans} from "../../../DI/Beans";
+import {AutoResponder} from "../../../managedEvents/messageEvents/closeableModules/AutoResponder";
+import {ChannelLogger} from "../../../events/closeableModules/logging/admin/ChannelLogger";
+import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
+import {AutoRole} from "../../../events/closeableModules/autoRole/AutoRole";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
 
+@registry([
+    {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
+    {token: Beans.ICloseableModuleToken, useToken: DynoAutoMod},
+    {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
+    {token: Beans.ICloseableModuleToken, useToken: RoleLogger},
+    {token: Beans.ICloseableModuleToken, useToken: MemberLogger},
+    {token: Beans.ICloseableModuleToken, useToken: ChannelLogger},
+    {token: Beans.ICloseableModuleToken, useToken: MessageLogger},
+    {token: Beans.ICloseableModuleToken, useToken: AutoRole},
+    {token: Beans.ICloseableModuleToken, useToken: AutoResponder}
+])
 @singleton()
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
 
@@ -73,29 +93,27 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         return retArray;
     }
 
+    public async getDefaultPermissionAllow(guild: Guild, commandName: string): Promise<boolean> {
+        const guildId = guild.id;
+        const command = await this.getCommandModel(guildId, commandName, "allowedRoles");
+        const {allowedRoles} = command;
+        return allowedRoles.length === 1 && allowedRoles[0] === "*";
+    }
+
     public async getPermissions(guild: Guild, commandName: string): Promise<ApplicationCommandPermissionData[]> {
         const guildId = guild.id;
-        const commands = await this.getAllCommandModels(guildId, commandName, "allowedRoles");
-        const allRoles = guild.roles.cache.map(role => role.id);
-        return commands.flatMap(command => {
-            let {allowedRoles} = command;
-            let permission = true;
-            if (!ArrayUtils.isValidArray(allowedRoles)) {
-                // if empty array then only admins
-                allowedRoles = allRoles;
-                permission = false;
-            } else if (allowedRoles.length === 1 && allowedRoles[0] === "*") {
-                // if "*"  then everyone
-                allowedRoles = allRoles;
-                permission = true;
-            }
-            return allowedRoles.map(allowedRole => {
-                return {
-                    id: allowedRole,
-                    type: "ROLE",
-                    permission
-                };
-            });
+        const command = await this.getCommandModel(guildId, commandName, "allowedRoles");
+        const {allowedRoles} = command;
+        if (!ArrayUtils.isValidArray(allowedRoles) || allowedRoles.length === 1 && allowedRoles[0] === "*") {
+            // everyone or admin only return empty array
+            return [];
+        }
+        return allowedRoles.map(allowedRole => {
+            return {
+                id: allowedRole,
+                type: "ROLE",
+                permission: true
+            };
         });
     }
 

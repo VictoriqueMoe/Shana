@@ -1,4 +1,4 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
 import {Collection, Message, Snowflake} from "discord.js";
@@ -28,6 +28,8 @@ import EmojiInfo = DiscordUtils.EmojiInfo;
         options: []
     }
 ])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 export abstract class ResourceBanner extends AbstractCommandModule {
 
     public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false): Promise<BannedAttachmentsModel> {

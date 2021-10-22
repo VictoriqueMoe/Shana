@@ -1,4 +1,4 @@
-import {Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {AbstractCommandModule} from "../AbstractCommandModule";
@@ -26,8 +26,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         options: []
     }
 ])
-
-
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("vicimage", "Obtain images of Victorique#0002")
 @injectable()
 export class VicImage extends AbstractCommandModule {
@@ -36,8 +36,6 @@ export class VicImage extends AbstractCommandModule {
         super();
     }
 
-    @Permission(false)
-    @Permission(guild => AbstractCommandModule.getPermissions(guild, "vicimage"))
     @Slash("vicimage", {
         description: "Get a random image of Victorique#0002"
     })
@@ -63,8 +61,6 @@ export class VicImage extends AbstractCommandModule {
     }
 
 
-    @Permission(false)
-    @Permission(guild => AbstractCommandModule.getPermissions(guild, "vicreindex"))
     @Slash("vicreindex", {
         description: "Get a random image of Victorique#0002"
     })

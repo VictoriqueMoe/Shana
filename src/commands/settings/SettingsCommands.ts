@@ -1,4 +1,13 @@
-import {Discord, Guard, Slash, SlashChoice, SlashGroup, SlashOption} from "discordx";
+import {
+    DefaultPermissionResolver,
+    Discord,
+    Guard,
+    Permission,
+    Slash,
+    SlashChoice,
+    SlashGroup,
+    SlashOption
+} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
@@ -12,7 +21,6 @@ import {injectable} from "tsyringe";
 import {Typeings} from "../../model/types/Typeings";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
-import TIME_UNIT = TimeUtils.TIME_UNIT;
 import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
 
 
@@ -49,6 +57,8 @@ import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
     set: "Command to set settings",
     get: "Commands to get settings"
 })
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
 export class SettingsCommands extends AbstractCommandModule {
 
@@ -165,7 +175,7 @@ export class SettingsCommands extends AbstractCommandModule {
             let value = settings[setting];
             switch (setting as keyof AutoRoleSettings) {
                 case "minAccountAge": {
-                    value = ObjectUtil.timeToHuman(value, TIME_UNIT.days);
+                    value = ObjectUtil.timeToHuman(value, TimeUtils.TIME_UNIT.days);
                     break;
                 }
                 case "autoRoleTimeout": {
@@ -187,6 +197,4 @@ export class SettingsCommands extends AbstractCommandModule {
             ephemeral: true
         });
     }
-
-
 }

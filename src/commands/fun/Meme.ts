@@ -8,7 +8,7 @@ import {
 } from "../../model/Impl/ImageFun/Typeings";
 import {AssertionError} from "assert";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {injectable} from "tsyringe";
 import {Category} from "@discordx/utilities";
@@ -1034,6 +1034,8 @@ import {Category} from "@discordx/utilities";
         ]
     }
 ])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
 export class Meme extends AbstractCommandModule {
 

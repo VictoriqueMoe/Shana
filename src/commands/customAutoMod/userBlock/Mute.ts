@@ -1,4 +1,14 @@
-import {ContextMenu, Discord, Guard, Slash, SlashChoice, SlashGroup, SlashOption} from "discordx";
+import {
+    ContextMenu,
+    DefaultPermissionResolver,
+    Discord,
+    Guard,
+    Permission,
+    Slash,
+    SlashChoice,
+    SlashGroup,
+    SlashOption
+} from "discordx";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {NotBotInteraction} from "../../../guards/NotABot";
@@ -8,7 +18,6 @@ import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {AbstractCommandModule} from "../../AbstractCommandModule";
 import {injectable} from "tsyringe";
 import {Category} from "@discordx/utilities";
-import TIME_UNIT = TimeUtils.TIME_UNIT;
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -57,6 +66,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         options: []
     }
 ])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("mute", "Commands to mute people from servers")
 @injectable()
 export class Mute extends AbstractCommandModule {
@@ -85,7 +96,7 @@ export class Mute extends AbstractCommandModule {
         }
         let replyMessage: string;
         try {
-            replyMessage = await this.muteUser(member, creator, guildId, "N/A", 30, TIME_UNIT.minutes);
+            replyMessage = await this.muteUser(member, creator, guildId, "N/A", 30, TimeUtils.TIME_UNIT.minutes);
             return InteractionUtils.replyOrFollowUp(interaction, replyMessage);
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, (<Error>e).message);
@@ -113,12 +124,12 @@ export class Mute extends AbstractCommandModule {
             type: "INTEGER"
         })
             timeout: number,
-        @SlashChoice(TIME_UNIT)
+        @SlashChoice(TimeUtils.TIME_UNIT)
         @SlashOption("timeunit", {
             description: "The time unit used to specify how long a user should be muted",
             required: true
         })
-            timeUnit: TIME_UNIT,
+            timeUnit: TimeUtils.TIME_UNIT,
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
@@ -143,7 +154,7 @@ export class Mute extends AbstractCommandModule {
         }
     }
 
-    private async muteUser(mentionedMember: GuildMember, creator: GuildMember, guildId: string, reason: string, timeout: number, timeUnit: TIME_UNIT): Promise<string> {
+    private async muteUser(mentionedMember: GuildMember, creator: GuildMember, guildId: string, reason: string, timeout: number, timeUnit: TimeUtils.TIME_UNIT): Promise<string> {
         const creatorID = creator.id;
         const blockedUserId = mentionedMember.id;
         const didYouBlockABot = mentionedMember.user.bot;

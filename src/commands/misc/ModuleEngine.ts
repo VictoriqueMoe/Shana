@@ -1,4 +1,4 @@
-import {Discord, Guard, Slash, SlashOption} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashOption} from "discordx";
 import {DiscordUtils} from "../../utils/Utils";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {AbstractCommandModule} from "../AbstractCommandModule";
@@ -35,6 +35,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         "description": "Return a list of all modules to use with the 'enableModule' command"
     }
 ])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 export abstract class ModuleEngine extends AbstractCommandModule {
 
     @Slash("enablemodule", {

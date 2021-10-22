@@ -1,4 +1,4 @@
-import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {secureCommandInteraction} from "../../guards/RoleConstraint";
 import {
@@ -48,6 +48,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
     }
 ])
 @SlashGroup("music", "Commands to play music from Youtube")
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
 export class Music extends AbstractCommandModule {
     constructor(private _player: Player, private _client: Client) {
