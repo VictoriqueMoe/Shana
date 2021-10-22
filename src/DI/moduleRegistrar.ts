@@ -1,12 +1,13 @@
 import {container} from "tsyringe";
-import {Beans} from "./Beans";
 import {ISubModule} from "../model/closeableModules/subModules/ISubModule";
 import {DynoAutoMod} from "../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {AbstractFilter} from "../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
+import {Beans} from "./Beans";
+import ISubModuleToken = Beans.ISubModuleToken;
 
 export async function moduleRegistrar(): Promise<void> {
     container.afterResolution(
-        Beans.SubModuleProxyDescriptor.token,
+        ISubModuleToken,
         (_t, result: ISubModule[], resolutionType) => {
             const dynoAutoMod = container.resolve(DynoAutoMod);
             for (const subModule of result) {

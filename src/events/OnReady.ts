@@ -275,8 +275,8 @@ export class OnReady extends BaseDAO<any> {
     private async populateClosableEvents(): Promise<void> {
         const commandSecurityManager = container.resolve(CommandSecurityManager);
         const allModules: CloseableModule<any>[] = commandSecurityManager.events;
-        for (const module of allModules) {
-            await this._dao.transaction(async transaction => {
+        await this._dao.transaction(async transaction => {
+            for (const module of allModules) {
                 for (const [guildId, guild] of this._client.guilds.cache) {
                     const moduleId = module.moduleId;
                     const modelPersisted = await CloseOptionModel.findOne({
@@ -306,8 +306,9 @@ export class OnReady extends BaseDAO<any> {
                         }
                     }
                 }
-            });
-        }
+            }
+        });
+
     }
 
     private static async startServer(): Promise<void> {

@@ -15,7 +15,6 @@ import {MessageListenerDecorator} from "../../../model/decorators/messageListene
 import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
 import {notBot} from "../../../guards/NotABot";
 import {container, singleton} from "tsyringe";
-import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 @singleton()
 export class DynoAutoMod extends CloseableModule<null> {
@@ -157,7 +156,7 @@ export class DynoAutoMod extends CloseableModule<null> {
         const model = await muteSingleton.muteUser(user, reason, creatorID, seconds);
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
-            const humanMuted = ObjectUtil.timeToHuman(seconds, TIME_UNIT.seconds);
+            const humanMuted = ObjectUtil.timeToHuman(seconds, TimeUtils.TIME_UNIT.seconds);
             await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${humanMuted}`, user.guild.id);
             if (channel) {
                 await channel.send(`<@${user.id}>, you have been muted for ${humanMuted} due to the violation of the ${violationObj.filterId}`);

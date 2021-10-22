@@ -6,12 +6,33 @@ import {GuildUtils} from "../../../utils/Utils";
 import {AbstractCommandModule} from "../../../commands/AbstractCommandModule";
 import {Typeings} from "../../types/Typeings";
 import {Sequelize} from "sequelize-typescript";
-import {container, singleton} from "tsyringe";
+import {container, registry, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
 import {PostConstruct} from "../../decorators/PostConstruct";
 import {CloseableModule} from "../../closeableModules/impl/CloseableModule";
+import {MemberLogger} from "../../../events/closeableModules/logging/admin/MemberLogger";
+import {MessageLogger} from "../../../events/closeableModules/logging/admin/MessageLogger";
+import {AutoResponder} from "../../../managedEvents/messageEvents/closeableModules/AutoResponder";
+import {ChannelLogger} from "../../../events/closeableModules/logging/admin/ChannelLogger";
+import {AutoRole} from "../../../events/closeableModules/autoRole/AutoRole";
+import {Beans} from "../../../DI/Beans";
+import {AuditLogger} from "../../../events/closeableModules/logging/mod/AuditLogger";
+import {RoleLogger} from "../../../events/closeableModules/logging/admin/RoleLogger";
+import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
+import ICloseableModuleToken = Beans.ICloseableModuleToken;
 
+@registry([
+    {token: ICloseableModuleToken, useToken: AuditLogger},
+    {token: ICloseableModuleToken, useToken: DynoAutoMod},
+    {token: ICloseableModuleToken, useToken: AuditLogger},
+    {token: ICloseableModuleToken, useToken: RoleLogger},
+    {token: ICloseableModuleToken, useToken: MemberLogger},
+    {token: ICloseableModuleToken, useToken: ChannelLogger},
+    {token: ICloseableModuleToken, useToken: MessageLogger},
+    {token: ICloseableModuleToken, useToken: AutoRole},
+    {token: ICloseableModuleToken, useToken: AutoResponder}
+])
 @singleton()
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
     private _commandsAndEvents: (CloseableModule<any> | AbstractCommandModule<any>)[];
@@ -26,8 +47,13 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> {
         this._commandsAndEvents = [];
         for (const classRef of appClasses) {
             const instance = container.resolve(classRef as constructor<any>);
+            if (instance instanceof CloseableModule) {
+                continue;
+            }
             this._commandsAndEvents.push(instance);
         }
+        const closeableModules = container.resolveAll<CloseableModule<any>>(ICloseableModuleToken);
+        this._commandsAndEvents.push(...closeableModules);
     }
 
     public get commandsAndEvents(): (CloseableModule<any> | AbstractCommandModule<any>)[] {

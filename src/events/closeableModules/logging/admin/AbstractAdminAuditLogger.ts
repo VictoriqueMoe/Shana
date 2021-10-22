@@ -5,7 +5,7 @@ import {DiscordUtils, GuildUtils} from "../../../../utils/Utils";
 
 export abstract class AbstractAdminAuditLogger extends CloseableModule<null> {
 
-    protected constructor() {
+    public constructor() {
         super(CloseOptionModel);
     }
 
