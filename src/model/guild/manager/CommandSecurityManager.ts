@@ -1,6 +1,6 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
-import {ApplicationCommandPermissionData, Guild, GuildMember} from "discord.js";
+import {ApplicationCommandPermissions, Guild, GuildMember, Permissions} from "discord.js";
 import {Client, DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
 import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
 import {Typeings} from "../../types/Typeings";
@@ -46,10 +46,6 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         super();
     }
 
-    public async trigger(event: RoleUpdateTrigger, type: RoleTypes): Promise<void> {
-        console.log(type);
-    }
-
     @PostConstruct
     private async init(): Promise<void> {
         const appClasses = DIService.allServices;
@@ -58,6 +54,18 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         }
     }
 
+    public async trigger([event]: RoleUpdateTrigger, type: RoleTypes): Promise<void> {
+        const {guild} = event;
+        console.log(`Reloading command permissions for guild: "${guild.name}"`);
+        const commandsByGuild = await this._client.CommandByGuild();
+        const pArr: Promise<void>[] = [];
+        for (const [, guildCommand] of commandsByGuild) {
+            pArr.push(this._client.initGuildApplicationPermissions(guild.id, guildCommand));
+        }
+        return Promise.all(pArr).then(() => {
+            console.log(`Permissions for guild ${guild.name} has been reloaded`);
+        });
+    }
 
     public get events(): readonly DOn[] {
         return this._metadata.events;
@@ -112,13 +120,21 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         return allowedRoles.length === 1 && allowedRoles[0] === "*";
     }
 
-    public async getPermissions(guild: Guild, commandName: string): Promise<ApplicationCommandPermissionData[]> {
+    public async getPermissions(guild: Guild, commandName: string): Promise<ApplicationCommandPermissions[]> {
         const guildId = guild.id;
         const command = await this.getCommandModel(guildId, commandName, "allowedRoles");
-        const {allowedRoles} = command;
-        if (!ArrayUtils.isValidArray(allowedRoles) || allowedRoles.length === 1 && allowedRoles[0] === "*") {
-            // everyone or admin only return empty array
+        let {allowedRoles} = command;
+        if (allowedRoles.length === 1 && allowedRoles[0] === "*") {
+            // everyone access
             return [];
+        }
+        if (!ArrayUtils.isValidArray(allowedRoles)) {
+            // only admins
+            const roles = guild.roles.cache;
+            const adminRoles = roles.filter(role => {
+                return role.permissions.has(Permissions.FLAGS.ADMINISTRATOR, true);
+            });
+            allowedRoles = adminRoles.map(role => role.id);
         }
         return allowedRoles.map(allowedRole => {
             return {

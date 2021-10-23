@@ -117,6 +117,12 @@ const isImageFast = require('is-image-fast');
             }
         ],
         "description": "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text."
+    },
+    {
+        "name": "initServerCommandPermissions",
+        "type": "SLASH",
+        "options": [],
+        "description": "Re-init all command permissions for this server."
     }
 ])
 @SlashGroup("miscellaneous", "Miscellaneous commands")
@@ -130,6 +136,27 @@ export class Misc extends AbstractCommandModule {
 
     constructor(private _client: Client) {
         super();
+    }
+
+    @Slash("initservercommandpermissions", {
+        description: "Re-init all command permissions for this server"
+    })
+    @Guard(NotBotInteraction, secureCommandInteraction)
+    private async initServerCommandPermissions(
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply({
+            ephemeral: true
+        });
+        const {guild} = interaction;
+        const commandsByGuild = await this._client.CommandByGuild();
+        const pArr: Promise<void>[] = [];
+        for (const [, guildCommand] of commandsByGuild) {
+            pArr.push(this._client.initGuildApplicationPermissions(guild.id, guildCommand));
+        }
+        return Promise.all(pArr).then(() => {
+            InteractionUtils.replyOrFollowUp(interaction, `Permissions for guild ${guild.name} has been reloaded`);
+        });
     }
 
     @Slash("generatetext", {

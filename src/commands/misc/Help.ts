@@ -199,4 +199,5 @@ export class Help extends AbstractCommandModule {
             embed.addField(nameToDisplay, fieldValue, resultOfPage.length > 5);
         }
     }
-}*/
+}
+*/

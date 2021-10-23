@@ -17,6 +17,7 @@ import {
     Permissions,
     Role,
     StaticImageURLOptions,
+    Sticker,
     TextChannel,
     ThreadAutoArchiveDuration,
     ThreadChannel,
@@ -372,6 +373,8 @@ export namespace DiscordUtils {
         "id": string
     };
 
+    export type StickerInfo = EmojiInfo;
+
     export function getClient(): Client {
         return container.resolve(Client);
     }
@@ -380,6 +383,27 @@ export namespace DiscordUtils {
         const guildManager = container.resolve(GuildManager);
         const guild = await guildManager.getGuild(guildId);
         return guild.me;
+    }
+
+    export async function getStickerInfo(sticker: Sticker, includeBuffer: boolean = true): Promise<StickerInfo> {
+        const {url, format, id} = sticker;
+        const retObj: StickerInfo = {
+            url,
+            id
+        };
+        if (!includeBuffer) {
+            return retObj;
+        }
+        if (format === "LOTTIE") {
+            retObj["buffer"] = Buffer.from(url, 'utf8');
+        } else {
+            try {
+                retObj["buffer"] = await DiscordUtils.loadResourceFromURL(url);
+            } catch {
+
+            }
+        }
+        return retObj;
     }
 
     export async function getEmojiInfo(emojiId: string, includeBuffer: boolean = true): Promise<EmojiInfo> {

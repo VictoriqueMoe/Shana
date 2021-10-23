@@ -3,7 +3,7 @@ import {Sequelize} from "sequelize-typescript";
 import * as dotenv from "dotenv";
 import {ObjectUtil} from "./utils/Utils";
 import * as v8 from "v8";
-import {Client, DIService} from "discordx";
+import {Client, DIService, SimpleCommandMessage} from "discordx";
 import {Intents} from "discord.js";
 import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 import {container} from "tsyringe";
@@ -46,7 +46,12 @@ export class Main {
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             simpleCommand: {
-                prefix: container.resolve(SettingsManager).getPrefix
+                prefix: container.resolve(SettingsManager).getPrefix,
+                responses: {
+                    unauthorised: (command: SimpleCommandMessage): void => {
+                        console.log(command);
+                    }
+                }
             },
             classes: [
                 `${__dirname}/{commands,events}/**/*.{ts,js}`
