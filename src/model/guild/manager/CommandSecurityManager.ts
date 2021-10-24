@@ -56,8 +56,16 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         }
     }
 
-    public async trigger([event]: RoleUpdateTrigger, type: RoleTypes): Promise<void> {
-        const {guild} = event;
+    public async trigger([oldRole, newRole]: RoleUpdateTrigger, type: RoleTypes): Promise<void> {
+        const {guild} = oldRole;
+        if (type === "roleUpdate") {
+            // was it a role that was removed/added to admin?
+            const added = oldRole.permissions.missing(newRole.permissions.bitfield);
+            const removed = newRole.permissions.missing(oldRole.permissions.bitfield);
+            if (!(added.includes("ADMINISTRATOR") || removed.includes("ADMINISTRATOR"))) {
+                return;
+            }
+        }
         console.log(`Reloading command permissions for guild: "${guild.name}"`);
         const commandsByGuild = await this._client.CommandByGuild();
         const commands = commandsByGuild.get(guild.id);
