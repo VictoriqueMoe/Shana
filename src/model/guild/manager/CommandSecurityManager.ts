@@ -22,7 +22,7 @@ import {
     RoleTypes,
     RoleUpdateTrigger
 } from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
-import {ICategory} from "@discordx/utilities/build/category";
+import {ICategory, ICategoryItem, ICategoryItemCommand} from "@discordx/utilities/build/category";
 import {CategoryMetaData} from "@discordx/utilities";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
@@ -94,6 +94,48 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
             }
             return [name];
         });
+    }
+
+    public async getCommandsForMember(member: GuildMember, category: ICategory): Promise<(ICategoryItem | ICategoryItemCommand)[]> {
+
+        function populateArray(this: CommandSecurityManager, command: CommandSecurityModel, item: (ICategoryItem | ICategoryItemCommand)): boolean {
+            if (command.allowedRoles.includes("*")) {
+                retArr.push(item);
+                return true;
+            }
+            const inArray = command.allowedRoles.some(value => memberRoles.includes(value));
+            if (inArray) {
+                retArr.push(item);
+                return true;
+            }
+            return false;
+        }
+
+        const retArr: (ICategoryItem | ICategoryItemCommand)[] = [];
+        const memberRoles = [...member.roles.cache.keys()];
+        const {items} = category;
+        const allCommands = await CommandSecurityModel.findAll({
+            where: {
+                guildId: member.guild.id,
+                allowedRoles: memberRoles
+            }
+        });
+        const isCategory = allCommands.find(command => command.commandName.toLowerCase() === category.name.toLowerCase());
+        if (isCategory) {
+            for (const item of category.items) {
+                retArr.push(item);
+            }
+        } else {
+            for (const item of items) {
+                const {name} = item;
+                const command = allCommands.find(command => command.commandName.toLowerCase() === name.toLowerCase());
+                if (!command) {
+                    continue;
+                }
+                populateArray.call(this, command, item);
+            }
+        }
+        return retArr;
     }
 
     /**
@@ -225,33 +267,11 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         });
     }
 
-    public async canRunCommand(member: GuildMember, commandName: string): Promise<boolean> {
+    public async canRunCommand(member: GuildMember, category: ICategory, command: (ICategoryItem | ICategoryItemCommand)): Promise<boolean> {
         if (GuildUtils.isMemberAdmin(member)) {
             return true;
         }
-        const allCommands = await CommandSecurityModel.findAll({
-            where: {
-                guildId: member.guild.id
-            }
-        });
-        const memberRoles = [...member.roles.cache.keys()];
-        for (const commandClass of this.commands) {
-            const {name} = commandClass;
-            if (commandName.toUpperCase() !== name.toUpperCase()) {
-                continue;
-            }
-            const command = allCommands.find(command => command.commandName === name);
-            if (!command) {
-                continue;
-            }
-            if (command.allowedRoles.includes("*")) {
-                return true;
-            }
-            const inArray = command.allowedRoles.some(value => memberRoles.includes(value));
-            if (inArray) {
-                return true;
-            }
-        }
-        return false;
+        const commandsForCat = await this.getCommandsForMember(member, category);
+        return commandsForCat.find(commandFromCat => commandFromCat === command) != null;
     }
 }

@@ -9,7 +9,7 @@ import {
     Slash,
     SlashGroup
 } from "discordx";
-import {Category, CategoryMetaData, sendPaginatedEmbeds} from "@discordx/utilities";
+import {Category, CategoryMetaData, ICategoryAttachment, ICategoryItemOption} from "@discordx/utilities";
 import {
     CommandInteraction,
     GuildMember,
@@ -24,8 +24,8 @@ import {CommandEnabled} from "../../guards/CommandEnabled";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
-import {embedType} from "@discordx/utilities/build/pagination/types";
 import {ICategoryItem, ICategoryItemCommand} from "@discordx/utilities/build/category";
+import {SettingsManager} from "../../model/settings/SettingsManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -37,7 +37,10 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @injectable()
 export class Help extends AbstractCommandModule {
 
-    constructor(@inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager, private _client: Client) {
+    constructor(@inject(delay(() => CommandSecurityManager))
+                private _commandSecurityManager: CommandSecurityManager,
+                private _client: Client,
+                private _settingsManager: SettingsManager) {
         super();
     }
 
@@ -49,6 +52,7 @@ export class Help extends AbstractCommandModule {
         await interaction.deferReply({
             ephemeral: true
         });
+
         const member = InteractionUtils.getInteractionCaller(interaction);
         const categoryEmbed = await this.displayCategory("categories", member);
         const selectMenu = await this.getSelectDropdown(member);
@@ -88,26 +92,33 @@ export class Help extends AbstractCommandModule {
 
     @SelectMenuComponent("help-category-selector")
     private async selectCategory(interaction: SelectMenuInteraction): Promise<void> {
+        await interaction.deferUpdate();
         const catToShow = interaction.values[0];
         const member = InteractionUtils.getInteractionCaller(interaction);
+        const categoryEmbed = await this.displayCategory(catToShow, member);
         const selectMenu = await this.getSelectDropdown(member, catToShow);
-        await sendPaginatedEmbeds(interaction, {
-            maxLength: this.getCategoryPageNumbers(catToShow),
-            func: async (page: number): Promise<embedType> => {
-                const embed = await this.displayCategory(catToShow, member, page);
-                return {
-                    embeds: [embed],
-                    components: [selectMenu]
-                };
-            }
-        }, {
-            type: "BUTTON",
+        interaction.editReply({
+            embeds: [categoryEmbed],
+            components: [selectMenu]
         });
+
+        /*const paginationResolver = new Pagination(async (page: number): Promise<embedType> => {
+            const embed = await this.displayCategory(catToShow, member, page);
+            return {
+                embeds: [embed],
+                components: [selectMenu]
+            };
+        }, this.getCategoryPageNumbers(catToShow));
+
+        await sendPaginatedEmbeds(interaction, paginationResolver, {
+            type: "BUTTON",
+        });*/
     }
 
 
-    private async displayCategory(category: string, caller: GuildMember, pageNumber: number = 1): Promise<MessageEmbed> {
+    private async displayCategory(category: string, caller: GuildMember, pageNumber: number = 0): Promise<MessageEmbed> {
         const botImage = this._client.user.displayAvatarURL({dynamic: true});
+        const prefix = await this._settingsManager.getPrefix(caller?.guild?.id);
         const highestRoleColour = caller.roles.highest.hexColor;
         if (category === "categories") {
             const availableCategories = await this._commandSecurityManager.getCommandModulesForMember(caller);
@@ -131,30 +142,46 @@ export class Help extends AbstractCommandModule {
         const {items} = categoryObject;
         const chunks = this.chunk(items, 24);
         const maxPage = chunks.length;
-        const resultOfPage = chunks[pageNumber - 1];
+        const resultOfPage = chunks[pageNumber];
         const embed = new MessageEmbed();
-        embed.setFooter(`Page ${pageNumber} of ${maxPage}`);
+        embed.setFooter(`Page ${pageNumber + 1} of ${maxPage}`);
         embed.addField('Commands:', '\u200b');
         for (const item of resultOfPage) {
-            const {name, description, type} = item;
-            if (!await this._commandSecurityManager.canRunCommand(caller, name)) {
+            const {description, type} = item;
+            if (!await this._commandSecurityManager.canRunCommand(caller, categoryObject, item)) {
                 continue;
             }
             let fieldValue = "No description";
-            if (ObjectUtil.isValidObject(description) && ObjectUtil.validString(description)) {
+            if (ObjectUtil.validString(description)) {
                 fieldValue = description;
             }
             if (this.isICategoryItemCommand(item)) {
-                const {options} = item;
-                if (ArrayUtils.isValidArray(options)) {
-
+                const {options, attachments} = item;
+                const argumentsToUse: ICategoryItemOption[] | ICategoryAttachment[] = {...options, ...attachments};
+                if (ArrayUtils.isValidArray(argumentsToUse)) {
+                    const requiredArgs = argumentsToUse.filter(argumentToUse => !argumentToUse.optional).length;
+                    if (requiredArgs > 0) {
+                        fieldValue += `\n\n*this command requires: ${requiredArgs} mandatory arguments*`;
+                    }
                 }
-            } else {
-
             }
+            fieldValue += `\n\nCommand type: ${type}`;
+            const nameToDisplay = this.getCommandName(item, prefix);
+            embed.addField(nameToDisplay, fieldValue, resultOfPage.length > 5);
         }
         // display a category
         return embed;
+    }
+
+    private getCommandName(command: ICategoryItem | ICategoryItemCommand, prefix: string): string {
+        const {name} = command;
+        if (command.type === "SLASH") {
+            return `/${name}`;
+        } else if (command.type === "SIMPLECOMMAND") {
+            return `${prefix}${name}`;
+        } else {
+            return name;
+        }
     }
 
     private isICategoryItemCommand(item: ICategoryItem | ICategoryItemCommand): item is ICategoryItemCommand {

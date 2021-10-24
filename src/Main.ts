@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 import {ObjectUtil} from "./utils/Utils";
 import * as v8 from "v8";
 import {Client, DIService, SimpleCommandMessage} from "discordx";
-import {Intents} from "discord.js";
+import {Intents, Message} from "discord.js";
 import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 import {container} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
@@ -46,7 +46,10 @@ export class Main {
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             simpleCommand: {
-                prefix: container.resolve(SettingsManager).getPrefix,
+                prefix: async (message: Message): Promise<string> => {
+                    const guildId = message?.guild?.id;
+                    return container.resolve(SettingsManager).getPrefix(guildId);
+                },
                 responses: {
                     unauthorised: (command: SimpleCommandMessage): void => {
                         console.log(command);

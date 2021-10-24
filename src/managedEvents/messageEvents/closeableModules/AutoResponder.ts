@@ -93,6 +93,24 @@ export class AutoResponder extends TriggerConstraint<null> {
                     }
                     break;
                 }
+                case "kick": {
+                    const toDm: string = this._parseVars(autoResponder.response, message);
+                    let {member} = message;
+                    if (!member.kickable) {
+                        continue;
+                    }
+                    let kickMessage: Message = null;
+                    if (ObjectUtil.validString(toDm)) {
+                        kickMessage = await member.send(toDm);
+                    }
+                    try {
+                        member = await member.kick(`Kicked via auto responder rule: "${trigger}"`);
+                    } catch {
+                        if (kickMessage) {
+                            await kickMessage.delete();
+                        }
+                    }
+                }
             }
         }
     }
