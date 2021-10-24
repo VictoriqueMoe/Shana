@@ -110,6 +110,9 @@ export class AutoResponder extends TriggerConstraint<null> {
                             await kickMessage.delete();
                         }
                     }
+                    if (publicDelete) {
+                        message.delete();
+                    }
                 }
             }
         }
