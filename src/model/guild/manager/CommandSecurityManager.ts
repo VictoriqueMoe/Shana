@@ -60,13 +60,9 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         const {guild} = event;
         console.log(`Reloading command permissions for guild: "${guild.name}"`);
         const commandsByGuild = await this._client.CommandByGuild();
-        const pArr: Promise<void>[] = [];
-        for (const [, guildCommand] of commandsByGuild) {
-            pArr.push(this._client.initGuildApplicationPermissions(guild.id, guildCommand));
-        }
-        return Promise.all(pArr).then(() => {
-            console.log(`Permissions for guild ${guild.name} has been reloaded`);
-        });
+        const commands = commandsByGuild.get(guild.id);
+        await this._client.initGuildApplicationPermissions(guild.id, commands);
+        console.log(`Permissions for guild ${guild.name} has been reloaded`);
     }
 
     public get events(): readonly DOn[] {
@@ -116,8 +112,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         const {items} = category;
         const allCommands = await CommandSecurityModel.findAll({
             where: {
-                guildId: member.guild.id,
-                allowedRoles: memberRoles
+                guildId: member.guild.id
             }
         });
         const isCategory = allCommands.find(command => command.commandName.toLowerCase() === category.name.toLowerCase());

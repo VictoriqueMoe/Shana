@@ -117,13 +117,13 @@ const isImageFast = require('is-image-fast');
             }
         ],
         "description": "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text."
-    },
+    }/*,
     {
         "name": "initServerCommandPermissions",
         "type": "SLASH",
         "options": [],
         "description": "Re-init all command permissions for this server."
-    }
+    }*/
 ])
 @SlashGroup("miscellaneous", "Miscellaneous commands")
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
@@ -138,7 +138,7 @@ export class Misc extends AbstractCommandModule {
         super();
     }
 
-    @Slash("initservercommandpermissions", {
+    /*@Slash("initservercommandpermissions", {
         description: "Re-init all command permissions for this server"
     })
     @Guard(NotBotInteraction, CommandEnabled)
@@ -157,7 +157,7 @@ export class Misc extends AbstractCommandModule {
         return Promise.all(pArr).then(() => {
             InteractionUtils.replyOrFollowUp(interaction, `Permissions for guild ${guild.name} has been reloaded`);
         });
-    }
+    }*/
 
     @Slash("generatetext", {
         description: "The text generation is a large unsupervised language model that can generate paragraphs of text"

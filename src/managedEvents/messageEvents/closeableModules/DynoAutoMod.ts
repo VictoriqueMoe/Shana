@@ -106,7 +106,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                             if (!(channel instanceof BaseGuildTextChannel)) {
                                 continue;
                             }
-                            const warnResponse = await message.reply(filter.warnMessage);
+                            const warnResponse = await channel.send(`<@${member.id}>, ${filter.warnMessage}`);
                             setTimeout(async () => {
                                 try {
                                     await warnResponse.delete();
