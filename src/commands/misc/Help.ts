@@ -9,8 +9,7 @@ import {
     Slash,
     SlashGroup
 } from "discordx";
-import {Category, CategoryMetaData} from "@discordx/utilities";
-import {ICategory} from "@discordx/utilities/build/category";
+import {Category, CategoryMetaData, sendPaginatedEmbeds} from "@discordx/utilities";
 import {
     CommandInteraction,
     GuildMember,
@@ -22,9 +21,11 @@ import {
 } from "discord.js";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
+import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+import {embedType} from "@discordx/utilities/build/pagination/types";
+import {ICategoryItem, ICategoryItemCommand} from "@discordx/utilities/build/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -35,7 +36,6 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()
 export class Help extends AbstractCommandModule {
-    private static readonly categories: Map<string, ICategory> = CategoryMetaData.categories;
 
     constructor(@inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager, private _client: Client) {
         super();
@@ -50,11 +50,11 @@ export class Help extends AbstractCommandModule {
             ephemeral: true
         });
         const member = InteractionUtils.getInteractionCaller(interaction);
-        const categoryEmbeds = await this.displayCategory("categories", member);
+        const categoryEmbed = await this.displayCategory("categories", member);
         const selectMenu = await this.getSelectDropdown(member);
         interaction.editReply({
             content: "Select a category",
-            embeds: categoryEmbeds,
+            embeds: [categoryEmbed],
             components: [selectMenu]
         });
     }
@@ -88,20 +88,25 @@ export class Help extends AbstractCommandModule {
 
     @SelectMenuComponent("help-category-selector")
     private async selectCategory(interaction: SelectMenuInteraction): Promise<void> {
-        await interaction.deferUpdate();
         const catToShow = interaction.values[0];
         const member = InteractionUtils.getInteractionCaller(interaction);
-        const categoryEmbeds = await this.displayCategory(catToShow, member);
         const selectMenu = await this.getSelectDropdown(member, catToShow);
-        interaction.editReply({
-            embeds: categoryEmbeds,
-            components: [selectMenu]
+        await sendPaginatedEmbeds(interaction, {
+            maxLength: this.getCategoryPageNumbers(catToShow),
+            func: async (page: number): Promise<embedType> => {
+                const embed = await this.displayCategory(catToShow, member, page);
+                return {
+                    embeds: [embed],
+                    components: [selectMenu]
+                };
+            }
+        }, {
+            type: "BUTTON",
         });
     }
 
 
-    private async displayCategory(category: string, caller: GuildMember): Promise<MessageEmbed[]> {
-        const returnArray: MessageEmbed[] = [];
+    private async displayCategory(category: string, caller: GuildMember, pageNumber: number = 1): Promise<MessageEmbed> {
         const botImage = this._client.user.displayAvatarURL({dynamic: true});
         const highestRoleColour = caller.roles.highest.hexColor;
         if (category === "categories") {
@@ -117,18 +122,56 @@ export class Help extends AbstractCommandModule {
                 const moduleDescription = category.description;
                 embed.addField(moduleName, moduleDescription);
             }
-            return [embed];
+            return embed;
         }
-        const categoryObject = Help.categories.get(category);
+        const categoryObject = CategoryMetaData.categories.get(category);
         if (!categoryObject) {
             throw new Error(`Unable to find category ${category}`);
         }
+        const {items} = categoryObject;
+        const chunks = this.chunk(items, 24);
+        const maxPage = chunks.length;
+        const resultOfPage = chunks[pageNumber - 1];
+        const embed = new MessageEmbed();
+        embed.setFooter(`Page ${pageNumber} of ${maxPage}`);
+        embed.addField('Commands:', '\u200b');
+        for (const item of resultOfPage) {
+            const {name, description, type} = item;
+            if (!await this._commandSecurityManager.canRunCommand(caller, name)) {
+                continue;
+            }
+            let fieldValue = "No description";
+            if (ObjectUtil.isValidObject(description) && ObjectUtil.validString(description)) {
+                fieldValue = description;
+            }
+            if (this.isICategoryItemCommand(item)) {
+                const {options} = item;
+                if (ArrayUtils.isValidArray(options)) {
+
+                }
+            } else {
+
+            }
+        }
         // display a category
-        const embed = new MessageEmbed()
-            .setTitle(category)
-            .setTimestamp();
-        returnArray.push(embed);
-        return returnArray;
+        return embed;
+    }
+
+    private isICategoryItemCommand(item: ICategoryItem | ICategoryItemCommand): item is ICategoryItemCommand {
+        return item["options"];
+    }
+
+    private getCategoryPageNumbers(category: string): number {
+        const categoryObject = CategoryMetaData.categories.get(category);
+        return this.chunk(categoryObject.items, 24).length;
+    }
+
+    private chunk<T>(array: T[], chunkSize: number): T[][] {
+        const r: T[][] = [];
+        for (let i = 0; i < array.length; i += chunkSize) {
+            r.push(array.slice(i, i + chunkSize));
+        }
+        return r;
     }
 }
 

@@ -225,7 +225,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         });
     }
 
-    /*public async canRunCommand(member: GuildMember, commandName: string): Promise<boolean> {
+    public async canRunCommand(member: GuildMember, commandName: string): Promise<boolean> {
         if (GuildUtils.isMemberAdmin(member)) {
             return true;
         }
@@ -253,5 +253,5 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
             }
         }
         return false;
-    }*/
+    }
 }
