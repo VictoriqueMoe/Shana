@@ -354,10 +354,10 @@ export namespace DiscordUtils {
             });
         }
 
-        export function getInteractionCaller(interaction: BaseCommandInteraction): GuildMember | null {
+        export function getInteractionCaller(interaction: BaseCommandInteraction | MessageComponentInteraction): GuildMember | null {
             const {member} = interaction;
             if (member == null) {
-                interaction.reply("Unable to extract member");
+                replyOrFollowUp(interaction, "Unable to extract member");
                 throw new Error("Unable to extract member");
             }
             if (member instanceof GuildMember) {

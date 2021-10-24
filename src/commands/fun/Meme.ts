@@ -9,7 +9,7 @@ import {
 import {AssertionError} from "assert";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {injectable} from "tsyringe";
 import {Category} from "@discordx/utilities";
 
@@ -1043,10 +1043,10 @@ export class Meme extends AbstractCommandModule {
         super();
     }
 
-    @SimpleCommand("waifu", {
-        aliases: EnumEx.getNames(GENERATE_ENDPOINT).filter(r => r !== "waifu")
+    @SimpleCommand("Memes", {
+        aliases: EnumEx.getNames(GENERATE_ENDPOINT)
     })
-    @Guard(secureCommandInteraction)
+    @Guard(CommandEnabled)
     private async generate(command: SimpleCommandMessage): Promise<void> {
         const {message} = command;
         const endPoint = command.name;

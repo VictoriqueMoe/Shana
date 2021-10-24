@@ -12,7 +12,7 @@ import {NotBotInteraction} from "../../guards/NotABot";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import {SETTINGS} from "../../enums/SETTINGS";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
 import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole";
 import {AbstractCommandModule} from "../AbstractCommandModule";
@@ -70,7 +70,7 @@ export class SettingsCommands extends AbstractCommandModule {
         description: "Change or set any global setting"
     })
     @SlashGroup("set")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async globalSettings(
         @SlashChoice(SETTINGS)
         @SlashOption("setting", {
@@ -106,7 +106,7 @@ export class SettingsCommands extends AbstractCommandModule {
         description: "Change or set any setting to do with Auto roles"
     })
     @SlashGroup("set")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async autoMuteSettings(
         @SlashChoice(AutoRoleSettingsEnum)
         @SlashOption("setting", {
@@ -158,7 +158,7 @@ export class SettingsCommands extends AbstractCommandModule {
         description: "Get all the auto role settings"
     })
     @SlashGroup("get")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async getGlobalSettings(interaction: CommandInteraction): Promise<void> {
         const {guild} = interaction;
         const guildId = guild.id;

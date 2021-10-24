@@ -22,6 +22,8 @@ import {
     RoleTypes,
     RoleUpdateTrigger
 } from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
+import {ICategory} from "@discordx/utilities/build/category";
+import {CategoryMetaData} from "@discordx/utilities";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
@@ -77,36 +79,73 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         return [...simpleCommands, ...appCommands];
     }
 
+    public getAllCommandNames(includeAlias: boolean = false): string[] {
+        if (!includeAlias) {
+            return this.commands.map(command => command.name);
+        }
+        return this.commands.flatMap(command => {
+            const {name} = command;
+            if (command instanceof DSimpleCommand) {
+                if (ArrayUtils.isValidArray(command.aliases)) {
+                    const {aliases} = command;
+                    const newAliases = aliases.filter(commandInArr => commandInArr !== name);
+                    return [name, ...newAliases];
+                }
+            }
+            return [name];
+        });
+    }
+
     /**
-     * Change to return JSON object with modules and commands for the user
+     * Get an array of categories a user is allowed to view
      * @param member
      */
-    public async getCommandModulesForMember(member: GuildMember): Promise<AllCommands> {
-        if (GuildUtils.isMemberAdmin(member)) {
-            return this.commands;
+    public async getCommandModulesForMember(member: GuildMember): Promise<ICategory[]> {
+        function populateArray(this: CommandSecurityManager, command: CommandSecurityModel, category: ICategory): boolean {
+            if (command.allowedRoles.includes("*")) {
+                retArray.push(category);
+                return true;
+            }
+            const inArray = command.allowedRoles.some(value => memberRoles.includes(value));
+            if (inArray) {
+                retArray.push(category);
+                return true;
+            }
+            return false;
         }
-        const retArray: AllCommands = [];
+
+        const catMap: Map<string, ICategory> = CategoryMetaData.categories;
+        const categories = [...catMap.values()];
+        if (GuildUtils.isMemberAdmin(member)) {
+            return categories;
+        }
+        const retArray: ICategory[] = [];
         const memberRoles = [...member.roles.cache.keys()];
         const allCommands = await CommandSecurityModel.findAll({
             where: {
                 guildId: member.guild.id
             }
         });
-        for (const commandClass of this.commands) {
-            const {name} = commandClass;
-            const command = allCommands.find(command => command.commandName === name);
-            if (!command) {
-                continue;
+        outer:
+            for (const category of categories) {
+                const {name, items} = category;
+                const command = allCommands.find(command => command.commandName.toLowerCase() === name.toLowerCase());
+                const itemNames = items.map(item => item.name.toLowerCase());
+                for (const itemName of itemNames) {
+                    // check all the items first, because there could be a category with simple commands only OR context menu stuff
+                    const command = allCommands.find(command => command.commandName.toLowerCase() === itemName);
+                    if (!command) {
+                        continue;
+                    }
+                    if (populateArray.call(this, command, category)) {
+                        continue outer;
+                    }
+                }
+                if (!command) {
+                    continue;
+                }
+                populateArray.call(this, command, category);
             }
-            if (command.allowedRoles.includes("*")) {
-                retArray.push(commandClass);
-                continue;
-            }
-            const inArray = command.allowedRoles.some(value => memberRoles.includes(value));
-            if (inArray) {
-                retArray.push(commandClass);
-            }
-        }
         return retArray;
     }
 
@@ -128,14 +167,19 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
             // everyone access
             return [];
         }
-        if (!ArrayUtils.isValidArray(allowedRoles)) {
+        const roles = guild.roles.cache;
+        const adminRoles = roles.filter(role => {
+            return role.permissions.has(Permissions.FLAGS.ADMINISTRATOR, true);
+        });
+        if (!ArrayUtils.isValidArray(allowedRoles) && adminRoles.size > 0) {
             // only admins
-            const roles = guild.roles.cache;
-            const adminRoles = roles.filter(role => {
-                return role.permissions.has(Permissions.FLAGS.ADMINISTRATOR, true);
-            });
             allowedRoles = adminRoles.map(role => role.id);
+        } else {
+            if (adminRoles.size > 0) {
+                allowedRoles.push(...adminRoles.keys());
+            }
         }
+
         return allowedRoles.map(allowedRole => {
             return {
                 id: allowedRole,

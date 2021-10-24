@@ -16,7 +16,7 @@ import {AutoRole} from "./closeableModules/autoRole/AutoRole";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import * as fs from 'fs';
 import {SettingsManager} from "../model/settings/SettingsManager";
-import {ArgsOf, Client, Discord, DSimpleCommand, On} from "discordx";
+import {ArgsOf, Client, Discord, On} from "discordx";
 import {container, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
@@ -341,32 +341,20 @@ export class OnReady extends BaseDAO<any> {
 
     private async populateCommandSecurity(): Promise<void> {
         const securityManager = container.resolve(CommandSecurityManager);
-        const allCommands = securityManager.commands;
-        const allCommandNames = allCommands.flatMap(command => {
-            const {name} = command;
-            if (command instanceof DSimpleCommand) {
-                if (ArrayUtils.isValidArray(command.aliases)) {
-                    const {aliases} = command;
-                    const newAliases = aliases.filter(commandInArr => commandInArr !== name);
-                    return [name, ...newAliases];
-                }
-            }
-            return [name];
-        });
-
+        const {commands} = securityManager;
         async function addNewCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
             await this._dao.transaction(async transaction => {
                 const models: {
                     commandName: string, guildId: string
                 }[] = [];
-                for (const commandName of allCommandNames) {
+                for (const {name} of commands) {
                     for (const guildModel of guildModels) {
                         const guildId = guildModel.guildId;
                         const commandSecurity = guildModel.commandSecurityModel;
-                        const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName === commandName);
+                        const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName.toLowerCase() === name.toLowerCase());
                         if (!inArray) {
                             models.push({
-                                commandName: commandName,
+                                commandName: name,
                                 guildId
                             });
                         }
@@ -388,7 +376,7 @@ export class OnReady extends BaseDAO<any> {
                     const commandSecurity = guildModel.commandSecurityModel;
                     const commandsToDestroy: string[] = [];
                     for (const {commandName} of commandSecurity) {
-                        const hasInSystem = allCommandNames.find(command => command === commandName);
+                        const hasInSystem = commands.find(command => command.name.toLowerCase() === commandName.toLowerCase());
                         if (!hasInSystem) {
                             console.log(`delete command ${commandName}`);
                             commandsToDestroy.push(commandName);

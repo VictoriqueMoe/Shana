@@ -12,7 +12,7 @@ import {
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {NotBotInteraction} from "../../../guards/NotABot";
-import {secureCommandInteraction} from "../../../guards/RoleConstraint";
+import {CommandEnabled} from "../../../guards/CommandEnabled";
 import {CommandInteraction, ContextMenuInteraction, GuildMember, User} from "discord.js";
 import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {AbstractCommandModule} from "../../AbstractCommandModule";
@@ -78,7 +78,7 @@ export class Mute extends AbstractCommandModule {
 
 
     @ContextMenu("USER", "Mute User for 30 mins")
-    @Guard(secureCommandInteraction)
+    @Guard(CommandEnabled)
     private async userHandler(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply();
         const member = InteractionUtils.getUserFromUserContextInteraction(interaction);
@@ -106,7 +106,7 @@ export class Mute extends AbstractCommandModule {
     @Slash("shut", {
         description: "Block a user from sending any messages with a timeout"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async shut(
         @SlashOption("user", {
             description: "User you wish to mute",
@@ -186,7 +186,7 @@ export class Mute extends AbstractCommandModule {
     @Slash("viewallmutes", {
         description: "View all the currently active mutes"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async viewAllMutes(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const guildId = interaction.guild.id;

@@ -24,7 +24,7 @@ import {
 import {TimedSet} from "../../model/Impl/TimedSet";
 import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
 import {Response} from "../../model/anime/AnimeTypings";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DeepAPI} from "../../model/DeepAPI";
 import {container, injectable} from "tsyringe";
@@ -141,7 +141,7 @@ export class Misc extends AbstractCommandModule {
     @Slash("initservercommandpermissions", {
         description: "Re-init all command permissions for this server"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async initServerCommandPermissions(
         interaction: CommandInteraction
     ): Promise<void> {
@@ -162,7 +162,7 @@ export class Misc extends AbstractCommandModule {
     @Slash("generatetext", {
         description: "The text generation is a large unsupervised language model that can generate paragraphs of text"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async generateText(
         @SlashOption("value", {
             description: "the text to include in the generation",
@@ -178,7 +178,7 @@ export class Misc extends AbstractCommandModule {
     }
 
     @SimpleCommand("posOrNeg")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async posOrNeg({message}: SimpleCommandMessage): Promise<void> {
         const reference = message.reference;
         let text = "";
@@ -201,7 +201,7 @@ export class Misc extends AbstractCommandModule {
     }
 
     @ContextMenu("USER", "avatar")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async avatar(interaction: ContextMenuInteraction): Promise<void> {
         const ops: ImageURLOptions = {
             dynamic: true,
@@ -215,7 +215,7 @@ export class Misc extends AbstractCommandModule {
     }
 
     @ContextMenu("MESSAGE", "translate")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async translate(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -266,7 +266,7 @@ export class Misc extends AbstractCommandModule {
     }
 
     @ContextMenu("USER", "banner")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async banner(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply();
         const ops: ImageURLOptions = {
@@ -285,7 +285,7 @@ export class Misc extends AbstractCommandModule {
 
 
     @SimpleCommand("findAnime")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async findAnime({message}: SimpleCommandMessage): Promise<void> {
         const freshHold = 0.86;
         const messaheUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(message);
@@ -400,7 +400,7 @@ export class Misc extends AbstractCommandModule {
 
 
     @SimpleCommand("findSource")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async imageSearch({message}: SimpleCommandMessage): Promise<void> {
         type GoogleImageResult = {
             url?: string,

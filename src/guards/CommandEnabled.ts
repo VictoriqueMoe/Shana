@@ -4,7 +4,7 @@ import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityMana
 import {CommandInteraction, ContextMenuInteraction} from "discord.js";
 import {container} from "tsyringe";
 
-export const secureCommandInteraction: GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> = async (arg, client, next) => {
+export const CommandEnabled: GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> = async (arg, client, next) => {
     let commandName = "";
     let guildId = "";
     if (arg instanceof SimpleCommandMessage) {

@@ -1,3 +1,138 @@
+import {AbstractCommandModule} from "../AbstractCommandModule";
+import {
+    Client,
+    DefaultPermissionResolver,
+    Discord,
+    Guard,
+    Permission,
+    SelectMenuComponent,
+    Slash,
+    SlashGroup
+} from "discordx";
+import {Category, CategoryMetaData} from "@discordx/utilities";
+import {ICategory} from "@discordx/utilities/build/category";
+import {
+    CommandInteraction,
+    GuildMember,
+    MessageActionRow,
+    MessageEmbed,
+    MessageSelectMenu,
+    MessageSelectOptionData,
+    SelectMenuInteraction
+} from "discord.js";
+import {NotBotInteraction} from "../../guards/NotABot";
+import {CommandEnabled} from "../../guards/CommandEnabled";
+import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
+import {delay, inject, injectable} from "tsyringe";
+import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+import InteractionUtils = DiscordUtils.InteractionUtils;
+
+@Discord()
+@Category("Help", "Commands to display help and info")
+@Category("Help", [])
+@SlashGroup("help", "Commands to display help and info")
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
+@injectable()
+export class Help extends AbstractCommandModule {
+    private static readonly categories: Map<string, ICategory> = CategoryMetaData.categories;
+
+    constructor(@inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager, private _client: Client) {
+        super();
+    }
+
+    @Slash("help", {
+        description: "Get the description of a command or all commands"
+    })
+    @Guard(NotBotInteraction, CommandEnabled)
+    private async help(interaction: CommandInteraction): Promise<void> {
+        await interaction.deferReply({
+            ephemeral: true
+        });
+        const member = InteractionUtils.getInteractionCaller(interaction);
+        const categoryEmbeds = await this.displayCategory("categories", member);
+        const selectMenu = await this.getSelectDropdown(member);
+        interaction.editReply({
+            content: "Select a category",
+            embeds: categoryEmbeds,
+            components: [selectMenu]
+        });
+    }
+
+    private async getSelectDropdown(caller: GuildMember, defaultValue?: string): Promise<MessageActionRow> {
+        if (!ObjectUtil.validString(defaultValue)) {
+            defaultValue = "categories";
+        }
+        const optionsForEmbed: MessageSelectOptionData[] = [];
+        optionsForEmbed.push({
+            description: "View all categories",
+            label: "Categories",
+            value: "categories",
+            default: defaultValue === "categories",
+        });
+        const availableCategories = await this._commandSecurityManager.getCommandModulesForMember(caller);
+        for (const category of availableCategories) {
+            let {description} = category;
+            const {name} = category;
+            description = StringUtils.truncate(description, 100);
+            optionsForEmbed.push({
+                description,
+                label: name,
+                value: name,
+                default: defaultValue === name
+            });
+        }
+        const selectMenu = new MessageSelectMenu().addOptions(optionsForEmbed).setCustomId("help-category-selector");
+        return new MessageActionRow().addComponents(selectMenu);
+    }
+
+    @SelectMenuComponent("help-category-selector")
+    private async selectCategory(interaction: SelectMenuInteraction): Promise<void> {
+        await interaction.deferUpdate();
+        const catToShow = interaction.values[0];
+        const member = InteractionUtils.getInteractionCaller(interaction);
+        const categoryEmbeds = await this.displayCategory(catToShow, member);
+        const selectMenu = await this.getSelectDropdown(member, catToShow);
+        interaction.editReply({
+            embeds: categoryEmbeds,
+            components: [selectMenu]
+        });
+    }
+
+
+    private async displayCategory(category: string, caller: GuildMember): Promise<MessageEmbed[]> {
+        const returnArray: MessageEmbed[] = [];
+        const botImage = this._client.user.displayAvatarURL({dynamic: true});
+        const highestRoleColour = caller.roles.highest.hexColor;
+        if (category === "categories") {
+            const availableCategories = await this._commandSecurityManager.getCommandModulesForMember(caller);
+            const embed = new MessageEmbed()
+                .setColor(highestRoleColour)
+                .setTitle(`${this._client.user.username} modules`)
+                .setDescription(`The items shown below are all the modules supported by this bot`)
+                .setAuthor(`${this._client.user.username}`, botImage)
+                .setTimestamp();
+            for (const category of availableCategories) {
+                const moduleName = category.name;
+                const moduleDescription = category.description;
+                embed.addField(moduleName, moduleDescription);
+            }
+            return [embed];
+        }
+        const categoryObject = Help.categories.get(category);
+        if (!categoryObject) {
+            throw new Error(`Unable to find category ${category}`);
+        }
+        // display a category
+        const embed = new MessageEmbed()
+            .setTitle(category)
+            .setTimestamp();
+        returnArray.push(embed);
+        return returnArray;
+    }
+}
+
+
 /*
 import {
     Client,

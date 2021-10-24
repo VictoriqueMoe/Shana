@@ -1,6 +1,6 @@
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashOption} from "discordx";
 import {DiscordUtils} from "../../utils/Utils";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction} from "discord.js";
 import {Category} from "@discordx/utilities";
@@ -42,7 +42,7 @@ export abstract class ModuleEngine extends AbstractCommandModule {
     @Slash("enablemodule", {
         description: "Enable a module to run. These modules are designed to be shut down and started dynamically"
     })
-    @Guard(secureCommandInteraction)
+    @Guard(CommandEnabled)
     private async enableModule(
         @SlashOption("setting", {
             description: "the name of the module to close or open",
@@ -78,7 +78,7 @@ export abstract class ModuleEngine extends AbstractCommandModule {
     @Slash("getmodulenames", {
         description: "Return a list of all modules to use with the 'enableModule' command"
     })
-    @Guard(secureCommandInteraction)
+    @Guard(CommandEnabled)
     private async getModuleNames(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const guildId = interaction.guild.id;

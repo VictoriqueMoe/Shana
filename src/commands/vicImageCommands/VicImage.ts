@@ -3,7 +3,7 @@ import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction} from "discord.js";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {injectable} from "tsyringe";
 import {DiscordUtils} from "../../utils/Utils";
 import {Category} from "@discordx/utilities";
@@ -39,7 +39,7 @@ export class VicImage extends AbstractCommandModule {
     @Slash("vicimage", {
         description: "Get a random image of Victorique#0002"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async vicImage(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const randomImageMetadata = this._vicDropbox.randomImage;
@@ -64,7 +64,7 @@ export class VicImage extends AbstractCommandModule {
     @Slash("vicreindex", {
         description: "Get a random image of Victorique#0002"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async vicReIndex(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         await this._vicDropbox.index();

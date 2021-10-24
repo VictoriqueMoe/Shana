@@ -13,7 +13,7 @@ import {
 } from "discordx";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
 import {BookmarkManager} from "../../model/guild/manager/BookmarkManager";
@@ -79,7 +79,7 @@ export class Bookmark extends AbstractCommandModule {
 
 
     @ContextMenu("MESSAGE", "bookmark")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async addBookmark(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -99,7 +99,7 @@ export class Bookmark extends AbstractCommandModule {
     @Slash("getbookmark", {
         description: "Gets all of your saved bookmarks"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async getbookmark(
         @SlashOption("public", {
             description: "make message public",
@@ -144,7 +144,7 @@ export class Bookmark extends AbstractCommandModule {
     @Slash("deletebookmarks", {
         description: "Delete a bookmark"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async deleteBookmarks(
         @SlashOption("id", {
             description: "ID of the bookmark",

@@ -3,7 +3,7 @@ import {injectable} from "tsyringe";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {MessageScheduleManager} from "../../model/guild/manager/MessageScheduleManager";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {BaseGuildTextChannel, Channel, CommandInteraction, MessageEmbed} from "discord.js";
 import {ArrayUtils, CronUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Category} from "@discordx/utilities";
@@ -82,7 +82,7 @@ export class MessageSchedule extends AbstractCommandModule {
     @Slash("getscheduledmessage", {
         description: "get all scheduled posts optionally by channel"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async getScheduledMessage(
         @SlashOption("channel", {
             description: "A filter for all scheduled messages by channel",
@@ -125,7 +125,7 @@ export class MessageSchedule extends AbstractCommandModule {
     @Slash("removescheduledmessage", {
         description: "remove a scheduled post by name"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async removeScheduledMessage(
         @SlashOption("name", {
             description: "The Unique ID of the schedule schedule you want to remove",
@@ -152,7 +152,7 @@ export class MessageSchedule extends AbstractCommandModule {
     @Slash("addschedulemessage", {
         description: "create a message to schedule to a channel"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async scheduleMessage(
         @SlashOption("name", {
             description: "The Unique ID of this schedule schedule",
