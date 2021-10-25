@@ -19,7 +19,7 @@ export function MessageListenerDecorator(triggerOnEdit: boolean = false, ...cond
         const entry = new MessageEntry(method, triggerOnEdit, conditions);
         let context: constructor<any> = null;
         for (const [_context,] of map) {
-            if (_context.constructor === constructor) {
+            if (_context === constructor) {
                 context = _context;
                 break;
             }

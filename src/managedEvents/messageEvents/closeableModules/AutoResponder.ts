@@ -94,7 +94,7 @@ export class AutoResponder extends TriggerConstraint<null> {
                     break;
                 }
                 case "kick": {
-                    const toDm: string = this._parseVars(autoResponder.response, message);
+                    const toDm = autoResponder.response;
                     let {member} = message;
                     if (!member.kickable) {
                         continue;

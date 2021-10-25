@@ -9,6 +9,7 @@ export const CommandEnabled: GuardFunction<CommandInteraction | SimpleCommandMes
     let guildId = "";
     if (arg instanceof SimpleCommandMessage) {
         commandName = arg.name;
+        guildId = arg.message.guild.id;
     } else {
         if (arg.isContextMenu() || arg.isCommand()) {
             commandName = arg.commandName;
