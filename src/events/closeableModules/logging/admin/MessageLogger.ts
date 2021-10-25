@@ -1,5 +1,5 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils";
+import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils";
 import {MessageEmbed, Util} from "discord.js";
 import {Main} from "../../../../Main";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
@@ -117,7 +117,9 @@ export class MessageLogger extends AbstractAdminAuditLogger {
                 }
                 stickerUrls.push(sticker.url);
             }
-            embed.addField("Stickers", stickerUrls.join("\n"));
+            if (ArrayUtils.isValidArray(stickerUrls)) {
+                embed.addField("Stickers", stickerUrls.join("\n"));
+            }
         }
         super.postToLog(embed, message.guild.id, message.member);
     }
