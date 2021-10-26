@@ -7,7 +7,7 @@ import {
     Permission,
     SelectMenuComponent,
     Slash,
-    SlashGroup
+    SlashOption
 } from "discordx";
 import {Category, CategoryMetaData, ICategoryAttachment, ICategoryItemOption} from "@discordx/utilities";
 import {
@@ -24,14 +24,33 @@ import {CommandEnabled} from "../../guards/CommandEnabled";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
-import {ICategoryItem, ICategoryItemCommand} from "@discordx/utilities/build/category";
+import {ICategory, ICategoryItem, ICategoryItemCommand} from "@discordx/utilities/build/category";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @Category("Help", "Commands to display help and info")
-@Category("Help", [])
-@SlashGroup("help", "Commands to display help and info")
+@Category("Help", [
+    {
+        name: "help",
+        description: "Get a random image of <@697417252320051291>",
+        type: "SLASH",
+        options: [
+            {
+                name: "CommandName",
+                type: "STRING",
+                description: "The command you wish to see help for",
+                optional: true
+            },
+            {
+                name: "public",
+                type: "BOOLEAN",
+                description: "If true, this message will be viewable by all",
+                optional: true
+            }
+        ]
+    }
+])
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()
@@ -48,17 +67,40 @@ export class Help extends AbstractCommandModule {
         description: "Get the description of a command or all commands"
     })
     @Guard(NotBotInteraction, CommandEnabled)
-    private async help(interaction: CommandInteraction): Promise<void> {
+    private async help(
+        @SlashOption("commandname", {
+            description: "Command name to drill into",
+            required: false,
+        })
+            commandName: string,
+        @SlashOption("public", {
+            description: "Display this help publicly",
+            required: false,
+        })
+            ephemeral: boolean,
+        interaction: CommandInteraction
+    ): Promise<void> {
         await interaction.deferReply({
-            ephemeral: true
+            ephemeral: !ephemeral
         });
-
         const member = InteractionUtils.getInteractionCaller(interaction);
-        const categoryEmbed = await this.displayCategory("categories", member);
-        const selectMenu = await this.getSelectDropdown(member);
+        let embed: MessageEmbed = null;
+        let catToDisplay = "categories";
+        if (ObjectUtil.validString(commandName)) {
+            try {
+                const commandInfo = await this.getCommandInfo(commandName, member);
+                embed = commandInfo[0];
+                catToDisplay = commandInfo[1].name;
+            } catch (e) {
+                return InteractionUtils.replyOrFollowUp(interaction, e.message);
+            }
+        } else {
+            embed = await this.displayCategory("categories", member);
+        }
+        const selectMenu = await this.getSelectDropdown(member, catToDisplay);
         interaction.editReply({
             content: "Select a category",
-            embeds: [categoryEmbed],
+            embeds: [embed],
             components: [selectMenu]
         });
     }
@@ -115,10 +157,66 @@ export class Help extends AbstractCommandModule {
         });*/
     }
 
+    public async getCommandInfo(commandName: string, caller: GuildMember): Promise<[MessageEmbed, ICategory]> {
+        const availableCategories = await this._commandSecurityManager.getCommandModulesForMember(caller);
+        if (!ArrayUtils.isValidArray(availableCategories)) {
+            throw new Error(`You do not have permissions to view use any commands`);
+        }
+        let command: ICategoryItem | ICategoryItemCommand = null;
+        let cat: ICategory = null;
+        outer:
+            for (const availableCat of availableCategories) {
+                for (const item of availableCat.items) {
+                    if (item.name.toLowerCase() === commandName.toLowerCase()) {
+                        command = item;
+                        cat = availableCat;
+                        break outer;
+                    }
+                }
+            }
+        if (!command) {
+            throw new Error(`Unable to find command: ${commandName}`);
+        }
+        const embed = new MessageEmbed();
+        const {type, examples} = command;
+        let {description} = command;
+        const title = await this.getCommandName(command, caller);
+        const prefix = await this._settingsManager.getPrefix(caller?.guild?.id);
+        embed.setTitle(title);
+        if (!ObjectUtil.validString(description)) {
+            description = "No description";
+        }
+        if (ArrayUtils.isValidArray(examples)) {
+            embed.addField("Examples:", examples.map(example => `${prefix}${example}`).join("\n\n"));
+        }
+        embed.setDescription(description);
+        embed.addField("Command type", type);
+        if (this.isICategoryItemCommand(command)) {
+            const {options, attachments} = command;
+            if (ArrayUtils.isValidArray(options)) {
+                embed.addField('Arguments:', '\u200b');
+                for (const {name, description, type, optional} of options) {
+                    const str = `***Description***: ${description} \n***Optional***: ${optional} \n***Type***: ${type}`;
+                    embed.addField(name, str);
+                }
+            }
+            if (ArrayUtils.isValidArray(attachments)) {
+                embed.addField('attachments:', '\u200b');
+                for (const {name, description, type, optional, extensions} of attachments) {
+                    let str = `***Description***: ${description}\n***Optional***: ${optional}`;
+                    if (ArrayUtils.isValidArray(extensions)) {
+                        str += `\n***Allowed extensions*** ${extensions.join(", ")}`;
+                    }
+                    str += `\n***Type***: ${type}`;
+                    embed.addField(name, str);
+                }
+            }
+        }
+        return [embed, cat];
+    }
 
     private async displayCategory(category: string, caller: GuildMember, pageNumber: number = 0): Promise<MessageEmbed> {
         const botImage = this._client.user.displayAvatarURL({dynamic: true});
-        const prefix = await this._settingsManager.getPrefix(caller?.guild?.id);
         const highestRoleColour = caller.roles.highest.hexColor;
         if (category === "categories") {
             const availableCategories = await this._commandSecurityManager.getCommandModulesForMember(caller);
@@ -146,6 +244,9 @@ export class Help extends AbstractCommandModule {
         const embed = new MessageEmbed();
         embed.setFooter(`Page ${pageNumber + 1} of ${maxPage}`);
         embed.addField('Commands:', '\u200b');
+        if (!resultOfPage) {
+            return embed;
+        }
         for (const item of resultOfPage) {
             const {description, type} = item;
             if (!await this._commandSecurityManager.canRunCommand(caller, categoryObject, item)) {
@@ -166,14 +267,15 @@ export class Help extends AbstractCommandModule {
                 }
             }
             fieldValue += `\n\nCommand type: ${type}`;
-            const nameToDisplay = this.getCommandName(item, prefix);
+            const nameToDisplay = await this.getCommandName(item, caller);
             embed.addField(nameToDisplay, fieldValue, resultOfPage.length > 5);
         }
         // display a category
         return embed;
     }
 
-    private getCommandName(command: ICategoryItem | ICategoryItemCommand, prefix: string): string {
+    private async getCommandName(command: ICategoryItem | ICategoryItemCommand, caller: GuildMember): Promise<string> {
+        const prefix = await this._settingsManager.getPrefix(caller?.guild?.id);
         const {name} = command;
         if (command.type === "SLASH") {
             return `/${name}`;
@@ -201,208 +303,3 @@ export class Help extends AbstractCommandModule {
         return r;
     }
 }
-
-
-/*
-import {
-    Client,
-    DefaultPermissionResolver,
-    Discord,
-    Guard,
-    Permission,
-    SimpleCommand,
-    SimpleCommandMessage
-} from "discordx";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {ArrayUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {GuildMember, MessageEmbed} from "discord.js";
-import {SettingsManager} from "../../model/settings/SettingsManager";
-import {SETTINGS} from "../../enums/SETTINGS";
-import {Typeings} from "../../model/types/Typeings";
-import {AbstractCommandModule} from "../AbstractCommandModule";
-import {container, delay, inject, injectable} from "tsyringe";
-import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
-import {Category} from "@discordx/utilities";
-import Command = Typeings.Command;
-
-
-@Discord()
-@Category("Help", "Commands to display help and info")
-@Category("Help", [
-    {
-        "name": "help",
-        "type": "SIMPLECOMMAND",
-        "options": [
-            {
-                "name": "Module",
-                "description": "The module that you want to drill into",
-                "optional": true,
-                "type": "STRING"
-            },
-            {
-                "name": "PageNumber",
-                "description": "Some modules contain a lot of commands, and can't be displayed all at once, if this is the case, you can supply a page number \n NOTE: the 'Command' argument is invalid when this is supplied",
-                "optional": true,
-                "type": "NUMBER"
-            },
-            {
-                "name": "Command",
-                "description": "The command you want to see details of, This must be used conjunction with the Module argument",
-                "optional": true,
-                "type": "STRING"
-            }
-        ],
-        "description": "Get the description of a command or all commands"
-    }
-])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
-@injectable()
-export class Help extends AbstractCommandModule {
-
-    constructor(@inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager, private _client: Client) {
-        super();
-    }
-
-
-    @SimpleCommand("help")
-    @Guard(NotBotInteraction)
-    private async help({message}: SimpleCommandMessage): Promise<void> {
-        const argumentArray = StringUtils.splitCommandLine(message.content);
-        if (argumentArray.length !== 3 && argumentArray.length !== 2 && argumentArray.length !== 1 && argumentArray.length !== 0) {
-            message.reply('Invalid arguments, please supply <"moduleName"> <"command from module OR page number">');
-            return;
-        }
-        const member = message.member;
-        const botImage = this._client.user.displayAvatarURL({dynamic: true});
-        const settingsManager = container.resolve(SettingsManager);
-        const prefix = await settingsManager.getSetting(SETTINGS.PREFIX, member.guild.id);
-        const highestRoleColour = member.roles.highest.hexColor;
-        const embed = new MessageEmbed()
-            .setColor(highestRoleColour)
-            .setAuthor(`${this._client.user.username}`, botImage)
-            .setTimestamp();
-        const availableModules = await this._commandSecurityManager.getCommandModulesForMember(member);
-        if (!ArrayUtils.isValidArray(argumentArray)) {
-            embed.setDescription(`The items shown below are all the modules supported by this bot, please run '${prefix} help "moduleName"' to see commands for modules and '${prefix} help "moduleName" "commandName"' for argument info`);
-            embed.setTitle(`${this._client.user.username} modules`);
-            for (const commandClass of availableModules) {
-                const {module} = commandClass.commandDescriptors;
-                const moduleName = module.name;
-                const moduleDescription = module.description;
-                embed.addField(moduleName, moduleDescription);
-            }
-        } else {
-            const [moduleName, pageNumberOrCommand] = argumentArray;
-            const moduleRequested = availableModules.find(m => m.commandDescriptors.module.name.toLowerCase() === moduleName.toLowerCase());
-            if (!moduleRequested) {
-                message.reply(`Invalid module: "${moduleName}" please run '${prefix}help' for a list of modules`);
-                return;
-            }
-            let commandName = null;
-            let pageNumber = 1;
-            if (ObjectUtil.validString(pageNumberOrCommand)) {
-                if (ObjectUtil.isNumeric(pageNumberOrCommand)) {
-                    pageNumber = Number.parseInt(pageNumberOrCommand);
-                } else {
-                    commandName = pageNumberOrCommand;
-                }
-            }
-
-            if (commandName) {
-                const commandObj = await moduleRequested.getCommand(commandName, member);
-                if (commandObj == null) {
-                    message.reply(`Invalid command name: "${commandName}" Please run '${prefix}${moduleName}' for a list of commands`);
-                    return;
-                }
-                // eslint-disable-next-line prefer-const
-                let {type, description: {args, examples, text}} = commandObj;
-                const title = this.getCommandName(commandObj, prefix);
-                embed.setTitle(title);
-                if (!ObjectUtil.validString(text)) {
-                    text = "No description";
-                }
-                if (type === "command") {
-                    embed.setDescription(`${text} \n\nall arguments of type 'text' should be wrapped with speach marks: ""`);
-                }
-                if (ArrayUtils.isValidArray(examples) && type === "command") {
-                    embed.addField("Examples:", examples.map(example => `${prefix}${example}`).join("\n\n"));
-                }
-                embed.addField("Command type", type);
-                if (ArrayUtils.isValidArray(args)) {
-                    embed.addField('Arguments:', '\u200b');
-                    for (const arg of args) {
-                        const {name, description, optional, type} = arg;
-                        const str = `***Description***: ${description} \n***Optional***: ${optional} \n***Type***: ${type}`;
-                        embed.addField(name, str);
-                    }
-                }
-            } else {
-                const {name, description} = moduleRequested.commandDescriptors.module;
-                embed.setDescription(`${description} \n \nif you wish to see the command in more detail like examples and arguments, please run "${prefix}help ${name} 'commandName' " \n\nyou may specify a page using: "${prefix}help ${name} 'pagenumber'"`);
-                embed.setTitle(`${moduleName}`);
-                const {commands} = moduleRequested.commandDescriptors;
-                await this.populatePagedFields(pageNumber, commands, embed, member, prefix);
-            }
-        }
-        message.reply({
-            embeds: [embed]
-        });
-    }
-
-    private getCommandName(command: Command, prefix: string): string {
-        const {name} = command;
-        if (command.type === "slash") {
-            return `/${name}`;
-        } else if (command.type === "command") {
-            return `${prefix}${name}`;
-        } else {
-            return name;
-        }
-    }
-
-    private static chunk<T>(array: T[], chunkSize: number): T[][] {
-        const r: T[][] = [];
-        for (let i = 0; i < array.length; i += chunkSize) {
-            r.push(array.slice(i, i + chunkSize));
-        }
-        return r;
-    }
-
-    private async populatePagedFields(pageNumber: number, commands: Typeings.Command[], embed: MessageEmbed, member: GuildMember, prefix: string): Promise<void> {
-        const chunks = Help.chunk(commands, 24);
-        const maxPage = chunks.length;
-        if (pageNumber > maxPage) {
-            pageNumber = maxPage;
-        }
-        if (pageNumber < 1) {
-            pageNumber = 1;
-        }
-        embed.setFooter(`Page ${pageNumber} of ${maxPage}`);
-        embed.addField('Commands:', '\u200b');
-        const resultOfPage = chunks[pageNumber - 1];
-        for (const command of resultOfPage) {
-            const {name, description, deprecated} = command;
-            if (!await this._commandSecurityManager.canRunCommand(member, name)) {
-                continue;
-            }
-            let fieldValue = "No description";
-            if (ObjectUtil.isValidObject(description) && ObjectUtil.validString(description.text)) {
-                fieldValue = description.text;
-            }
-            if (deprecated) {
-                fieldValue += " \n\nThis command is deprecated and will be removed in the future";
-            }
-            if (ArrayUtils.isValidArray(description.args)) {
-                const requiredArgs = description.args.filter(arg => !arg.optional).length;
-                if (requiredArgs > 0) {
-                    fieldValue += `\n\n*this command requires: ${requiredArgs} mandatory arguments*`;
-                }
-            }
-            fieldValue += `\n\nCommand type: ${command.type}`;
-            const nameToDisplay = this.getCommandName(command, prefix);
-            embed.addField(nameToDisplay, fieldValue, resultOfPage.length > 5);
-        }
-    }
-}
-*/

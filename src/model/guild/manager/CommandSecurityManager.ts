@@ -83,6 +83,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         return [...simpleCommands, ...appCommands];
     }
 
+
     public getAllCommandNames(includeAlias: boolean = false): string[] {
         if (!includeAlias) {
             return this.commands.map(command => command.name);

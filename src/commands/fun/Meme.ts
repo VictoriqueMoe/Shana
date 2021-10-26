@@ -1049,8 +1049,12 @@ export class Meme extends AbstractCommandModule {
     @Guard(CommandEnabled)
     private async generate(command: SimpleCommandMessage): Promise<void> {
         const {message} = command;
-        const endPoint = command.name;
-        const enumObj = GENERATE_ENDPOINT[endPoint];
+        const {content} = message;
+        if (!ObjectUtil.validString(content)) {
+            return;
+        }
+        const endPoint = content.split(command.prefix)[1].split(" ")[0];
+        const enumObj: GENERATE_ENDPOINT = GENERATE_ENDPOINT[endPoint];
         if (!ObjectUtil.validString(enumObj)) {
             return;
         }

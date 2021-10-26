@@ -100,11 +100,16 @@ export class AutoResponder extends TriggerConstraint<null> {
                         continue;
                     }
                     let kickMessage: Message = null;
+                    let kickReason = "";
                     if (ObjectUtil.validString(toDm)) {
-                        kickMessage = await member.send(toDm);
+                        try {
+                            kickMessage = await member.send(toDm);
+                        } catch {
+                            kickReason = ", however, I could not DM this member, so did not get an invite";
+                        }
                     }
                     try {
-                        member = await member.kick(`Kicked via auto responder rule: "${trigger}"`);
+                        member = await member.kick(`Kicked via auto responder rule: "${trigger}"${kickReason}`);
                     } catch {
                         if (kickMessage) {
                             await kickMessage.delete();
