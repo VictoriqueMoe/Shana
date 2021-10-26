@@ -66,6 +66,10 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
                 return;
             }
         }
+        return this.initGuildApplicationPermissions(guild);
+    }
+
+    public async initGuildApplicationPermissions(guild: Guild): Promise<void> {
         console.log(`Reloading command permissions for guild: "${guild.name}"`);
         const commandsByGuild = await this._client.CommandByGuild();
         const commands = commandsByGuild.get(guild.id);
@@ -116,6 +120,9 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
             return false;
         }
 
+        if (GuildUtils.isMemberAdmin(member)) {
+            return category.items;
+        }
         const retArr: (ICategoryItem | ICategoryItemCommand)[] = [];
         const memberRoles = [...member.roles.cache.keys()];
         const {items} = category;

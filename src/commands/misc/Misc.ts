@@ -27,9 +27,10 @@ import {Response} from "../../model/anime/AnimeTypings";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DeepAPI} from "../../model/DeepAPI";
-import {container, injectable} from "tsyringe";
+import {container, delay, inject, injectable} from "tsyringe";
 import * as locale from 'locale-codes';
 import {Category} from "@discordx/utilities";
+import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const translate = require("deepl");
@@ -134,11 +135,11 @@ export class Misc extends AbstractCommandModule {
     private readonly animeTractApi = new AnimeTractApi();
     private readonly anilist = new Anilist();
 
-    constructor(private _client: Client) {
+    constructor(private _client: Client, @inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager) {
         super();
     }
 
-    /*@Slash("initservercommandpermissions", {
+    @Slash("initservercommandpermissions", {
         description: "Re-init all command permissions for this server"
     })
     @Guard(NotBotInteraction, CommandEnabled)
@@ -148,16 +149,9 @@ export class Misc extends AbstractCommandModule {
         await interaction.deferReply({
             ephemeral: true
         });
-        const {guild} = interaction;
-        const commandsByGuild = await this._client.CommandByGuild();
-        const pArr: Promise<void>[] = [];
-        for (const [, guildCommand] of commandsByGuild) {
-            pArr.push(this._client.initGuildApplicationPermissions(guild.id, guildCommand));
-        }
-        return Promise.all(pArr).then(() => {
-            InteractionUtils.replyOrFollowUp(interaction, `Permissions for guild ${guild.name} has been reloaded`);
-        });
-    }*/
+        await this._commandSecurityManager.initGuildApplicationPermissions(interaction.guild);
+        InteractionUtils.replyOrFollowUp(interaction, "Permissions synchronised");
+    }
 
     @Slash("generatetext", {
         description: "The text generation is a large unsupervised language model that can generate paragraphs of text"

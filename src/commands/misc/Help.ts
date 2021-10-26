@@ -166,7 +166,8 @@ export class Help extends AbstractCommandModule {
         let cat: ICategory = null;
         outer:
             for (const availableCat of availableCategories) {
-                for (const item of availableCat.items) {
+                const items = await this._commandSecurityManager.getCommandsForMember(caller, availableCat);
+                for (const item of items) {
                     if (item.name.toLowerCase() === commandName.toLowerCase()) {
                         command = item;
                         cat = availableCat;
