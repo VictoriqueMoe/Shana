@@ -37,7 +37,7 @@
     "deepl": "^1.0.13",
     "discord-api-types": "^0.24.0",
     "discord-music-player": "^8.2.0",
-    "discord.js": "^13.3.0-dev.1635120322.ceaf738",
+    "discord.js": "^13.3.0-dev.1635293093.8806039",
     "discordx": "^8.0.0-dev.1635143098.cecc9fc",
     "dotenv": "^10.0.0",
     "dropbox": "^10.13.0",
