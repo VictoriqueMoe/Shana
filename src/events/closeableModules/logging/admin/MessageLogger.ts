@@ -1,5 +1,5 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils";
+import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils";
 import {MessageEmbed, Util} from "discord.js";
 import {Main} from "../../../../Main";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
@@ -84,6 +84,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
 
         const avatarUrl = member.user.displayAvatarURL({dynamic: true});
         const messageContent = message.content;
+        const stickers = message.stickers;
         const description = StringUtils.truncate(`Message sent by <@${member.id}> deleted in <#${message.channel.id}> \n ${messageContent}`, MessageLogger.messageLimit);
         const embed = new MessageEmbed()
             .setColor('#FF470F')
@@ -106,6 +107,18 @@ export class MessageLogger extends AbstractAdminAuditLogger {
                     }
                 }
             } catch {
+            }
+        }
+        if (stickers.size > 0) {
+            const stickerUrls: string[] = [];
+            for (const [id, sticker] of stickers) {
+                if (sticker.format === "LOTTIE") {
+                    continue;
+                }
+                stickerUrls.push(sticker.url);
+            }
+            if (ArrayUtils.isValidArray(stickerUrls)) {
+                embed.addField("Stickers", stickerUrls.join("\n"));
             }
         }
         super.postToLog(embed, message.guild.id, message.member);

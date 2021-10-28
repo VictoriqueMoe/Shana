@@ -17,6 +17,9 @@ export class BannedAttachmentsModel extends Model implements IGuildAware {
     @Column({defaultValue: false})
     public isEmoji: boolean;
 
+    @Column({defaultValue: false})
+    public isSticker: boolean;
+
     @ForeignKey(() => GuildableModel)
     @Column
     guildId: string;

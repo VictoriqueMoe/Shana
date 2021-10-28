@@ -1,74 +1,76 @@
-import {Discord, Guard, Slash, SlashChoice, SlashGroup, SlashOption} from "discordx";
+import {
+    DefaultPermissionResolver,
+    Discord,
+    Guard,
+    Permission,
+    Slash,
+    SlashChoice,
+    SlashGroup,
+    SlashOption
+} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import {SETTINGS} from "../../enums/SETTINGS";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
 import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
 import {Typeings} from "../../model/types/Typeings";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
-import TIME_UNIT = TimeUtils.TIME_UNIT;
 import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
 
 
-const settingArgument: Typeings.Command["description"] = {
-    text: "Change or set any global setting",
-    args: [
-        {
-            name: "setting",
-            optional: false,
-            type: "text",
-            description: "the name of the setting you wish to change"
-        },
-        {
-            name: "value",
-            optional: false,
-            type: "text",
-            description: "the value of the setting"
-        }
-    ]
-};
-
 @Discord()
+@Category("Settings", "Commands to change internal seetings of this bot")
+@Category("Settings", [
+    {
+        "name": "globalSettings",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "setting",
+                "description": "the name of the setting you wish to change",
+                "optional": false,
+                "type": "STRING"
+            },
+            {
+                "name": "value",
+                "description": "the value of the setting",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "Change or set any global setting"
+    },
+    {
+        "name": "autorole",
+        "type": "SLASH",
+        "options": [],
+        "description": "Get and set all the Auto Role settings"
+    }
+])
 @SlashGroup("settings", "Get and Set settings for this bot", {
     set: "Command to set settings",
     get: "Commands to get settings"
 })
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
-export class SettingsCommands extends AbstractCommandModule<any> {
+export class SettingsCommands extends AbstractCommandModule {
 
     constructor(private _settingsManager: SettingsManager, private _autoRole: AutoRole) {
-        super({
-            module: {
-                name: "Settings",
-                description: "Commands to change internal seetings of this bot"
-            },
-            commands: [
-                {
-                    name: "globalSettings",
-                    type: "slash",
-                    description: settingArgument
-                },
-                {
-                    name: "autorole",
-                    type: "slash",
-                    description: {
-                        text: "Get and set all the Auto Role settings"
-                    }
-                }
-            ]
-        });
+        super();
     }
 
     @Slash("globalsettings", {
         description: "Change or set any global setting"
     })
     @SlashGroup("set")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async globalSettings(
         @SlashChoice(SETTINGS)
         @SlashOption("setting", {
@@ -104,7 +106,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
         description: "Change or set any setting to do with Auto roles"
     })
     @SlashGroup("set")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async autoMuteSettings(
         @SlashChoice(AutoRoleSettingsEnum)
         @SlashOption("setting", {
@@ -156,7 +158,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
         description: "Get all the auto role settings"
     })
     @SlashGroup("get")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async getGlobalSettings(interaction: CommandInteraction): Promise<void> {
         const {guild} = interaction;
         const guildId = guild.id;
@@ -173,7 +175,7 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             let value = settings[setting];
             switch (setting as keyof AutoRoleSettings) {
                 case "minAccountAge": {
-                    value = ObjectUtil.timeToHuman(value, TIME_UNIT.days);
+                    value = ObjectUtil.timeToHuman(value, TimeUtils.TIME_UNIT.days);
                     break;
                 }
                 case "autoRoleTimeout": {
@@ -195,6 +197,4 @@ export class SettingsCommands extends AbstractCommandModule<any> {
             ephemeral: true
         });
     }
-
-
 }

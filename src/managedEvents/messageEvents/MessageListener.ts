@@ -3,13 +3,14 @@ import fetch from "node-fetch";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
 import {Main} from "../../Main";
-import {DMChannel, GuildMember, Message, Role, User} from "discord.js";
+import {DMChannel, GuildMember, Message, Role, Sticker, User} from "discord.js";
 import {Op} from "sequelize";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
 import {notBot} from "../../guards/NotABot";
 import {container, singleton} from "tsyringe";
 import EmojiInfo = DiscordUtils.EmojiInfo;
+import StickerInfo = DiscordUtils.StickerInfo;
 
 const getUrls = require('get-urls');
 
@@ -32,6 +33,42 @@ export class MessageListener {
             });
         }
     }*/
+
+    private async doStickerBan(stickers: Sticker[], message: Message): Promise<void> {
+        for (const sticker of stickers) {
+            let bannedStickerInfo: StickerInfo = null;
+            try {
+                bannedStickerInfo = await DiscordUtils.getStickerInfo(sticker);
+            } catch {
+
+            }
+            if (!bannedStickerInfo) {
+                return;
+            }
+            const stickerHash = md5(bannedStickerInfo.buffer);
+            const exists = await BannedAttachmentsModel.findOne({
+                where: {
+                    guildId: message.guild.id,
+                    isSticker: true,
+                    [Op.or]: [
+                        {
+                            attachmentHash: stickerHash
+                        }, {
+                            url: bannedStickerInfo.url
+                        }
+                    ]
+                }
+            });
+            if (exists) {
+                try {
+                    await message.delete();
+                    message.channel.send(`Message contains a banned Sticker`);
+                } catch {
+                }
+                break;
+            }
+        }
+    }
 
     public static async doEmojiBan(emojiIds: string[], user: User, message: Message, isReaction: boolean): Promise<void> {
         for (const emoji of emojiIds) {
@@ -183,6 +220,19 @@ export class MessageListener {
             return;
         }
         message.channel.send(reply.output);
+    }
+
+    @MessageListenerDecorator(true)
+    private async scanSticker([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
+        const member = message.member;
+        if (!member) {
+            return;
+        }
+        if (GuildUtils.isMemberAdmin(message.member) && Main.testMode === false) {
+            return;
+        }
+        const stickers = message.stickers;
+        this.doStickerBan([...stickers.values()], message);
     }
 
     @MessageListenerDecorator(true)

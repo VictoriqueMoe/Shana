@@ -1,8 +1,10 @@
 import {
     Client,
     ContextMenu,
+    DefaultPermissionResolver,
     Discord,
     Guard,
+    Permission,
     SimpleCommand,
     SimpleCommandMessage,
     Slash,
@@ -22,11 +24,13 @@ import {
 import {TimedSet} from "../../model/Impl/TimedSet";
 import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
 import {Response} from "../../model/anime/AnimeTypings";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DeepAPI} from "../../model/DeepAPI";
-import {container, injectable} from "tsyringe";
+import {container, delay, inject, injectable} from "tsyringe";
 import * as locale from 'locale-codes';
+import {Category} from "@discordx/utilities";
+import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const translate = require("deepl");
@@ -36,133 +40,123 @@ const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
 
 @Discord()
+@Category("Miscellaneous", "Miscellaneous commands")
+@Category("Miscellaneous", [
+    {
+        "name": "findSource",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "image",
+                "description": "The image to search",
+                "optional": false,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ],
+        "description": "Perform a reverse image search"
+    },
+    {
+        "name": "findAnime",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Source",
+                "description": "The source of the anime to look for, can be attachment or a reply to a message with ONE attachment\nPlease note: ONLY screenshots are allowed, please make sure there is NO border",
+                "optional": false,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ],
+        "description": "Find anime source, including episode and preview"
+    },
+    {
+        "name": "avatar",
+        "type": "CONTEXT USER",
+        "description": "Display a users avatar"
+    },
+    {
+        "name": "translate",
+        "type": "CONTEXT MESSAGE",
+        "description": "Translate a message (to EN-GB)"
+    },
+    {
+        "name": "banner",
+        "type": "CONTEXT USER",
+        "description": "Display a users profile banner"
+    },
+    {
+        "name": "posOrNeg",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "text",
+                "description": "the text to analyse",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "This algorithm classifies each sentence in the input as very negative, negative, neutral, positive, or very positive"
+    },
+    {
+        "name": "generateText",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "text",
+                "description": "the text to include",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text."
+    }/*,
+    {
+        "name": "initServerCommandPermissions",
+        "type": "SLASH",
+        "options": [],
+        "description": "Re-init all command permissions for this server."
+    }*/
+])
 @SlashGroup("miscellaneous", "Miscellaneous commands")
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
-export class Misc extends AbstractCommandModule<any> {
+export class Misc extends AbstractCommandModule {
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
     private readonly animeTractApi = new AnimeTractApi();
     private readonly anilist = new Anilist();
 
-    constructor(private _client: Client) {
-        super({
-            module: {
-                name: "Miscellaneous",
-                description: "Miscellaneous commands"
-            },
-            commands: [
-                {
-                    name: "findSource",
-                    type: "command",
-                    description: {
-                        text: "Perform a reverse image search",
-                        args: [
-                            {
-                                type: "attachment",
-                                optional: false,
-                                name: "image",
-                                description: "The image to search"
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "findAnime",
-                    type: "command",
-                    description: {
-                        text: "Find anime source, including episode and preview",
-                        args: [
-                            {
-                                name: "Source",
-                                type: "attachment",
-                                description: "The source of the anime to look for, can be attachment or a reply to a message with ONE attachment\nPlease note: ONLY screenshots are allowed, please make sure there is NO border",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "avatar",
-                    type: "contextMenu",
-                    description: {
-                        text: "Display a users avatar",
-                        args: [
-                            {
-                                name: "user",
-                                type: "mention",
-                                description: "The user to get",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "translate",
-                    type: "contextMenu",
-                    description: {
-                        text: "Translate a message (to EN-GB)",
-                        args: [
-                            {
-                                name: "message",
-                                type: "text",
-                                description: "the message or text to translate",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "banner",
-                    type: "contextMenu",
-                    description: {
-                        text: "Display a users profile banner",
-                        args: [
-                            {
-                                name: "user",
-                                type: "mention",
-                                description: "The user to get",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "posOrNeg",
-                    type: "command",
-                    description: {
-                        text: "This algorithm classifies each sentence in the input as very negative, negative, neutral, positive, or very positive",
-                        args: [
-                            {
-                                name: "text",
-                                type: "text",
-                                description: "the text to analyse",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "generateText",
-                    type: "slash",
-                    description: {
-                        text: "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text.",
-                        args: [
-                            {
-                                name: "text",
-                                type: "text",
-                                description: "the text to include",
-                                optional: false
-                            }
-                        ]
-                    }
-                }
-            ]
+    constructor(private _client: Client, @inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager) {
+        super();
+    }
+
+    @Slash("initservercommandpermissions", {
+        description: "Re-init all command permissions for this server"
+    })
+    @Guard(NotBotInteraction, CommandEnabled)
+    private async initServerCommandPermissions(
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply({
+            ephemeral: true
         });
+        await this._commandSecurityManager.initGuildApplicationPermissions(interaction.guild);
+        InteractionUtils.replyOrFollowUp(interaction, "Permissions synchronised");
     }
 
     @Slash("generatetext", {
         description: "The text generation is a large unsupervised language model that can generate paragraphs of text"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async generateText(
         @SlashOption("value", {
             description: "the text to include in the generation",
@@ -178,7 +172,7 @@ export class Misc extends AbstractCommandModule<any> {
     }
 
     @SimpleCommand("posOrNeg")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async posOrNeg({message}: SimpleCommandMessage): Promise<void> {
         const reference = message.reference;
         let text = "";
@@ -201,7 +195,7 @@ export class Misc extends AbstractCommandModule<any> {
     }
 
     @ContextMenu("USER", "avatar")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async avatar(interaction: ContextMenuInteraction): Promise<void> {
         const ops: ImageURLOptions = {
             dynamic: true,
@@ -215,7 +209,7 @@ export class Misc extends AbstractCommandModule<any> {
     }
 
     @ContextMenu("MESSAGE", "translate")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async translate(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -266,7 +260,7 @@ export class Misc extends AbstractCommandModule<any> {
     }
 
     @ContextMenu("USER", "banner")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async banner(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply();
         const ops: ImageURLOptions = {
@@ -285,7 +279,7 @@ export class Misc extends AbstractCommandModule<any> {
 
 
     @SimpleCommand("findAnime")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async findAnime({message}: SimpleCommandMessage): Promise<void> {
         const freshHold = 0.86;
         const messaheUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(message);
@@ -400,7 +394,7 @@ export class Misc extends AbstractCommandModule<any> {
 
 
     @SimpleCommand("findSource")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async imageSearch({message}: SimpleCommandMessage): Promise<void> {
         type GoogleImageResult = {
             url?: string,

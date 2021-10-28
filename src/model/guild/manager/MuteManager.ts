@@ -10,7 +10,6 @@ import {GuildManager} from "./GuildManager";
 import {Sequelize} from "sequelize-typescript";
 import {Client} from "discordx";
 import {Transaction} from "sequelize/types/lib/transaction";
-import TIME_UNIT = TimeUtils.TIME_UNIT;
 
 @singleton()
 export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
@@ -54,7 +53,7 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
      * @param timeOut - the timeout. if unit is not passed, this will be evaluated as seconds
      * @param unit - the unit of time to apply to the timeOut argument
      */
-    public async muteUser(user: GuildMember, reason: string, creatorID: string, timeOut?: number, unit?: TIME_UNIT): Promise<MuteModel> {
+    public async muteUser(user: GuildMember, reason: string, creatorID: string, timeOut?: number, unit?: TimeUtils.TIME_UNIT): Promise<MuteModel> {
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(user.guild.id);
         if (!mutedRole) {
             return;

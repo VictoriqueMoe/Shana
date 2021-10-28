@@ -21,7 +21,7 @@ export class DynoAutoMod extends CloseableModule<null> {
 
     private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
 
-    constructor(private _client: Client) {
+    constructor(private _client: Client, private _muteManager: MuteManager) {
         super(CloseOptionModel);
     }
 
@@ -64,7 +64,6 @@ export class DynoAutoMod extends CloseableModule<null> {
         violatedFilters.sort((a, b) => a.priority - b.priority);
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(message.guild.id);
         const guildid = member.guild.id;
-        const muteSingleton = container.resolve(MuteManager);
         const {channel} = message;
         outer:
             for (const filter of violatedFilters) {
@@ -76,7 +75,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                             if (!mutedRole) {
                                 continue;
                             }
-                            if (await muteSingleton.isMuted(member)) {
+                            if (await this._muteManager.isMuted(member)) {
                                 continue;
                             }
                             let fromArray = this.getFromArray(userId, guildid);
@@ -107,7 +106,7 @@ export class DynoAutoMod extends CloseableModule<null> {
                             if (!(channel instanceof BaseGuildTextChannel)) {
                                 continue;
                             }
-                            const warnResponse = await channel.send(filter.warnMessage);
+                            const warnResponse = await channel.send(`<@${member.id}>, ${filter.warnMessage}`);
                             setTimeout(async () => {
                                 try {
                                     await warnResponse.delete();

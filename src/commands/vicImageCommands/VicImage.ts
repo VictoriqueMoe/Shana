@@ -1,53 +1,49 @@
-import {Discord, Guard, Slash, SlashGroup} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction} from "discord.js";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
-import {container, injectable} from "tsyringe";
-import {Dropbox} from "dropbox";
+import {CommandEnabled} from "../../guards/CommandEnabled";
+import {injectable} from "tsyringe";
 import {DiscordUtils} from "../../utils/Utils";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
+
 @Discord()
+@Category("VicImage", "Commands to obtain images of <@697417252320051291>")
+@Category("VicImage", [
+    {
+        name: "vicImage",
+        description: "Get a random image of <@697417252320051291>",
+        type: "SLASH",
+        options: []
+    },
+    {
+        name: "vicReIndex",
+        description: "Re-index image metadata from dropbox",
+        type: "SLASH",
+        options: []
+    }
+])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("vicimage", "Obtain images of Victorique#0002")
 @injectable()
-export class VicImage extends AbstractCommandModule<any> {
+export class VicImage extends AbstractCommandModule {
 
-    constructor(private _dropbox: Dropbox) {
-        super({
-            module: {
-                name: "VicImage",
-                description: "Commands to obtain images of <@697417252320051291>"
-            },
-            commands: [
-                {
-                    name: "vicImage",
-                    type: "slash",
-                    description: {
-                        text: `Get a random image of <@697417252320051291>`
-                    }
-                },
-                {
-                    name: "vicReIndex",
-                    type: "slash",
-                    description: {
-                        text: "Re-index image metadata from dropbox"
-                    }
-                }
-            ]
-        });
+    constructor(private _vicDropbox: VicDropbox) {
+        super();
     }
 
     @Slash("vicimage", {
         description: "Get a random image of Victorique#0002"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async vicImage(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
-        const vicDropbox = container.resolve(VicDropbox);
-        const randomImageMetadata = vicDropbox.randomImage;
-        const randomImage = (await this._dropbox.filesDownload({"path": randomImageMetadata.path_lower})).result;
+        const randomImageMetadata = this._vicDropbox.randomImage;
+        const randomImage = (await this._vicDropbox.filesDownload({"path": randomImageMetadata.path_lower})).result;
         const buffer: Buffer = (randomImage as any).fileBinary;
         try {
             await interaction.editReply({
@@ -68,13 +64,12 @@ export class VicImage extends AbstractCommandModule<any> {
     @Slash("vicreindex", {
         description: "Get a random image of Victorique#0002"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async vicReIndex(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
-        const vicDropbox = container.resolve(VicDropbox);
-        await vicDropbox.index();
+        await this._vicDropbox.index();
         await interaction.editReply({
-            content: `Re-indexed ${vicDropbox.allImages.length} images from Dropbox`
+            content: `Re-indexed ${this._vicDropbox.allImages.length} images from Dropbox`
         });
     }
 }

@@ -8,893 +8,1053 @@ import {
 } from "../../model/Impl/ImageFun/Typeings";
 import {AssertionError} from "assert";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {injectable} from "tsyringe";
+import {Category} from "@discordx/utilities";
 
 @Discord()
-@injectable()
-export class Meme extends AbstractCommandModule<any> {
-
-    public constructor(private _handler: ImageFun) {
-        super(
+@Category("Memes", "Commands generate memes. All commands that are marked as type 'attachment' can take both an uploaded image (has to be jpg) OR a mention")
+@Category("Memes", [
+    {
+        "name": "3000years",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
             {
-                module: {
-                    name: "Memes",
-                    description: "Commands generate memes. All commands that are marked as type 'attachment' can take both an uploaded image (has to be jpg) OR a mention"
-                },
-                "commands": [
-                    {
-                        "name": "3000years",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "approved",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "afusion",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "User",
-                                    "type": "mention",
-                                    "optional": false,
-                                    "description": "the 2nd image to use"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "batslap",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "User",
-                                    "type": "mention",
-                                    "optional": false,
-                                    "description": "the member to slap"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "beautiful",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "blur",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                },
-                                {
-                                    "name": "blur amount",
-                                    "type": "number",
-                                    "optional": true,
-                                    "description": "The amount of blue to apply (defaults to 5) MAX: 30"
-                                },
-                                {
-                                    "name": "delete message",
-                                    "type": "boolean",
-                                    "optional": true,
-                                    "description": "if true, the bot will delete the message you send automatically"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "blurple",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                },
-                                {
-                                    "name": "invert",
-                                    "type": "boolean",
-                                    "optional": true,
-                                    "description": "invert the iamge"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "brazzers",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "burn",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "challenger",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "circle",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "contrast",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "crush",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "facebook",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                },
-                                {
-                                    "name": "text of post",
-                                    "type": "text",
-                                    "optional": true,
-                                    "description": "Text of the facebook post"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "ddungeon",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "deepfry",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "dictator",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "distort",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "dither565",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "emboss",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "fire",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "frame",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "gay",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "glitch",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "greyple",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                },
-                                {
-                                    "name": "invert",
-                                    "type": "boolean",
-                                    "optional": true,
-                                    "description": "invert the iamge"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "greyscale",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "instagram",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "invert",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "jail",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "lookwhatkarenhave",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "Magik",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "missionpassed",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "moustache",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "pixelize",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                },
-                                {
-                                    "name": "pixelation amount",
-                                    "type": "number",
-                                    "optional": true,
-                                    "description": "The amount of pixels to use, smaller = more pixelated (between 1 and 50)"
-                                },
-                                {
-                                    "name": "delete message",
-                                    "type": "boolean",
-                                    "optional": true,
-                                    "description": "if true, the bot will delete the message you send automatically"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "ps4",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "posterize",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "rejected",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "redple",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "rip",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "scary",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "sepia",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "sharpen",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "sniper",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "pornhub",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                },
-                                {
-                                    "name": "Text to use",
-                                    "type": "text",
-                                    "optional": false,
-                                    "description": "The text to use on the pornhub page"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "steamcard",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                },
-                                {
-                                    "name": "Text to use",
-                                    "type": "text",
-                                    "optional": false,
-                                    "description": "The text to use on the steamcard"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "symmetry",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "thanos",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "trinity",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "tobecontinued",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "subzero",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "triggered",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                },
-                                {
-                                    "name": "invert",
-                                    "type": "boolean",
-                                    "optional": true,
-                                    "description": "invert the iamge"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "unsharpen",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "utatoo",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "vs",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "User",
-                                    "type": "mention",
-                                    "optional": false,
-                                    "description": "the member to vs"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "wanted",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "wasted",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "Image",
-                                    "type": "attachment",
-                                    "optional": true,
-                                    "description": "The image to use for this meme (keep blank to refer to yourself)"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "whowouldwin",
-                        type: "command",
-                        "description": {
-                            "args": [
-                                {
-                                    "name": "User",
-                                    "type": "mention",
-                                    "optional": false,
-                                    "description": "opponent"
-                                }
-                            ]
-                        }
-                    }
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
                 ]
             }
-        );
+        ]
+    },
+    {
+        "name": "approved",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "afusion",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "User",
+                "description": "the 2nd image to use",
+                "optional": false,
+                "type": "USER"
+            }
+        ]
+    },
+    {
+        "name": "batslap",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "User",
+                "description": "the member to slap",
+                "optional": false,
+                "type": "USER"
+            }
+        ]
+    },
+    {
+        "name": "beautiful",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "blur",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "blur amount",
+                "description": "The amount of blue to apply (defaults to 5) MAX: 30",
+                "optional": true,
+                "type": "NUMBER"
+            },
+            {
+                "name": "delete message",
+                "description": "if true, the bot will delete the message you send automatically",
+                "optional": true,
+                "type": "BOOLEAN"
+            }
+        ],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "blurple",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "invert",
+                "description": "invert the iamge",
+                "optional": true,
+                "type": "BOOLEAN"
+            }
+        ],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "brazzers",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "burn",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "challenger",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "circle",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "contrast",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "crush",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "facebook",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "text of post",
+                "description": "Text of the facebook post",
+                "optional": true,
+                "type": "STRING"
+            }
+        ],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "ddungeon",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "deepfry",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "dictator",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "distort",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "dither565",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "emboss",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "fire",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "frame",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "gay",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "glitch",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "greyple",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "invert",
+                "description": "invert the iamge",
+                "optional": true,
+                "type": "BOOLEAN"
+            }
+        ],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "greyscale",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "instagram",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "invert",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "jail",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "lookwhatkarenhave",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Magik",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "missionpassed",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "moustache",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "pixelize",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "pixelation amount",
+                "description": "The amount of pixels to use, smaller = more pixelated (between 1 and 50)",
+                "optional": true,
+                "type": "NUMBER"
+            },
+            {
+                "name": "delete message",
+                "description": "if true, the bot will delete the message you send automatically",
+                "optional": true,
+                "type": "BOOLEAN"
+            }
+        ],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "ps4",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "posterize",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "rejected",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "redple",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "rip",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "scary",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sepia",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sharpen",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "sniper",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "pornhub",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "Text to use",
+                "description": "The text to use on the pornhub page",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "steamcard",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "Text to use",
+                "description": "The text to use on the steamcard",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "symmetry",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "thanos",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "trinity",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "tobecontinued",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "subzero",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "triggered",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "invert",
+                "description": "invert the iamge",
+                "optional": true,
+                "type": "BOOLEAN"
+            }
+        ],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "unsharpen",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "utatoo",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "vs",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "User",
+                "description": "the member to vs",
+                "optional": false,
+                "type": "USER"
+            }
+        ]
+    },
+    {
+        "name": "wanted",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "wasted",
+        "type": "SIMPLECOMMAND",
+        "options": [],
+        "attachments": [
+            {
+                "name": "Image",
+                "description": "The image to use for this meme (keep blank to refer to yourself)",
+                "optional": true,
+                "type": "ATTACHMENT",
+                "extensions": [
+                    "jpg",
+                    "png"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "whowouldwin",
+        "type": "SIMPLECOMMAND",
+        "options": [
+            {
+                "name": "User",
+                "description": "opponent",
+                "optional": false,
+                "type": "USER"
+            }
+        ]
+    }
+])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
+@injectable()
+export class Meme extends AbstractCommandModule {
+
+    public constructor(private _handler: ImageFun) {
+        super();
     }
 
-    @SimpleCommand("waifu", {
+    @SimpleCommand("Memes", {
         aliases: EnumEx.getNames(GENERATE_ENDPOINT)
     })
-    @Guard(secureCommandInteraction)
+    @Guard(CommandEnabled)
     private async generate(command: SimpleCommandMessage): Promise<void> {
         const {message} = command;
-        const endPoint = command.name;
-        const enumObj = GENERATE_ENDPOINT[endPoint];
+        const {content} = message;
+        if (!ObjectUtil.validString(content)) {
+            return;
+        }
+        const endPoint = content.split(command.prefix)[1].split(" ")[0];
+        const enumObj: GENERATE_ENDPOINT = GENERATE_ENDPOINT[endPoint];
         if (!ObjectUtil.validString(enumObj)) {
             return;
         }

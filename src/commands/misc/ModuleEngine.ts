@@ -1,57 +1,48 @@
-import {Discord, Guard, Slash, SlashOption} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashOption} from "discordx";
 import {DiscordUtils} from "../../utils/Utils";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction} from "discord.js";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-export abstract class ModuleEngine extends AbstractCommandModule<any> {
-
-    constructor() {
-        super({
-            module: {
-                name: "closeableModules",
-                description: "Commands to enable or disable features"
+@Category("closeableModules", "Commands to enable or disable features")
+@Category("closeableModules", [
+    {
+        "name": "enableModule",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "moduleId",
+                "description": "the name of the module to close or open, Please run 'getModuleNames' to get a list of module names for this argument",
+                "optional": false,
+                "type": "STRING"
             },
-            commands: [
-                {
-                    name: "enableModule",
-                    type: "slash",
-                    description: {
-                        text: "Enable a module to run. These modules are designed to be shut down and started dynamically",
-                        examples: ["enableModule AdminLog true = enable module AdminLog", "enableModule AdminLog false = disable module AdminLog"],
-                        args: [
-                            {
-                                name: "moduleId",
-                                type: "text",
-                                optional: false,
-                                description: "the name of the module to close or open, Please run 'getModuleNames' to get a list of module names for this argument"
-                            },
-                            {
-                                name: "enable/Disable",
-                                type: "boolean",
-                                optional: false,
-                                description: "true = enable, false = disable"
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "getModuleNames",
-                    type: "slash",
-                    description: {
-                        text: "Return a list of all modules to use with the 'enableModule' command"
-                    }
-                }
-            ]
-        });
+            {
+                "name": "enable/Disable",
+                "description": "true = enable, false = disable",
+                "optional": false,
+                "type": "BOOLEAN"
+            }
+        ],
+        "description": "Enable a module to run. These modules are designed to be shut down and started dynamically"
+    },
+    {
+        "name": "getModuleNames",
+        "type": "SLASH",
+        "options": [],
+        "description": "Return a list of all modules to use with the 'enableModule' command"
     }
+])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
+export abstract class ModuleEngine extends AbstractCommandModule {
 
     @Slash("enablemodule", {
         description: "Enable a module to run. These modules are designed to be shut down and started dynamically"
     })
-    @Guard(secureCommandInteraction)
+    @Guard(CommandEnabled)
     private async enableModule(
         @SlashOption("setting", {
             description: "the name of the module to close or open",
@@ -87,7 +78,7 @@ export abstract class ModuleEngine extends AbstractCommandModule<any> {
     @Slash("getmodulenames", {
         description: "Return a list of all modules to use with the 'enableModule' command"
     })
-    @Guard(secureCommandInteraction)
+    @Guard(CommandEnabled)
     private async getModuleNames(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const guildId = interaction.guild.id;

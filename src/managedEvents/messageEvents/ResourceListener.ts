@@ -56,7 +56,12 @@ export class ResourceListener {
             } catch {
                 continue;
             }
-            const attachmentHash = md5(attachment);
+            let attachmentHash = "";
+            try {
+                attachmentHash = md5(attachment);
+            } catch {
+                return;
+            }
             const exists = await BannedAttachmentsModel.findOne({
                 where: {
                     guildId: message.guild.id,

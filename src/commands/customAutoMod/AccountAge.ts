@@ -1,63 +1,53 @@
-import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Channel, CommandInteraction, GuildMember, User} from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {injectable} from "tsyringe";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@Category("Ages", "commands to get ages of accounts and servers")
+@Category("Ages", [
+    {
+        name: "userAge",
+        description: "Get the age on an account",
+        type: "SLASH",
+        options: [{
+            name: "user",
+            type: "USER",
+            optional: false,
+            description: "The user you want to check the account age of"
+        }]
+    },
+    {
+        name: "serverAge",
+        description: "Get the age of this server",
+        type: "SLASH",
+        options: []
+    },
+    {
+        name: "channelAge",
+        description: "View the age of a channel",
+        type: "SLASH",
+        options: [{
+            name: "Channel",
+            type: "CHANNEL",
+            optional: false,
+            description: "The reference to the channel"
+        }]
+    }
+])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("ages", "commands to get ages of accounts and servers")
 @injectable()
-export class AccountAge extends AbstractCommandModule<any> {
+export class AccountAge extends AbstractCommandModule {
 
     public constructor(private _client: Client) {
-        super({
-            module: {
-                name: "Ages",
-                description: "commands to get ages of accounts and servers"
-            },
-            commands: [
-                {
-                    name: "age",
-                    type: "slash",
-                    description: {
-                        text: "Get the age on an account",
-                        args: [
-                            {
-                                name: "user",
-                                type: "mention",
-                                optional: false,
-                                description: "The user you want to check the account age of"
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "serverAge",
-                    type: "slash",
-                    description: {
-                        text: "Get the age of this server"
-                    }
-                },
-                {
-                    name: "channelAge",
-                    type: "slash",
-                    description: {
-                        text: "View the age of a channel",
-                        args: [
-                            {
-                                name: "Channel",
-                                type: "mention",
-                                description: "The reference to the channel",
-                                optional: false
-                            }
-                        ]
-                    }
-                }
-            ]
-        });
+        super();
     }
 
     private static getAge(toCall: { createdAt: Date }): { ageHumanReadable: string, utcDate: string } {
@@ -78,7 +68,7 @@ export class AccountAge extends AbstractCommandModule<any> {
     @Slash("serverage", {
         description: "Get the age of this server"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async serverAge(interaction: CommandInteraction): Promise<void> {
         const guildId = interaction.guild.id;
         const guild = await this._client.guilds.fetch(guildId);
@@ -89,7 +79,7 @@ export class AccountAge extends AbstractCommandModule<any> {
     @Slash("channelage", {
         description: "View the age of a channel"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async channelAge(
         @SlashOption("channel", {
             description: "The reference to the channel",
@@ -106,7 +96,7 @@ export class AccountAge extends AbstractCommandModule<any> {
     @Slash("age", {
         description: "Get the age on an account"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async getAccountAge(
         @SlashOption("user", {
             description: "The user you want to check the account age of",

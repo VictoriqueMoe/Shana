@@ -2,31 +2,14 @@ import {Dropbox, files} from "dropbox";
 import {singleton} from "tsyringe";
 
 @singleton()
-export class VicDropbox {
-    private isIndexed = false;
+export class VicDropbox extends Dropbox {
     private imageCache: files.FolderMetadataReference[];
 
-    public constructor(private _dropbox: Dropbox) {
+    public constructor() {
+        super({
+            accessToken: process.env.dropboxToken
+        });
         this.imageCache = [];
-        this.isIndexed = false;
-        const handler = {
-            get(target: any, propKey: string, receiver: any): any {
-                if (typeof target[propKey] === 'function') {
-                    return new Proxy(target[propKey], {
-                        apply(applyTarget: any, thisArg: any, args: any[]): any {
-                            const isIndexed = target.isIndexed;
-                            const isIndexMethod = applyTarget.name === "index";
-                            if (!isIndexMethod && !isIndexed) {
-                                throw new Error("Index must be called before using this class");
-                            }
-                            return Reflect.apply(applyTarget, thisArg, args);
-                        }
-                    });
-                }
-                return target[propKey];
-            }
-        };
-        return new Proxy(this, handler);
     }
 
     /**
@@ -45,8 +28,7 @@ export class VicDropbox {
 
     public async index(): Promise<void> {
         console.log("Indexing images...");
-        this.imageCache = ((await this._dropbox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
+        this.imageCache = ((await this.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
         console.log(`Indexed ${this.imageCache.length} images`);
-        this.isIndexed = true;
     }
 }

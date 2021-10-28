@@ -17,6 +17,7 @@ import {
     Permissions,
     Role,
     StaticImageURLOptions,
+    Sticker,
     TextChannel,
     ThreadAutoArchiveDuration,
     ThreadChannel,
@@ -24,12 +25,10 @@ import {
 } from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
-import {Main} from "../Main";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
 import {Model, Sequelize} from "sequelize-typescript";
 import {glob} from "glob";
 import * as path from "path";
-import {Channels} from "../enums/Channels";
 import {ChannelManager} from "../model/guild/manager/ChannelManager";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import {SettingsManager} from "../model/settings/SettingsManager";
@@ -41,8 +40,8 @@ import {Typeings} from "../model/types/Typeings";
 import {FindOptions} from "sequelize/types/lib/model";
 import {container} from "tsyringe";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
-import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {Client} from "discordx";
+import {Beans} from "../DI/Beans";
 
 const emojiRegex = require('emoji-regex');
 
@@ -355,10 +354,10 @@ export namespace DiscordUtils {
             });
         }
 
-        export function getInteractionCaller(interaction: BaseCommandInteraction): GuildMember | null {
+        export function getInteractionCaller(interaction: BaseCommandInteraction | MessageComponentInteraction): GuildMember | null {
             const {member} = interaction;
             if (member == null) {
-                interaction.reply("Unable to extract member");
+                replyOrFollowUp(interaction, "Unable to extract member");
                 throw new Error("Unable to extract member");
             }
             if (member instanceof GuildMember) {
@@ -374,6 +373,8 @@ export namespace DiscordUtils {
         "id": string
     };
 
+    export type StickerInfo = EmojiInfo;
+
     export function getClient(): Client {
         return container.resolve(Client);
     }
@@ -382,6 +383,27 @@ export namespace DiscordUtils {
         const guildManager = container.resolve(GuildManager);
         const guild = await guildManager.getGuild(guildId);
         return guild.me;
+    }
+
+    export async function getStickerInfo(sticker: Sticker, includeBuffer: boolean = true): Promise<StickerInfo> {
+        const {url, format, id} = sticker;
+        const retObj: StickerInfo = {
+            url,
+            id
+        };
+        if (!includeBuffer) {
+            return retObj;
+        }
+        if (format === "LOTTIE") {
+            retObj["buffer"] = Buffer.from(url, 'utf8');
+        } else {
+            try {
+                retObj["buffer"] = await DiscordUtils.loadResourceFromURL(url);
+            } catch {
+
+            }
+        }
+        return retObj;
     }
 
     export async function getEmojiInfo(emojiId: string, includeBuffer: boolean = true): Promise<EmojiInfo> {
@@ -784,11 +806,7 @@ export namespace DiscordUtils {
     export async function postToLog(message: MessageEmbed[] | string, guildId: string, adminLog: boolean = false): Promise<Message | null> {
         let channel: BaseGuildTextChannel;
         const channelManager = container.resolve(ChannelManager);
-        if (Main.testMode) {
-            const client = container.resolve(Client);
-            const guild = await client.guilds.fetch(guildId);
-            channel = await guild.channels.resolve(Channels.TEST_CHANNEL) as BaseGuildTextChannel;
-        } else if (adminLog) {
+        if (adminLog) {
             channel = await channelManager.getAdminLogChannel(guildId);
         } else {
             channel = await channelManager.getLogChannel(guildId);
@@ -867,8 +885,7 @@ export namespace DiscordUtils {
     }
 
     export function getCloseableModules(): CloseableModule<any>[] {
-        const commandSecurityManager = container.resolve(CommandSecurityManager);
-        return commandSecurityManager.events;
+        return container.resolveAll<CloseableModule<any>>(Beans.ICloseableModuleToken);
     }
 
     export function getModule(moduleId: string): ICloseableModule<any> {

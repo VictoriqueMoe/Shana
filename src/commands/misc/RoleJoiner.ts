@@ -1,6 +1,6 @@
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {RoleJoinerModel} from "../../model/DB/guild/RoleJoiner.model";
-import {Discord, SelectMenuComponent, Slash, SlashGroup} from "discordx";
+import {DefaultPermissionResolver, Discord, Permission, SelectMenuComponent, Slash, SlashGroup} from "discordx";
 import {
     CommandInteraction,
     GuildMember,
@@ -11,29 +11,23 @@ import {
     SelectMenuInteraction
 } from "discord.js";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-@SlashGroup("rolejoiner", "Commands to allow users to join vanity roles")
-export class RoleJoiner extends AbstractCommandModule<RoleJoinerModel> {
-
-    public constructor() {
-        super({
-            module: {
-                name: "RoleJoiner",
-                description: "Commands to allow users to join vanity roles"
-            },
-            commands: [
-                {
-                    name: "displayJoinUi",
-                    description: {
-                        text: "Initialise the role join dropdown and buttons"
-                    },
-                    type: "slash",
-                }
-            ]
-        });
+@Category("RoleJoiner", "Commands to allow users to join vanity roles")
+@Category("RoleJoiner", [
+    {
+        "name": "displayJoinUi",
+        "type": "SLASH",
+        "options": [],
+        "description": "Initialise the role join dropdown and buttons"
     }
+])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
+@SlashGroup("rolejoiner", "Commands to allow users to join vanity roles")
+export class RoleJoiner extends AbstractCommandModule {
 
     @Slash("displayjoinui", {
         description: "Initialise the role join dropdown and buttons"

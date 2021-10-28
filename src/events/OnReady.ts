@@ -2,7 +2,7 @@ import {Main} from "../Main";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
 import {Op} from "sequelize";
-import {ArrayUtils, EnumEx, GuildUtils, loadClasses, ObjectUtil} from "../utils/Utils";
+import {ArrayUtils, DiscordUtils, EnumEx, GuildUtils, loadClasses, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
@@ -20,7 +20,6 @@ import {ArgsOf, Client, Discord, On} from "discordx";
 import {container, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
-import {AbstractCommandModule} from "../commands/AbstractCommandModule";
 import {Sequelize} from "sequelize-typescript";
 import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS";
 import {Player} from "discord-music-player";
@@ -173,15 +172,16 @@ export class OnReady extends BaseDAO<any> {
     /**
      * Commands that are run on application start AND on join new guild
      */
-    public init(): Promise<any>[] {
-        const pArr: Promise<any>[] = [];
-        pArr.push(this.populateClosableEvents());
-        pArr.push(this.setDefaultSettings());
-        pArr.push(this.populateCommandSecurity());
-        pArr.push(this.populatePostableChannels());
-        pArr.push(this.cleanUpGuilds());
-        pArr.push(this.initAppCommands());
-        return pArr;
+    public init(): Promise<Promise<any>[]> {
+        return this.populateCommandSecurity().then(() => {
+            const pArr: Promise<any>[] = [];
+            pArr.push(this.populateClosableEvents());
+            pArr.push(this.setDefaultSettings());
+            pArr.push(this.populatePostableChannels());
+            pArr.push(this.cleanUpGuilds());
+            pArr.push(this.initAppCommands());
+            return pArr;
+        });
     }
 
     @On("interactionCreate")
@@ -207,7 +207,8 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(vicDropbox.index());
         pArr.push(this.initiateMuteTimers());
         pArr.push(this.initUsernames());
-        pArr.push(...this.init());
+        const initArr = await this.init();
+        pArr.push(...initArr);
         pArr.push(OnReady.applyEmptyRoles());
         pArr.push(loadClasses(...this.classesToLoad));
         pArr.push(OnReady.startServer());
@@ -246,7 +247,8 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private async initAppCommands(): Promise<void> {
-        return this._client.initApplicationCommands();
+        await this._client.initApplicationCommands();
+        return this._client.initApplicationPermissions();
     }
 
     private async initUsernames(): Promise<void> {
@@ -273,8 +275,7 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private async populateClosableEvents(): Promise<void> {
-        const commandSecurityManager = container.resolve(CommandSecurityManager);
-        const allModules: CloseableModule<any>[] = commandSecurityManager.events;
+        const allModules: CloseableModule<any>[] = DiscordUtils.getCloseableModules();
         await this._dao.transaction(async transaction => {
             for (const module of allModules) {
                 for (const [guildId, guild] of this._client.guilds.cache) {
@@ -312,6 +313,9 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private static async startServer(): Promise<void> {
+        if (Main.testMode) {
+            return;
+        }
         const botServer = container.resolve(BotServer);
         await botServer.initClasses();
         botServer.start(4401);
@@ -337,29 +341,22 @@ export class OnReady extends BaseDAO<any> {
 
     private async populateCommandSecurity(): Promise<void> {
         const securityManager = container.resolve(CommandSecurityManager);
-        const allCommands: AbstractCommandModule<any>[] = securityManager.commands;
-
+        const {commands} = securityManager;
         async function addNewCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
             await this._dao.transaction(async transaction => {
                 const models: {
                     commandName: string, guildId: string
                 }[] = [];
-                for (const commandCLazz of allCommands) {
-                    if (!ObjectUtil.isValidObject(commandCLazz.commandDescriptors)) {
-                        continue;
-                    }
-                    const {commands} = commandCLazz.commandDescriptors;
-                    for (const {name} of commands) {
-                        for (const guildModel of guildModels) {
-                            const guildId = guildModel.guildId;
-                            const commandSecurity = guildModel.commandSecurityModel;
-                            const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName === name);
-                            if (!inArray) {
-                                models.push({
-                                    commandName: name,
-                                    guildId
-                                });
-                            }
+                for (const {name} of commands) {
+                    for (const guildModel of guildModels) {
+                        const guildId = guildModel.guildId;
+                        const commandSecurity = guildModel.commandSecurityModel;
+                        const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName.toLowerCase() === name.toLowerCase());
+                        if (!inArray) {
+                            models.push({
+                                commandName: name,
+                                guildId
+                            });
                         }
                     }
                 }
@@ -377,26 +374,19 @@ export class OnReady extends BaseDAO<any> {
                 for (const guildModel of guildModels) {
                     const {guildId} = guildModel;
                     const commandSecurity = guildModel.commandSecurityModel;
-                    const commandsToDestory: string[] = [];
+                    const commandsToDestroy: string[] = [];
                     for (const {commandName} of commandSecurity) {
-                        let found = false;
-                        for (const commandClazz of allCommands) {
-                            const commandFromSystem = await commandClazz.getCommand(commandName);
-                            if (ObjectUtil.isValidObject(commandFromSystem)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
+                        const hasInSystem = commands.find(command => command.name.toLowerCase() === commandName.toLowerCase());
+                        if (!hasInSystem) {
                             console.log(`delete command ${commandName}`);
-                            commandsToDestory.push(commandName);
+                            commandsToDestroy.push(commandName);
                         }
                     }
-                    if (ArrayUtils.isValidArray(commandsToDestory)) {
+                    if (ArrayUtils.isValidArray(commandsToDestroy)) {
                         await CommandSecurityModel.destroy({
                             transaction,
                             where: {
-                                "commandName": commandsToDestory,
+                                "commandName": commandsToDestroy,
                                 guildId
                             }
                         });

@@ -1,6 +1,6 @@
-import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {
     ButtonInteraction,
     CommandInteraction,
@@ -15,50 +15,45 @@ import {AbstractCommandModule} from "../AbstractCommandModule";
 import {Player, Playlist, Queue, Song} from "discord-music-player";
 import {DiscordUtils} from "../../utils/Utils";
 import {injectable} from "tsyringe";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@Category("Music", "Commands to play music from Youtube")
+@Category("Music", [
+    {
+        "name": "play",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "search",
+                "description": "The song name or URL",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "Plays or Queues a song "
+    },
+    {
+        "name": "playerControls",
+        "type": "SLASH",
+        "options": [],
+        "description": "Player controls to skip, pause, skip, stop, resume, etc... "
+    },
+    {
+        "name": "nowPlaying",
+        "type": "SLASH",
+        "options": [],
+        "description": "View the current playlist"
+    }
+])
 @SlashGroup("music", "Commands to play music from Youtube")
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
-export class Music extends AbstractCommandModule<any> {
+export class Music extends AbstractCommandModule {
     constructor(private _player: Player, private _client: Client) {
-        super({
-            module: {
-                name: "Music",
-                description: "Commands to play music from Youtube"
-            },
-            commands: [
-                {
-                    name: "play",
-                    type: "slash",
-                    description: {
-                        text: "Plays or Queues a song ",
-                        args: [
-                            {
-                                name: "search",
-                                description: "The song name or URL",
-                                type: "text",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "playerControls",
-                    type: "slash",
-                    description: {
-                        text: "Player controls to skip, pause, skip, stop, resume, etc... "
-                    }
-                },
-                {
-                    name: "nowPlaying",
-                    type: "slash",
-                    description: {
-                        text: "View the current playlist"
-                    }
-                }
-            ]
-        });
+        super();
     }
 
     private getGuildQueue(interaction: CommandInteraction | ButtonInteraction): Queue {
@@ -68,7 +63,7 @@ export class Music extends AbstractCommandModule<any> {
     @Slash("playercontrols", {
         description: "Player controls to skip, pause, skip, stop, resume, etc..."
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async playerControls(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const guildQueue = this.getGuildQueue(interaction);
@@ -164,7 +159,7 @@ export class Music extends AbstractCommandModule<any> {
     @Slash("nowplaying", {
         description: "View the current playlist"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async nowPlaying(interaction: CommandInteraction): Promise<void> {
         const guildQueue = this.getGuildQueue(interaction);
         if (!guildQueue || !guildQueue.isPlaying) {

@@ -1,72 +1,68 @@
-import {ArgsOf, Client, ContextMenu, Discord, Guard, On, Slash, SlashGroup, SlashOption} from "discordx";
+import {
+    ArgsOf,
+    Client,
+    ContextMenu,
+    DefaultPermissionResolver,
+    Discord,
+    Guard,
+    On,
+    Permission,
+    Slash,
+    SlashGroup,
+    SlashOption
+} from "discordx";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {BookmarkModel} from "../../model/DB/guild/Bookmark.model";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
 import {BookmarkManager} from "../../model/guild/manager/BookmarkManager";
 import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@Category("Bookmarks", "Commands to manage bookmarks")
+@Category("Bookmarks", [
+    {
+        "name": "bookmark",
+        "type": "CONTEXT MESSAGE",
+        "description": "Bookmark a message"
+    },
+    {
+        "name": "getbookmark",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "public",
+                "description": "Make this message public",
+                "optional": false,
+                "type": "BOOLEAN"
+            }
+        ],
+        "description": "Get all of your bookmarks"
+    },
+    {
+        "name": "deleteBookmarks",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "id",
+                "description": "Id of the bookmark to delete",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "Delete a bookmark"
+    }
+])
 @SlashGroup("bookmarks", "Commands to manage bookmarks")
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @injectable()
-export class Bookmark extends AbstractCommandModule<BookmarkModel> {
+export class Bookmark extends AbstractCommandModule {
     constructor(private _bookmarkManager: BookmarkManager) {
-        super({
-            module: {
-                name: "Bookmarks",
-                description: "Commands to manage bookmarks"
-            },
-            commands: [
-                {
-                    name: "bookmark",
-                    type: "contextMenu",
-                    description: {
-                        text: "Bookmark a message",
-                        args: [
-                            {
-                                name: "messageUrl",
-                                type: "text",
-                                description: "the URL of the message",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "getbookmark",
-                    type: "slash",
-                    description: {
-                        text: "Get all of your bookmarks",
-                        args: [
-                            {
-                                name: "public",
-                                type: "boolean",
-                                description: "Make this message public",
-                                optional: false
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "deleteBookmarks",
-                    type: "slash",
-                    description: {
-                        text: "Delete a bookmark",
-                        args: [
-                            {
-                                name: "id",
-                                type: "text",
-                                description: "Id of the bookmark to delete",
-                                optional: false
-                            }
-                        ]
-                    }
-                }
-            ]
-        });
+        super();
     }
 
     @On("messageDelete")
@@ -83,7 +79,7 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
 
 
     @ContextMenu("MESSAGE", "bookmark")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async addBookmark(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -103,7 +99,7 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
     @Slash("getbookmark", {
         description: "Gets all of your saved bookmarks"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async getbookmark(
         @SlashOption("public", {
             description: "make message public",
@@ -148,7 +144,7 @@ export class Bookmark extends AbstractCommandModule<BookmarkModel> {
     @Slash("deletebookmarks", {
         description: "Delete a bookmark"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async deleteBookmarks(
         @SlashOption("id", {
             description: "ID of the bookmark",

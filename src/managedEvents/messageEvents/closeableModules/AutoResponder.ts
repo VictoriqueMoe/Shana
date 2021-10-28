@@ -6,12 +6,12 @@ import {Message} from "discord.js";
 import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
 import {AutoResponderManager} from "../../../model/guild/manager/AutoResponderManager";
 import {notBot} from "../../../guards/NotABot";
-import {container, singleton} from "tsyringe";
+import {singleton} from "tsyringe";
 
 @singleton()
 export class AutoResponder extends TriggerConstraint<null> {
 
-    constructor() {
+    constructor(private _autoResponderManager: AutoResponderManager) {
         super(CloseOptionModel);
     }
 
@@ -30,7 +30,7 @@ export class AutoResponder extends TriggerConstraint<null> {
         if (!await this.canRun(guildId, null, channel)) {
             return;
         }
-        const allRespondObjects = await container.resolve(AutoResponderManager).getAllAutoResponders(guildId);
+        const allRespondObjects = await this._autoResponderManager.getAllAutoResponders(guildId);
         const messageContent = message.content?.trim().toLowerCase();
         if (!ObjectUtil.validString(messageContent) || !ArrayUtils.isValidArray(allRespondObjects)) {
             return;
@@ -92,6 +92,32 @@ export class AutoResponder extends TriggerConstraint<null> {
                         }
                     }
                     break;
+                }
+                case "kick": {
+                    const toDm = autoResponder.response;
+                    let {member} = message;
+                    if (!member.kickable) {
+                        continue;
+                    }
+                    let kickMessage: Message = null;
+                    let kickReason = "";
+                    if (ObjectUtil.validString(toDm)) {
+                        try {
+                            kickMessage = await member.send(toDm);
+                        } catch {
+                            kickReason = ", however, I could not DM this member, so did not get an invite";
+                        }
+                    }
+                    try {
+                        member = await member.kick(`Kicked via auto responder rule: "${trigger}"${kickReason}`);
+                    } catch {
+                        if (kickMessage) {
+                            await kickMessage.delete();
+                        }
+                    }
+                    if (publicDelete) {
+                        message.delete();
+                    }
                 }
             }
         }

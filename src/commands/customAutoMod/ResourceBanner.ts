@@ -1,46 +1,45 @@
-import {Discord, Guard, SimpleCommand, SimpleCommandMessage} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
-import {Collection, Message, Snowflake} from "discord.js";
+import {Collection, Message, Snowflake, Sticker} from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
+import {Category} from "@discordx/utilities";
 
 const getUrls = require('get-urls');
 const md5 = require('md5');
 import EmojiInfo = DiscordUtils.EmojiInfo;
-
+import StickerInfo = DiscordUtils.StickerInfo;
 
 @Discord()
-export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachmentsModel> {
-
-    constructor() {
-        super({
-            module: {
-                name: "ResourceBanner",
-                description: "Commands deal with banning attachments, embeds and emojis from messages"
-            },
-            commands: [
-                {
-                    type: "command",
-                    name: "banAttachment",
-                    description: {
-                        text: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \n banning an attachment means that if it is posted again, it is automatically deleted and logged",
-                        examples: ["banAttachment = while replying to a message you wish to ban"],
-                    }
-                },
-                {
-                    name: "banEmoji",
-                    type: "command",
-                    description: {
-                        text: "This command is used to ban emojis from other servers, to use it, reply to a message that contains the emoji you want banned, if the replied message contains more than one emoji, this bot will ask you what one you wish to ban",
-                    }
-                }
-            ]
-        });
+@Category("ResourceBanner", "Commands deal with banning attachments, embeds and emojis from messages")
+@Category("ResourceBanner", [
+    {
+        name: "banAttachment",
+        description: "This command is used to ban an attachment, to use it, reply to a message and use {prefix}banAttachment \n banning an attachment means that if it is posted again, it is automatically deleted and logged",
+        type: "SIMPLECOMMAND",
+        options: [],
+        examples: ["banAttachment = while replying to a message you wish to ban"]
+    },
+    {
+        name: "banEmoji",
+        description: "This command is used to ban emojis from other servers, to use it, reply to a message that contains the emoji you want banned, if the replied message contains more than one emoji, this bot will ask you what one you wish to ban",
+        type: "SIMPLECOMMAND",
+        options: []
+    },
+    {
+        name: "banSticker",
+        description: "This command is used to ban stickers from other servers, to use it, reply to a message that contains the sticker you want banned",
+        type: "SIMPLECOMMAND",
+        options: []
     }
+])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
+export abstract class ResourceBanner extends AbstractCommandModule {
 
-    public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false): Promise<BannedAttachmentsModel> {
+    public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false, isSticker: boolean = false): Promise<BannedAttachmentsModel> {
         const attachmentHash = md5(attachment);
         const exists = await BannedAttachmentsModel.count({
             where: {
@@ -56,13 +55,53 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
             url,
             reason,
             guildId,
-            isEmoji
+            isEmoji,
+            isSticker
         });
-        return await entry.save();
+        return entry.save();
+    }
+
+    @SimpleCommand("banSticker")
+    @Guard(NotBotInteraction, CommandEnabled)
+    private async banSticker({message}: SimpleCommandMessage): Promise<void> {
+        const {reference} = message;
+        if (!reference) {
+            message.reply("Please reply to a message");
+            return;
+        }
+        const repliedMessageID = reference.messageId;
+        const repliedMessageObj = await message.channel.messages.fetch(repliedMessageID);
+        const {stickers} = repliedMessageObj;
+        // you can have more than one sticker per message???? fuck it
+        if (stickers.size !== 1) {
+            message.reply("Please reply to a message that contains only one sticker");
+            return;
+        }
+
+        const argumentArray = StringUtils.splitCommandLine(message.content);
+        if (argumentArray.length !== 1) {
+            message.reply("Please supply a reason");
+            return;
+        }
+        const reason: string = argumentArray[0];
+        const findMessage = await message.reply("Please wait while i extract the sticker...");
+        const sticker: Sticker = stickers.first();
+        let stickerInfo: StickerInfo = null;
+        try {
+            stickerInfo = await DiscordUtils.getStickerInfo(sticker);
+        } catch {
+            await findMessage.delete();
+            message.reply("Error finding Sticker");
+            return;
+        }
+        await ResourceBanner.doBanAttachment(stickerInfo.buffer, reason, stickerInfo.url, message.guild.id, false, true);
+        await findMessage.delete();
+        await message.reply("Sticker added to ban database");
+        repliedMessageObj.delete();
     }
 
     @SimpleCommand("banEmoji")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async banEmoji({message}: SimpleCommandMessage): Promise<void> {
         const repliedMessageLink = message.reference;
         if (!repliedMessageLink) {
@@ -135,7 +174,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
     }
 
     @SimpleCommand("banAttachment")
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async banAttachment({message}: SimpleCommandMessage): Promise<void> {
         const repliedMessageRef = message.reference;
         if (!repliedMessageRef) {
@@ -156,7 +195,7 @@ export abstract class ResourceBanner extends AbstractCommandModule<BannedAttachm
             urlsInMessage = getUrls(repliedMessageObj.content);
         }
         const attachmentArray = repliedMessageObj.attachments;
-        if (attachmentArray.size === 0 && urlsInMessage.size === 0) {
+        if (attachmentArray.size === 0 && (urlsInMessage && urlsInMessage.size === 0)) {
             message.reply("Linked message contains no attachments");
             return;
         }

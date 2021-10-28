@@ -108,7 +108,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
             }
         );
         this._isEnabled.set(guildId, m[0] === 1);
-        console.log(`Module: ${this.moduleId} enabled`);
+        console.log(`Module: ${this.moduleId} enabled for guild ${guildId}`);
         return m[0] === 1;
     }
 

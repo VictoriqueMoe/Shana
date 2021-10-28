@@ -1,90 +1,84 @@
-import {ContextMenu, Discord, Guard, Slash, SlashChoice, SlashGroup, SlashOption} from "discordx";
-import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
+import {
+    ContextMenu,
+    DefaultPermissionResolver,
+    Discord,
+    Guard,
+    Permission,
+    Slash,
+    SlashChoice,
+    SlashGroup,
+    SlashOption
+} from "discordx";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {NotBotInteraction} from "../../../guards/NotABot";
-import {secureCommandInteraction} from "../../../guards/RoleConstraint";
+import {CommandEnabled} from "../../../guards/CommandEnabled";
 import {CommandInteraction, ContextMenuInteraction, GuildMember, User} from "discord.js";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {AbstractCommandModule} from "../../AbstractCommandModule";
 import {injectable} from "tsyringe";
-import TIME_UNIT = TimeUtils.TIME_UNIT;
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
+@Category("Mute", "Commands to mute people from servers")
+@Category("Mute", [
+    {
+        name: "shut",
+        description: "Block a user from sending any messages with an optional timeout",
+        type: "SLASH",
+        options: [
+            {
+                name: "User",
+                optional: false,
+                type: "USER",
+                description: "User you wish to mute"
+            },
+            {
+                name: "Reason",
+                optional: false,
+                type: "STRING",
+                description: "The reason why this user is muted"
+            },
+            {
+                name: "Timeout",
+                optional: false,
+                type: "NUMBER",
+                description: "timeout in seconds for how long this user should be muted"
+            },
+            {
+                name: "TimeUnit",
+                optional: false,
+                type: "STRING",
+                description: "The time unit used to specify how long a user should be muted"
+            }
+        ]
+    },
+    {
+        name: "Mute User for 30 mins",
+        description: "Mute the current user for 30 mins",
+        type: "CONTEXT USER"
+    },
+    {
+        name: "viewAllMutes",
+        description: "View all the currently active mutes",
+        type: "SLASH",
+        options: []
+    }
+])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("mute", "Commands to mute people from servers")
 @injectable()
-export class Mute extends AbstractCommandModule<RolePersistenceModel> {
+export class Mute extends AbstractCommandModule {
 
     public constructor(private _muteManager: MuteManager) {
-        super({
-            module: {
-                name: "Mute",
-                description: "Commands to mute people from servers"
-            },
-            commands: [
-                {
-                    name: "shut",
-                    type: "slash",
-                    description: {
-                        text: "Block a user from sending any messages with an optional timeout",
-                        examples: ['mute @user "they where annoying" 2d = Mute user for 2 days', 'mute @user "they where not so annoying" 60 = Mute user for 60 seconds', 'mute @user "they where REALLY annoying" = Mute user indefinitely until unmute'],
-                        args: [
-                            {
-                                name: "User",
-                                optional: false,
-                                type: "mention",
-                                description: "User you wish to mute"
-                            },
-                            {
-                                name: "Reason",
-                                optional: false,
-                                type: "text",
-                                description: "The reason why this user is muted"
-                            },
-                            {
-                                name: "Timeout",
-                                optional: false,
-                                type: "number",
-                                description: "timeout in seconds for how long this user should be muted"
-                            },
-                            {
-                                name: "Timeout",
-                                optional: false,
-                                type: "text",
-                                description: "The time unit used to specify how long a user should be muted \n see muteTimeUnits for values"
-                            }
-                        ]
-                    }
-                },
-                {
-                    name: "muteTimeUnits",
-                    type: "slash",
-                    description: {
-                        text: "Get all the available time units you can use in mute"
-                    }
-                },
-                {
-                    name: "Mute User for 30 mins",
-                    type: "contextMenu",
-                    description: {
-                        text: "Mute the current user for 30 mins"
-                    }
-                },
-                {
-                    name: "viewAllMutes",
-                    type: "slash",
-                    description: {
-                        text: "View all the currently active mutes"
-                    }
-                }
-            ]
-        });
+        super();
     }
 
 
     @ContextMenu("USER", "Mute User for 30 mins")
-    @Guard(secureCommandInteraction)
+    @Guard(CommandEnabled)
     private async userHandler(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply();
         const member = InteractionUtils.getUserFromUserContextInteraction(interaction);
@@ -102,7 +96,7 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
         }
         let replyMessage: string;
         try {
-            replyMessage = await this.muteUser(member, creator, guildId, "N/A", 30, TIME_UNIT.minutes);
+            replyMessage = await this.muteUser(member, creator, guildId, "N/A", 30, TimeUtils.TIME_UNIT.minutes);
             return InteractionUtils.replyOrFollowUp(interaction, replyMessage);
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, (<Error>e).message);
@@ -112,8 +106,8 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
     @Slash("shut", {
         description: "Block a user from sending any messages with a timeout"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
-    private async mute(
+    @Guard(NotBotInteraction, CommandEnabled)
+    private async shut(
         @SlashOption("user", {
             description: "User you wish to mute",
             required: true
@@ -130,12 +124,12 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
             type: "INTEGER"
         })
             timeout: number,
-        @SlashChoice(TIME_UNIT)
+        @SlashChoice(TimeUtils.TIME_UNIT)
         @SlashOption("timeunit", {
             description: "The time unit used to specify how long a user should be muted",
             required: true
         })
-            timeUnit: TIME_UNIT,
+            timeUnit: TimeUtils.TIME_UNIT,
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
@@ -160,7 +154,7 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
         }
     }
 
-    private async muteUser(mentionedMember: GuildMember, creator: GuildMember, guildId: string, reason: string, timeout: number, timeUnit: TIME_UNIT): Promise<string> {
+    private async muteUser(mentionedMember: GuildMember, creator: GuildMember, guildId: string, reason: string, timeout: number, timeUnit: TimeUtils.TIME_UNIT): Promise<string> {
         const creatorID = creator.id;
         const blockedUserId = mentionedMember.id;
         const didYouBlockABot = mentionedMember.user.bot;
@@ -189,30 +183,12 @@ export class Mute extends AbstractCommandModule<RolePersistenceModel> {
         return replyMessage;
     }
 
-    private getMuteTimeOutStr(): string {
-        const keyValuePair: Array<{ name: TIME_UNIT, value: string }> = EnumEx.getNamesAndValues(TIME_UNIT) as Array<{ name: TIME_UNIT, value: string }>;
-        return keyValuePair.map(kv => {
-            const {name, value}: { name: TIME_UNIT, value: string } = kv;
-            return `'${value}' -> ${name}`;
-        }).join("\n ");
-    }
-
-    @Slash("mutetimeunits", {
-        description: "Get all the available time units you can use in mute"
-    })
-    @Guard(NotBotInteraction, secureCommandInteraction)
-    private async getTimeUnits(interaction: CommandInteraction): Promise<void> {
-        return InteractionUtils.replyOrFollowUp(interaction, `\n ${this.getMuteTimeOutStr()}`);
-    }
-
     @Slash("viewallmutes", {
         description: "View all the currently active mutes"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async viewAllMutes(interaction: CommandInteraction): Promise<void> {
-        await interaction.deferReply({
-            ephemeral: true
-        });
+        await interaction.deferReply();
         const guildId = interaction.guild.id;
         const currentBlocks = await MuteModel.findAll({
             where: {

@@ -1,36 +1,21 @@
-import {Typeings} from "../model/types/Typeings";
-import {BaseDAO} from "../DAO/BaseDAO";
-import {Model} from "sequelize-typescript";
-import {GuildMember} from "discord.js";
+import {ApplicationCommandPermissions, Guild} from "discord.js";
 import {container} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
-import CommandArgs = Typeings.CommandArgs;
-import Command = Typeings.Command;
+import {ApplicationCommandMixin, ApplicationGuildMixin, SimpleCommandMessage} from "discordx";
 
-export abstract class AbstractCommandModule<T extends Model> extends BaseDAO<T> {
-    protected constructor(protected _commands: CommandArgs) {
-        super();
+export abstract class AbstractCommandModule {
+    protected static async getPermissions(guild: Guild, command: ApplicationCommandMixin | SimpleCommandMessage): Promise<ApplicationCommandPermissions[]> {
+        const securityManger = container.resolve(CommandSecurityManager);
+        return securityManger.getPermissions(guild, command.name);
     }
 
-    public get commandDescriptors(): CommandArgs {
-        return this._commands;
-    }
-
-
-    public async getCommand(name: string, member?: GuildMember): Promise<Command> {
-        const commandManager = container.resolve(CommandSecurityManager);
-        for (const command of this._commands.commands) {
-            if (command.name === name) {
-                if (member) {
-                    if (await commandManager.canRunCommand(member, name)) {
-                        return command;
-                    }
-                    return null;
-                }
-                return command;
-            }
+    protected static async getDefaultPermissionAllow(mixin: SimpleCommandMessage | ApplicationGuildMixin): Promise<boolean> {
+        const {name} = mixin;
+        const guild = mixin instanceof SimpleCommandMessage ? mixin?.message?.guild : mixin.guild;
+        if (!guild) {
+            return false;
         }
-        return null;
+        const securityManger = container.resolve(CommandSecurityManager);
+        return securityManger.getDefaultPermissionAllow(guild, name);
     }
-
 }

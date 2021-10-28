@@ -14,8 +14,8 @@ export class AutoResponderModel extends Model implements IGuildAware, IEventSecu
     @Column({allowNull: false, unique: true})
     public title: string;
 
-    @Column({type: DataType.ENUM("message", "reaction", "delete"), defaultValue: "message", allowNull: false})
-    public responseType: "message" | "reaction" | "delete";
+    @Column({type: DataType.ENUM("message", "reaction", "delete", "kick"), defaultValue: "message", allowNull: false})
+    public responseType: "message" | "reaction" | "delete" | "kick";
 
     @Column({defaultValue: false, allowNull: false})
     public wildCard: boolean;

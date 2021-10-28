@@ -1,69 +1,59 @@
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
-import {Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {secureCommandInteraction} from "../../guards/RoleConstraint";
+import {CommandEnabled} from "../../guards/CommandEnabled";
 import {DiscordUtils} from "../../utils/Utils";
 import {CommandInteraction, GuildMember, User} from "discord.js";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {container} from "tsyringe";
+import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
-@SlashGroup("username", "Commands to set usernames for people")
-export abstract class Username extends AbstractCommandModule<UsernameModel> {
-
-    protected constructor() {
-        super({
-            module: {
-                name: "Username",
-                description: "Commands to set usernames for people"
+@Category("Username", "Commands to set usernames for people")
+@Category("Username", [
+    {
+        name: "viewUsernames",
+        description: "View all the persisted usernames this bot is aware of",
+        type: "SLASH",
+        options: []
+    },
+    {
+        name: "username",
+        description: "force a username to always be set to a member, this will automatically apply the username if they leave and rejoin again. \n you can optionally add a block to anyone other than staff member from changing it",
+        type: "SLASH",
+        options: [
+            {
+                name: "Channel",
+                type: "USER",
+                optional: false,
+                description: "The user you want to change nicknames"
             },
-            commands: [
-                {
-                    name: "viewUsernames",
-                    type: "slash",
-                    description: {
-                        text: "View all the persisted usernames this bot is aware of"
-                    }
-                },
-                {
-                    name: "username",
-                    type: "slash",
-                    description: {
-                        text: "force a username to always be set to a member, this will automatically apply the username if they leave and rejoin again. \n you can optionally add a block to anyone other than staff member from changing it",
-                        examples: ["username @user 'this is a new username' = username will always be 'this is a new username' if they leave and rejoin", "username @user 'this is a new username' true = same as before, but this means they can not change it themselves"],
-                        args: [
-                            {
-                                name: "User",
-                                type: "mention",
-                                optional: false,
-                                description: "The user you want to change nicknames"
-                            },
-                            {
-                                name: "new nickName",
-                                type: "text",
-                                optional: false,
-                                description: "The new nickname for the user"
-                            },
-                            {
-                                name: "Block changes",
-                                type: "boolean",
-                                optional: true,
-                                description: "Block this username from being changed by another other than staff members (as defined in the staff members config)"
-                            }
-                        ]
-                    }
-                }
-            ]
-        });
+            {
+                name: "new nickName",
+                type: "STRING",
+                optional: false,
+                description: "The new nickname for the user"
+            },
+            {
+                name: "Block changes",
+                type: "BOOLEAN",
+                optional: true,
+                description: "Block this username from being changed by another other than staff members (as defined in the staff members config)"
+            }
+        ]
     }
-
+])
+@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
+@Permission(AbstractCommandModule.getPermissions)
+@SlashGroup("username", "Commands to set usernames for people")
+export abstract class Username extends AbstractCommandModule {
 
     @Slash("viewusernames", {
         description: "View all the persisted usernames this bot is aware of"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async ViewAllSetUsernames(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const {guild} = interaction;
@@ -95,7 +85,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
     @Slash("username", {
         description: "force a username to always be set to a member"
     })
-    @Guard(NotBotInteraction, secureCommandInteraction)
+    @Guard(NotBotInteraction, CommandEnabled)
     private async setUsername(
         @SlashOption("user", {
             description: "The user you want to change nickname",
@@ -163,7 +153,7 @@ export abstract class Username extends AbstractCommandModule<UsernameModel> {
 
             const model = new UsernameModel(obj);
             try {
-                await super.commitToDatabase(model, undefined, true);
+                await model.save();
             } catch (e) {
             }
         }

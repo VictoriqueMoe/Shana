@@ -9,12 +9,10 @@ import {SettingsManager} from "../../../model/settings/SettingsManager";
 import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {ModuleController} from "./modules/impl/ModuleController";
-import {CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager";
-import {Typeings} from "../../../model/types/Typeings";
+import {AllCommands, CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager";
 import {container, singleton} from "tsyringe";
 import {Sequelize} from "sequelize-typescript";
 import {Client} from "discordx";
-import CommandArgs = Typeings.CommandArgs;
 
 @singleton()
 @Controller("api/bot")
@@ -136,14 +134,11 @@ export class BotController extends baseController {
         }
         const securityManager = container.resolve(CommandSecurityManager);
         const commandClasses = securityManager.commands;
-        const retObj: CommandArgs[] = [];
+        const retObj: AllCommands = [];
         for (const commandModule of commandClasses) {
-            const {commandDescriptors} = commandModule;
-            for (const command of commandDescriptors.commands) {
-                const {name} = command;
-                command["enabled"] = await securityManager.isEnabled(name, guild.id);
-            }
-            retObj.push(commandDescriptors);
+            const {name} = commandModule;
+            commandModule["enabled"] = await securityManager.isEnabled(name, guild.id);
+            retObj.push(commandModule);
         }
         return super.ok(res, retObj);
     }
