@@ -31,25 +31,25 @@ export class ResourceListener {
         }
         const attachments = message.attachments;
         const messageContent = message.content;
-        const arratchmentUrl: string[] = attachments.map(attachmentObject => attachmentObject.attachment as string);
+        const attachmentUrl: string[] = attachments.map(attachmentObject => attachmentObject.attachment as string);
 
         if (ObjectUtil.validString(messageContent)) {
             const urlsInMessage = getUrls(messageContent);
             if (urlsInMessage && urlsInMessage.size > 0) {
-                arratchmentUrl.push(...urlsInMessage.values());
+                attachmentUrl.push(...urlsInMessage.values());
             }
         }
         const embeds = message.embeds;
         if (ArrayUtils.isValidArray(embeds)) {
             for (const embed of embeds) {
                 if (embed.video) {
-                    arratchmentUrl.push(embed.video.url);
+                    attachmentUrl.push(embed.video.url);
                 }
             }
         }
         let shouldDelete = false;
         let reason: string = null;
-        for (const url of arratchmentUrl) {
+        for (const url of attachmentUrl) {
             let attachment;
             try {
                 attachment = await DiscordUtils.loadResourceFromURL(url);

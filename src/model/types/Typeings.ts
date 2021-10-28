@@ -68,7 +68,7 @@ export namespace Typeings {
         export type SenimentTypes = "very negative" | "negative" | "neutral" | "positive" | "very positive";
         export type SentimentAnalysisResponse =
             MainOb
-            & { output: [SenimentTypes] };
+            & { output: SenimentTypes[] };
         export type ImageSimilarity = MainOb & {
             output: {
                 distance: number

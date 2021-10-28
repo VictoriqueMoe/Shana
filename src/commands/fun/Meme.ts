@@ -1080,8 +1080,7 @@ export class Meme extends AbstractCommandModule {
         }
         const urls = await DiscordUtils.getImageUrlsFromMessageOrReference(message);
         if (urls.size === 1) {
-            const url = urls.values().next().value;
-            avatarOverride["avatar"] = url;
+            avatarOverride["avatar"] = urls.values().next().value;
             canOverride = true;
         }
         if (canOverride && ObjectUtil.isValidObject(avatarOverride)) {
