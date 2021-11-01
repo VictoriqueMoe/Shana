@@ -29,7 +29,7 @@ export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoA
     }
 
     public get warnMessage(): string {
-        return `Your message mentions too many emoji, the limit is: ${this.value}`;
+        return `Your message mentions too many emojis, the limit is: ${this.value}`;
     }
 
     public get priority(): number {

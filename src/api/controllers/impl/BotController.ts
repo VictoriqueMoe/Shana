@@ -2,7 +2,7 @@ import {ChildControllers, Controller, Get, Post} from "@overnightjs/core";
 import {Request, Response} from 'express';
 import {baseController} from "../BaseController";
 import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil} from "../../../utils/Utils";
-import {Channel, Guild, GuildMember} from "discord.js";
+import {Channel, Guild, GuildChannel, GuildMember} from "discord.js";
 import {StatusCodes} from "http-status-codes";
 import {SETTINGS} from "../../../enums/SETTINGS";
 import {SettingsManager} from "../../../model/settings/SettingsManager";
@@ -187,9 +187,9 @@ export class BotController extends baseController {
         }
         let roleArray = [...guild.roles.cache.values()];
         roleArray = roleArray.filter(role => {
-            const bot = guild.me;
-            const botHighestRole = bot.roles.highest.position;
-            return role.position < botHighestRole && !role.managed && role.name !== "@everyone";
+            return !role.managed && role.name !== "@everyone";
+        }).sort((a, b) => {
+            return b.position - a.position;
         });
         const roleMap = roleArray.map(role => role.toJSON());
         return super.ok(res, roleMap);
@@ -287,7 +287,10 @@ export class BotController extends baseController {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
         const allChannels = [...guild.channels.cache.values()];
-        const ret = allChannels.map(channel => channel.toJSON() as Record<string, any>);
+        const ret: Record<string, any> = allChannels
+            .sort((a: GuildChannel, b: GuildChannel) => a.rawPosition - b.rawPosition)
+            .map(channel => channel.toJSON());
+
         return super.ok(res, ret);
     }
 
