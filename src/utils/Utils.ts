@@ -717,17 +717,6 @@ export namespace DiscordUtils {
         return retObj;
     }
 
-    export function findChannelByName(channelName: string, guildId: string): Typeings.AbstractChannel {
-        const client = container.resolve(Client);
-        const channels = client.guilds.cache.get(guildId).channels;
-        for (const [, channel] of channels.cache) {
-            if (channel.name === channelName) {
-                return channel;
-            }
-        }
-        return null;
-    }
-
     export async function loadResourceFromURL(url: string): Promise<Buffer> {
         const response = await fetch(url);
         const buffer = await response.buffer();
