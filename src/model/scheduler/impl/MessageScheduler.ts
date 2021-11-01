@@ -1,5 +1,6 @@
 import {IScheduledMessageJob} from "./ScheduledJob/IScheduledMessageJob";
 import * as schedule from 'node-schedule';
+import {JobCallback} from 'node-schedule';
 import {BaseGuildTextChannel} from "discord.js";
 import {ScheduledMessageJob} from "./ScheduledJob/impl/ScheduledMessageJob";
 import {singleton} from "tsyringe";
@@ -21,7 +22,7 @@ export class MessageScheduler extends Scheduler implements IMessageScheduler {
     }
 
 
-    public override register(name: string, cron: string, proxy?: () => void, guildId?: string, channel?: BaseGuildTextChannel, message?: string): IScheduledMessageJob {
+    public override register(name: string, cron: string, proxy?: JobCallback, guildId?: string, channel?: BaseGuildTextChannel, message?: string): IScheduledMessageJob {
         if (!ObjectUtil.isValidObject(channel)) {
             throw new Error("Message Scheduler requires a channel to send on");
         }

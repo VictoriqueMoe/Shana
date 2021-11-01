@@ -1,4 +1,5 @@
 import * as schedule from 'node-schedule';
+import {JobCallback} from 'node-schedule';
 import {isValidCron} from 'cron-validator';
 import {CronException, ObjectUtil} from '../../../utils/Utils';
 import {IScheduledJob} from "./ScheduledJob/IScheduledJob";
@@ -27,7 +28,7 @@ export class Scheduler implements IScheduler {
      * @param guildId
      * @param additionalArgs
      */
-    public register(name: string, whenToExecute: string | Date, callBack: () => void, guildId: string, additionalArgs: Record<string, any>): IScheduledJob {
+    public register(name: string, whenToExecute: string | Date, callBack: JobCallback, guildId: string, additionalArgs?: Record<string, any>): IScheduledJob {
         if (this.getJob(name)) {
             this.cancelJob(name);
         }

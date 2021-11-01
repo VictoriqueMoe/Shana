@@ -101,7 +101,6 @@ export class MessageSchedule extends AbstractCommandModule {
         const botAvatar = this._client.user.displayAvatarURL({dynamic: true});
         const embed = new MessageEmbed()
             .setColor(this._client.user.hexAccentColor)
-            .setTitle(``)
             .setAuthor(`${this._client.user.username}`, botAvatar)
             .setTimestamp();
         const result = this._messageScheduleManager.getAllActiveMessageSchedules(guildId, channel as BaseGuildTextChannel | null);
@@ -155,7 +154,7 @@ export class MessageSchedule extends AbstractCommandModule {
     @Guard(NotBotInteraction, CommandEnabled)
     private async scheduleMessage(
         @SlashOption("name", {
-            description: "The Unique ID of this schedule schedule",
+            description: "The Unique ID of this scheduled job",
             required: true,
         })
             name: string,
