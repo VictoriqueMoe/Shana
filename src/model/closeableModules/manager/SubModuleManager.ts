@@ -5,7 +5,6 @@ import {ModuleSettings} from "../ModuleSettings";
 import {injectAll, registry, singleton} from "tsyringe";
 import {Beans} from "../../../DI/Beans";
 import {ZalgoTextFilter} from "../subModules/dynoAutoMod/impl/ZalgoTextFilter";
-import {ScamFilter} from "../subModules/dynoAutoMod/impl/ScamFilter";
 import {ImageSpamFilter} from "../subModules/dynoAutoMod/impl/ImageSpamFilter";
 import {LinkCooldownFilter} from "../subModules/dynoAutoMod/impl/LinkCooldownFilter";
 import {SpoilersFilter} from "../subModules/dynoAutoMod/impl/SpoilersFilter";
@@ -18,7 +17,6 @@ import {AllCapsFilter} from "../subModules/dynoAutoMod/impl/AllCapsFilter";
 
 @registry([
     {token: Beans.ISubModuleToken, useToken: ZalgoTextFilter},
-    {token: Beans.ISubModuleToken, useToken: ScamFilter},
     {token: Beans.ISubModuleToken, useToken: ImageSpamFilter},
     {token: Beans.ISubModuleToken, useToken: LinkCooldownFilter},
     {token: Beans.ISubModuleToken, useToken: SpoilersFilter},

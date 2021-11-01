@@ -1,12 +1,9 @@
 import {Main} from "../Main";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
-import {MuteModel} from "../model/DB/autoMod/impl/Mute.model";
-import {Op} from "sequelize";
-import {ArrayUtils, DiscordUtils, EnumEx, GuildUtils, loadClasses, ObjectUtil} from "../utils/Utils";
+import {ArrayUtils, DiscordUtils, EnumEx, loadClasses, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
 import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
-import {MuteManager} from "../model/guild/manager/MuteManager";
 import {BotServer} from "../api/BotServer";
 import {GuildableModel} from "../model/DB/guild/Guildable.model";
 import {CommandSecurityModel} from "../model/DB/guild/CommandSecurity.model";
@@ -36,40 +33,6 @@ export class OnReady extends BaseDAO<any> {
         super();
     }
 
-
-    private async initiateMuteTimers(): Promise<void> {
-        const mutesWithTimers = await MuteModel.findAll({
-            where: {
-                timeout: {
-                    [Op.not]: null
-                }
-            }
-        });
-        const now = Date.now();
-        const muteSingleton = container.resolve(MuteManager);
-        for (const mute of mutesWithTimers) {
-            const mutedRole = await GuildUtils.RoleUtils.getMuteRole(mute.guildId);
-            if (!mutedRole) {
-                continue;
-            }
-            const muteCreated = (mute.createdAt as Date).getTime();
-            const timerLength = mute.timeout;
-            const timeLeft = timerLength - (now - muteCreated);
-            const guild: Guild = await this._client.guilds.fetch(mute.guildId);
-            if (timeLeft <= 0) {
-                console.log(`Timer has expired for user ${mute.username}, removing from database`);
-                await MuteModel.destroy({
-                    where: {
-                        id: mute.id,
-                        guildId: mute.guildId
-                    }
-                });
-            } else {
-                console.log(`Re-creating timed mute for ${mute.username}, time remaining is: ${ObjectUtil.timeToHuman(timeLeft)}`);
-                muteSingleton.createTimeout(mute.userId, mute.username, timeLeft, guild);
-            }
-        }
-    }
 
     private async cleanCommands(justGuilds: boolean): Promise<void> {
         if (justGuilds) {
@@ -205,7 +168,6 @@ export class OnReady extends BaseDAO<any> {
         // await OnReady.cleanCommands(true);
         this.initMusicPlayer();
         pArr.push(vicDropbox.index());
-        pArr.push(this.initiateMuteTimers());
         pArr.push(this.initUsernames());
         const initArr = await this.init();
         pArr.push(...initArr);

@@ -1,7 +1,7 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {GuildMember, Message} from "discord.js";
-import {BannedWordEntryies, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
+import {BannedWordEntries, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {GuildUtils} from "../../../../../utils/Utils";
 import {singleton} from "tsyringe";
@@ -13,7 +13,7 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
         return [ACTION.DELETE, ACTION.WARN, ACTION.MUTE];
     }
 
-    public get bannedWords(): BannedWordEntryies {
+    public get bannedWords(): BannedWordEntries {
         return {
             "exactWord": ["retard", "retarded", "tard", "tards", "retards", "fag", "fags", "faggot", "faggots", "nigger"],
             "WildCardWords": ["nigger", "cunt", "nigga", "lambda.it.cx", "taciturasa", "gljfizd8xKgsSrU7dafuw", "fmqdWC-eVqc", "chng.it"]

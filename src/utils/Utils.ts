@@ -270,7 +270,7 @@ export namespace Ffmpeg {
 }
 
 export namespace ArrayUtils {
-    export function isValidArray(array: any): boolean {
+    export function isValidArray(array: any): array is any[] {
         return Array.isArray(array) && array.length > 0;
     }
 }
@@ -345,7 +345,7 @@ export namespace DiscordUtils {
                     content
                 }) as unknown as Promise<void>;
             }
-            if (interaction.deferred) {  // Currently behaves the same but could change in the future
+            if (interaction.deferred) {
                 return interaction.editReply(content) as unknown as Promise<void>;
             }
             return interaction.reply({
@@ -816,7 +816,7 @@ export namespace DiscordUtils {
         }
         try {
             if (ArrayUtils.isValidArray(message)) {
-                return await channel.send({embeds: message as MessageEmbed[]});
+                return await channel.send({embeds: message});
             } else {
                 return await channel.send(message as string);
             }

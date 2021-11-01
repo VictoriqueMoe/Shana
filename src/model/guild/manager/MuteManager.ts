@@ -5,11 +5,13 @@ import {Guild, GuildMember} from "discord.js";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import * as schedule from "node-schedule";
 import {Job} from "node-schedule";
-import {singleton} from "tsyringe";
+import {container, singleton} from "tsyringe";
 import {GuildManager} from "./GuildManager";
 import {Sequelize} from "sequelize-typescript";
 import {Client} from "discordx";
 import {Transaction} from "sequelize/types/lib/transaction";
+import {PostConstruct} from "../../decorators/PostConstruct";
+import {Op} from "sequelize";
 
 @singleton()
 export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
@@ -43,6 +45,41 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
             }
         });
         return !!has;
+    }
+
+    @PostConstruct
+    private async initTimers(): Promise<void> {
+        const mutesWithTimers = await MuteModel.findAll({
+            where: {
+                timeout: {
+                    [Op.not]: null
+                }
+            }
+        });
+        const now = Date.now();
+        const muteSingleton = container.resolve(MuteManager);
+        for (const mute of mutesWithTimers) {
+            const mutedRole = await GuildUtils.RoleUtils.getMuteRole(mute.guildId);
+            if (!mutedRole) {
+                continue;
+            }
+            const muteCreated = (mute.createdAt as Date).getTime();
+            const timerLength = mute.timeout;
+            const timeLeft = timerLength - (now - muteCreated);
+            const guild: Guild = await this._client.guilds.fetch(mute.guildId);
+            if (timeLeft <= 0) {
+                console.log(`Timer has expired for user ${mute.username}, removing from database`);
+                await MuteModel.destroy({
+                    where: {
+                        id: mute.id,
+                        guildId: mute.guildId
+                    }
+                });
+            } else {
+                console.log(`Re-creating timed mute for ${mute.username}, time remaining is: ${ObjectUtil.timeToHuman(timeLeft)}`);
+                muteSingleton.createTimeout(mute.userId, mute.username, timeLeft, guild);
+            }
+        }
     }
 
     /**
@@ -113,7 +150,8 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         return savedModel;
     }
 
-    public async unMute(userId: string, guildId: string, skipPersistence: boolean = false, t?: Transaction): Promise<void> {
+    public async unMute(user: GuildMember | string, guildId: string, skipPersistence: boolean = false, t?: Transaction): Promise<void> {
+        const userId = typeof user === "string" ? user : user.id;
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
         if (!mutedRole) {
             return;
