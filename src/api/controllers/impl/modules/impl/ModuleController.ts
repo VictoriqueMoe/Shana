@@ -6,11 +6,13 @@ import {Guild} from "discord.js";
 import {StatusCodes} from "http-status-codes";
 import {CloseOptionModel} from "../../../../../model/DB/autoMod/impl/CloseOption.model";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../../../../utils/Utils";
+import {AutoRoleController} from "./AutoRoleController";
 
 
 @Controller("module")
 @ChildControllers([
-    new AutoResponderController()
+    new AutoResponderController(),
+    new AutoRoleController()
 ])
 export class ModuleController extends AbstractModuleController {
 

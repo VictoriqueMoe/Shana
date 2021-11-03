@@ -4,7 +4,7 @@ import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model
 import * as schedule from "node-schedule";
 import {GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
+import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {GuildManager} from "../../../model/guild/manager/GuildManager";
 import {UniqueViolationError} from "../../../DAO/BaseDAO";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
@@ -84,13 +84,15 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             }
         } catch {
         }
-        const autoRoleId = settings.role;
-        if (autoRoleId) {
-            const autoRole = guild.roles.cache.get(autoRoleId);
-            if (autoRole) {
-                try {
-                    await this._roleApplier.applyRole(autoRole, member, `added via ${botUsername}`);
-                } catch {
+        const autoRoleIds = settings.role;
+        if (ArrayUtils.isValidArray(autoRoleIds)) {
+            for (const autoRoleFromSetting of autoRoleIds) {
+                const autoRole = guild.roles.cache.get(autoRoleFromSetting);
+                if (autoRole) {
+                    try {
+                        await this._roleApplier.applyRole(autoRole, member, `added via ${botUsername}`);
+                    } catch {
+                    }
                 }
             }
         }
