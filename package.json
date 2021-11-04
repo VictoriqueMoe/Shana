@@ -40,7 +40,7 @@
     "discord.js": "^13.3.1",
     "discordx": "^8.0.1",
     "dotenv": "^10.0.0",
-    "dropbox": "^10.15.0",
+    "dropbox": "^10.17.0",
     "emoji-regex": "^10.0.0",
     "express": "^4.17.1",
     "express-async-handler": "^1.2.0",
