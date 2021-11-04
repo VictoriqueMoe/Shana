@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import {Sequelize} from "sequelize-typescript";
 import * as dotenv from "dotenv";
 import {ObjectUtil} from "./utils/Utils";
 import * as v8 from "v8";
@@ -9,6 +8,7 @@ import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 import {container} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
 import {SettingsManager} from "./model/settings/SettingsManager";
+import {createConnection, useContainer} from "typeorm";
 
 // const https = require('http-debug').https;
 // https.debug = 1;
@@ -28,7 +28,18 @@ export class Main {
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         await moduleRegistrar();
         const dbName = Main.testMode ? "database_test.sqlite" : "database.sqlite";
-        const dao = new Sequelize('database', '', '', {
+        useContainer(
+            {get: someClass => container.resolve(someClass as any)},
+        );
+        const connection = await createConnection({
+            type: "sqlite",
+            database: dbName,
+            synchronize: true,
+            key: process.env.sqlIte_key,
+            entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
+        });
+        await connection.connect();
+        /*const dao = new Sequelize('database', '', '', {
             host: 'localhost',
             dialect: 'sqlite',
             logging: (sql: string, timing: number): void => {
@@ -37,11 +48,11 @@ export class Main {
                 }
             },
             storage: dbName,
-            models: [__dirname + '/model/DB/**/*.model.{ts,js}'],
+            models: [__dirname + '/model/DB/!**!/!*.model.{ts,js}'],
             modelMatch: (filename, member): boolean => {
                 return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
             }
-        });
+        });*/
         await dao.sync({force: false});
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,

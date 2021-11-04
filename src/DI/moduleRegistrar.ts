@@ -1,10 +1,14 @@
-import {container} from "tsyringe";
+import {container, instanceCachingFactory} from "tsyringe";
 import {Beans} from "./Beans";
 import {ISubModule} from "../model/closeableModules/subModules/ISubModule";
 import {DynoAutoMod} from "../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {AbstractFilter} from "../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
+import {ConnectionManager} from "typeorm";
 
 export async function moduleRegistrar(): Promise<void> {
+    container.register<ConnectionManager>(ConnectionManager, {
+        useFactory: instanceCachingFactory(() => new ConnectionManager())
+    });
     container.afterResolution(
         Beans.ISubModuleToken,
         (_t, result: ISubModule[], resolutionType) => {
