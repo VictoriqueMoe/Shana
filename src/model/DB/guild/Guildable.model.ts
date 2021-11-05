@@ -12,6 +12,7 @@ import {AutoResponderModel} from "../autoMod/impl/AutoResponder.model";
 import {RoleJoinerModel} from "./RoleJoiner.model";
 import {BookmarkModel} from "./Bookmark.model";
 import {MessageScheduleModel} from "./MessageSchedule.model";
+import {TwitterModel} from "./Twitter.model";
 
 @Table
 export class GuildableModel extends Model implements IGuildAware {
@@ -54,4 +55,7 @@ export class GuildableModel extends Model implements IGuildAware {
 
     @HasMany(() => MessageScheduleModel)
     public messageScheduleModel: MessageScheduleModel[];
+
+    @HasMany(() => TwitterModel)
+    public twitterModel: TwitterModel[];
 }

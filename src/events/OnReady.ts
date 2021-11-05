@@ -21,6 +21,7 @@ import {Sequelize} from "sequelize-typescript";
 import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS";
 import {Player} from "discord-music-player";
 import {registerInstance} from "../DI/moduleRegistrar";
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const io = require('@pm2/io');
 
@@ -149,7 +150,14 @@ export class OnReady extends BaseDAO<any> {
 
     @On("interactionCreate")
     private async intersectionInit([interaction]: ArgsOf<"interactionCreate">): Promise<void> {
-        await this._client.executeInteraction(interaction);
+        try {
+            await this._client.executeInteraction(interaction);
+        } catch (e) {
+            console.error(e);
+            if (interaction.isApplicationCommand() || interaction.isMessageComponent()) {
+                return InteractionUtils.replyOrFollowUp(interaction, "Something went wrong, please notify my developer: <@697417252320051291>");
+            }
+        }
     }
 
     @On("ready")
@@ -304,6 +312,7 @@ export class OnReady extends BaseDAO<any> {
     private async populateCommandSecurity(): Promise<void> {
         const securityManager = container.resolve(CommandSecurityManager);
         const {commands} = securityManager;
+
         async function addNewCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
             await this._dao.transaction(async transaction => {
                 const models: {
