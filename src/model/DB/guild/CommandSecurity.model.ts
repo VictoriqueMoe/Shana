@@ -1,41 +1,22 @@
-import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
-import {IGuildAware} from "../IGuildAware";
+import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 import {GuildableModel} from "./Guildable.model";
-import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
+import {AbstractModel} from "../AbstractModel";
 
-@Table
-export class CommandSecurityModel extends Model implements IGuildAware {
+@Entity()
+export class CommandSecurityModel extends AbstractModel {
 
-    @Column({unique: false, allowNull: false})
+    @Column({unique: false, nullable: false})
     public commandName: string;
 
-    @Column({unique: false, defaultValue: true})
+    @Column({unique: false, default: true})
     public enabled: boolean;
 
     @Column({
-        type: DataType.TEXT,
-        allowNull: true,
-        get(): string[] {
-            const value: string | null = this.getDataValue("allowedRoles");
-            if (!ObjectUtil.validString(value)) {
-                return [];
-            }
-            return this.getDataValue("allowedRoles").split(",");
-        },
-        set(roles: string[]) {
-            if (!ArrayUtils.isValidArray(roles)) {
-                this.setDataValue("allowedRoles", null);
-                return;
-            }
-            this.setDataValue("allowedRoles", roles.join(","));
-        }
+        type: "simple-array",
     })
     public allowedRoles: string[];
 
-    @ForeignKey(() => GuildableModel)
-    @Column
-    guildId: string;
-
-    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.commandSecurityModel, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
     guildableModel: GuildableModel;
 }

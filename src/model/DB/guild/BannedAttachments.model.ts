@@ -1,29 +1,27 @@
-import {BelongsTo, Column, ForeignKey, Model, Table} from "sequelize-typescript";
-import {IGuildAware} from "../IGuildAware";
 import {GuildableModel} from "./Guildable.model";
+import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
+import {AbstractModel} from "../AbstractModel";
 
-@Table
-export class BannedAttachmentsModel extends Model implements IGuildAware {
+@Entity()
+export class BannedAttachmentsModel extends AbstractModel {
 
     @Column({unique: false})
     public attachmentHash: string;
 
-    @Column
+    @Column()
     public url: string;
 
-    @Column
+    @Column()
     public reason: string;
 
-    @Column({defaultValue: false})
+    @Column({default: false})
     public isEmoji: boolean;
 
-    @Column({defaultValue: false})
+    @Column({default: false})
     public isSticker: boolean;
 
-    @ForeignKey(() => GuildableModel)
-    @Column
-    guildId: string;
 
-    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.bannedAttachmentsModel, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
     guildableModel: GuildableModel;
 }

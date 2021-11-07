@@ -1,45 +1,47 @@
-import {AllowNull, BelongsTo, Column, DataType, Default, ForeignKey, Model, Table} from "sequelize-typescript";
 import {GuildUtils} from "../../../../utils/Utils";
-import {IGuildAware} from "../../IGuildAware";
 import {GuildableModel} from "../../guild/Guildable.model";
-import {Identifiable} from "../../Identifiable";
+import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
+import {AbstractModel} from "../../AbstractModel";
+import {IdentifiableModel} from "../../IdentifiableModel";
 
-@Table
-export class MuteModel extends Model implements IGuildAware, Identifiable {
+@Entity()
+export class MuteModel extends IdentifiableModel {
 
-    @Column({unique: false, allowNull: false})
-    public userId: string;
+    @Column({
+        type: "simple-array"
+    })
+    public prevRole: string[];
 
-    @Column
-    public prevRole: string;
-
-    @Column({allowNull: false})
+    @Column({nullable: false})
     public username: string;
 
-    @Column(DataType.TEXT)
+    @Column({
+        type: "text"
+    })
     public reason: string;
 
-    @Column
+    @Column()
     public creatorID: string;
 
-    @AllowNull(false)
-    @Default(0)
-    @Column(DataType.INTEGER)
+    @Column({
+        nullable: false,
+        default: 0,
+        type: "integer"
+    })
     public violationRules: number;
 
-    @AllowNull(true)
-    @Column(DataType.INTEGER)
+    @Column({
+        nullable: true,
+        type: "integer"
+    })
     public timeout: number;
 
-    @ForeignKey(() => GuildableModel)
-    @Column
-    guildId: string;
-
-    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
-    guildableModel: GuildableModel;
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.muteModel, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
+    public guildableModel: GuildableModel;
 
     public async getPrevRoles(): Promise<string[]> {
-        const prevRoles = this.prevRole.split(",");
+        const prevRoles = this.prevRole;
         const newArr: string[] = [];
         for (const prevRole of prevRoles) {
             if (await GuildUtils.RoleUtils.isValidRole(this.guildId, prevRole)) {

@@ -26,7 +26,7 @@ import {
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
-import {Model, Sequelize} from "sequelize-typescript";
+import {Sequelize} from "sequelize-typescript";
 import {glob} from "glob";
 import * as path from "path";
 import {ChannelManager} from "../model/guild/manager/ChannelManager";
@@ -1102,52 +1102,5 @@ export class EnumEx {
     private static getObjValues(e: any): Array<number | string> {
 
         return Object.keys(e).map(k => e[k]);
-    }
-}
-
-export namespace ModelUtils {
-
-    export namespace EventSecurityConstraintUtils {
-
-        export function getRoles(this: Model, prop: string): Role[] {
-            const value: string | null = this.getDataValue(prop);
-            if (!ObjectUtil.validString(value)) {
-                return [];
-            }
-            const guild = getGuild.call(this);
-            const roleIds = value.split(",");
-            return roleIds.map(roleId => guild.roles.cache.get(roleId));
-        }
-
-        export function setRoles(this: Model, roles: string[], prop: string): void {
-            if (!ArrayUtils.isValidArray(roles)) {
-                this.setDataValue(prop, null);
-                return;
-            }
-            this.setDataValue(prop, roles.join(","));
-        }
-
-        export function getChannels(this: Model, prop: string): GuildChannel[] {
-            const value: string | null = this.getDataValue(prop);
-            if (!ObjectUtil.validString(value)) {
-                return [];
-            }
-            const guild = getGuild.call(this);
-            const channels = value.split(",");
-            return channels.map(channelId => guild.channels.cache.get(channelId));
-        }
-
-        export function setChannels(this: Model, channels: string[], prop: string): void {
-            if (!ArrayUtils.isValidArray(channels)) {
-                this.setDataValue(prop, null);
-                return;
-            }
-            this.setDataValue(prop, channels.join(","));
-        }
-    }
-
-    function getGuild(this: Model): Guild {
-        const client = container.resolve(Client);
-        return client.guilds.cache.get(this.getDataValue("guildId"));
     }
 }

@@ -1,4 +1,3 @@
-import {Column, HasMany, Model, Table} from "sequelize-typescript";
 import {IGuildAware} from "../IGuildAware";
 import {MuteModel} from "../autoMod/impl/Mute.model";
 import {RolePersistenceModel} from "../autoMod/impl/RolePersistence.model";
@@ -13,49 +12,52 @@ import {RoleJoinerModel} from "./RoleJoiner.model";
 import {BookmarkModel} from "./Bookmark.model";
 import {MessageScheduleModel} from "./MessageSchedule.model";
 import {TwitterModel} from "./Twitter.model";
+import {Column, Entity, OneToMany} from "typeorm";
 
-@Table
-export class GuildableModel extends Model implements IGuildAware {
+@Entity()
+export class GuildableModel implements IGuildAware {
 
-    @Column({primaryKey: true})
+    @Column({
+        primary: true
+    })
     public guildId: string;
 
-    @HasMany(() => MuteModel)
+    @OneToMany(() => MuteModel, muteModel => muteModel.guildableModel)
     public muteModel: MuteModel[];
 
-    @HasMany(() => RolePersistenceModel)
-    public rolePersistenc: RolePersistenceModel[];
+    @OneToMany(() => RolePersistenceModel, rolePersistence => rolePersistence.guildableModel)
+    public rolePersistence: RolePersistenceModel[];
 
-    @HasMany(() => UsernameModel)
+    @OneToMany(() => UsernameModel, usernameModel => usernameModel.guildableModel)
     public usernameModel: UsernameModel[];
 
-    @HasMany(() => CloseOptionModel)
+    @OneToMany(() => CloseOptionModel, closeOptionModel => closeOptionModel.guildableModel)
     public closeOptionModel: CloseOptionModel[];
 
-    @HasMany(() => BannedAttachmentsModel)
+    @OneToMany(() => BannedAttachmentsModel, bannedAttachmentsModel => bannedAttachmentsModel.guildableModel)
     public bannedAttachmentsModel: BannedAttachmentsModel[];
 
-    @HasMany(() => SettingsModel)
+    @OneToMany(() => SettingsModel, settingsModel => settingsModel.guildableModel)
     public settingsModel: SettingsModel[];
 
-    @HasMany(() => PostableChannelModel)
+    @OneToMany(() => PostableChannelModel, postableChannels => postableChannels.guildableModel)
     public postableChannels: PostableChannelModel[];
 
-    @HasMany(() => CommandSecurityModel)
+    @OneToMany(() => CommandSecurityModel, commandSecurityModel => commandSecurityModel.guildableModel)
     public commandSecurityModel: CommandSecurityModel[];
 
-    @HasMany(() => AutoResponderModel)
+    @OneToMany(() => AutoResponderModel, autoResponderModel => autoResponderModel.guildableModel)
     public autoResponderModel: AutoResponderModel[];
 
-    @HasMany(() => RoleJoinerModel)
+    @OneToMany(() => RoleJoinerModel, roleJoinerModel => roleJoinerModel.guildableModel)
     public roleJoinerModel: RoleJoinerModel[];
 
-    @HasMany(() => BookmarkModel)
+    @OneToMany(() => BookmarkModel, bookmarkModel => bookmarkModel.guildableModel)
     public bookmarkModel: BookmarkModel[];
 
-    @HasMany(() => MessageScheduleModel)
+    @OneToMany(() => MessageScheduleModel, messageScheduleModel => messageScheduleModel.guildableModel)
     public messageScheduleModel: MessageScheduleModel[];
 
-    @HasMany(() => TwitterModel)
+    @OneToMany(() => TwitterModel, twitterModel => twitterModel.guildableModel)
     public twitterModel: TwitterModel[];
 }

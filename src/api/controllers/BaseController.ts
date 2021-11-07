@@ -14,9 +14,8 @@ export abstract class baseController {
         });
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    protected ok(res: Response, json: object): Response {
-        const serialisedJson: string = JSON.stringify(json, (key, value) => typeof value === 'bigint' ? value.toString() : value);
+    protected ok(res: Response, json: Record<string, any>): Response {
+        const serialisedJson: string = JSON.stringify(json);
         res.setHeader('Content-Type', 'application/json');
         return res.status(StatusCodes.OK).send(serialisedJson);
     }

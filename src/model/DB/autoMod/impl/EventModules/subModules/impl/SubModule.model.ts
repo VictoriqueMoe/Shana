@@ -1,7 +1,5 @@
-import {Model, Table} from "sequelize-typescript";
 
-@Table
-export class SubModuleModel extends Model {
+export class SubModuleModel {
 
     /*    @Column({unique: "guildConstraint", allowNull: false})
         public subMuldeId: string;

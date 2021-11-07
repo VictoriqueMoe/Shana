@@ -71,7 +71,6 @@
     "node-fetch": "^2.6.5",
     "node-reverse-image-search": "^1.0.2",
     "node-schedule": "^2.0.0",
-    "npm": "^8.1.2",
     "promisify": "0.0.3",
     "reflect-metadata": "^0.1.13",
     "sanitize-filename": "^1.6.3",

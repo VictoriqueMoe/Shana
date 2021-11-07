@@ -8,9 +8,6 @@ import constructor from "tsyringe/dist/typings/types/constructor";
 @injectable()
 export class MessageEventDispatcher {
 
-    public constructor(private _client: Client) {
-    }
-
     private static readonly _messageListenerMap: Map<constructor<any>, MessageEntry[]> = new Map();
 
     public static get messageListenerMap(): Map<constructor<any>, MessageEntry[]> {
@@ -19,7 +16,7 @@ export class MessageEventDispatcher {
 
     @On("messageCreate")
     private async eventTrigger([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
-        await this._client.executeCommand(message, {
+        await client.executeCommand(message, {
             caseSensitive: false
         });
         return this.trigger(message, client, false);

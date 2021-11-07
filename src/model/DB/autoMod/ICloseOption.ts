@@ -1,9 +1,8 @@
-import {Model} from "sequelize-typescript";
 
 /**
  * interface for close options. aka a model that can carry info about what module is closed
  */
-export interface ICloseOption extends Model {
+export interface ICloseOption {
 
     /**
      * name of the module

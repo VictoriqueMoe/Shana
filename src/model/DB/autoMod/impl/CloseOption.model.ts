@@ -1,47 +1,32 @@
-import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
-import {ICloseOption} from "../ICloseOption";
-import {IGuildAware} from "../../IGuildAware";
 import {GuildableModel} from "../../guild/Guildable.model";
-import {ObjectUtil} from "../../../../utils/Utils";
+import {Column, Entity, Index, JoinColumn, ManyToOne} from "typeorm";
+import {AbstractModel} from "../../AbstractModel";
+import {ICloseOption} from "../ICloseOption";
 
-@Table
-export class CloseOptionModel extends Model implements ICloseOption, IGuildAware {
+@Entity()
+@Index("uniqueConstraint", ["moduleId", "guildId"], {
+    unique: true
+})
+export class CloseOptionModel extends AbstractModel implements ICloseOption {
 
-    @Column({unique: "uniqueConstraint", allowNull: false})
+    @Column({
+        nullable: false
+    })
     public moduleId: string;
 
-    @Column({allowNull: false, defaultValue: false})
+    @Column({
+        nullable: false
+    })
     public status: boolean;
 
     @Column({
-        allowNull: true,
-        defaultValue: null,
-        type: DataType.TEXT,
-        get(): Record<string, unknown> {
-            const value: string | null = this.getDataValue("settings");
-            if (!ObjectUtil.validString(value)) {
-                return null;
-            }
-            return JSON.parse(value);
-        },
-        set(settings: Record<string, unknown>) {
-            if (!ObjectUtil.isValidObject(settings)) {
-                this.setDataValue("settings", null);
-                return;
-            }
-            this.setDataValue("settings", JSON.stringify(settings));
-        }
+        nullable: true,
+        default: null,
+        type: "simple-json",
     })
     public settings: Record<string, unknown>;
 
-    @ForeignKey(() => GuildableModel)
-    @Column({unique: "uniqueConstraint"})
-    guildId: string;
-
-    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.closeOptionModel, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
     guildableModel: GuildableModel;
-
-
-    /*@HasMany(() => SubModuleModel, {onDelete: "cascade", foreignKey: "moduleId"})
-    public submodules: SubModuleModel[];*/
 }

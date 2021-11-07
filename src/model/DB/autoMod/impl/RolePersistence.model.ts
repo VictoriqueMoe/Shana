@@ -1,21 +1,15 @@
-import {BelongsTo, Column, ForeignKey, Model, Table} from "sequelize-typescript";
-import {Identifiable} from "../../Identifiable";
-import {IGuildAware} from "../../IGuildAware";
 import {GuildableModel} from "../../guild/Guildable.model";
+import {IdentifiableModel} from "../../IdentifiableModel";
+import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
+import {AbstractModel} from "../../AbstractModel";
 
-@Table
-export class RolePersistenceModel extends Model implements Identifiable, IGuildAware {
+@Entity()
+export class RolePersistenceModel extends IdentifiableModel {
 
-    @Column({unique: false, allowNull: false})
-    public userId: string;
-
-    @Column
+    @Column()
     public roleId: string;
 
-    @ForeignKey(() => GuildableModel)
-    @Column
-    guildId: string;
-
-    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
-    guildableModel: GuildableModel;
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.rolePersistence, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
+    public guildableModel: GuildableModel;
 }

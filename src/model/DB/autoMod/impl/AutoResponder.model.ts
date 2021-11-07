@@ -1,105 +1,35 @@
-import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
-import {IGuildAware} from "../../IGuildAware";
+import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 import {GuildableModel} from "../../guild/Guildable.model";
-import {IEventSecurityConstraint} from "../../IEventSecurityConstraint";
-import {GuildChannel, Role} from "discord.js";
-import {ArrayUtils, ModelUtils, ObjectUtil} from "../../../../utils/Utils";
+import {AbstractEventSecurityConstraint} from "../../AbstractEventSecurityConstraint";
+import {AbstractModel} from "../../AbstractModel";
 
-@Table
-export class AutoResponderModel extends Model implements IGuildAware, IEventSecurityConstraint {
+@Entity()
+export class AutoResponderModel extends AbstractEventSecurityConstraint {
 
-    @Column({allowNull: false, defaultValue: false})
+    @Column({nullable: false, default: false})
     public useRegex: boolean;
 
-    @Column({allowNull: false, unique: true})
+    @Column({nullable: false, unique: true})
     public title: string;
 
-    @Column({type: DataType.ENUM("message", "reaction", "delete", "kick"), defaultValue: "message", allowNull: false})
+    @Column({enum: ["message", "reaction", "delete", "kick"], type: "text", default: "message", nullable: false})
     public responseType: "message" | "reaction" | "delete" | "kick";
 
-    @Column({defaultValue: false, allowNull: false})
+    @Column({default: false, nullable: false})
     public wildCard: boolean;
 
-    @Column({defaultValue: false, allowNull: false})
+    @Column({default: false, nullable: false})
     public publicDelete: boolean;
 
-    @Column({type: DataType.TEXT, allowNull: true, defaultValue: null})
+    @Column({type: "text", nullable: true, default: null})
     public response: string;
 
     @Column({
-        type: DataType.TEXT,
-        allowNull: true,
-        get(): string[] {
-            const value: string | null = this.getDataValue("emojiReactions");
-            if (!ObjectUtil.validString(value)) {
-                return [];
-            }
-            return this.getDataValue("emojiReactions").split(",");
-        },
-        set(roles: string[]) {
-            if (!ArrayUtils.isValidArray(roles)) {
-                this.setDataValue("emojiReactions", null);
-                return;
-            }
-            this.setDataValue("emojiReactions", roles.join(","));
-        }
+        type: "simple-array",
     })
     public emojiReactions: string[];
 
-    @Column({
-        type: DataType.TEXT,
-        allowNull: true,
-        get(): GuildChannel[] {
-            return ModelUtils.EventSecurityConstraintUtils.getChannels.call(this, "allowedChannels");
-        },
-        set(channels: string[]) {
-            ModelUtils.EventSecurityConstraintUtils.setChannels.call(this, channels, "allowedChannels");
-        }
-    })
-    public allowedChannels: GuildChannel[];
-
-    @Column({
-        type: DataType.TEXT,
-        allowNull: true,
-        get(): Role[] {
-            return ModelUtils.EventSecurityConstraintUtils.getRoles.call(this, "allowedRoles");
-        },
-        set(roles: string[]) {
-            ModelUtils.EventSecurityConstraintUtils.setRoles.call(this, roles, "allowedRoles");
-        }
-    })
-    allowedRoles: Role[];
-
-
-    @Column({
-        type: DataType.TEXT,
-        allowNull: true,
-        get(): GuildChannel[] {
-            return ModelUtils.EventSecurityConstraintUtils.getChannels.call(this, "ignoredChannels");
-        },
-        set(channels: string[]) {
-            ModelUtils.EventSecurityConstraintUtils.setChannels.call(this, channels, "ignoredChannels");
-        }
-    })
-    ignoredChannels: GuildChannel[];
-
-    @Column({
-        type: DataType.TEXT,
-        allowNull: true,
-        get(): Role[] {
-            return ModelUtils.EventSecurityConstraintUtils.getRoles.call(this, "ignoredRoles");
-        },
-        set(roles: string[]) {
-            ModelUtils.EventSecurityConstraintUtils.setRoles.call(this, roles, "ignoredRoles");
-        }
-    })
-    ignoredRoles: Role[];
-
-
-    @ForeignKey(() => GuildableModel)
-    @Column
-    guildId: string;
-
-    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.autoResponderModel, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
     guildableModel: GuildableModel;
 }

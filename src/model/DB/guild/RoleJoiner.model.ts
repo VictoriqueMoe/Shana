@@ -1,35 +1,17 @@
-import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
-import {IGuildAware} from "../IGuildAware";
+import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 import {GuildableModel} from "./Guildable.model";
-import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
+import {AbstractModel} from "../AbstractModel";
 
-@Table
-export class RoleJoinerModel extends Model implements IGuildAware {
+@Entity()
+export class RoleJoinerModel extends AbstractModel {
 
     @Column({
-        type: DataType.TEXT,
-        allowNull: true,
-        get(): string[] {
-            const value: string | null = this.getDataValue("rolesToJoin");
-            if (!ObjectUtil.validString(value)) {
-                return [];
-            }
-            return this.getDataValue("rolesToJoin").split(",");
-        },
-        set(roles: string[]) {
-            if (!ArrayUtils.isValidArray(roles)) {
-                this.setDataValue("rolesToJoin", null);
-                return;
-            }
-            this.setDataValue("rolesToJoin", roles.join(","));
-        }
+        type: "simple-array",
+        nullable: true,
     })
     public rolesToJoin: string[];
 
-    @ForeignKey(() => GuildableModel)
-    @Column
-    guildId: string;
-
-    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.roleJoinerModel, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
     guildableModel: GuildableModel;
 }

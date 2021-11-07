@@ -1,23 +1,20 @@
-import {BelongsTo, Column, ForeignKey, Model, Table} from "sequelize-typescript";
-import {IGuildAware} from "../IGuildAware";
 import {GuildableModel} from "./Guildable.model";
+import {AbstractModel} from "../AbstractModel";
+import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 
-@Table
-export class PostableChannelModel extends Model implements IGuildAware {
+@Entity()
+export class PostableChannelModel extends AbstractModel {
 
-    @Column({unique: true, defaultValue: null, allowNull: true})
+    @Column({unique: true, default: null, nullable: true})
     public logChannel: string;
 
-    @Column({unique: true, defaultValue: null, allowNull: true})
+    @Column({unique: true, default: null, nullable: true})
     public AdminLogchannel: string;
 
-    @Column({unique: true, defaultValue: null, allowNull: true})
+    @Column({unique: true, default: null, nullable: true})
     public JailChannel: string;
 
-    @ForeignKey(() => GuildableModel)
-    @Column
-    guildId: string;
-
-    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.postableChannels, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
     guildableModel: GuildableModel;
 }

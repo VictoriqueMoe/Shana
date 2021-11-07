@@ -1,20 +1,17 @@
-import {BelongsTo, Column, DataType, ForeignKey, Model, Table} from "sequelize-typescript";
-import {IGuildAware} from "../IGuildAware";
 import {GuildableModel} from "./Guildable.model";
+import {AbstractModel} from "../AbstractModel";
+import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 
-@Table
-export class SettingsModel extends Model implements IGuildAware {
+@Entity()
+export class SettingsModel extends AbstractModel {
 
     @Column({unique: false})
     public setting: string;
 
-    @Column({type: DataType.TEXT, allowNull: true, defaultValue: null})
+    @Column({type: "text", nullable: true, default: null})
     public value: string;
 
-    @ForeignKey(() => GuildableModel)
-    @Column
-    guildId: string;
-
-    @BelongsTo(() => GuildableModel, {onDelete: "cascade"})
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.settingsModel, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
     guildableModel: GuildableModel;
 }

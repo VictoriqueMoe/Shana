@@ -53,7 +53,6 @@ export class Main {
                 return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
             }
         });*/
-        await dao.sync({force: false});
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             simpleCommand: {
@@ -88,7 +87,7 @@ export class Main {
             }],
             silent: false,
         });
-        registerInstance(dao, client);
+        registerInstance(connection, client);
         await client.login(Main.testMode ? process.env.test_token : process.env.token);
     }
 }
