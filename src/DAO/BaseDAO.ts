@@ -1,42 +1,39 @@
-import {Model} from "sequelize-typescript";
-import {SaveOptions} from "sequelize/types/lib/model";
-import {UniqueConstraintError, ValidationError} from "sequelize";
 import {ObjectUtil} from "../utils/Utils";
-import {Transaction} from "sequelize/types/lib/transaction";
+import {EntityManager, QueryFailedError, Repository} from "typeorm";
+import {InsertResult} from "typeorm/query-builder/result/InsertResult";
+import {EntityTarget} from "typeorm/common/EntityTarget";
 
-export abstract class BaseDAO<T extends Model> {
+export abstract class BaseDAO<T> {
 
-    protected async commitToDatabase(model: T, options?: SaveOptions, silentOnDupe: boolean = false, t?: Transaction): Promise<T> {
+    protected async commitToDatabase(repo: Repository<T> | EntityManager, model: T[], modelClass?: EntityTarget<T>, opts: {
+        silentOnDupe?: boolean,
+        saveOrUpdate?: boolean
+    } = {}): Promise<InsertResult | T[]> {
         let errorStr = "";
-        // hacky 'mc hack
         try {
             try {
-                if (t) {
-                    options["transaction"] = t;
-                }
-                return await model.save(options);
-            } catch (e) {
-                if (e instanceof UniqueConstraintError) {
-                    throw new UniqueViolationError(e.message);
-                } else if (e instanceof ValidationError) {
-                    const errors = e.errors;
-                    let isOnlyUniqueError = true;
-                    for (const error of errors) {
-                        if (error.type !== "unique violation") {
-                            isOnlyUniqueError = false;
-                        }
+                if (repo instanceof EntityManager) {
+                    if (!modelClass) {
+                        throw new Error("Must supply class");
                     }
-                    if (isOnlyUniqueError) {
+                    return opts?.saveOrUpdate ? repo.save(modelClass, model) : repo.insert(modelClass, model);
+                } else {
+                    return opts?.saveOrUpdate ? repo.save(model) : repo.insert(model);
+                }
+            } catch (e) {
+                if (e instanceof QueryFailedError) {
+                    const error = e.message;
+                    if (error.includes("UNIQUE constraint failed")) {
                         throw new UniqueViolationError(e.message);
                     }
-                    errorStr = errors.map(error => `${error.message}`).join("\n");
+                    errorStr = error;
                 } else {
                     throw e;
                 }
             }
         } catch (e) {
             if (e instanceof UniqueViolationError) {
-                if (!silentOnDupe) {
+                if (!opts?.silentOnDupe) {
                     console.log(`Entry already exists in database: ${model}`);
                 }
                 throw e;

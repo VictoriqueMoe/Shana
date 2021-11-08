@@ -2,7 +2,6 @@ import {Main} from "../Main";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {ArrayUtils, DiscordUtils, EnumEx, loadClasses, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
-import {UsernameModel} from "../model/DB/autoMod/impl/Username.model";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
 import {BotServer} from "../api/BotServer";
 import {GuildableModel} from "../model/DB/guild/Guildable.model";
@@ -17,10 +16,10 @@ import {ArgsOf, Client, Discord, On} from "discordx";
 import {container, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
-import {Sequelize} from "sequelize-typescript";
 import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS";
 import {Player} from "discord-music-player";
 import {registerInstance} from "../DI/moduleRegistrar";
+import {getManager, getRepository} from "typeorm";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const io = require('@pm2/io');
@@ -30,7 +29,7 @@ const io = require('@pm2/io');
 export class OnReady extends BaseDAO<any> {
     private readonly classesToLoad = [`${__dirname}/../model/closeableModules/subModules/dynoAutoMod/impl/*.{ts,js}`, `${__dirname}/../managedEvents/**/*.{ts,js}`];
 
-    public constructor(private _client: Client, private _dao: Sequelize) {
+    public constructor(private _client: Client) {
         super();
     }
 
@@ -52,8 +51,8 @@ export class OnReady extends BaseDAO<any> {
 
     private static async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
         const retMap: Map<Guild, string[]> = new Map();
-        const guildModels = await GuildableModel.findAll({
-            include: [CommandSecurityModel]
+        const guildModels = await getRepository(GuildableModel).find({
+            relations: ["commandSecurityModel"]
         });
         const guildManager = container.resolve(GuildManager);
         for (const guildModel of guildModels) {
@@ -222,8 +221,8 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private async initUsernames(): Promise<void> {
-        const allModels = await GuildableModel.findAll({
-            include: [UsernameModel]
+        const allModels = await getRepository(GuildableModel).find({
+            relations: ["usernameModel"]
         });
         const pArr: Promise<void>[] = [];
         for (const model of allModels) {
@@ -246,12 +245,11 @@ export class OnReady extends BaseDAO<any> {
 
     private async populateClosableEvents(): Promise<void> {
         const allModules: CloseableModule<any>[] = DiscordUtils.getCloseableModules();
-        await this._dao.transaction(async transaction => {
+        await getManager().transaction(async transactionManager => {
             for (const module of allModules) {
                 for (const [guildId, guild] of this._client.guilds.cache) {
                     const moduleId = module.moduleId;
-                    const modelPersisted = await CloseOptionModel.findOne({
-                        transaction,
+                    const modelPersisted = await transactionManager.findOne(CloseOptionModel, {
                         where: {
                             moduleId,
                             guildId
@@ -263,13 +261,12 @@ export class OnReady extends BaseDAO<any> {
                             console.log(`Module: ${modelPersisted.moduleId} (${moduleName})for guild "${guild.name}" (${guildId}) enabled`);
                         }
                     } else {
-                        const m = new CloseOptionModel({
-                            transaction,
+                        const m = transactionManager.create(CloseOptionModel, {
                             moduleId,
                             guildId
                         });
                         try {
-                            await super.commitToDatabase(m, {}, false, transaction);
+                            await super.commitToDatabase(transactionManager, [m], CloseOptionModel);
                         } catch (e) {
                             if (!(e instanceof UniqueViolationError)) {
                                 throw e;
@@ -279,7 +276,6 @@ export class OnReady extends BaseDAO<any> {
                 }
             }
         });
-
     }
 
     private static async startServer(): Promise<void> {
@@ -293,13 +289,15 @@ export class OnReady extends BaseDAO<any> {
 
     private async populateGuilds(): Promise<void> {
         const guilds = this._client.guilds.cache;
-        return this._dao.transaction(async transaction => {
+        return getManager().transaction(async transactionManager => {
             for (const [guildId] of guilds) {
-                const guild = new GuildableModel({
+                const guild = transactionManager.create(GuildableModel, {
                     guildId
                 });
                 try {
-                    await super.commitToDatabase(guild, {}, true, transaction);
+                    await super.commitToDatabase(transactionManager, [guild], GuildableModel, {
+                        silentOnDupe: true
+                    });
                 } catch (e) {
                     if (!(e instanceof UniqueViolationError)) {
                         throw e;
@@ -314,34 +312,31 @@ export class OnReady extends BaseDAO<any> {
         const {commands} = securityManager;
 
         async function addNewCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
-            await this._dao.transaction(async transaction => {
-                const models: {
-                    commandName: string, guildId: string
-                }[] = [];
+            await getManager().transaction(async transactionManager => {
+                const models: CommandSecurityModel[] = [];
                 for (const {name} of commands) {
                     for (const guildModel of guildModels) {
                         const guildId = guildModel.guildId;
                         const commandSecurity = guildModel.commandSecurityModel;
                         const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName.toLowerCase() === name.toLowerCase());
                         if (!inArray) {
-                            models.push({
+                            const newModel = transactionManager.create(CommandSecurityModel, {
                                 commandName: name,
                                 guildId
                             });
+                            models.push(newModel);
                         }
                     }
                 }
                 if (models.length > 0) {
                     console.log(`adding commands: ${models.map(value => value.commandName)}`);
-                    return CommandSecurityModel.bulkCreate(models, {
-                        transaction
-                    });
+                    return this.commitToDatabase(transactionManager, models, CommandSecurityModel);
                 }
             });
         }
 
         async function removeOldCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
-            await this._dao.transaction(async transaction => {
+            await getManager().transaction(async transactionManager => {
                 for (const guildModel of guildModels) {
                     const {guildId} = guildModel;
                     const commandSecurity = guildModel.commandSecurityModel;
@@ -354,18 +349,14 @@ export class OnReady extends BaseDAO<any> {
                         }
                     }
                     if (ArrayUtils.isValidArray(commandsToDestroy)) {
-                        await CommandSecurityModel.destroy({
-                            transaction,
-                            where: {
-                                "commandName": commandsToDestroy,
-                                guildId
-                            }
+                        await transactionManager.delete(CommandSecurityModel, {
+                            "commandName": commandsToDestroy,
+                            guildId
                         });
                     }
                 }
             });
         }
-
         const guilds = await GuildableModel.findAll({
             include: [CommandSecurityModel]
         });
