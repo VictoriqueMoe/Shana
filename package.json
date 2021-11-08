@@ -29,7 +29,7 @@
     "@discordx/utilities": "^3.0.3",
     "@overnightjs/core": "^1.7.6",
     "@pm2/io": "^5.0.0",
-    "anilist-node": "^1.9.1",
+    "anilist-node": "^1.11.0",
     "bufferutil": "^4.0.5",
     "cron-validator": "^1.2.1",
     "cronstrue": "^1.119.0",
