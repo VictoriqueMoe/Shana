@@ -12,6 +12,7 @@ import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings
 import {TimedSet} from "../../../model/Impl/TimedSet";
 import {container, injectable} from "tsyringe";
 import {RoleApplier} from "../../customAutoMod/RoleApplier/RoleApplier";
+import {getRepository} from "typeorm";
 
 class JoinEntry {
     constructor(public joinCount: number) {
@@ -52,7 +53,8 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (filter.isActive && await filter.checkUsername(member)) {
             return;
         }
-        const persistedRole = await RolePersistenceModel.findOne({
+
+        const persistedRole = await getRepository(RolePersistenceModel).findOne({
             where: {
                 userId: member.id,
                 guildId

@@ -20,6 +20,7 @@ import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS";
 import {Player} from "discord-music-player";
 import {registerInstance} from "../DI/moduleRegistrar";
 import {getManager, getRepository} from "typeorm";
+import {InsertResult} from "typeorm/browser";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const io = require('@pm2/io');
@@ -261,7 +262,7 @@ export class OnReady extends BaseDAO<any> {
                             console.log(`Module: ${modelPersisted.moduleId} (${moduleName})for guild "${guild.name}" (${guildId}) enabled`);
                         }
                     } else {
-                        const m = transactionManager.create(CloseOptionModel, {
+                        const m = BaseDAO.build(CloseOptionModel, {
                             moduleId,
                             guildId
                         });
@@ -291,7 +292,7 @@ export class OnReady extends BaseDAO<any> {
         const guilds = this._client.guilds.cache;
         return getManager().transaction(async transactionManager => {
             for (const [guildId] of guilds) {
-                const guild = transactionManager.create(GuildableModel, {
+                const guild = BaseDAO.build(GuildableModel, {
                     guildId
                 });
                 try {
@@ -310,9 +311,10 @@ export class OnReady extends BaseDAO<any> {
     private async populateCommandSecurity(): Promise<void> {
         const securityManager = container.resolve(CommandSecurityManager);
         const {commands} = securityManager;
+        const manager = getManager();
 
         async function addNewCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
-            await getManager().transaction(async transactionManager => {
+            await manager.transaction(async transactionManager => {
                 const models: CommandSecurityModel[] = [];
                 for (const {name} of commands) {
                     for (const guildModel of guildModels) {
@@ -320,7 +322,7 @@ export class OnReady extends BaseDAO<any> {
                         const commandSecurity = guildModel.commandSecurityModel;
                         const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName.toLowerCase() === name.toLowerCase());
                         if (!inArray) {
-                            const newModel = transactionManager.create(CommandSecurityModel, {
+                            const newModel = BaseDAO.build(CommandSecurityModel, {
                                 commandName: name,
                                 guildId
                             });
@@ -336,7 +338,7 @@ export class OnReady extends BaseDAO<any> {
         }
 
         async function removeOldCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
-            await getManager().transaction(async transactionManager => {
+            await manager.transaction(async transactionManager => {
                 for (const guildModel of guildModels) {
                     const {guildId} = guildModel;
                     const commandSecurity = guildModel.commandSecurityModel;
@@ -357,53 +359,50 @@ export class OnReady extends BaseDAO<any> {
                 }
             });
         }
-        const guilds = await GuildableModel.findAll({
-            include: [CommandSecurityModel]
+
+        const guilds = await manager.find(GuildableModel, {
+            relations: ["commandSecurityModel"]
         });
         await addNewCommands.call(this, guilds);
         await removeOldCommands.call(this, guilds);
     }
 
-    private async populatePostableChannels(): Promise<void> {
-        const guildModels = await GuildableModel.findAll({
-            include: [CommandSecurityModel]
+    private async populatePostableChannels(): Promise<InsertResult | any[]> {
+        const guildModels = await getRepository(GuildableModel).find({
+            relations: ["commandSecurityModel"]
         });
-        const currentModels = await PostableChannelModel.findAll();
+        const postableRepo = getRepository(PostableChannelModel);
+        const currentModels = await postableRepo.find();
         const models: {
             guildId: string
         }[] = [];
-        await this._dao.transaction(async transaction => {
-            for (const guildModel of guildModels) {
-                const guildId = guildModel.guildId;
-                if (currentModels.some(m => m.guildId === guildId)) {
-                    continue;
-                }
-                models.push({
-                    guildId
-                });
+        for (const guildModel of guildModels) {
+            const guildId = guildModel.guildId;
+            if (currentModels.some(m => m.guildId === guildId)) {
+                continue;
             }
-            return PostableChannelModel.bulkCreate(models, {
-                transaction
+            models.push({
+                guildId
             });
-        });
+        }
+        return super.commitToDatabase(postableRepo, models);
     }
 
     private async cleanUpGuilds(): Promise<void> {
         const guildsJoined = [...this._client.guilds.cache.keys()];
-        for (const guildsJoinedId of guildsJoined) {
-            const guildModels = await GuildableModel.findOne({
-                where: {
-                    "guildId": guildsJoinedId
-                }
-            });
-            if (!guildModels) {
-                await GuildableModel.destroy({
-                    cascade: true,
+        await getManager().transaction(async transactionManager => {
+            for (const guildsJoinedId of guildsJoined) {
+                const guildModels = await transactionManager.find(GuildableModel, {
                     where: {
-                        guildId: guildsJoinedId
+                        "guildId": guildsJoinedId
                     }
                 });
+                if (!guildModels) {
+                    await transactionManager.delete(GuildableModel, {
+                        guildId: guildsJoinedId
+                    });
+                }
             }
-        }
+        });
     }
 }

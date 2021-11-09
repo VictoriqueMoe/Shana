@@ -1,14 +1,16 @@
 import {ObjectUtil} from "../utils/Utils";
-import {EntityManager, QueryFailedError, Repository} from "typeorm";
-import {InsertResult} from "typeorm/query-builder/result/InsertResult";
+import {EntityManager, getManager, QueryFailedError, Repository} from "typeorm";
 import {EntityTarget} from "typeorm/common/EntityTarget";
 
 export abstract class BaseDAO<T> {
 
+    public static build<T extends new (...args: any) => any>(instance: T, data: Record<string, any>): InstanceType<T> {
+        return getManager().create(instance, data);
+    }
+
     protected async commitToDatabase(repo: Repository<T> | EntityManager, model: T[], modelClass?: EntityTarget<T>, opts: {
-        silentOnDupe?: boolean,
-        saveOrUpdate?: boolean
-    } = {}): Promise<InsertResult | T[]> {
+        silentOnDupe?: boolean
+    } = {}): Promise<T[]> {
         let errorStr = "";
         try {
             try {
@@ -16,9 +18,9 @@ export abstract class BaseDAO<T> {
                     if (!modelClass) {
                         throw new Error("Must supply class");
                     }
-                    return opts?.saveOrUpdate ? repo.save(modelClass, model) : repo.insert(modelClass, model);
+                    return repo.save(modelClass, model);
                 } else {
-                    return opts?.saveOrUpdate ? repo.save(model) : repo.insert(model);
+                    return repo.save(model);
                 }
             } catch (e) {
                 if (e instanceof QueryFailedError) {

@@ -8,6 +8,7 @@ import {AutoResponderPayload} from "../../../../../model/types/Typeings";
 import {AutoResponderModel} from "../../../../../model/DB/autoMod/impl/AutoResponder.model";
 import {AutoResponderManager} from "../../../../../model/guild/manager/AutoResponderManager";
 import {container} from "tsyringe";
+import {BaseDAO} from "../../../../../DAO/BaseDAO";
 
 
 @Controller("autoResponder")
@@ -35,7 +36,7 @@ export class AutoResponderController extends AbstractModuleController {
         const requestObject: Edit = req.body;
         requestObject.guildId = guild.id;
         try {
-            await this._autoResponderManager.editAutoResponder(new AutoResponderModel(requestObject), requestObject.currentTitle);
+            await this._autoResponderManager.editAutoResponder(BaseDAO.build(AutoResponderModel, requestObject), requestObject.currentTitle);
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.BAD_REQUEST);
         }
@@ -54,7 +55,7 @@ export class AutoResponderController extends AbstractModuleController {
         const requestObject: AutoResponderPayload = req.body;
         requestObject.guildId = guild.id;
         try {
-            await this._autoResponderManager.addAutoResponder(new AutoResponderModel(requestObject));
+            await this._autoResponderManager.addAutoResponder(BaseDAO.build(AutoResponderModel, requestObject));
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.BAD_REQUEST);
         }
@@ -71,7 +72,7 @@ export class AutoResponderController extends AbstractModuleController {
         }
         try {
             const responders = await this._autoResponderManager.getAllAutoResponders(guild.id);
-            const json = responders.map(value => value.toJSON());
+            const json = responders.map(value => JSON.stringify(value));
             return super.ok(res, json);
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.INTERNAL_SERVER_ERROR);

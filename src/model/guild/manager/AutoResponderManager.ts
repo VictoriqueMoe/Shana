@@ -1,51 +1,61 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {AutoResponderModel} from "../../DB/autoMod/impl/AutoResponder.model";
 import {singleton} from "tsyringe";
-import {Sequelize} from "sequelize-typescript";
-import {Transaction} from "sequelize/types/lib/transaction";
+import {getManager, getRepository, Repository, Transaction, TransactionRepository} from "typeorm";
 
 @singleton()
 export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
+    private readonly _repository = getRepository(AutoResponderModel);
 
-    public constructor(private _dao: Sequelize) {
+    public constructor() {
         super();
     }
 
-    public async editAutoResponder(obj: AutoResponderModel, currentTitle: string): Promise<AutoResponderModel> {
+    @Transaction()
+    public async editAutoResponder(obj: AutoResponderModel, currentTitle: string, @TransactionRepository(AutoResponderModel) editResponderRepo?: Repository<AutoResponderModel>): Promise<AutoResponderModel> {
         try {
-            return await this._dao.transaction(async t => {
-                await this.deleteAutoResponse(obj.guildId, currentTitle, t);
-                return this.addAutoResponder(obj, t);
-            });
+            await this.deleteAutoResponse(obj.guildId, currentTitle, editResponderRepo);
+            return this.addAutoResponder(obj, editResponderRepo);
         } catch (e) {
             throw new Error(e.message);
         }
     }
 
-    public async addAutoResponder(obj: AutoResponderModel, transaction?: Transaction): Promise<AutoResponderModel> {
-        return super.commitToDatabase(obj, {}, false, transaction);
+    public async addAutoResponder(obj: AutoResponderModel, transaction?: Repository<AutoResponderModel>): Promise<AutoResponderModel> {
+        if (transaction) {
+            const commitResult = await super.commitToDatabase(transaction, [obj]);
+            return commitResult[0];
+        }
+        const commitResult = await super.commitToDatabase(getManager(), [obj], AutoResponderModel);
+        return commitResult[0];
     }
 
     public async getAllAutoResponders(guildId: string): Promise<AutoResponderModel[]> {
-        return AutoResponderModel.findAll({
+        return this._repository.find({
             where: {
                 guildId
             }
         });
     }
 
-    public async deleteAutoResponse(guildId: string, title: string, transaction?: Transaction): Promise<boolean> {
-        return (await AutoResponderModel.destroy({
-            transaction,
-            where: {
+    public async deleteAutoResponse(guildId: string, title: string, t?: Repository<AutoResponderModel>): Promise<boolean> {
+        if (t) {
+            const deleteResponse = await t.delete({
                 guildId,
                 title
-            }
-        }) === 1);
+            });
+            return deleteResponse.affected === 1;
+        } else {
+            const transactionDelete = await this._repository.delete({
+                guildId,
+                title
+            });
+            return transactionDelete.affected === 1;
+        }
     }
 
     public async getAutoResponderFromTitle(title: string, guildId: string): Promise<AutoResponderModel | null> {
-        const fromDb = await AutoResponderModel.findOne({
+        const fromDb = await this._repository.findOne({
             where: {
                 title,
                 guildId
