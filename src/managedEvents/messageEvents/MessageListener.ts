@@ -4,11 +4,11 @@ import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
 import {Main} from "../../Main";
 import {DMChannel, GuildMember, Message, Role, Sticker, User} from "discord.js";
-import {Op} from "sequelize";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
 import {notBot} from "../../guards/NotABot";
 import {container, singleton} from "tsyringe";
+import {getRepository} from "typeorm";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
 
@@ -46,7 +46,18 @@ export class MessageListener {
                 return;
             }
             const stickerHash = md5(bannedStickerInfo.buffer);
-            const exists = await BannedAttachmentsModel.findOne({
+            const count = await getRepository(BannedAttachmentsModel)
+                .createQueryBuilder("bannedAttachment")
+                .where(`bannedAttachment.guildId = :id`, {
+                    id: message.guild.id
+                })
+                .andWhere(`bannedAttachment.isSticker = true`)
+                .andWhere(`bannedAttachment.attachmentHash = :hash OR bannedAttachment.url = :url`, {
+                    hash: stickerHash,
+                    url: bannedStickerInfo.url
+                })
+                .getCount();
+            /*const exists = await getRepository(BannedAttachmentsModel).findOne({
                 where: {
                     guildId: message.guild.id,
                     isSticker: true,
@@ -58,8 +69,8 @@ export class MessageListener {
                         }
                     ]
                 }
-            });
-            if (exists) {
+            });*/
+            if (count === 1) {
                 try {
                     await message.delete();
                     message.channel.send(`Message contains a banned Sticker`);
@@ -82,7 +93,18 @@ export class MessageListener {
                 return;
             }
             const emojiHash = md5(bannedEmojiInfo.buffer);
-            const exists = await BannedAttachmentsModel.findOne({
+            const exists = await getRepository(BannedAttachmentsModel)
+                .createQueryBuilder("bannedAttachment")
+                .where(`bannedAttachment.guildId = :id`, {
+                    id: message.guild.id
+                })
+                .andWhere(`bannedAttachment.isEmoji = true`)
+                .andWhere(`bannedAttachment.attachmentHash = :hash OR bannedAttachment.url = :url`, {
+                    hash: emojiHash,
+                    url: bannedEmojiInfo.url
+                })
+                .getOne();
+            /*const exists = await BannedAttachmentsModel.findOne({
                 where: {
                     guildId: message.guild.id,
                     isEmoji: true,
@@ -94,7 +116,7 @@ export class MessageListener {
                         }
                     ]
                 }
-            });
+            });*/
             if (exists) {
                 const reasonToDel = exists.reason;
                 try {

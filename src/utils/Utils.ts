@@ -26,7 +26,6 @@ import {
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
-import {Sequelize} from "sequelize-typescript";
 import {glob} from "glob";
 import * as path from "path";
 import {ChannelManager} from "../model/guild/manager/ChannelManager";
@@ -37,11 +36,11 @@ import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
 import fetch from "node-fetch";
 import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
-import {FindOptions} from "sequelize/types/lib/model";
 import {container} from "tsyringe";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {Client} from "discordx";
 import {Beans} from "../DI/Beans";
+import {getRepository} from "typeorm";
 
 const emojiRegex = require('emoji-regex');
 
@@ -856,19 +855,26 @@ export namespace DiscordUtils {
     }
 
     export async function getAllClosableModules(guildId?: string): Promise<string[]> {
-        const options: FindOptions<CloseOptionModel['_attributes']> = {
+        /*const options: FindOptions<CloseOptionModel['_attributes']> = {
             attributes: [
                 [
                     Sequelize.fn('DISTINCT', Sequelize.col('moduleId')), 'moduleId'
                 ]
             ]
-        };
+        };*/
+        const builder = getRepository(CloseOptionModel)
+            .createQueryBuilder("closeOptionModel")
+            .select("closeOptionModel.moduleId")
+            .distinct(true);
         if (ObjectUtil.validString(guildId)) {
-            options["where"] = {
+            builder.where("closeOptionModel.guildId = :guildId", {
                 guildId
-            };
+            });
+            /*options["where"] = {
+                guildId
+            };*/
         }
-        const allModules = await CloseOptionModel.findAll(options);
+        const allModules = await builder.getMany();
 
         return allModules.map(m => m.moduleId);
     }

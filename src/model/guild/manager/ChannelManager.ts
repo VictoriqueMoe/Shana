@@ -4,17 +4,19 @@ import {BaseGuildTextChannel} from "discord.js";
 import {ObjectUtil} from "../../../utils/Utils";
 import {GuildManager} from "./GuildManager";
 import {singleton} from "tsyringe";
+import {getRepository} from "typeorm";
 
 @singleton()
 export class ChannelManager extends BaseDAO<PostableChannelModel> {
+    private readonly _repository = getRepository(PostableChannelModel);
 
     public constructor(private _guildManager: GuildManager) {
         super();
     }
 
     private static getModel(guildId: string, attra: "logChannel" | "AdminLogchannel" | "JailChannel"): Promise<PostableChannelModel> {
-        return PostableChannelModel.findOne({
-            attributes: [attra],
+        return getRepository(PostableChannelModel).findOne({
+            select: [attra],
             where: {
                 guildId
             }
@@ -22,14 +24,12 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
     }
 
     public async setChannel(guildId: string, channelType: "logChannel" | "AdminLogchannel" | "JailChannel", value: string): Promise<PostableChannelModel[] | null> {
-        const result = await PostableChannelModel.update({
+        const result = await this._repository.update({
             [channelType]: value
         }, {
-            where: {
-                guildId
-            }
+            guildId
         });
-        if (result[0] === 0) {
+        if (result.affected === 0) {
             return null;
         }
         return result[1];

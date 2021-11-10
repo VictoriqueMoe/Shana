@@ -4,7 +4,6 @@ import {ApplicationCommandPermissions, Guild, GuildMember, Permissions} from "di
 import {Client, DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
 import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
 import {Typeings} from "../../types/Typeings";
-import {Sequelize} from "sequelize-typescript";
 import {container, registry, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
 import {PostConstruct} from "../../decorators/PostConstruct";
@@ -22,8 +21,8 @@ import {
     RoleTypes,
     RoleUpdateTrigger
 } from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
-import {ICategory, ICategoryItem, ICategoryItemCommand} from "@discordx/utilities/build/category";
-import {CategoryMetaData} from "@discordx/utilities";
+import {CategoryMetaData, ICategory, ICategoryItem, ICategoryItemCommand} from "@discordx/utilities";
+import {getRepository, Raw, Repository} from "typeorm";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
@@ -43,6 +42,8 @@ export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implements IPermissionEventListener {
 
     private readonly _metadata = MetadataStorage.instance;
+
+    private readonly _repository: Repository<CommandSecurityModel> = getRepository(CommandSecurityModel);
 
     public constructor(private _client: Client) {
         super();
@@ -126,7 +127,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         const retArr: (ICategoryItem | ICategoryItemCommand)[] = [];
         const memberRoles = [...member.roles.cache.keys()];
         const {items} = category;
-        const allCommands = await CommandSecurityModel.findAll({
+        const allCommands = await this._repository.find({
             where: {
                 guildId: member.guild.id
             }
@@ -174,7 +175,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         }
         const retArray: ICategory[] = [];
         const memberRoles = [...member.roles.cache.keys()];
-        const allCommands = await CommandSecurityModel.findAll({
+        const allCommands = await this._repository.find({
             where: {
                 guildId: member.guild.id
             }
@@ -243,16 +244,14 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
     }
 
     public async updateCommand(commandName: string, guildId: string, settings: UpdateCommandSettings): Promise<boolean> {
-        const result = await CommandSecurityModel.update({
+        const result = await this._repository.update({
             allowedRoles: settings.roles,
             enabled: settings.enabled
         }, {
-            where: {
-                guildId,
-                commandName
-            }
+            guildId,
+            commandName
         });
-        if (result[0] === 1) {
+        if (result.affected === 1) {
             await this._client.initApplicationPermissions();
             return true;
         }
@@ -268,14 +267,21 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         return command.enabled;
     }
 
-    private async getCommandModel(guildId: string, commandName: string, ...attributes: string[]): Promise<CommandSecurityModel> {
-        return CommandSecurityModel.findOne({
+    private async getCommandModel(guildId: string, commandName: string, ...attributes: (keyof CommandSecurityModel)[]): Promise<CommandSecurityModel> {
+        return this._repository.findOne({
+            select: attributes,
+            where: {
+                guildId,
+                commandName: Raw(alias => `'LOWER(${alias}) Like '%${commandName}%''`)
+            }
+        });
+        /*return CommandSecurityModel.findOne({
             attributes,
             where: {
                 guildId,
                 "commandName": Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('commandName')), 'LIKE', `%${commandName}%`)
             }
-        });
+        });*/
     }
 
     public async canRunCommand(member: GuildMember, category: ICategory, command: (ICategoryItem | ICategoryItemCommand)): Promise<boolean> {

@@ -8,6 +8,8 @@ import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {container} from "tsyringe";
 import {Category} from "@discordx/utilities";
+import {getRepository} from "typeorm";
+import {BaseDAO} from "../../DAO/BaseDAO";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -49,6 +51,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("username", "Commands to set usernames for people")
 export abstract class Username extends AbstractCommandModule {
+    private readonly _repository = getRepository(UsernameModel);
 
     @Slash("viewusernames", {
         description: "View all the persisted usernames this bot is aware of"
@@ -58,7 +61,7 @@ export abstract class Username extends AbstractCommandModule {
         await interaction.deferReply();
         const {guild} = interaction;
         const guildId = guild.id;
-        const allModels = await UsernameModel.findAll({
+        const allModels = await this._repository.find({
             where: {
                 guildId
             }
@@ -125,22 +128,20 @@ export abstract class Username extends AbstractCommandModule {
             return InteractionUtils.replyOrFollowUp(interaction, "You can not use this command against a member who's role is higher than yours!", false);
         }
         const userId = mentionedMember.id;
-        if (await UsernameModel.count({
+        if (await this._repository.count({
             where: {
                 userId,
                 guildId
             }
         }) > 0) {
-            await UsernameModel.update(
+            await this._repository.update(
                 {
                     usernameToPersist,
                     force
                 },
                 {
-                    where: {
-                        userId,
-                        guildId
-                    }
+                    userId,
+                    guildId
                 }
             );
         } else {
@@ -151,9 +152,9 @@ export abstract class Username extends AbstractCommandModule {
                 guildId
             };
 
-            const model = new UsernameModel(obj);
+            const model = BaseDAO.build(UsernameModel, obj);
             try {
-                await model.save();
+                await this._repository.save(model);
             } catch (e) {
             }
         }

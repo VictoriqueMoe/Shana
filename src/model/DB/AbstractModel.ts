@@ -1,4 +1,4 @@
-import {Column} from "typeorm";
+import {Column, CreateDateColumn, UpdateDateColumn} from "typeorm";
 import {RelationOptions} from "typeorm/decorator/options/RelationOptions";
 import {IGuildAware} from "./IGuildAware";
 
@@ -19,4 +19,10 @@ export abstract class AbstractModel implements IGuildAware {
 
     @Column()
     public guildId: string;
+
+    @CreateDateColumn()
+    public createdAt: Date;
+
+    @UpdateDateColumn()
+    public updatedAt: Date;
 }

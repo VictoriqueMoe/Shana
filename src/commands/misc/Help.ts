@@ -9,7 +9,15 @@ import {
     Slash,
     SlashOption
 } from "discordx";
-import {Category, CategoryMetaData, ICategoryAttachment, ICategoryItemOption} from "@discordx/utilities";
+import {
+    Category,
+    CategoryMetaData,
+    ICategory,
+    ICategoryAttachment,
+    ICategoryItem,
+    ICategoryItemCommand,
+    ICategoryItemOption
+} from "@discordx/utilities";
 import {
     CommandInteraction,
     GuildMember,
@@ -24,7 +32,6 @@ import {CommandEnabled} from "../../guards/CommandEnabled";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
-import {ICategory, ICategoryItem, ICategoryItemCommand} from "@discordx/utilities/build/category";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 

@@ -7,28 +7,26 @@ import {GuildManager} from "./GuildManager";
 import {MessageScheduler} from "../../scheduler/impl/MessageScheduler";
 import {IScheduledMessageJob} from "../../scheduler/impl/ScheduledJob/IScheduledMessageJob";
 import {ObjectUtil} from "../../../utils/Utils";
-import {Sequelize} from "sequelize-typescript";
+import {getRepository, Repository, Transaction, TransactionRepository} from "typeorm";
 
 @singleton()
 export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
 
-    public constructor(private _guildManager: GuildManager, private _messageScheduler: MessageScheduler, private _dao: Sequelize) {
+    private readonly _repository = getRepository(MessageScheduleModel);
+
+    public constructor(private _guildManager: GuildManager, private _messageScheduler: MessageScheduler) {
         super();
     }
 
-    public async deleteMessageSchedule(guildId: string, name: string): Promise<boolean> {
-        return this._dao.transaction(async transaction => {
-            const destroyResult = await MessageScheduleModel.destroy({
-                transaction,
-                where: {
-                    guildId,
-                    name
-                }
-            });
-            const didDestroy = destroyResult == 1;
-            const engineResponse = this._messageScheduler.cancelJob(name);
-            return didDestroy && engineResponse;
+    @Transaction()
+    public async deleteMessageSchedule(guildId: string, name: string, @TransactionRepository(MessageScheduleModel) messageScheduleModelRepository?: Repository<MessageScheduleModel>): Promise<boolean> {
+        const destroyResult = await messageScheduleModelRepository.delete({
+            guildId,
+            name
         });
+        const didDestroy = destroyResult.affected == 1;
+        const engineResponse = this._messageScheduler.cancelJob(name);
+        return didDestroy && engineResponse;
     }
 
     public getAllActiveMessageSchedules(guildId: string, channel?: BaseGuildTextChannel): IScheduledMessageJob[] {
@@ -46,7 +44,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
     public async getOwner(schedule: IScheduledMessageJob): Promise<GuildMember> {
         const {guildId} = schedule;
         const guild = await this._guildManager.getGuild(guildId);
-        const model = await MessageScheduleModel.findOne({
+        const model = await this._repository.findOne({
             where: {
                 guildId,
             }
@@ -55,7 +53,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
     }
 
     public async addMessageSchedule(guildId: string, channel: BaseGuildTextChannel, cron: string, message: string, user: GuildMember, name: string): Promise<IScheduledMessageJob> {
-        const newMessageSchedule = new MessageScheduleModel({
+        const newMessageSchedule = BaseDAO.build(MessageScheduleModel, {
             guildId,
             cron,
             message,
@@ -63,9 +61,9 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
             channel,
             userId: user.id
         });
-        return this._dao.transaction(async t => {
+        return this._repository.manager.transaction(async entityManager => {
             try {
-                await super.commitToDatabase(newMessageSchedule, {}, false, t);
+                await super.commitToDatabase(entityManager, [newMessageSchedule], MessageScheduleModel);
             } catch (e) {
                 if (e instanceof UniqueViolationError) {
                     throw new Error("Message Schedule already exists in this server with this name");
@@ -79,7 +77,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
     private async initAllMessageSchedules(): Promise<void> {
         const allGuilds = await this._guildManager.getGuilds();
         for (const guild of allGuilds) {
-            const allMessageSchedules = await MessageScheduleModel.findAll({
+            const allMessageSchedules = await this._repository.find({
                 where: {
                     guildId: guild.id
                 }

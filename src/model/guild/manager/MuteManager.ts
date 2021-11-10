@@ -7,17 +7,17 @@ import * as schedule from "node-schedule";
 import {Job} from "node-schedule";
 import {container, singleton} from "tsyringe";
 import {GuildManager} from "./GuildManager";
-import {Sequelize} from "sequelize-typescript";
 import {Client} from "discordx";
-import {Transaction} from "sequelize/types/lib/transaction";
 import {PostConstruct} from "../../decorators/PostConstruct";
-import {Op} from "sequelize";
+import {EntityManager, getRepository, IsNull, Not} from "typeorm";
 
 @singleton()
 export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
     private readonly _mutes: Set<Job>;
 
-    public constructor(private _guildManager: GuildManager, private _dao: Sequelize, private _client: Client) {
+    private readonly _repository = getRepository(MuteModel);
+
+    public constructor(private _guildManager: GuildManager, private _client: Client) {
         super();
         this._mutes = new Set();
     }
@@ -38,7 +38,7 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
             }
         }
 
-        const has = await MuteModel.findOne({
+        const has = await this._repository.findOne({
             where: {
                 userId: user.id,
                 guildId: user.guild.id
@@ -49,11 +49,9 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
 
     @PostConstruct
     private async initTimers(): Promise<void> {
-        const mutesWithTimers = await MuteModel.findAll({
+        const mutesWithTimers = await this._repository.find({
             where: {
-                timeout: {
-                    [Op.not]: null
-                }
+                timeout: Not(IsNull())
             }
         });
         const now = Date.now();
@@ -69,11 +67,9 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
             const guild: Guild = await this._client.guilds.fetch(mute.guildId);
             if (timeLeft <= 0) {
                 console.log(`Timer has expired for user ${mute.username}, removing from database`);
-                await MuteModel.destroy({
-                    where: {
-                        id: mute.id,
-                        guildId: mute.guildId
-                    }
+                await this._repository.delete({
+                    id: mute.id,
+                    guildId: mute.guildId
                 });
             } else {
                 console.log(`Re-creating timed mute for ${mute.username}, time remaining is: ${ObjectUtil.timeToHuman(timeLeft)}`);
@@ -124,15 +120,15 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
             }
             obj["timeout"] = millis;
         }
-        const model = new MuteModel(obj);
+        const model = BaseDAO.build(MuteModel, obj);
         let userObject: GuildMember = null;
         let savedModel: MuteModel = null;
         userObject = await user.guild.members.fetch(blockedUserId);
         try {
-            savedModel = await this._dao.transaction(async t => {
-                const m = await super.commitToDatabase(model, {}, false, t) as MuteModel;
-                await this.addRolePersist(userObject, muteRoleId, t);
-                return m;
+            savedModel = await this._repository.manager.transaction(async transactionManager => {
+                const m = await super.commitToDatabase(transactionManager, [model], MuteModel);
+                await this.addRolePersist(userObject, muteRoleId, transactionManager);
+                return m[0];
             }) as MuteModel;
         } catch {
             return null;
@@ -150,32 +146,39 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         return savedModel;
     }
 
-    public async unMute(user: GuildMember | string, guildId: string, skipPersistence: boolean = false, t?: Transaction): Promise<void> {
+    public async unMute(user: GuildMember | string, guildId: string, skipPersistence: boolean = false, t?: EntityManager): Promise<void> {
+        if (!t) {
+            t = this._repository.manager;
+        }
         const userId = typeof user === "string" ? user : user.id;
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
         if (!mutedRole) {
             return;
         }
         const muteRoleId = mutedRole.id;
-        const whereClaus = {
-            transaction: t,
+        const muteModel = await t.findOne(MuteModel, {
             where: {
                 userId,
                 guildId
             }
-        };
-        const muteModel = await MuteModel.findOne(whereClaus);
+        });
         if (!muteModel) {
             throw new Error('That user is not currently muted.');
         }
         const prevRoles = await muteModel.getPrevRoles();
-        const rowCount = await MuteModel.destroy(whereClaus);
-        if (rowCount != 1) {
+        const rowCount = await t.delete(MuteModel, {
+            userId,
+            guildId
+        });
+        if (rowCount.affected != 1) {
             throw new Error('That user is not currently muted.');
         }
         if (!skipPersistence) {
-            const persistenceModelRowCount = await RolePersistenceModel.destroy(whereClaus);
-            if (persistenceModelRowCount != 1) {
+            const persistenceModelRowCount = await t.delete(MuteModel, {
+                userId,
+                guildId
+            });
+            if (persistenceModelRowCount.affected != 1) {
                 //the application has SHIT itself, if one table has an entry but the other not, fuck knows what to do here...
                 throw new Error("Unknown error occurred, error is a synchronisation issue between the Persistence model and the Mute Model ");
             }
@@ -227,8 +230,8 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
         try {
             const job = schedule.scheduleJob(userId, newDate, async () => {
-                await this._dao.transaction(async t => {
-                    await this.unMute(userId, guild.id, false, t);
+                await this._repository.manager.transaction(async transactionManager => {
+                    await this.unMute(userId, guild.id, false, transactionManager);
                 });
                 DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);
             });
@@ -237,12 +240,12 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
     }
 
-    private addRolePersist(user: GuildMember, muteRoleId: string, transaction?: Transaction): Promise<RolePersistenceModel> {
-        return super.commitToDatabase(new RolePersistenceModel({
+    private addRolePersist(user: GuildMember, muteRoleId: string, entityManager: EntityManager): Promise<RolePersistenceModel> {
+        const newModel = BaseDAO.build(RolePersistenceModel, {
             "userId": user.id,
             "roleId": muteRoleId,
             guildId: user.guild.id
-        }), {}, false, transaction) as Promise<RolePersistenceModel>;
+        });
+        return super.commitToDatabase(entityManager, [newModel], RolePersistenceModel).then(values => values[0]) as Promise<RolePersistenceModel>;
     }
-
 }

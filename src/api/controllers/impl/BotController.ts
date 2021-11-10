@@ -11,8 +11,8 @@ import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {ModuleController} from "./modules/impl/ModuleController";
 import {AllCommands, CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager";
 import {container, singleton} from "tsyringe";
-import {Sequelize} from "sequelize-typescript";
 import {Client} from "discordx";
+import {getManager, getRepository} from "typeorm";
 
 @singleton()
 @Controller("api/bot")
@@ -21,7 +21,7 @@ import {Client} from "discordx";
 ])
 export class BotController extends baseController {
 
-    public constructor(private _dao: Sequelize, private _client: Client) {
+    public constructor(private _client: Client) {
         super();
     }
 
@@ -40,9 +40,9 @@ export class BotController extends baseController {
         }
         const body: payload = req.body;
         const muteSingleton = container.resolve(MuteManager);
-        await this._dao.transaction(async t => {
+        await getManager().transaction(async entityManager => {
             for (const userId of body) {
-                await muteSingleton.unMute(userId, guild.id, false, t);
+                await muteSingleton.unMute(userId, guild.id, false, entityManager);
             }
         });
         return super.ok(res, {});
@@ -221,7 +221,7 @@ export class BotController extends baseController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
-        const currentBlocks = await MuteModel.findAll({
+        const currentBlocks = await getRepository(MuteModel).find({
             where: {
                 guildId: guild.id
             }

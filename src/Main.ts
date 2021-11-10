@@ -32,7 +32,7 @@ export class Main {
             {get: someClass => container.resolve(someClass as any)},
         );
         const connection = await createConnection({
-            type: "sqlite",
+            type: "better-sqlite3",
             database: dbName,
             synchronize: true,
             key: process.env.sqlIte_key,

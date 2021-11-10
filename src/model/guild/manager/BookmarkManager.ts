@@ -3,9 +3,12 @@ import {BookmarkModel} from "../../DB/guild/Bookmark.model";
 import {singleton} from "tsyringe";
 import {BaseGuildTextChannel, GuildMember, Message} from "discord.js";
 import {ArrayUtils} from "../../../utils/Utils";
+import {getRepository} from "typeorm";
 
 @singleton()
 export class BookmarkManager extends BaseDAO<BookmarkModel> {
+
+    private readonly _repository = getRepository(BookmarkModel);
 
     /**
      * adds a bew bookmark to a member or makes a new entry
@@ -17,7 +20,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
-        const bookMarksExists = await BookmarkModel.findOne({
+        const bookMarksExists = await this._repository.findOne({
             where: {
                 guildId,
                 userId: id
@@ -27,21 +30,19 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
             const messageIds = new Set<string>(bookMarksExists.messageIds);
             messageIds.add(messageToAddId);
             const arr = Array.from(messageIds);
-            await BookmarkModel.update({
+            await this._repository.update({
                 messageIds: arr
             }, {
-                where: {
-                    guildId,
-                    userId: id
-                }
+                guildId,
+                userId: id
             });
         } else {
-            const newModel = new BookmarkModel({
+            const newModel = BaseDAO.build(BookmarkModel, {
                 guildId,
                 userId: id,
                 messageIds: [messageToAddId]
             });
-            return super.commitToDatabase(newModel);
+            return super.commitToDatabase(this._repository, [newModel]).then(values => values[0]);
         }
     }
 
@@ -53,7 +54,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
-        const bookMarksExists = await BookmarkModel.findOne({
+        const bookMarksExists = await this._repository.findOne({
             where: {
                 guildId,
                 userId: id
@@ -67,22 +68,18 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
             }
             messageIds.splice(indexInArray, 1);
             if (!ArrayUtils.isValidArray(messageIds)) {
-                return (await BookmarkModel.destroy({
-                    where: {
-                        guildId,
-                        userId: id
-                    }
-                }) === 1);
+                return (await this._repository.delete({
+                    guildId,
+                    userId: id
+                })).affected === 1;
             } else {
-                const updateResult = await BookmarkModel.update({
+                const updateResult = await this._repository.update({
                     messageIds
                 }, {
-                    where: {
-                        guildId,
-                        userId: id
-                    }
+                    guildId,
+                    userId: id
                 });
-                return updateResult[0] == 1;
+                return updateResult.affected == 1;
             }
         }
         return false;
@@ -92,7 +89,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
-        const bookMarks = await BookmarkModel.findOne({
+        const bookMarks = await this._repository.findOne({
             where: {
                 guildId,
                 userId: id

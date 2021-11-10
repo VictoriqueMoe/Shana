@@ -3,16 +3,18 @@ import {BaseDAO} from "../DAO/BaseDAO";
 import {GuildableModel} from "../model/DB/guild/Guildable.model";
 import {OnReady} from "./OnReady";
 import {container} from "tsyringe";
+import {getRepository} from "typeorm";
 
 @Discord()
 export class BotGuildUpdater extends BaseDAO<GuildableModel> {
+    private readonly _repository = getRepository(GuildableModel);
 
     @On("guildCreate")
     private async botJoins([guild]: ArgsOf<"guildCreate">, client: Client): Promise<void> {
-        const model = new GuildableModel({
+        const model = BaseDAO.build(GuildableModel, {
             guildId: guild.id
         });
-        await super.commitToDatabase(model);
+        await super.commitToDatabase(this._repository, [model]);
         const onReadyClass: OnReady = container.resolve(OnReady);
         return onReadyClass.init().then(pArr => {
             Promise.all(pArr).then(() => {
@@ -26,11 +28,8 @@ export class BotGuildUpdater extends BaseDAO<GuildableModel> {
     @On("guildDelete")
     private async botLeaves([guild]: ArgsOf<"guildDelete">, client: Client): Promise<void> {
         console.log(`Bot left guild: "${guild.name}" deleting all related data...`);
-        await GuildableModel.destroy({
-            cascade: true,
-            where: {
-                guildId: guild.id
-            }
+        await this._repository.delete({
+            guildId: guild.id
         });
     }
 }

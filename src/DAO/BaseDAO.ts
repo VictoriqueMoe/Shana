@@ -4,6 +4,11 @@ import {EntityTarget} from "typeorm/common/EntityTarget";
 
 export abstract class BaseDAO<T> {
 
+    /**
+     * Build an entity by injecting props as an object
+     * @param instance
+     * @param data
+     */
     public static build<T extends new (...args: any) => any>(instance: T, data: Record<string, any>): InstanceType<T> {
         return getManager().create(instance, data);
     }

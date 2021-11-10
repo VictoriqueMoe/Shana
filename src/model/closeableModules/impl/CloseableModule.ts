@@ -10,12 +10,13 @@ import {GuildMember, TextBasedChannels} from "discord.js";
 import {Roles} from "../../../enums/Roles";
 import {CloseOptionModel} from "../../DB/autoMod/impl/CloseOption.model";
 import {container, delay} from "tsyringe";
+import {getRepository, Repository} from "typeorm";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<ICloseOption> implements ICloseableModule<T> {
 
     private _isEnabled: Map<string, boolean | null>;
-
+    private readonly _repository: Repository<CloseOptionModel>;
     private _settings: Map<string, T | null>;
     private readonly _subModuleManager: SubModuleManager;
 
@@ -24,6 +25,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         this._settings = new Map();
         this._isEnabled = new Map();
         this._subModuleManager = container.resolve(delay(() => SubModuleManager));
+        this._repository = getRepository(_model);
     }
 
     public abstract get moduleId(): string;
@@ -40,15 +42,13 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
             const percistedSettings = await this.getSettings(guildId);
             obj = {...percistedSettings, ...setting};
         }
-        await this._model.update(
+        await this._repository.update(
             {
                 "settings": obj
             },
             {
-                where: {
-                    "moduleId": this.moduleId,
-                    guildId
-                }
+                "moduleId": this.moduleId,
+                guildId
             }
         );
         this._settings.set(guildId, obj);
@@ -58,8 +58,8 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         if (!force && this._settings.has(guildId)) {
             return this._settings.get(guildId);
         }
-        const model: ICloseOption = await this._model.findOne({
-            attributes: ["settings"],
+        const model: ICloseOption = await this._repository.findOne({
+            select: ["settings"],
             where: {
                 "moduleId": this.moduleId,
                 guildId
@@ -76,18 +76,16 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
      * Close this module, this prevents all events from being fired. events are NOT queued
      */
     public async close(guildId: string): Promise<boolean> {
-        const m = await this._model.update(
+        const m = await this._repository.update(
             {
                 "status": false
             },
             {
-                where: {
-                    "moduleId": this.moduleId,
-                    guildId
-                }
+                "moduleId": this.moduleId,
+                guildId
             }
         );
-        this._isEnabled.set(guildId, m[0] === 1);
+        this._isEnabled.set(guildId, m.affected === 1);
         console.log(`Module: ${this.moduleId} disabled`);
         return m[0] === 1;
     }
@@ -96,26 +94,24 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
      * Opens this module, allowing events to be fired.
      */
     public async open(guildId: string): Promise<boolean> {
-        const m = await this._model.update(
+        const m = await this._repository.update(
             {
                 "status": true
             },
             {
-                where: {
-                    "moduleId": this.moduleId,
-                    guildId
-                }
+                "moduleId": this.moduleId,
+                guildId
             }
         );
-        this._isEnabled.set(guildId, m[0] === 1);
+        this._isEnabled.set(guildId, m.affected === 1);
         console.log(`Module: ${this.moduleId} enabled for guild ${guildId}`);
         return m[0] === 1;
     }
 
     public async isEnabled(guildId: string): Promise<boolean> {
         if (!this._isEnabled.has(guildId)) {
-            const model: ICloseOption = await this._model.findOne({
-                attributes: ["status"],
+            const model: ICloseOption = await this._repository.findOne({
+                select: ["status"],
                 where: {
                     "moduleId": this.moduleId,
                     guildId
@@ -157,7 +153,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
                 }
             }
         }
-        const module = await CloseOptionModel.findOne({
+        const module = await this._repository.findOne({
             where: {
                 moduleId: this.moduleId,
                 guildId,
