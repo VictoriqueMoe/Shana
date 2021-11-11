@@ -3,6 +3,8 @@ import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {DiscordUtils} from "../../../utils/Utils";
 import {singleton} from "tsyringe";
+import {getRepository} from "typeorm";
+import {BaseDAO} from "../../../DAO/BaseDAO";
 
 @singleton()
 export class RoleApplier {
@@ -31,14 +33,13 @@ export class RoleApplier {
         const userId = change.newUser.id;
         const roleId = role.id;
         if (isRoleRemoved) {
-            const rowCount = await model.destroy({
-                where: {
-                    userId,
-                    roleId,
-                    guildId: change.newUser.guild.id
-                }
+            const repo = getRepository(model);
+            const rowCount = await repo.delete({
+                userId,
+                roleId,
+                guildId: change.newUser.guild.id
             });
-            return rowCount > 0;
+            return rowCount.affected > 0;
         }
         return false;
     }
@@ -52,7 +53,8 @@ export class RoleApplier {
      */
     public async roleJoins(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<boolean> {
         const userId = member.user.id;
-        const res = await model.findOne({
+        const repo = getRepository(model);
+        const res = await repo.findOne({
             where: {
                 userId,
                 roleId: role.id,
@@ -105,7 +107,7 @@ export class RoleApplier {
             const roleObj = member.roles.cache.get(roleId);
             // they where in special, but left on choice, this is now logged into the DB if they return
             console.log(`member ${member.user.username} left the guild while having the role of ${roleObj.name}`);
-            return new model({
+            return BaseDAO.build(model, {
                 userId: member.user.id,
                 roleId,
                 guildId: member.guild.id

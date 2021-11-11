@@ -10,7 +10,6 @@ import {
     SlashOption
 } from "discordx";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
-import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
 import {NotBotInteraction} from "../../../guards/NotABot";
 import {CommandEnabled} from "../../../guards/CommandEnabled";
 import {CommandInteraction, ContextMenuInteraction, GuildMember, User} from "discord.js";
@@ -190,11 +189,7 @@ export class Mute extends AbstractCommandModule {
     private async viewAllMutes(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const guildId = interaction.guild.id;
-        const currentBlocks = await MuteModel.findAll({
-            where: {
-                guildId
-            }
-        });
+        const currentBlocks = await this._muteManager.getAllMutedMembers(guildId);
         if (currentBlocks.length === 0) {
             return InteractionUtils.replyOrFollowUp(interaction, "No members are muted", false);
         }

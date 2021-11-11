@@ -2,9 +2,12 @@ import {ArgsOf, Client, Discord, On} from "discordx";
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
 import {DiscordUtils} from "../../utils/Utils";
 import {Roles} from "../../enums/Roles";
+import {getRepository} from "typeorm";
 
 @Discord()
 export abstract class UsernameEvents {
+
+    private readonly _repository = getRepository(UsernameModel);
 
     @On("guildMemberUpdate")
     public async onMemberUpdate([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
@@ -12,7 +15,7 @@ export abstract class UsernameEvents {
         if (isNickChange) {
             const userId = newUser.id;
             const guildId = newUser.guild.id;
-            const modelObj = await UsernameModel.findOne({
+            const modelObj = await this._repository.findOne({
                 where: {
                     userId,
                     guildId
@@ -30,22 +33,18 @@ export abstract class UsernameEvents {
                 if (isMemberStaff || (executor.id === newUser.id && modelObj.force === false)) {
                     const newNick = newUser.nickname;
                     if (newNick === null) {
-                        await UsernameModel.destroy({
-                            where: {
-                                userId,
-                                guildId
-                            }
+                        await this._repository.delete({
+                            userId,
+                            guildId
                         });
                     } else {
-                        await UsernameModel.update(
+                        await this._repository.update(
                             {
                                 "usernameToPersist": newNick
                             },
                             {
-                                where: {
-                                    userId,
-                                    guildId
-                                }
+                                userId,
+                                guildId
                             }
                         );
                     }
@@ -64,7 +63,7 @@ export abstract class UsernameEvents {
     @On("guildMemberAdd")
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const userId = member.id;
-        const modelObj = await UsernameModel.findOne({
+        const modelObj = await this._repository.findOne({
             where: {
                 userId,
                 guildId: member.guild.id

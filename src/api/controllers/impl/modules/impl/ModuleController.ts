@@ -7,6 +7,7 @@ import {StatusCodes} from "http-status-codes";
 import {CloseOptionModel} from "../../../../../model/DB/autoMod/impl/CloseOption.model";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../../../../utils/Utils";
 import {AutoRoleController} from "./AutoRoleController";
+import {getRepository} from "typeorm";
 
 
 @Controller("module")
@@ -26,9 +27,10 @@ export class ModuleController extends AbstractModuleController {
         }
         const moduleId = req.query.moduleId as string;
         let allModules: CloseOptionModel[] = [];
+        const closeOptionRepo = getRepository(CloseOptionModel);
         //TODO make this a manager
         if (ObjectUtil.validString(moduleId)) {
-            const found = await CloseOptionModel.findOne({
+            const found = await closeOptionRepo.findOne({
                 where: {
                     guildId: guild.id,
                     moduleId
@@ -38,7 +40,7 @@ export class ModuleController extends AbstractModuleController {
                 allModules.push(found);
             }
         } else {
-            allModules = await CloseOptionModel.findAll({
+            allModules = await closeOptionRepo.find({
                 where: {
                     guildId: guild.id
                 }

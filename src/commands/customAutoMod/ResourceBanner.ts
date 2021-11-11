@@ -6,6 +6,8 @@ import {AbstractCommandModule} from "../AbstractCommandModule";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {Category} from "@discordx/utilities";
+import {getRepository} from "typeorm";
+import {BaseDAO} from "../../DAO/BaseDAO";
 
 const getUrls = require('get-urls');
 const md5 = require('md5');
@@ -41,7 +43,8 @@ export abstract class ResourceBanner extends AbstractCommandModule {
 
     public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false, isSticker: boolean = false): Promise<BannedAttachmentsModel> {
         const attachmentHash = md5(attachment);
-        const exists = await BannedAttachmentsModel.count({
+        const repo = getRepository(AbstractCommandModule);
+        const exists = await repo.count({
             where: {
                 attachmentHash,
                 guildId
@@ -50,7 +53,7 @@ export abstract class ResourceBanner extends AbstractCommandModule {
         if (exists) {
             return null;
         }
-        const entry = new BannedAttachmentsModel({
+        const entry = BaseDAO.build(BannedAttachmentsModel, {
             attachmentHash,
             url,
             reason,
@@ -58,7 +61,7 @@ export abstract class ResourceBanner extends AbstractCommandModule {
             isEmoji,
             isSticker
         });
-        return entry.save();
+        return repo.save(entry);
     }
 
     @SimpleCommand("banSticker")

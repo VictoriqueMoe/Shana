@@ -8,7 +8,7 @@ import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner";
 import {Main} from "../../Main";
 import {DirResult} from "tmp";
 import {singleton} from "tsyringe";
-import {Op} from "sequelize";
+import {getRepository} from "typeorm";
 import ffmpeg = require("ffmpeg");
 
 const getUrls = require('get-urls');
@@ -22,6 +22,8 @@ const md5 = require('md5');
 @singleton()
 export class ResourceListener {
     private static readonly MAX_SIZE_BYTES: number = 10485760;
+
+    private readonly _repository = getRepository(BannedAttachmentsModel);
 
     @MessageListenerDecorator(true)
     private async scanAttachments([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
@@ -62,7 +64,16 @@ export class ResourceListener {
             } catch {
                 return;
             }
-            const exists = await BannedAttachmentsModel.findOne({
+            const exists = await this._repository
+                .createQueryBuilder("bannedAttachmentsModel")
+                .where("bannedAttachmentsModel.guildId :guildId", {
+                    guildId: message.guild.id
+                })
+                .andWhere("bannedAttachmentsModel.attachmentHash = :hash OR bannedAttachmentsModel.url = :url", {
+                    hash: attachmentHash,
+                    url
+                }).getOne();
+            /*const exists = await BannedAttachmentsModel.findOne({
                 where: {
                     guildId: message.guild.id,
                     [Op.or]: [
@@ -73,7 +84,7 @@ export class ResourceListener {
                         }
                     ]
                 }
-            });
+            });*/
             if (exists) {
                 shouldDelete = true;
                 reason = exists.reason;
@@ -140,7 +151,8 @@ export class ResourceListener {
                     continue;
                 }
                 const attachmentHash = md5(attachment);
-                const exists = await BannedAttachmentsModel.count({
+
+                const exists = await this._repository.count({
                     where: {
                         attachmentHash,
                         guildId: message.guild.id

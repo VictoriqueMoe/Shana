@@ -219,6 +219,14 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
     }
 
+    public async getAllMutedMembers(guildId: string): Promise<MuteModel[]> {
+        return await this._repository.find({
+            where: {
+                guildId
+            }
+        });
+    }
+
     public createTimeout(userId: string, username: string, millis: number, guild: Guild): void {
         const now = Date.now();
         const future = now + millis;

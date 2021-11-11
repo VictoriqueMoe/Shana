@@ -3,6 +3,7 @@ import {SettingsModel} from "../DB/guild/Settings.model";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {ArrayUtils, ObjectUtil} from "../../utils/Utils";
 import {singleton} from "tsyringe";
+import {getRepository} from "typeorm";
 
 export type ALL_SETTINGS_TYPE = {
     [key in keyof typeof SETTINGS]?: string
@@ -14,6 +15,8 @@ export type ALL_SETTINGS_TYPE = {
 @singleton()
 export class SettingsManager extends BaseDAO<SettingsModel> {
     private readonly _cache: Map<string, ALL_SETTINGS_TYPE>;
+
+    private readonly _repository = getRepository(SettingsModel);
 
     public constructor() {
         super();
@@ -40,7 +43,7 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
         if (this._cache.has(guildId)) {
             return this._cache.get(guildId);
         }
-        const models = await SettingsModel.findAll({
+        const models = await this._repository.find({
             where: {
                 guildId
             }
@@ -63,7 +66,7 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
         if (this.getFromCache(setting, guildId)) {
             return this.getFromCache(setting, guildId);
         }
-        const model = await SettingsModel.findOne({
+        const model = await this._repository.findOne({
             where: {
                 setting,
                 guildId
@@ -84,14 +87,14 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
      * @param saveOnly
      */
     public async saveOrUpdateSetting(setting: SETTINGS, value: string, guildId: string, saveOnly: boolean = false): Promise<number> {
-        const newModel = new SettingsModel({
+        const newModel = BaseDAO.build(SettingsModel, {
             setting,
             value,
             guildId
         });
         let retRow = -1;
         let textPrefix = "";
-        if (await SettingsModel.count({
+        if (await this._repository.count({
             where: {
                 guildId,
                 setting
@@ -100,19 +103,17 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
             if (saveOnly) {
                 return 0;
             }
-            const result = await SettingsModel.update({
+            const result = await this._repository.update({
                 value
             }, {
-                where: {
-                    guildId,
-                    setting
-                }
+                guildId,
+                setting
             });
             this.updateCache(setting, value, guildId);
             retRow = result[0];
             textPrefix = "Updated";
         } else {
-            await super.commitToDatabase(newModel, {}, true);
+            await super.commitToDatabase(this._repository, [newModel]);
             this.updateCache(setting, value, guildId);
             retRow = 1;
             textPrefix = "Saved";
