@@ -43,8 +43,6 @@ import {Beans} from "../DI/Beans";
 import {getRepository} from "typeorm";
 
 const emojiRegex = require('emoji-regex');
-
-const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
 
 export class CronException extends Error {
@@ -461,7 +459,7 @@ export namespace DiscordUtils {
         // message URL
         const messageContent = message.content;
         if (ObjectUtil.validString(messageContent)) {
-            const urlsInMessage = getUrls(messageContent);
+            const urlsInMessage = ObjectUtil.getUrls(messageContent);
             if (urlsInMessage && urlsInMessage.size > 0) {
                 const urlMessageSet = new Set<string>();
                 for (const url of urlsInMessage) {
@@ -499,7 +497,7 @@ export namespace DiscordUtils {
                 }
 
                 if (ObjectUtil.validString(repliedMessageContent)) {
-                    const urlsInMessage = getUrls(repliedMessageObj.content);
+                    const urlsInMessage = ObjectUtil.getUrls(repliedMessageObj.content);
                     if (urlsInMessage && urlsInMessage.size > 0) {
                         for (const urlInMessage of urlsInMessage) {
                             if (await isImageFast(urlInMessage)) {
@@ -895,6 +893,13 @@ export namespace DiscordUtils {
 }
 
 export class ObjectUtil {
+
+    public static getUrls(str: string): Set<string> {
+        const regexp = /(http(s)?:\/\/.)(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/gim;
+        const matches = str.match(regexp);
+        return new Set(...matches);
+    }
+
     public static guid(): string {
         function s4(): string {
             return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);

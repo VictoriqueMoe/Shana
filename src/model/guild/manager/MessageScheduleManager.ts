@@ -12,8 +12,6 @@ import {getRepository, Repository, Transaction, TransactionRepository} from "typ
 @singleton()
 export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
 
-    private readonly _repository = getRepository(MessageScheduleModel);
-
     public constructor(private _guildManager: GuildManager, private _messageScheduler: MessageScheduler) {
         super();
     }
@@ -44,7 +42,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
     public async getOwner(schedule: IScheduledMessageJob): Promise<GuildMember> {
         const {guildId} = schedule;
         const guild = await this._guildManager.getGuild(guildId);
-        const model = await this._repository.findOne({
+        const model = await getRepository(MessageScheduleModel).findOne({
             where: {
                 guildId,
             }
@@ -61,7 +59,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
             channel,
             userId: user.id
         });
-        return this._repository.manager.transaction(async entityManager => {
+        return getRepository(MessageScheduleModel).manager.transaction(async entityManager => {
             try {
                 await super.commitToDatabase(entityManager, [newMessageSchedule], MessageScheduleModel);
             } catch (e) {
@@ -76,8 +74,9 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
     @PostConstruct
     private async initAllMessageSchedules(): Promise<void> {
         const allGuilds = await this._guildManager.getGuilds();
+        const repo = getRepository(MessageScheduleModel);
         for (const guild of allGuilds) {
-            const allMessageSchedules = await this._repository.find({
+            const allMessageSchedules = await repo.find({
                 where: {
                     guildId: guild.id
                 }

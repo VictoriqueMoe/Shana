@@ -9,7 +9,6 @@ import {container} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import {createConnection, useContainer} from "typeorm";
-
 // const https = require('http-debug').https;
 // https.debug = 1;
 const io = require('@pm2/io');
@@ -20,7 +19,7 @@ io.init({
 dotenv.config({path: __dirname + '/../.env'});
 
 export class Main {
-    public static testMode = false;
+    public static testMode = true;
 
     public static async start(): Promise<void> {
         DIService.container = container;
@@ -35,10 +34,10 @@ export class Main {
             type: "better-sqlite3",
             database: dbName,
             synchronize: true,
+            dropSchema: true,
             key: process.env.sqlIte_key,
             entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
         });
-        await connection.connect();
         /*const dao = new Sequelize('database', '', '', {
             host: 'localhost',
             dialect: 'sqlite',

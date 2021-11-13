@@ -30,7 +30,6 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup("rolejoiner", "Commands to allow users to join vanity roles")
 export class RoleJoiner extends AbstractCommandModule {
 
-    private readonly _repository = getRepository(RoleJoinerModel);
 
     @Slash("displayjoinui", {
         description: "Initialise the role join dropdown and buttons"
@@ -38,7 +37,7 @@ export class RoleJoiner extends AbstractCommandModule {
     private async displayJoinUi(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const {guildId} = interaction;
-        const roleJoinerSettings = await this._repository.findOne({
+        const roleJoinerSettings = await getRepository(RoleJoinerModel).findOne({
             where: {
                 guildId
             }
@@ -83,7 +82,7 @@ export class RoleJoiner extends AbstractCommandModule {
         const added: string[] = [];
         const removed: string[] = [];
         if (!ArrayUtils.isValidArray(roleIdsToAssign)) {
-            const roleJoinerSettings = await this._repository.findOne({
+            const roleJoinerSettings = await getRepository(RoleJoinerModel).findOne({
                 where: {
                     guildId
                 }

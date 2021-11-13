@@ -22,7 +22,7 @@ import {
     RoleUpdateTrigger
 } from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
 import {CategoryMetaData, ICategory, ICategoryItem, ICategoryItemCommand} from "@discordx/utilities";
-import {getRepository, Raw, Repository} from "typeorm";
+import {getRepository} from "typeorm";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
@@ -43,7 +43,6 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
 
     private readonly _metadata = MetadataStorage.instance;
 
-    private readonly _repository: Repository<CommandSecurityModel> = getRepository(CommandSecurityModel);
 
     public constructor(private _client: Client) {
         super();
@@ -127,7 +126,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         const retArr: (ICategoryItem | ICategoryItemCommand)[] = [];
         const memberRoles = [...member.roles.cache.keys()];
         const {items} = category;
-        const allCommands = await this._repository.find({
+        const allCommands = await getRepository(CommandSecurityModel).find({
             where: {
                 guildId: member.guild.id
             }
@@ -175,7 +174,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         }
         const retArray: ICategory[] = [];
         const memberRoles = [...member.roles.cache.keys()];
-        const allCommands = await this._repository.find({
+        const allCommands = await getRepository(CommandSecurityModel).find({
             where: {
                 guildId: member.guild.id
             }
@@ -244,7 +243,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
     }
 
     public async updateCommand(commandName: string, guildId: string, settings: UpdateCommandSettings): Promise<boolean> {
-        const result = await this._repository.update({
+        const result = await getRepository(CommandSecurityModel).update({
             allowedRoles: settings.roles,
             enabled: settings.enabled
         }, {
@@ -268,13 +267,13 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
     }
 
     private async getCommandModel(guildId: string, commandName: string, ...attributes: (keyof CommandSecurityModel)[]): Promise<CommandSecurityModel> {
-        return this._repository.findOne({
-            select: attributes,
-            where: {
-                guildId,
-                commandName: Raw(alias => `'LOWER(${alias}) Like '%${commandName}%''`)
-            }
-        });
+        const builder = getRepository(CommandSecurityModel).createQueryBuilder("commandSecurityModel");
+        const selectArr = attributes.map(attra => `commandSecurityModel.${attra}`);
+        builder.select(selectArr);
+        return builder
+            .where(`commandSecurityModel.guildId = :guildId`, {guildId})
+            .andWhere("LOWER(commandSecurityModel.commandName) = LOWER(:commandName)", {commandName}).getOne();
+
         /*return CommandSecurityModel.findOne({
             attributes,
             where: {

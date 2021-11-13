@@ -2,6 +2,7 @@
   "name": "shanabot",
   "version": "3.0.0",
   "description": "Notice me",
+  "type": "commonjs",
   "main": "./build/Main.js",
   "scripts": {
     "start": "ts-node src/Main.ts",
@@ -30,6 +31,7 @@
     "@overnightjs/core": "^1.7.6",
     "@pm2/io": "^5.0.0",
     "anilist-node": "^1.9.1",
+    "better-sqlite3": "^7.4.4",
     "bufferutil": "^4.0.5",
     "cron-validator": "^1.2.1",
     "cronstrue": "^1.119.0",
@@ -73,7 +75,6 @@
     "promisify": "0.0.3",
     "reflect-metadata": "^0.1.13",
     "sanitize-filename": "^1.6.3",
-    "better-sqlite3": "^7.4.4",
     "tmp": "^0.2.1",
     "tsyringe": "^4.6.0",
     "twitter-v2": "^1.1.0",

@@ -8,8 +8,6 @@ import {getRepository} from "typeorm";
 @singleton()
 export class BookmarkManager extends BaseDAO<BookmarkModel> {
 
-    private readonly _repository = getRepository(BookmarkModel);
-
     /**
      * adds a bew bookmark to a member or makes a new entry
      * @param member
@@ -20,7 +18,8 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
-        const bookMarksExists = await this._repository.findOne({
+        const repo = getRepository(BookmarkModel);
+        const bookMarksExists = await repo.findOne({
             where: {
                 guildId,
                 userId: id
@@ -30,7 +29,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
             const messageIds = new Set<string>(bookMarksExists.messageIds);
             messageIds.add(messageToAddId);
             const arr = Array.from(messageIds);
-            await this._repository.update({
+            await repo.update({
                 messageIds: arr
             }, {
                 guildId,
@@ -42,7 +41,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
                 userId: id,
                 messageIds: [messageToAddId]
             });
-            return super.commitToDatabase(this._repository, [newModel]).then(values => values[0]);
+            return super.commitToDatabase(repo, [newModel]).then(values => values[0]);
         }
     }
 
@@ -51,10 +50,11 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         if (!member) {
             return false;
         }
+        const repo = getRepository(BookmarkModel);
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
-        const bookMarksExists = await this._repository.findOne({
+        const bookMarksExists = await repo.findOne({
             where: {
                 guildId,
                 userId: id
@@ -68,12 +68,12 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
             }
             messageIds.splice(indexInArray, 1);
             if (!ArrayUtils.isValidArray(messageIds)) {
-                return (await this._repository.delete({
+                return (await repo.delete({
                     guildId,
                     userId: id
                 })).affected === 1;
             } else {
-                const updateResult = await this._repository.update({
+                const updateResult = await repo.update({
                     messageIds
                 }, {
                     guildId,
@@ -89,7 +89,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
-        const bookMarks = await this._repository.findOne({
+        const bookMarks = await getRepository(BookmarkModel).findOne({
             where: {
                 guildId,
                 userId: id

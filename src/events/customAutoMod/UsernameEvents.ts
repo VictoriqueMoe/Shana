@@ -7,15 +7,15 @@ import {getRepository} from "typeorm";
 @Discord()
 export abstract class UsernameEvents {
 
-    private readonly _repository = getRepository(UsernameModel);
 
     @On("guildMemberUpdate")
     public async onMemberUpdate([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
         const isNickChange = oldUser.nickname !== newUser.nickname;
+        const repo = getRepository(UsernameModel);
         if (isNickChange) {
             const userId = newUser.id;
             const guildId = newUser.guild.id;
-            const modelObj = await this._repository.findOne({
+            const modelObj = await repo.findOne({
                 where: {
                     userId,
                     guildId
@@ -33,12 +33,12 @@ export abstract class UsernameEvents {
                 if (isMemberStaff || (executor.id === newUser.id && modelObj.force === false)) {
                     const newNick = newUser.nickname;
                     if (newNick === null) {
-                        await this._repository.delete({
+                        await repo.delete({
                             userId,
                             guildId
                         });
                     } else {
-                        await this._repository.update(
+                        await repo.update(
                             {
                                 "usernameToPersist": newNick
                             },
@@ -63,7 +63,7 @@ export abstract class UsernameEvents {
     @On("guildMemberAdd")
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         const userId = member.id;
-        const modelObj = await this._repository.findOne({
+        const modelObj = await getRepository(UsernameModel).findOne({
             where: {
                 userId,
                 guildId: member.guild.id

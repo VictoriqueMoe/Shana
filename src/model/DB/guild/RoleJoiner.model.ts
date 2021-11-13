@@ -8,6 +8,7 @@ export class RoleJoinerModel extends AbstractModel {
     @Column({
         type: "simple-array",
         nullable: true,
+        default: ""
     })
     public rolesToJoin: string[];
 

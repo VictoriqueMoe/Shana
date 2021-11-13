@@ -9,7 +9,6 @@ import {Category} from "@discordx/utilities";
 import {getRepository} from "typeorm";
 import {BaseDAO} from "../../DAO/BaseDAO";
 
-const getUrls = require('get-urls');
 const md5 = require('md5');
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
@@ -195,7 +194,7 @@ export abstract class ResourceBanner extends AbstractCommandModule {
         let urlsInMessage: Set<string> = null;
         const repliedMessageContent = repliedMessageObj.content;
         if (ObjectUtil.validString(repliedMessageContent)) {
-            urlsInMessage = getUrls(repliedMessageObj.content);
+            urlsInMessage = ObjectUtil.getUrls(repliedMessageObj.content);
         }
         const attachmentArray = repliedMessageObj.attachments;
         if (attachmentArray.size === 0 && (urlsInMessage && urlsInMessage.size === 0)) {

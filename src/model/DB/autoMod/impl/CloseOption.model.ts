@@ -15,7 +15,8 @@ export class CloseOptionModel extends AbstractModel implements ICloseOption {
     public moduleId: string;
 
     @Column({
-        nullable: false
+        nullable: false,
+        default: false
     })
     public status: boolean;
 

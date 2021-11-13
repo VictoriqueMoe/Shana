@@ -10,13 +10,12 @@ import {GuildMember, TextBasedChannels} from "discord.js";
 import {Roles} from "../../../enums/Roles";
 import {CloseOptionModel} from "../../DB/autoMod/impl/CloseOption.model";
 import {container, delay} from "tsyringe";
-import {getRepository, Repository} from "typeorm";
+import {getRepository} from "typeorm";
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<ICloseOption> implements ICloseableModule<T> {
 
     private _isEnabled: Map<string, boolean | null>;
-    private readonly _repository: Repository<CloseOptionModel>;
     private _settings: Map<string, T | null>;
     private readonly _subModuleManager: SubModuleManager;
 
@@ -25,7 +24,6 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         this._settings = new Map();
         this._isEnabled = new Map();
         this._subModuleManager = container.resolve(delay(() => SubModuleManager));
-        this._repository = getRepository(_model);
     }
 
     public abstract get moduleId(): string;
@@ -42,7 +40,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
             const percistedSettings = await this.getSettings(guildId);
             obj = {...percistedSettings, ...setting};
         }
-        await this._repository.update(
+        await getRepository(this._model).update(
             {
                 "settings": obj
             },
@@ -58,7 +56,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         if (!force && this._settings.has(guildId)) {
             return this._settings.get(guildId);
         }
-        const model: ICloseOption = await this._repository.findOne({
+        const model: ICloseOption = await getRepository(this._model).findOne({
             select: ["settings"],
             where: {
                 "moduleId": this.moduleId,
@@ -76,7 +74,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
      * Close this module, this prevents all events from being fired. events are NOT queued
      */
     public async close(guildId: string): Promise<boolean> {
-        const m = await this._repository.update(
+        const m = await getRepository(this._model).update(
             {
                 "status": false
             },
@@ -94,7 +92,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
      * Opens this module, allowing events to be fired.
      */
     public async open(guildId: string): Promise<boolean> {
-        const m = await this._repository.update(
+        const m = await getRepository(this._model).update(
             {
                 "status": true
             },
@@ -110,7 +108,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
 
     public async isEnabled(guildId: string): Promise<boolean> {
         if (!this._isEnabled.has(guildId)) {
-            const model: ICloseOption = await this._repository.findOne({
+            const model: ICloseOption = await getRepository(this._model).findOne({
                 select: ["status"],
                 where: {
                     "moduleId": this.moduleId,
@@ -153,7 +151,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
                 }
             }
         }
-        const module = await this._repository.findOne({
+        const module = await getRepository(this._model).findOne({
             where: {
                 moduleId: this.moduleId,
                 guildId,

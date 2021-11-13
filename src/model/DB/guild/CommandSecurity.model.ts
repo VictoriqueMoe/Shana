@@ -13,6 +13,8 @@ export class CommandSecurityModel extends AbstractModel {
 
     @Column({
         type: "simple-array",
+        nullable: true,
+        default: ""
     })
     public allowedRoles: string[];
 

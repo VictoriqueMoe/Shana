@@ -8,7 +8,6 @@ import {getRepository} from "typeorm";
 
 @singleton()
 export class ChannelManager extends BaseDAO<PostableChannelModel> {
-    private readonly _repository = getRepository(PostableChannelModel);
 
     public constructor(private _guildManager: GuildManager) {
         super();
@@ -24,7 +23,7 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
     }
 
     public async setChannel(guildId: string, channelType: "logChannel" | "AdminLogchannel" | "JailChannel", value: string): Promise<PostableChannelModel[] | null> {
-        const result = await this._repository.update({
+        const result = await getRepository(PostableChannelModel).update({
             [channelType]: value
         }, {
             guildId

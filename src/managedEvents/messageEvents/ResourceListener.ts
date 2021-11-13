@@ -11,7 +11,6 @@ import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
 import ffmpeg = require("ffmpeg");
 
-const getUrls = require('get-urls');
 const isVideo = require('is-video');
 const tmp = require('tmp');
 
@@ -23,7 +22,6 @@ const md5 = require('md5');
 export class ResourceListener {
     private static readonly MAX_SIZE_BYTES: number = 10485760;
 
-    private readonly _repository = getRepository(BannedAttachmentsModel);
 
     @MessageListenerDecorator(true)
     private async scanAttachments([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
@@ -36,7 +34,7 @@ export class ResourceListener {
         const attachmentUrl: string[] = attachments.map(attachmentObject => attachmentObject.attachment as string);
 
         if (ObjectUtil.validString(messageContent)) {
-            const urlsInMessage = getUrls(messageContent);
+            const urlsInMessage = ObjectUtil.getUrls(messageContent);
             if (urlsInMessage && urlsInMessage.size > 0) {
                 attachmentUrl.push(...urlsInMessage.values());
             }
@@ -64,7 +62,7 @@ export class ResourceListener {
             } catch {
                 return;
             }
-            const exists = await this._repository
+            const exists = await getRepository(BannedAttachmentsModel)
                 .createQueryBuilder("bannedAttachmentsModel")
                 .where("bannedAttachmentsModel.guildId :guildId", {
                     guildId: message.guild.id
@@ -114,7 +112,7 @@ export class ResourceListener {
         const messageContent = message.content;
         let urlsInMessage: Set<string> = new Set();
         if (ObjectUtil.validString(messageContent)) {
-            urlsInMessage = getUrls(messageContent);
+            urlsInMessage = ObjectUtil.getUrls(messageContent);
         }
         const embeds = message.embeds;
         if (ArrayUtils.isValidArray(embeds)) {
@@ -152,7 +150,7 @@ export class ResourceListener {
                 }
                 const attachmentHash = md5(attachment);
 
-                const exists = await this._repository.count({
+                const exists = await getRepository(BannedAttachmentsModel).count({
                     where: {
                         attachmentHash,
                         guildId: message.guild.id

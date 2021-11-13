@@ -7,14 +7,13 @@ import {getRepository} from "typeorm";
 
 @Discord()
 export class BotGuildUpdater extends BaseDAO<GuildableModel> {
-    private readonly _repository = getRepository(GuildableModel);
 
     @On("guildCreate")
     private async botJoins([guild]: ArgsOf<"guildCreate">, client: Client): Promise<void> {
         const model = BaseDAO.build(GuildableModel, {
             guildId: guild.id
         });
-        await super.commitToDatabase(this._repository, [model]);
+        await super.commitToDatabase(getRepository(GuildableModel), [model]);
         const onReadyClass: OnReady = container.resolve(OnReady);
         return onReadyClass.init().then(pArr => {
             Promise.all(pArr).then(() => {
@@ -28,7 +27,7 @@ export class BotGuildUpdater extends BaseDAO<GuildableModel> {
     @On("guildDelete")
     private async botLeaves([guild]: ArgsOf<"guildDelete">, client: Client): Promise<void> {
         console.log(`Bot left guild: "${guild.name}" deleting all related data...`);
-        await this._repository.delete({
+        await getRepository(GuildableModel).delete({
             guildId: guild.id
         });
     }

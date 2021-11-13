@@ -12,8 +12,6 @@ import {getRepository} from "typeorm";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
 
-const getUrls = require('get-urls');
-
 const md5 = require('md5');
 
 @singleton()

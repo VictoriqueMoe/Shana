@@ -5,8 +5,7 @@ import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
 import {TimedSet} from "../../../../Impl/TimedSet";
 import {singleton} from "tsyringe";
-
-const getUrls = require('get-urls');
+import {ObjectUtil} from "../../../../../utils/Utils";
 
 @singleton()
 export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
@@ -50,7 +49,7 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
 
     public async doFilter(content: Message): Promise<boolean> {
         const messageContent = content.content;
-        const urls = getUrls(messageContent);
+        const urls = ObjectUtil.getUrls(messageContent);
         if (urls && urls.size > 0) {
             const memberId = content.member.id;
             const guildId = content.member.guild.id;

@@ -1,5 +1,4 @@
 import {Main} from "../Main";
-import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {ArrayUtils, DiscordUtils, EnumEx, loadClasses, ObjectUtil} from "../utils/Utils";
 import {Guild} from "discord.js";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
@@ -19,7 +18,7 @@ import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS";
 import {Player} from "discord-music-player";
 import {registerInstance} from "../DI/moduleRegistrar";
-import {getManager, getRepository} from "typeorm";
+import {EntityManager, getManager, getRepository, Transaction, TransactionManager} from "typeorm";
 import {InsertResult} from "typeorm/browser";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
@@ -32,6 +31,38 @@ export class OnReady extends BaseDAO<any> {
 
     public constructor(private _client: Client) {
         super();
+    }
+
+    @On("ready")
+    private async initialize([client]: ArgsOf<"ready">): Promise<void> {
+        if (Main.testMode) {
+            await this._client.user.setActivity("Under development", {type: "LISTENING"});
+            await this._client.user.setPresence({
+                status: "idle"
+            });
+        } else {
+            await this._client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
+        }
+        // const vicDropbox = container.resolve(VicDropbox);
+        const pArr: Promise<any>[] = [];
+        await this.populateGuilds();
+        // await OnReady.cleanCommands(true);
+        this.initMusicPlayer();
+        //    pArr.push(vicDropbox.index());
+        pArr.push(this.initUsernames());
+        const initPromises = await this.init();
+        // wait for the initial transaction to finish
+        await Promise.all(initPromises);
+        pArr.push(OnReady.applyEmptyRoles());
+        pArr.push(loadClasses(...this.classesToLoad));
+        pArr.push(OnReady.startServer());
+        pArr.push(this.loadCustomActions());
+        return Promise.all(pArr).then(() => {
+            console.log("Bot logged in.");
+            if (process.send) {
+                process.send('ready');
+            }
+        });
     }
 
 
@@ -136,13 +167,14 @@ export class OnReady extends BaseDAO<any> {
     /**
      * Commands that are run on application start AND on join new guild
      */
-    public init(): Promise<Promise<any>[]> {
-        return this.populateCommandSecurity().then(() => {
+    @Transaction()
+    public init(@TransactionManager() manager?: EntityManager): Promise<Promise<any>[]> {
+        return this.populateCommandSecurity(manager).then(() => {
             const pArr: Promise<any>[] = [];
-            pArr.push(this.populateClosableEvents());
-            pArr.push(this.setDefaultSettings());
-            pArr.push(this.populatePostableChannels());
-            pArr.push(this.cleanUpGuilds());
+            pArr.push(this.populateClosableEvents(manager));
+            pArr.push(this.setDefaultSettings(manager));
+            pArr.push(this.populatePostableChannels(manager));
+            pArr.push(this.cleanUpGuilds(manager));
             pArr.push(this.initAppCommands());
             return pArr;
         });
@@ -160,37 +192,6 @@ export class OnReady extends BaseDAO<any> {
         }
     }
 
-    @On("ready")
-    private async initialize([client]: ArgsOf<"ready">): Promise<void> {
-        if (Main.testMode) {
-            await this._client.user.setActivity("Under development", {type: "LISTENING"});
-            await this._client.user.setPresence({
-                status: "idle"
-            });
-        } else {
-            await this._client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
-        }
-        const vicDropbox = container.resolve(VicDropbox);
-        const pArr: Promise<any>[] = [];
-        await this.populateGuilds();
-        // await OnReady.cleanCommands(true);
-        this.initMusicPlayer();
-        pArr.push(vicDropbox.index());
-        pArr.push(this.initUsernames());
-        const initArr = await this.init();
-        pArr.push(...initArr);
-        pArr.push(OnReady.applyEmptyRoles());
-        pArr.push(loadClasses(...this.classesToLoad));
-        pArr.push(OnReady.startServer());
-        pArr.push(this.loadCustomActions());
-        return Promise.all(pArr).then(() => {
-            console.log("Bot logged in.");
-            if (process.send) {
-                process.send('ready');
-            }
-        });
-    }
-
     public initMusicPlayer(): void {
         const player = new Player(this._client, {
             leaveOnEmpty: true,
@@ -199,7 +200,7 @@ export class OnReady extends BaseDAO<any> {
         registerInstance(player);
     }
 
-    public async setDefaultSettings(): Promise<void> {
+    public async setDefaultSettings(manager: EntityManager): Promise<void> {
         const guilds = this._client.guilds;
         const cache = guilds.cache;
         const nameValue = EnumEx.getNamesAndValues(DEFAULT_SETTINGS) as any;
@@ -211,7 +212,7 @@ export class OnReady extends BaseDAO<any> {
                 if (!ObjectUtil.validString(value)) {
                     value = null;
                 }
-                await settingsManager.saveOrUpdateSetting(setting, value, guildId, true);
+                await settingsManager.saveOrUpdateSetting(setting, value, guildId, true, manager);
             }
         }
     }
@@ -244,39 +245,37 @@ export class OnReady extends BaseDAO<any> {
         console.log("set all Usernames");
     }
 
-    private async populateClosableEvents(): Promise<void> {
+    private async populateClosableEvents(transactionManager: EntityManager): Promise<void> {
         const allModules: CloseableModule<any>[] = DiscordUtils.getCloseableModules();
-        await getManager().transaction(async transactionManager => {
-            for (const module of allModules) {
-                for (const [guildId, guild] of this._client.guilds.cache) {
-                    const moduleId = module.moduleId;
-                    const modelPersisted = await transactionManager.findOne(CloseOptionModel, {
-                        where: {
-                            moduleId,
-                            guildId
-                        }
+        for (const module of allModules) {
+            for (const [guildId, guild] of this._client.guilds.cache) {
+                const moduleId = module.moduleId;
+                const modelPersisted = await transactionManager.findOne(CloseOptionModel, {
+                    where: {
+                        moduleId,
+                        guildId
+                    }
+                });
+                if (modelPersisted) {
+                    if (modelPersisted.status) {
+                        const moduleName = ObjectUtil.validString(module.constructor.name) ? module.constructor.name : "";
+                        console.log(`Module: ${modelPersisted.moduleId} (${moduleName})for guild "${guild.name}" (${guildId}) enabled`);
+                    }
+                } else {
+                    const m = BaseDAO.build(CloseOptionModel, {
+                        moduleId,
+                        guildId
                     });
-                    if (modelPersisted) {
-                        if (modelPersisted.status) {
-                            const moduleName = ObjectUtil.validString(module.constructor.name) ? module.constructor.name : "";
-                            console.log(`Module: ${modelPersisted.moduleId} (${moduleName})for guild "${guild.name}" (${guildId}) enabled`);
-                        }
-                    } else {
-                        const m = BaseDAO.build(CloseOptionModel, {
-                            moduleId,
-                            guildId
-                        });
-                        try {
-                            await super.commitToDatabase(transactionManager, [m], CloseOptionModel);
-                        } catch (e) {
-                            if (!(e instanceof UniqueViolationError)) {
-                                throw e;
-                            }
+                    try {
+                        await super.commitToDatabase(transactionManager, [m], CloseOptionModel);
+                    } catch (e) {
+                        if (!(e instanceof UniqueViolationError)) {
+                            throw e;
                         }
                     }
                 }
             }
-        });
+        }
     }
 
     private static async startServer(): Promise<void> {
@@ -308,71 +307,65 @@ export class OnReady extends BaseDAO<any> {
         });
     }
 
-    private async populateCommandSecurity(): Promise<void> {
+    private async populateCommandSecurity(transactionManager: EntityManager): Promise<void> {
         const securityManager = container.resolve(CommandSecurityManager);
         const {commands} = securityManager;
-        const manager = getManager();
 
         async function addNewCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
-            await manager.transaction(async transactionManager => {
-                const models: CommandSecurityModel[] = [];
-                for (const {name} of commands) {
-                    for (const guildModel of guildModels) {
-                        const guildId = guildModel.guildId;
-                        const commandSecurity = guildModel.commandSecurityModel;
-                        const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName.toLowerCase() === name.toLowerCase());
-                        if (!inArray) {
-                            const newModel = BaseDAO.build(CommandSecurityModel, {
-                                commandName: name,
-                                guildId
-                            });
-                            models.push(newModel);
-                        }
+            const models: CommandSecurityModel[] = [];
+            for (const {name} of commands) {
+                for (const guildModel of guildModels) {
+                    const guildId = guildModel.guildId;
+                    const commandSecurity = guildModel.commandSecurityModel;
+                    const inArray = ArrayUtils.isValidArray(commandSecurity) && commandSecurity.some(value => value.commandName.toLowerCase() === name.toLowerCase());
+                    if (!inArray) {
+                        const newModel = BaseDAO.build(CommandSecurityModel, {
+                            commandName: name,
+                            guildId
+                        });
+                        models.push(newModel);
                     }
                 }
-                if (models.length > 0) {
-                    console.log(`adding commands: ${models.map(value => value.commandName)}`);
-                    return this.commitToDatabase(transactionManager, models, CommandSecurityModel);
-                }
-            });
+            }
+            if (models.length > 0) {
+                console.log(`adding commands: ${models.map(value => value.commandName)}`);
+                await this.commitToDatabase(transactionManager, models, CommandSecurityModel);
+            }
         }
 
         async function removeOldCommands(this: OnReady, guildModels: GuildableModel[]): Promise<void> {
-            await manager.transaction(async transactionManager => {
-                for (const guildModel of guildModels) {
-                    const {guildId} = guildModel;
-                    const commandSecurity = guildModel.commandSecurityModel;
-                    const commandsToDestroy: string[] = [];
-                    for (const {commandName} of commandSecurity) {
-                        const hasInSystem = commands.find(command => command.name.toLowerCase() === commandName.toLowerCase());
-                        if (!hasInSystem) {
-                            console.log(`delete command ${commandName}`);
-                            commandsToDestroy.push(commandName);
-                        }
-                    }
-                    if (ArrayUtils.isValidArray(commandsToDestroy)) {
-                        await transactionManager.delete(CommandSecurityModel, {
-                            "commandName": commandsToDestroy,
-                            guildId
-                        });
+            for (const guildModel of guildModels) {
+                const {guildId} = guildModel;
+                const commandSecurity = guildModel.commandSecurityModel;
+                const commandsToDestroy: string[] = [];
+                for (const {commandName} of commandSecurity) {
+                    const hasInSystem = commands.find(command => command.name.toLowerCase() === commandName.toLowerCase());
+                    if (!hasInSystem) {
+                        console.log(`delete command ${commandName}`);
+                        commandsToDestroy.push(commandName);
                     }
                 }
-            });
+                if (ArrayUtils.isValidArray(commandsToDestroy)) {
+                    await transactionManager.delete(CommandSecurityModel, {
+                        "commandName": commandsToDestroy,
+                        guildId
+                    });
+                }
+            }
         }
 
-        const guilds = await manager.find(GuildableModel, {
+        const guilds = await transactionManager.find(GuildableModel, {
             relations: ["commandSecurityModel"]
         });
         await addNewCommands.call(this, guilds);
         await removeOldCommands.call(this, guilds);
     }
 
-    private async populatePostableChannels(): Promise<InsertResult | any[]> {
+    private async populatePostableChannels(manager: EntityManager): Promise<InsertResult | any[]> {
         const guildModels = await getRepository(GuildableModel).find({
             relations: ["commandSecurityModel"]
         });
-        const postableRepo = getRepository(PostableChannelModel);
-        const currentModels = await postableRepo.find();
+        const currentModels = await manager.find(PostableChannelModel);
         const models: {
             guildId: string
         }[] = [];
@@ -385,24 +378,22 @@ export class OnReady extends BaseDAO<any> {
                 guildId
             });
         }
-        return super.commitToDatabase(postableRepo, models);
+        return super.commitToDatabase(manager, models, PostableChannelModel);
     }
 
-    private async cleanUpGuilds(): Promise<void> {
+    private async cleanUpGuilds(transactionManager: EntityManager): Promise<void> {
         const guildsJoined = [...this._client.guilds.cache.keys()];
-        await getManager().transaction(async transactionManager => {
-            for (const guildsJoinedId of guildsJoined) {
-                const guildModels = await transactionManager.find(GuildableModel, {
-                    where: {
-                        "guildId": guildsJoinedId
-                    }
-                });
-                if (!guildModels) {
-                    await transactionManager.delete(GuildableModel, {
-                        guildId: guildsJoinedId
-                    });
+        for (const guildsJoinedId of guildsJoined) {
+            const guildModels = await transactionManager.find(GuildableModel, {
+                where: {
+                    "guildId": guildsJoinedId
                 }
+            });
+            if (!guildModels) {
+                await transactionManager.delete(GuildableModel, {
+                    guildId: guildsJoinedId
+                });
             }
-        });
+        }
     }
 }

@@ -8,7 +8,6 @@ import {getRepository} from "typeorm";
 @singleton()
 export class GuildManager extends BaseDAO<GuildableModel> {
 
-    private readonly _repository = getRepository(GuildableModel);
 
     constructor(private _client: Client) {
         super();
@@ -16,7 +15,7 @@ export class GuildManager extends BaseDAO<GuildableModel> {
 
     public async getGuilds(): Promise<Guild[]> {
         const retArray: Guild[] = [];
-        const models = await this._repository.find();
+        const models = await getRepository(GuildableModel).find();
         for (const model of models) {
             const guild = await this._client.guilds.fetch(model.guildId);
             retArray.push(guild);

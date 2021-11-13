@@ -36,7 +36,6 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 const translate = require("deepl");
 const Anilist = require('anilist-node');
 const reverseImageSearch = require("node-reverse-image-search");
-const getUrls = require('get-urls');
 const isImageFast = require('is-image-fast');
 
 @Discord()
@@ -413,7 +412,7 @@ export class Misc extends AbstractCommandModule {
             const repliedMessageContent = repliedMessageObj.content;
             const repliedMessageAttachments = repliedMessageObj.attachments;
 
-            const repliedMessageUrls = getUrls(repliedMessageContent);
+            const repliedMessageUrls = ObjectUtil.getUrls(repliedMessageContent);
             if (repliedMessageUrls && repliedMessageUrls.size === 1) {
                 imageUrl = repliedMessageUrls.values().next().value;
             } else if (repliedMessageAttachments && repliedMessageAttachments.size === 1) {
@@ -427,7 +426,7 @@ export class Misc extends AbstractCommandModule {
             const firstAttach = messageAttachments.array()[0];
             imageUrl = firstAttach.attachment as string;
         } else if (ObjectUtil.validString(message.content)) {
-            const messageContentUrl = getUrls(message.content);
+            const messageContentUrl = ObjectUtil.getUrls(message.content);
             if (messageContentUrl && messageContentUrl.size === 1) {
                 imageUrl = messageContentUrl.values().next().value;
             }

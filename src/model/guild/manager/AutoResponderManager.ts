@@ -5,7 +5,6 @@ import {getManager, getRepository, Repository, Transaction, TransactionRepositor
 
 @singleton()
 export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
-    private readonly _repository = getRepository(AutoResponderModel);
 
     public constructor() {
         super();
@@ -31,7 +30,7 @@ export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
     }
 
     public async getAllAutoResponders(guildId: string): Promise<AutoResponderModel[]> {
-        return this._repository.find({
+        return getRepository(AutoResponderModel).find({
             where: {
                 guildId
             }
@@ -46,7 +45,7 @@ export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
             });
             return deleteResponse.affected === 1;
         } else {
-            const transactionDelete = await this._repository.delete({
+            const transactionDelete = await getRepository(AutoResponderModel).delete({
                 guildId,
                 title
             });
@@ -55,7 +54,7 @@ export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
     }
 
     public async getAutoResponderFromTitle(title: string, guildId: string): Promise<AutoResponderModel | null> {
-        const fromDb = await this._repository.findOne({
+        const fromDb = await getRepository(AutoResponderModel).findOne({
             where: {
                 title,
                 guildId

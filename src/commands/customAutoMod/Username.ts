@@ -51,7 +51,6 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Permission(AbstractCommandModule.getPermissions)
 @SlashGroup("username", "Commands to set usernames for people")
 export abstract class Username extends AbstractCommandModule {
-    private readonly _repository = getRepository(UsernameModel);
 
     @Slash("viewusernames", {
         description: "View all the persisted usernames this bot is aware of"
@@ -61,7 +60,7 @@ export abstract class Username extends AbstractCommandModule {
         await interaction.deferReply();
         const {guild} = interaction;
         const guildId = guild.id;
-        const allModels = await this._repository.find({
+        const allModels = await getRepository(UsernameModel).find({
             where: {
                 guildId
             }
@@ -127,14 +126,15 @@ export abstract class Username extends AbstractCommandModule {
         if (roleOfMember.position >= callee.roles.highest.position) {
             return InteractionUtils.replyOrFollowUp(interaction, "You can not use this command against a member who's role is higher than yours!", false);
         }
+        const repo = getRepository(UsernameModel);
         const userId = mentionedMember.id;
-        if (await this._repository.count({
+        if (await repo.count({
             where: {
                 userId,
                 guildId
             }
         }) > 0) {
-            await this._repository.update(
+            await repo.update(
                 {
                     usernameToPersist,
                     force
@@ -154,7 +154,7 @@ export abstract class Username extends AbstractCommandModule {
 
             const model = BaseDAO.build(UsernameModel, obj);
             try {
-                await this._repository.save(model);
+                await repo.save(model);
             } catch (e) {
             }
         }
