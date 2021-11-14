@@ -40,15 +40,21 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
             const percistedSettings = await this.getSettings(guildId);
             obj = {...percistedSettings, ...setting};
         }
-        await getRepository(this._model).update(
-            {
-                "settings": obj
-            },
-            {
-                "moduleId": this.moduleId,
-                guildId
-            }
-        );
+        try {
+            await getRepository(this._model).update(
+                {
+                    moduleId: this.moduleId,
+                    guildId
+                },
+                {
+                    settings: obj
+                }
+            );
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+
         this._settings.set(guildId, obj);
     }
 
@@ -76,11 +82,11 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
     public async close(guildId: string): Promise<boolean> {
         const m = await getRepository(this._model).update(
             {
-                "status": false
-            },
-            {
                 "moduleId": this.moduleId,
                 guildId
+            },
+            {
+                "status": false
             }
         );
         this._isEnabled.set(guildId, m.affected === 1);
@@ -94,11 +100,11 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
     public async open(guildId: string): Promise<boolean> {
         const m = await getRepository(this._model).update(
             {
-                "status": true
-            },
-            {
                 "moduleId": this.moduleId,
                 guildId
+            },
+            {
+                "status": true
             }
         );
         this._isEnabled.set(guildId, m.affected === 1);

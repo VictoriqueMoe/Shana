@@ -852,29 +852,16 @@ export namespace DiscordUtils {
         return userPreformingActionHighestRole.position > userToBlockHighestRole.position;
     }
 
-    export async function getAllClosableModules(guildId?: string): Promise<string[]> {
-        /*const options: FindOptions<CloseOptionModel['_attributes']> = {
-            attributes: [
-                [
-                    Sequelize.fn('DISTINCT', Sequelize.col('moduleId')), 'moduleId'
-                ]
-            ]
-        };*/
+    export async function getAllClosableModules(guildId?: string): Promise<CloseOptionModel[]> {
         const builder = getRepository(CloseOptionModel)
             .createQueryBuilder("closeOptionModel")
-            .select("closeOptionModel.moduleId")
             .distinct(true);
         if (ObjectUtil.validString(guildId)) {
             builder.where("closeOptionModel.guildId = :guildId", {
                 guildId
             });
-            /*options["where"] = {
-                guildId
-            };*/
         }
-        const allModules = await builder.getMany();
-
-        return allModules.map(m => m.moduleId);
+        return await builder.getMany();
     }
 
     export function getCloseableModules(): CloseableModule<any>[] {
@@ -897,6 +884,9 @@ export class ObjectUtil {
     public static getUrls(str: string): Set<string> {
         const regexp = /(http(s)?:\/\/.)(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/gim;
         const matches = str.match(regexp);
+        if (!ArrayUtils.isValidArray(matches)) {
+            return new Set();
+        }
         return new Set(...matches);
     }
 

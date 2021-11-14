@@ -40,11 +40,11 @@ export abstract class UsernameEvents {
                     } else {
                         await repo.update(
                             {
-                                "usernameToPersist": newNick
-                            },
-                            {
                                 userId,
                                 guildId
+                            },
+                            {
+                                "usernameToPersist": newNick
                             }
                         );
                     }

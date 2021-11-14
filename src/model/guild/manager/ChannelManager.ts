@@ -24,9 +24,9 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
 
     public async setChannel(guildId: string, channelType: "logChannel" | "AdminLogchannel" | "JailChannel", value: string): Promise<PostableChannelModel[] | null> {
         const result = await getRepository(PostableChannelModel).update({
-            [channelType]: value
-        }, {
             guildId
+        }, {
+            [channelType]: value
         });
         if (result.affected === 0) {
             return null;

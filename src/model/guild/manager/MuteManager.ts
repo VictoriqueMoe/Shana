@@ -9,7 +9,7 @@ import {container, singleton} from "tsyringe";
 import {GuildManager} from "./GuildManager";
 import {Client} from "discordx";
 import {PostConstruct} from "../../decorators/PostConstruct";
-import {EntityManager, getRepository, IsNull, Not} from "typeorm";
+import {EntityManager, getManager, getRepository, IsNull, Not} from "typeorm";
 
 @singleton()
 export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
@@ -173,7 +173,7 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
             throw new Error('That user is not currently muted.');
         }
         if (!skipPersistence) {
-            const persistenceModelRowCount = await t.delete(MuteModel, {
+            const persistenceModelRowCount = await t.delete(RolePersistenceModel, {
                 userId,
                 guildId
             });
@@ -237,7 +237,7 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
         }
         try {
             const job = schedule.scheduleJob(userId, newDate, async () => {
-                await getRepository(MuteModel).manager.transaction(async transactionManager => {
+                await getManager().transaction(async transactionManager => {
                     await this.unMute(userId, guild.id, false, transactionManager);
                 });
                 DiscordUtils.postToLog(`User ${username} has been unblocked after timeout`, guild.id);

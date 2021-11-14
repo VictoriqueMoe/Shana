@@ -1,5 +1,5 @@
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashOption} from "discordx";
-import {DiscordUtils} from "../../utils/Utils";
+import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction} from "discord.js";
@@ -33,11 +33,36 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         "type": "SLASH",
         "options": [],
         "description": "Return a list of all modules to use with the 'enableModule' command"
+    },
+    {
+        "name": "getAllEnabled",
+        "type": "SLASH",
+        "options": [],
+        "description": "Get the enabled status for modules"
     }
 ])
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 export abstract class ModuleEngine extends AbstractCommandModule {
+
+    @Slash("getallenabled", {
+        description: "Get the enabled status for modules"
+    })
+    @Guard(CommandEnabled)
+    private async getAllEnabled(
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply({
+            ephemeral: true
+        });
+        const guildId = interaction.guild.id;
+        const allModuleNames = await DiscordUtils.getAllClosableModules(guildId);
+        const enabled = allModuleNames.filter(module => module.status);
+        if (!ArrayUtils.isValidArray(enabled)) {
+            return InteractionUtils.replyOrFollowUp(interaction, "No modules enabled");
+        }
+        return InteractionUtils.replyOrFollowUp(interaction, `The following modules are enabled:\n${enabled.map(module => module.moduleId).join("\n")}`);
+    }
 
     @Slash("enablemodule", {
         description: "Enable a module to run. These modules are designed to be shut down and started dynamically"
@@ -60,8 +85,9 @@ export abstract class ModuleEngine extends AbstractCommandModule {
         await interaction.deferReply();
         const guildId = interaction.guild.id;
         const allModuleNames = await DiscordUtils.getAllClosableModules(guildId);
-        if (!allModuleNames.includes(moduleId)) {
-            return InteractionUtils.replyOrFollowUp(interaction, `Unable to find that module, all available modules are: \n ${allModuleNames.join(", ")}`);
+        const ids = allModuleNames.map(module => module.moduleId);
+        if (!ids.includes(moduleId)) {
+            return InteractionUtils.replyOrFollowUp(interaction, `Unable to find that module, all available modules are: \n ${ids.join(", ")}`);
         }
         const module = DiscordUtils.getModule(moduleId);
         const subModules = module.submodules.filter(sm => sm.isActive);
@@ -83,6 +109,7 @@ export abstract class ModuleEngine extends AbstractCommandModule {
         await interaction.deferReply();
         const guildId = interaction.guild.id;
         const allModuleNames = await DiscordUtils.getAllClosableModules(guildId);
-        InteractionUtils.replyOrFollowUp(interaction, `all available modules are: \n ${allModuleNames.join(", ")}`);
+        const ids = allModuleNames.map(module => module.moduleId);
+        InteractionUtils.replyOrFollowUp(interaction, `all available modules are: \n ${ids.join(", ")}`);
     }
 }

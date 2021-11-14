@@ -104,10 +104,10 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
                 return 0;
             }
             const result = await repo.update({
-                value
-            }, {
                 guildId,
                 setting
+            }, {
+                value
             });
             this.updateCache(setting, value, guildId);
             retRow = result[0];

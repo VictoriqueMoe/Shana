@@ -30,10 +30,10 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
             messageIds.add(messageToAddId);
             const arr = Array.from(messageIds);
             await repo.update({
-                messageIds: arr
-            }, {
                 guildId,
                 userId: id
+            }, {
+                messageIds: arr
             });
         } else {
             const newModel = BaseDAO.build(BookmarkModel, {
@@ -74,10 +74,10 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
                 })).affected === 1;
             } else {
                 const updateResult = await repo.update({
-                    messageIds
-                }, {
                     guildId,
                     userId: id
+                }, {
+                    messageIds
                 });
                 return updateResult.affected == 1;
             }

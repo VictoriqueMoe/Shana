@@ -136,12 +136,12 @@ export abstract class Username extends AbstractCommandModule {
         }) > 0) {
             await repo.update(
                 {
-                    usernameToPersist,
-                    force
-                },
-                {
                     userId,
                     guildId
+                },
+                {
+                    usernameToPersist,
+                    force
                 }
             );
         } else {

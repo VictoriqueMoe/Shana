@@ -82,6 +82,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
                 }
             });
             for (const model of allMessageSchedules) {
+                console.log(`Re-registering scheduled message "${model.name}" for guild "${model.guildId}" to post on channel #${model.channel.id}`);
                 this._messageScheduler.register(model.name, model.cron, null, null, model.channel, model.message);
             }
         }

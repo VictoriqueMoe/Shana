@@ -244,11 +244,11 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
 
     public async updateCommand(commandName: string, guildId: string, settings: UpdateCommandSettings): Promise<boolean> {
         const result = await getRepository(CommandSecurityModel).update({
-            allowedRoles: settings.roles,
-            enabled: settings.enabled
-        }, {
             guildId,
             commandName
+        }, {
+            allowedRoles: settings.roles,
+            enabled: settings.enabled
         });
         if (result.affected === 1) {
             await this._client.initApplicationPermissions();

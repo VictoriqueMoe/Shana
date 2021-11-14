@@ -9,6 +9,7 @@ import {container} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import {createConnection, useContainer} from "typeorm";
+import {importx} from "@discordx/importer";
 // const https = require('http-debug').https;
 // https.debug = 1;
 const io = require('@pm2/io');
@@ -33,25 +34,9 @@ export class Main {
         const connection = await createConnection({
             type: "better-sqlite3",
             database: dbName,
-            synchronize: true,
-            dropSchema: true,
             key: process.env.sqlIte_key,
             entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
         });
-        /*const dao = new Sequelize('database', '', '', {
-            host: 'localhost',
-            dialect: 'sqlite',
-            logging: (sql: string, timing: number): void => {
-                if (Main.testMode) {
-                    // console.log(sql, timing);
-                }
-            },
-            storage: dbName,
-            models: [__dirname + '/model/DB/!**!/!*.model.{ts,js}'],
-            modelMatch: (filename, member): boolean => {
-                return `${filename.substring(0, filename.indexOf('.model'))}Model`.toLowerCase() === member.toLowerCase();
-            }
-        });*/
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             simpleCommand: {
@@ -65,9 +50,6 @@ export class Main {
                     }
                 }
             },
-            classes: [
-                `${__dirname}/{commands,events}/**/*.{ts,js}`
-            ],
             intents: [
                 Intents.FLAGS.GUILDS,
                 Intents.FLAGS.GUILD_MESSAGES,
@@ -86,6 +68,7 @@ export class Main {
             }],
             silent: false,
         });
+        await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
         registerInstance(connection, client);
         await client.login(Main.testMode ? process.env.test_token : process.env.token);
     }
