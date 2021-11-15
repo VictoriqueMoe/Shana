@@ -36,9 +36,6 @@ export class AutoResponder extends TriggerConstraint<null> {
             return;
         }
         for (const autoResponder of allRespondObjects) {
-            if (!super.canTrigger(autoResponder, message)) {
-                continue;
-            }
             const trigger = autoResponder.title;
             const {wildCard, useRegex, publicDelete} = autoResponder;
             let shouldTrigger = false;
@@ -57,7 +54,7 @@ export class AutoResponder extends TriggerConstraint<null> {
                     shouldTrigger = true;
                 }
             }
-            if (!shouldTrigger) {
+            if (!shouldTrigger || !super.canTrigger(autoResponder, message)) {
                 continue;
             }
             const {responseType} = autoResponder;

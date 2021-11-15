@@ -72,8 +72,7 @@ export class AutoResponderController extends AbstractModuleController {
         }
         try {
             const responders = await this._autoResponderManager.getAllAutoResponders(guild.id);
-            const json = responders.map(value => JSON.stringify(value));
-            return super.ok(res, json);
+            return super.ok(res, responders);
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.INTERNAL_SERVER_ERROR);
         }

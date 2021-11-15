@@ -2,7 +2,7 @@ import {IEventSecurityConstraint} from "./IEventSecurityConstraint";
 import {AbstractModel} from "./AbstractModel";
 import {AfterLoad, BeforeInsert, Column} from "typeorm";
 import {Guild, GuildChannel, Role} from "discord.js";
-import {ArrayUtils, ObjectUtil} from "../../utils/Utils";
+import {ArrayUtils} from "../../utils/Utils";
 import {container} from "tsyringe";
 import {Client} from "discordx";
 
@@ -18,24 +18,22 @@ export abstract class AbstractEventSecurityConstraint extends AbstractModel impl
 
     private getRoles(prop: string): void {
         const value: string | null = this[prop];
-        if (!ObjectUtil.validString(value)) {
+        if (!ArrayUtils.isValidArray(value)) {
             this[prop] = [];
             return;
         }
         const guild = this.getGuild();
-        const roleIds = value.split(",");
-        this[prop] = roleIds.map(roleId => guild.roles.cache.get(roleId));
+        this[prop] = value.map(roleId => guild.roles.cache.get(roleId));
     }
 
     private getChannels(prop: string): void {
         const value: string | null = this[prop];
-        if (!ObjectUtil.validString(value)) {
+        if (!ArrayUtils.isValidArray(value)) {
             this[prop] = [];
             return;
         }
         const guild = this.getGuild();
-        const channels = value.split(",");
-        this[prop] = channels.map(channelId => guild.channels.cache.get(channelId));
+        this[prop] = value.map(channelId => guild.channels.cache.get(channelId));
     }
 
     private setChannels(channels: GuildChannel[], prop: string): void {
