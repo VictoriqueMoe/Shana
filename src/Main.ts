@@ -10,12 +10,16 @@ import {GuildManager} from "./model/guild/manager/GuildManager";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import {createConnection, useContainer} from "typeorm";
 import {importx} from "@discordx/importer";
+import * as io from "@pm2/io";
 // const https = require('http-debug').https;
 // https.debug = 1;
-const io = require('@pm2/io');
+
+
 io.init({
-    transactions: true,// will enable the transaction tracing
-    http: true // will enable metrics about the http server (optional)
+    tracing: true,
+    metrics: {
+        http: true
+    }
 });
 dotenv.config({path: __dirname + '/../.env'});
 
@@ -34,6 +38,7 @@ export class Main {
         const connection = await createConnection({
             type: "better-sqlite3",
             database: dbName,
+            synchronize: true,
             key: process.env.sqlIte_key,
             entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
         });

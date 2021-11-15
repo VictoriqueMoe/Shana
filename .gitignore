@@ -111,3 +111,5 @@ config.json
 node-gyp
 /.clinic/
 **.clinic/**
+/database_test.sqlite-wal
+/database_test.sqlite-shm
