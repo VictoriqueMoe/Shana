@@ -113,3 +113,5 @@ node-gyp
 **.clinic/**
 /database_test.sqlite-wal
 /database_test.sqlite-shm
+/database.sqlite-shm
+/database.sqlite-wal
