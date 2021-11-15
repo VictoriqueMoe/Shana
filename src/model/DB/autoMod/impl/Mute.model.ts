@@ -8,7 +8,8 @@ import {IdentifiableModel} from "../../IdentifiableModel";
 export class MuteModel extends IdentifiableModel {
 
     @Column({
-        type: "simple-array"
+        type: "simple-array",
+        nullable: false
     })
     public prevRole: string[];
 

@@ -178,7 +178,9 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (model) {
             try {
                 // @ts-ignore
-                await super.commitToDatabase(model, {}, true);
+                await super.commitToDatabase(getRepository(RolePersistenceModel), model, undefined, {
+                    silentOnDupe: true
+                });
             } catch (e) {
                 if (e instanceof UniqueViolationError) {
                     return;

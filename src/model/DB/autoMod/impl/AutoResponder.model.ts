@@ -26,6 +26,8 @@ export class AutoResponderModel extends AbstractEventSecurityConstraint {
 
     @Column({
         type: "simple-array",
+        nullable: false,
+        default: ""
     })
     public emojiReactions: string[];
 

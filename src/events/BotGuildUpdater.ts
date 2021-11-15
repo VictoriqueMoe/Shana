@@ -15,12 +15,10 @@ export class BotGuildUpdater extends BaseDAO<GuildableModel> {
         });
         await super.commitToDatabase(getRepository(GuildableModel), [model]);
         const onReadyClass: OnReady = container.resolve(OnReady);
-        return onReadyClass.init().then(pArr => {
-            Promise.all(pArr).then(() => {
-                console.log(`Joined server "${guild.name}"`);
-            }).catch(e => {
-                console.error(e);
-            });
+        return onReadyClass.init().then(() => {
+            console.log(`Joined server "${guild.name}"`);
+        }).catch(e => {
+            console.error(e);
         });
     }
 

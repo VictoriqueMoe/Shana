@@ -887,7 +887,7 @@ export class ObjectUtil {
         if (!ArrayUtils.isValidArray(matches)) {
             return new Set();
         }
-        return new Set(...matches);
+        return new Set(matches);
     }
 
     public static guid(): string {

@@ -78,14 +78,14 @@ export abstract class AbstractEventSecurityConstraint extends AbstractModel impl
 
     @Column({
         type: "simple-array",
-        nullable: true,
+        nullable: false,
         default: ""
     })
     public allowedChannels: GuildChannel[];
 
     @Column({
         type: "simple-array",
-        nullable: true,
+        nullable: false,
         default: ""
     })
     public allowedRoles: Role[];
@@ -93,14 +93,14 @@ export abstract class AbstractEventSecurityConstraint extends AbstractModel impl
 
     @Column({
         type: "simple-array",
-        nullable: true,
+        nullable: false,
         default: ""
     })
     public ignoredChannels: GuildChannel[];
 
     @Column({
         type: "simple-array",
-        nullable: true,
+        nullable: false,
         default: ""
     })
     public ignoredRoles: Role[];

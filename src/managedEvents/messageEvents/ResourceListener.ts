@@ -64,25 +64,13 @@ export class ResourceListener {
             }
             const exists = await getRepository(BannedAttachmentsModel)
                 .createQueryBuilder("bannedAttachmentsModel")
-                .where("bannedAttachmentsModel.guildId :guildId", {
+                .where("bannedAttachmentsModel.guildId = :guildId", {
                     guildId: message.guild.id
                 })
                 .andWhere("bannedAttachmentsModel.attachmentHash = :hash OR bannedAttachmentsModel.url = :url", {
                     hash: attachmentHash,
                     url
                 }).getOne();
-            /*const exists = await BannedAttachmentsModel.findOne({
-                where: {
-                    guildId: message.guild.id,
-                    [Op.or]: [
-                        {
-                            attachmentHash
-                        }, {
-                            url
-                        }
-                    ]
-                }
-            });*/
             if (exists) {
                 shouldDelete = true;
                 reason = exists.reason;

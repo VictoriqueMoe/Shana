@@ -43,6 +43,9 @@ export class VicImage extends AbstractCommandModule {
     private async vicImage(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const randomImageMetadata = this._vicDropbox.randomImage;
+        if (!randomImageMetadata) {
+            return InteractionUtils.replyOrFollowUp(interaction, "no images found");
+        }
         const randomImage = (await this._vicDropbox.filesDownload({"path": randomImageMetadata.path_lower})).result;
         const buffer: Buffer = (randomImage as any).fileBinary;
         try {

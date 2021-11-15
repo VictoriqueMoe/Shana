@@ -24,7 +24,7 @@ io.init({
 dotenv.config({path: __dirname + '/../.env'});
 
 export class Main {
-    public static testMode = true;
+    public static testMode = false;
 
     public static async start(): Promise<void> {
         DIService.container = container;
@@ -38,7 +38,6 @@ export class Main {
         const connection = await createConnection({
             type: "better-sqlite3",
             database: dbName,
-            synchronize: true,
             key: process.env.sqlIte_key,
             entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
         });
@@ -71,7 +70,7 @@ export class Main {
                 const guilds = await guildManager.getGuilds();
                 return guilds.map(guild => guild.id);
             }],
-            silent: false,
+            silent: false
         });
         await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
         registerInstance(connection, client);

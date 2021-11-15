@@ -21,6 +21,7 @@ import {registerInstance} from "../DI/moduleRegistrar";
 import {EntityManager, getManager, getRepository, Transaction, TransactionManager} from "typeorm";
 import {InsertResult} from "typeorm/browser";
 import * as io from "@pm2/io";
+import {VicDropbox} from "../model/dropbox/VicDropbox";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -42,16 +43,14 @@ export class OnReady extends BaseDAO<any> {
         } else {
             await this._client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
         }
-        // const vicDropbox = container.resolve(VicDropbox);
+        const vicDropbox = container.resolve(VicDropbox);
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
-        // await OnReady.cleanCommands(true);
         this.initMusicPlayer();
-        //    pArr.push(vicDropbox.index());
+        pArr.push(vicDropbox.index());
         pArr.push(this.initUsernames());
-        const initPromises = await this.init();
+        await this.init();
         // wait for the initial transaction to finish
-        await Promise.all(initPromises);
         pArr.push(OnReady.applyEmptyRoles());
         pArr.push(loadClasses(...this.classesToLoad));
         pArr.push(OnReady.startServer());
@@ -167,16 +166,14 @@ export class OnReady extends BaseDAO<any> {
      * Commands that are run on application start AND on join new guild
      */
     @Transaction()
-    public init(@TransactionManager() manager?: EntityManager): Promise<Promise<any>[]> {
-        return this.populateCommandSecurity(manager).then(() => {
-            const pArr: Promise<any>[] = [];
-            pArr.push(this.populateClosableEvents(manager));
-            pArr.push(this.setDefaultSettings(manager));
-            pArr.push(this.populatePostableChannels(manager));
-            pArr.push(this.cleanUpGuilds(manager));
-            pArr.push(this.initAppCommands());
-            return pArr;
-        });
+    public async init(@TransactionManager() manager?: EntityManager): Promise<void> {
+        await this.populateCommandSecurity(manager);
+        await this.populateClosableEvents(manager);
+        await this.populateClosableEvents(manager);
+        await this.setDefaultSettings(manager);
+        await this.populatePostableChannels(manager);
+        await this.cleanUpGuilds(manager);
+        await this.initAppCommands();
     }
 
     @On("interactionCreate")
