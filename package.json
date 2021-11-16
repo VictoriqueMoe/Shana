@@ -1,6 +1,6 @@
 {
   "name": "shanabot",
-  "version": "3.0.0",
+  "version": "3.5.0",
   "description": "Notice me",
   "type": "commonjs",
   "main": "./build/Main.js",
