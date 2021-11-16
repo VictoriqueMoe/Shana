@@ -124,16 +124,9 @@ export class OnReady extends BaseDAO<any> {
             return cb(log);
         });
 
-        io.action("Re init commands (globally)", async cb => {
-            await this.cleanCommands(false);
-            await this.initAppCommands();
-            return cb("Slash Commands reset");
-        });
-
-        io.action("Re init commands (guilds only)", async cb => {
-            await this.cleanCommands(true);
-            await this.initAppCommands();
-            return cb("Slash Commands reset");
+        io.action("refresh permissions", async cb => {
+            await this._client.initApplicationPermissions();
+            cb("Permissions refreshed");
         });
 
         io.action('Refresh settings cache', async (cb) => {
