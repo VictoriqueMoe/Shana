@@ -73,7 +73,7 @@ export class AccountAge extends AbstractCommandModule {
         const guildId = interaction.guild.id;
         const guild = await this._client.guilds.fetch(guildId);
         const ageObject = AccountAge.getAge(guild);
-        return InteractionUtils.replyOrFollowUp(interaction, `Server is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
+        return InteractionUtils.replyOrFollowUp(interaction, `Server is: ${ageObject.ageHumanReadable} old\n and was created at: ${ageObject.utcDate}`);
     }
 
     @Slash("channelage", {
@@ -89,7 +89,7 @@ export class AccountAge extends AbstractCommandModule {
         interaction: CommandInteraction
     ): Promise<void> {
         const ageObject = AccountAge.getAge(channel);
-        return InteractionUtils.replyOrFollowUp(interaction, `Channel is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
+        return InteractionUtils.replyOrFollowUp(interaction, `<#${channel.id}> is: ${ageObject.ageHumanReadable} old\n and was created at: ${ageObject.utcDate}`);
     }
 
 
@@ -106,6 +106,6 @@ export class AccountAge extends AbstractCommandModule {
         interaction: CommandInteraction
     ): Promise<void> {
         const ageObject = AccountAge.getAge(user);
-        return InteractionUtils.replyOrFollowUp(interaction, `Account is: ${ageObject.ageHumanReadable}\n and was created at: ${ageObject.utcDate}`);
+        return InteractionUtils.replyOrFollowUp(interaction, ` <@${user.id}>'s account is: ${ageObject.ageHumanReadable}\nand was created at: ${ageObject.utcDate}`);
     }
 }

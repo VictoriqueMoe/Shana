@@ -65,7 +65,7 @@ export class VicImage extends AbstractCommandModule {
 
 
     @Slash("vicreindex", {
-        description: "Get a random image of Victorique#0002"
+        description: "Re-index image metadata from dropbox"
     })
     @Guard(NotBotInteraction, CommandEnabled)
     private async vicReIndex(interaction: CommandInteraction): Promise<void> {
