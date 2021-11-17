@@ -437,7 +437,7 @@ export namespace DiscordUtils {
      * message Attachments
      * message URL
      * reference message
-     * @param command
+     * @param message
      */
     export async function getImageUrlsFromMessageOrReference(message: Message): Promise<Set<string>> {
         const messageAttachments = message.attachments;

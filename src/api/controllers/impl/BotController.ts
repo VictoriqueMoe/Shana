@@ -354,7 +354,6 @@ export class BotController extends baseController {
         const emojis = await Promise.all(pArr).then(values => {
             return values.map(v => {
                 return {
-                    /* "buffer": v.buffer.toString("base64"),*/
                     "url": v.url,
                     "id": v.id,
                     // @ts-ignore
