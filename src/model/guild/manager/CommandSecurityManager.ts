@@ -272,15 +272,8 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         builder.select(selectArr);
         return builder
             .where(`commandSecurityModel.guildId = :guildId`, {guildId})
-            .andWhere("LOWER(commandSecurityModel.commandName) = LOWER(:commandName)", {commandName}).getOne();
-
-        /*return CommandSecurityModel.findOne({
-            attributes,
-            where: {
-                guildId,
-                "commandName": Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('commandName')), 'LIKE', `%${commandName}%`)
-            }
-        });*/
+            .andWhere("LOWER(commandSecurityModel.commandName) = LOWER(:commandName)", {commandName})
+            .getOne();
     }
 
     public async canRunCommand(member: GuildMember, category: ICategory, command: (ICategoryItem | ICategoryItemCommand)): Promise<boolean> {

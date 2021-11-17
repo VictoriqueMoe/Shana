@@ -133,9 +133,9 @@ export abstract class ResourceBanner extends AbstractCommandModule {
                 emojiMap.set(letter, emoji);
             }
             let reply = "";
-            emojiMap.forEach((value, key) => {
+            for (const [key, value] of emojiMap) {
                 reply += `${key}: ${value} \n`;
-            });
+            }
             await message.reply(`What emoji would you like to ban: \n${reply}`);
             const filter = (response: Message): boolean => {
                 if (!response.member || !message.member) {
