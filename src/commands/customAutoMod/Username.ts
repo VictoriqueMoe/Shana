@@ -23,11 +23,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
     },
     {
         name: "username",
-        description: "force a username to always be set to a member, this will automatically apply the username if they leave and rejoin again. \n you can optionally add a block to anyone other than staff member from changing it",
+        description: "Force a username to always be set to a member, this will automatically apply the username if they leave and rejoin again.\n\nyou can optionally add a block to anyone other than staff member from changing it.\n\nWipe the username to clear it from the block",
         type: "SLASH",
         options: [
             {
-                name: "Channel",
+                name: "User",
                 type: "USER",
                 optional: false,
                 description: "The user you want to change nicknames"

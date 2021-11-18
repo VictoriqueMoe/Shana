@@ -1,10 +1,10 @@
-import {GuildMember, Role, User} from "discord.js";
+import {GuildMember, Role} from "discord.js";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {DiscordUtils} from "../../../utils/Utils";
 import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
 import {BaseDAO} from "../../../DAO/BaseDAO";
+import {DiscordUtils} from "../../../utils/Utils";
 
 @singleton()
 export class RoleApplier {
@@ -81,38 +81,13 @@ export class RoleApplier {
         if (!hasRole) {
             return;
         }
-        // at this point we KNOW the member is special AND they left, but we do not know if they left voluntary or was kicked
-        // we need to look at the audit logs
-        const kickLog = await DiscordUtils.getAuditLogEntry("MEMBER_KICK", member.guild);
-        let wasKicked: boolean;
-        if (!kickLog) {
-            console.log(`${member.user.tag} left the guild, most likely of their own will.`);
-            wasKicked = false;
-        } else {
-            if (kickLog.createdAt < member.joinedAt) {
-                console.log(`${member.user.tag} left the guild, most likely of their own will or they where banned .`);
-                wasKicked = false;
-            } else {
-                const {executor, target} = kickLog;
-                if ((target as User).id === member.id) {
-                    console.log(`${member.user.tag} left the guild; kicked by ${executor.tag}?`);
-                    wasKicked = true;
-                } else {
-                    wasKicked = false;
-                }
-            }
-        }
-
-        if (!wasKicked) {
-            const roleObj = member.roles.cache.get(roleId);
-            // they where in special, but left on choice, this is now logged into the DB if they return
-            console.log(`member ${member.user.username} left the guild while having the role of ${roleObj.name}`);
-            return BaseDAO.build(model, {
-                userId: member.user.id,
-                roleId,
-                guildId: member.guild.id
-            });
-        }
-        return null;
+        const guildId = member.guild.id;
+        const userId = member.user.id;
+        await DiscordUtils.postToLog(`member ${member.user.tag} left the guild while having the role of ${role.name}`, guildId);
+        return BaseDAO.build(model, {
+            userId,
+            roleId,
+            guildId
+        });
     }
 }
