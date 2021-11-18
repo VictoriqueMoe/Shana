@@ -10,7 +10,10 @@ export class MiscListeners {
         const emojiId = emjiFromReaction.id;
         if (!(user instanceof User)) {
             try {
-                user = (await reaction.message.guild.members.fetch(user.id)).user;
+                user = (await reaction.message.guild.members.fetch({
+                    force: true,
+                    user: user.id
+                })).user;
             } catch (e) {
                 console.error(e);
                 return;

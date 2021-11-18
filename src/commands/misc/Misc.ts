@@ -31,10 +31,10 @@ import {container, delay, inject, injectable} from "tsyringe";
 import * as locale from 'locale-codes';
 import {Category} from "@discordx/utilities";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+import Anilist from "anilist-node";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const translate = require("deepl");
-const Anilist = require('anilist-node');
 const reverseImageSearch = require("node-reverse-image-search");
 const isImageFast = require('is-image-fast');
 
@@ -131,10 +131,13 @@ const isImageFast = require('is-image-fast');
 @injectable()
 export class Misc extends AbstractCommandModule {
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
-    private readonly animeTractApi = new AnimeTractApi();
-    private readonly anilist = new Anilist();
 
-    constructor(private _client: Client, @inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager) {
+    constructor(
+        private _client: Client,
+        @inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager,
+        private _animeTractApi: AnimeTractApi,
+        private _anilist: Anilist
+    ) {
         super();
     }
 
@@ -301,7 +304,7 @@ export class Misc extends AbstractCommandModule {
         let resp: Response = null;
         const url: string = messaheUrls.values().next().value;
         try {
-            resp = await this.animeTractApi.fetchAnime(url);
+            resp = await this._animeTractApi.fetchAnime(url);
         } catch (e) {
             console.error(e);
         }
@@ -320,7 +323,7 @@ export class Misc extends AbstractCommandModule {
             similarity,
             from
         } = resp.result[0];
-        const aniDbRes = await this.anilist.media.anime(anilist);
+        const aniDbRes = await this._anilist.media.anime(anilist);
         const {
             isAdult,
             title
@@ -376,7 +379,7 @@ export class Misc extends AbstractCommandModule {
             }
         }
         try {
-            const previewBuffer = await this.animeTractApi.fetchPreview(video);
+            const previewBuffer = await this._animeTractApi.fetchPreview(video);
             await replyMessage.delete();
             const file = new MessageAttachment(previewBuffer, `${mainTitle}.mp4`);
             await message.reply({

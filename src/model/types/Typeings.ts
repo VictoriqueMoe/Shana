@@ -1,65 +1,12 @@
 import {ArgsOf, Client} from "discordx";
-import {GuildChannel, Message, ThreadChannel} from "discord.js";
+import {Message} from "discord.js";
 import {SETTINGS} from "../../enums/SETTINGS";
 
 export namespace Typeings {
-    export type CommandArgs = {
-        module: {
-            name: string,
-            description: string
-        },
-        commands: Command[]
-    };
-    export type commandType = "slash" | "contextMenu" | "dropdown" | "button" | "command";
-    export type Command = {
-        name: string,
-        type: commandType
-        deprecated?: boolean,
-        description?: {
-            text?: string,
-            examples?: string[],
-            args?: {
-                name: string,
-                type: "mention" | "text" | "number" | "boolean" | "attachment",
-                optional: boolean,
-                description: string
-            }[]
-        }
-    };
-    export type AbstractChannel = GuildChannel | ThreadChannel;
-
     export type UpdateCommandSettings = {
         roles: string[],
         enabled: boolean
     };
-
-    export type AnimeEntry = {
-        averageScore: number,
-        coverImage: {
-            large: string,
-            medium: string,
-            small: string,
-            color: string
-        },
-        description: string,
-        startDate: PseudoDate,
-        endDate: PseudoDate,
-        episodes: number,
-        siteUrl: string,
-        format: string,
-        genres: string[],
-        isAdult: boolean,
-        nextAiringEpisode: AiringEntry[]
-    }
-    export type PseudoDate = {
-        year: number,
-        month: number,
-        day: number
-    };
-    export type AiringEntry = {
-        airingAt: number,
-        episode: number
-    }
 
     export namespace DEEP_AI {
         type MainOb = {

@@ -1,18 +1,9 @@
 import fetch from "node-fetch";
 import {Response} from "./AnimeTypings";
+import {singleton} from "tsyringe";
 
+@singleton()
 export class AnimeTractApi {
-
-    public uris: { search: string; };
-
-    /**
-     * Constructs an instance of the API.
-     */
-    constructor() {
-        this.uris = {
-            search: `https://api.trace.moe/search?cutBorders`
-        };
-    }
 
     /**
      * Searches the website for the similar anime.
