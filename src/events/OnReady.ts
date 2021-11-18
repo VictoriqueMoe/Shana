@@ -20,7 +20,7 @@ import {Player} from "discord-music-player";
 import {registerInstance} from "../DI/moduleRegistrar";
 import {EntityManager, getManager, getRepository, Transaction, TransactionManager} from "typeorm";
 import {InsertResult} from "typeorm/browser";
-import * as io from "@pm2/io";
+import io from "@pm2/io";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 

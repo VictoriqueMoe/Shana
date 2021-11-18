@@ -10,7 +10,7 @@ export async function moduleRegistrar(): Promise<void> {
     container.register<ConnectionManager>(ConnectionManager, {
         useFactory: instanceCachingFactory(() => new ConnectionManager())
     });
-    container.registerSingleton(Anilist);
+    container.registerInstance(Anilist, new Anilist());
     container.afterResolution(
         Beans.ISubModuleToken,
         (_t, result: ISubModule[], resolutionType) => {

@@ -10,7 +10,7 @@ import {GuildManager} from "./model/guild/manager/GuildManager";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import {createConnection, useContainer} from "typeorm";
 import {importx} from "@discordx/importer";
-import * as io from "@pm2/io";
+import io from "@pm2/io";
 // const https = require('http-debug').https;
 // https.debug = 1;
 

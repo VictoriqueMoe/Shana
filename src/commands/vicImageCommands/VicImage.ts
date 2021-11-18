@@ -69,7 +69,9 @@ export class VicImage extends AbstractCommandModule {
     })
     @Guard(NotBotInteraction, CommandEnabled)
     private async vicReIndex(interaction: CommandInteraction): Promise<void> {
-        await interaction.deferReply();
+        await interaction.deferReply({
+            ephemeral: true
+        });
         await this._vicDropbox.index();
         await interaction.editReply({
             content: `Re-indexed ${this._vicDropbox.allImages.length} images from Dropbox`
