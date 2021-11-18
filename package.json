@@ -102,6 +102,6 @@
     "node-gyp": "^8.3.0",
     "ts-node": "^10.4.0",
     "tslib": "^2.3.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.2"
   }
 }
