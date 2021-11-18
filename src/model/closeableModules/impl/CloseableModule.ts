@@ -65,7 +65,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         const model: ICloseOption = await getRepository(this._model).findOne({
             select: ["settings"],
             where: {
-                "moduleId": this.moduleId,
+                moduleId: this.moduleId,
                 guildId
             }
         });
@@ -82,11 +82,11 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
     public async close(guildId: string): Promise<boolean> {
         const m = await getRepository(this._model).update(
             {
-                "moduleId": this.moduleId,
+                moduleId: this.moduleId,
                 guildId
             },
             {
-                "status": false
+                status: false
             }
         );
         this._isEnabled.set(guildId, m.affected === 1);
@@ -100,11 +100,11 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
     public async open(guildId: string): Promise<boolean> {
         const m = await getRepository(this._model).update(
             {
-                "moduleId": this.moduleId,
+                moduleId: this.moduleId,
                 guildId
             },
             {
-                "status": true
+                status: true
             }
         );
         this._isEnabled.set(guildId, m.affected === 1);
@@ -117,7 +117,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
             const model: ICloseOption = await getRepository(this._model).findOne({
                 select: ["status"],
                 where: {
-                    "moduleId": this.moduleId,
+                    moduleId: this.moduleId,
                     guildId
                 }
             });
