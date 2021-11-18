@@ -798,13 +798,13 @@ export namespace DiscordUtils {
             channel = await channelManager.getLogChannel(guildId);
         }
         if (channel == null) {
-            return Promise.resolve(null);
+            return null;
         }
         try {
             if (ArrayUtils.isValidArray(message)) {
-                return await channel.send({embeds: message});
+                return channel.send({embeds: message});
             } else {
-                return await channel.send(message as string);
+                return channel.send(message);
             }
         } catch (e) {
             console.warn(e.message);
