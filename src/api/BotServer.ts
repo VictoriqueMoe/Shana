@@ -7,6 +7,7 @@ import * as http from "http";
 import Logger from "jet-logger";
 import {singleton} from "tsyringe";
 import {BotController} from "./controllers/impl/BotController";
+import {PostConstruct} from "../model/decorators/PostConstruct";
 
 @singleton()
 export class BotServer extends Server {
@@ -20,23 +21,22 @@ export class BotServer extends Server {
         super.addControllers(initRouter);
     }
 
-    public initClasses(): Promise<void> {
-        return this.loadClasses();
-    }
-
     public start(port: number): http.Server {
         return this.app.listen(port, () => {
             Logger.Imp('Server listening on port: ' + port);
         });
     }
 
+    @PostConstruct
     private loadClasses(): Promise<void> {
         const files = glob.sync(this.classesToLoad) || [];
-        const pArr = files.map(filePath => import(path.resolve(filePath)));
-        return Promise.all(pArr).then(modules => {
-            for (const module of modules) {
+        const pArr = files.map(filePath => {
+            import(path.resolve(filePath)).then(module => {
                 Logger.Imp(`load ${Object.keys(module)[0]}`);
-            }
+            });
+        });
+        return Promise.all(pArr).then(() => {
+            this.start(4401);
         });
     }
 }

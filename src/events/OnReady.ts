@@ -271,9 +271,7 @@ export class OnReady extends BaseDAO<any> {
         if (Main.testMode) {
             return;
         }
-        const botServer = container.resolve(BotServer);
-        await botServer.initClasses();
-        botServer.start(4401);
+        container.resolve(BotServer);
     }
 
     private async populateGuilds(): Promise<void> {
