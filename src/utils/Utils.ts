@@ -532,6 +532,19 @@ export namespace DiscordUtils {
         parent?: ObjectChange<CategoryChannel>
     };
 
+
+    export type GuildUpdate = {
+        banner?: ObjectChange<string>,
+        rulesChannel?: ObjectChange<TextChannel>,
+        splash?: ObjectChange<string>,
+        description?: ObjectChange<string>,
+        discoverySplash?: ObjectChange<string>,
+        icon?: ObjectChange<string>,
+        vanityURLCode?: ObjectChange<string>,
+        name?: ObjectChange<string>,
+
+    };
+
     export type ThreadUpdate = {
         archived?: ObjectChange<boolean>,
         type?: ObjectChange<"Public" | "Private" | null>
@@ -604,6 +617,100 @@ export namespace DiscordUtils {
                 after: newArchiveDuration
             };
         }
+        return retObj;
+    }
+
+    export function getGuildUpdate(oldGuild: Guild, newGuild: Guild): GuildUpdate {
+        const retObj: GuildUpdate = {};
+        const oldName = oldGuild.name;
+        const newName = newGuild.name;
+        if (oldName !== newName) {
+            retObj["name"] = {
+                before: oldName,
+                after: newName
+            };
+        }
+        const oldBanner = oldGuild.banner;
+        const newBanner = newGuild.banner;
+        if (oldBanner !== newBanner) {
+            retObj["banner"] = {
+                before: oldGuild.bannerURL({
+                    size: 1024
+                }),
+                after: newGuild.bannerURL({
+                    size: 1024
+                })
+            };
+        }
+
+        const oldRulesChannel = oldGuild.rulesChannelId;
+        const newRulesChannel = newGuild.rulesChannelId;
+        if (oldRulesChannel !== newRulesChannel) {
+            retObj["rulesChannel"] = {
+                before: oldGuild.rulesChannel,
+                after: newGuild.rulesChannel
+            };
+        }
+
+        const oldSplash = oldGuild.splash;
+        const newSplash = newGuild.splash;
+        if (oldSplash !== newSplash) {
+            retObj["splash"] = {
+                before: oldGuild.splashURL({
+                    size: 1024
+                }),
+                after: newGuild.splashURL({
+                    size: 1024
+                })
+            };
+        }
+
+        const oldDescription = oldGuild.description;
+        const newDescription = newGuild.description;
+        if (oldDescription !== newDescription) {
+            retObj["description"] = {
+                before: oldDescription,
+                after: newDescription
+            };
+        }
+
+        const oldDiscoverySplash = oldGuild.discoverySplash;
+        const newDiscoverySplash = newGuild.discoverySplash;
+        if (oldDiscoverySplash !== newDiscoverySplash) {
+            retObj["discoverySplash"] = {
+                before: oldGuild.discoverySplashURL({
+                    size: 1024
+                }),
+                after: newGuild.discoverySplashURL({
+                    size: 1024
+                })
+            };
+        }
+
+        const oldIcon = oldGuild.icon;
+        const newIcon = newGuild.icon;
+        if (oldIcon !== newIcon) {
+            retObj["icon"] = {
+                before: oldGuild.iconURL({
+                    size: 1024,
+                    dynamic: true
+                }),
+                after: newGuild.iconURL({
+                    size: 1024,
+                    dynamic: true
+                })
+            };
+        }
+
+        const oldVanityUrl = oldGuild.vanityURLCode;
+        const newVanityUrl = newGuild.vanityURLCode;
+        if (oldVanityUrl !== newVanityUrl) {
+            retObj["vanityURLCode"] = {
+                before: oldVanityUrl,
+                after: newVanityUrl
+            };
+        }
+
         return retObj;
     }
 
@@ -999,7 +1106,7 @@ export class ObjectUtil {
         return Math.floor((amountOfCaps * 100) / stringLength);
     }
 
-    public static isValidObject(obj: unknown): boolean {
+    public static isValidObject(obj: unknown): obj is Record<string, any> {
         return typeof obj === "object" && obj !== null && obj !== undefined && Object.keys(obj).length > 0;
     }
 
