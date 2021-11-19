@@ -634,12 +634,12 @@ export namespace DiscordUtils {
         const newBanner = newGuild.banner;
         if (oldBanner !== newBanner) {
             retObj["banner"] = {
-                before: oldGuild.bannerURL({
+                before: sanitiseString(oldGuild.bannerURL({
                     size: 1024
-                }),
-                after: newGuild.bannerURL({
+                })),
+                after: sanitiseString(newGuild.bannerURL({
                     size: 1024
-                })
+                }))
             };
         }
 
@@ -656,12 +656,12 @@ export namespace DiscordUtils {
         const newSplash = newGuild.splash;
         if (oldSplash !== newSplash) {
             retObj["splash"] = {
-                before: oldGuild.splashURL({
+                before: sanitiseString(newGuild.splashURL({
                     size: 1024
-                }),
-                after: newGuild.splashURL({
+                })),
+                after: sanitiseString(newGuild.splashURL({
                     size: 1024
-                })
+                }))
             };
         }
 
@@ -669,8 +669,8 @@ export namespace DiscordUtils {
         const newDescription = newGuild.description;
         if (oldDescription !== newDescription) {
             retObj["description"] = {
-                before: oldDescription,
-                after: newDescription
+                before: sanitiseString(oldDescription),
+                after: sanitiseString(newDescription)
             };
         }
 
@@ -678,12 +678,12 @@ export namespace DiscordUtils {
         const newDiscoverySplash = newGuild.discoverySplash;
         if (oldDiscoverySplash !== newDiscoverySplash) {
             retObj["discoverySplash"] = {
-                before: oldGuild.discoverySplashURL({
+                before: sanitiseString(oldGuild.discoverySplashURL({
                     size: 1024
-                }),
-                after: newGuild.discoverySplashURL({
+                })),
+                after: sanitiseString(newGuild.discoverySplashURL({
                     size: 1024
-                })
+                }))
             };
         }
 
@@ -691,14 +691,14 @@ export namespace DiscordUtils {
         const newIcon = newGuild.icon;
         if (oldIcon !== newIcon) {
             retObj["icon"] = {
-                before: oldGuild.iconURL({
+                before: sanitiseString(oldGuild.iconURL({
                     size: 1024,
                     dynamic: true
-                }),
-                after: newGuild.iconURL({
+                })),
+                after: sanitiseString(newGuild.iconURL({
                     size: 1024,
                     dynamic: true
-                })
+                }))
             };
         }
 
@@ -706,8 +706,8 @@ export namespace DiscordUtils {
         const newVanityUrl = newGuild.vanityURLCode;
         if (oldVanityUrl !== newVanityUrl) {
             retObj["vanityURLCode"] = {
-                before: oldVanityUrl,
-                after: newVanityUrl
+                before: sanitiseString(oldVanityUrl),
+                after: sanitiseString(newVanityUrl)
             };
         }
 
@@ -814,11 +814,15 @@ export namespace DiscordUtils {
         const newIcon = newRole.iconURL(iconUrlSettings);
         if (oldIcon !== newIcon) {
             retObj["iconChange"] = {
-                "before": oldIcon,
-                "after": newIcon
+                "before": sanitiseString(oldIcon),
+                "after": sanitiseString(newIcon)
             };
         }
         return retObj;
+    }
+
+    function sanitiseString(str: string): string {
+        return str ?? "None";
     }
 
     export async function loadResourceFromURL(url: string): Promise<Buffer> {
