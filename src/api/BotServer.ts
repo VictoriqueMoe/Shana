@@ -13,12 +13,17 @@ import {PostConstruct} from "../model/decorators/PostConstruct";
 export class BotServer extends Server {
 
     private readonly classesToLoad = `${__dirname}/controllers/**/*.{ts,js}`;
+    private _server: http.Server = null;
 
     constructor(initRouter: BotController) {
         super(Main.testMode);
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({extended: true}));
         super.addControllers(initRouter);
+    }
+
+    public get server(): http.Server {
+        return this._server;
     }
 
     public start(port: number): http.Server {
@@ -28,7 +33,7 @@ export class BotServer extends Server {
     }
 
     @PostConstruct
-    private loadClasses(): Promise<void> {
+    private init(): Promise<void> {
         const files = glob.sync(this.classesToLoad) || [];
         const pArr = files.map(filePath => {
             import(path.resolve(filePath)).then(module => {
@@ -36,7 +41,7 @@ export class BotServer extends Server {
             });
         });
         return Promise.all(pArr).then(() => {
-            this.start(4401);
+            this._server = this.start(4401);
         });
     }
 }

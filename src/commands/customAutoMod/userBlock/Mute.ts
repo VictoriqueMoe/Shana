@@ -35,27 +35,37 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
             },
             {
                 name: "Reason",
-                optional: false,
+                optional: true,
                 type: "STRING",
-                description: "The reason why this user is muted"
+                description: "The reason why this user is muted (defaults to 'muted for {TIME}')"
             },
             {
                 name: "Timeout",
-                optional: false,
+                optional: true,
                 type: "NUMBER",
-                description: "timeout in seconds for how long this user should be muted"
+                description: "timeout in seconds for how long this user should be muted (defaults to 1)"
             },
             {
                 name: "TimeUnit",
-                optional: false,
+                optional: true,
                 type: "STRING",
-                description: "The time unit used to specify how long a user should be muted"
+                description: "The time unit used to specify how long a user should be muted (defaults to days)"
             }
         ]
     },
     {
-        name: "Mute User for 30 mins",
-        description: "Mute the current user for 30 mins",
+        name: "Mute for 1 Hour",
+        description: "Mute the current user for 1 hour",
+        type: "CONTEXT USER"
+    },
+    {
+        name: "Mute for 6 Hours",
+        description: "Mute the current user for 6 hours",
+        type: "CONTEXT USER"
+    },
+    {
+        name: "Mute for 1 day",
+        description: "Mute the current user for 1 day",
         type: "CONTEXT USER"
     },
     {
@@ -76,10 +86,30 @@ export class Mute extends AbstractCommandModule {
     }
 
 
-    @ContextMenu("USER", "Mute User for 30 mins")
+    @ContextMenu("USER", "Mute for 1 Hour")
     @Guard(CommandEnabled)
-    private async userHandler(interaction: ContextMenuInteraction): Promise<void> {
+    private async muteFor1Hour(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply();
+        return this.muteFromContext(interaction, 1, TimeUtils.TIME_UNIT.hours);
+    }
+
+    @ContextMenu("USER", "Mute for 6 Hours")
+    @Guard(CommandEnabled)
+    private async muteFor6Hours(interaction: ContextMenuInteraction): Promise<void> {
+        await interaction.deferReply();
+        return this.muteFromContext(interaction, 6, TimeUtils.TIME_UNIT.hours);
+    }
+
+
+    @ContextMenu("USER", "Mute for 1 day")
+    @Guard(CommandEnabled)
+    private async muteFor1Day(interaction: ContextMenuInteraction): Promise<void> {
+        await interaction.deferReply();
+        return this.muteFromContext(interaction, 1, TimeUtils.TIME_UNIT.days);
+    }
+
+
+    private async muteFromContext(interaction: ContextMenuInteraction, timeOut: number, timeUnit: TimeUtils.TIME_UNIT): Promise<void> {
         const member = InteractionUtils.getUserFromUserContextInteraction(interaction);
         if (!(member instanceof GuildMember)) {
             return InteractionUtils.replyOrFollowUp(interaction, "Unable to mute non-guild members");
@@ -95,7 +125,7 @@ export class Mute extends AbstractCommandModule {
         }
         let replyMessage: string;
         try {
-            replyMessage = await this.muteUser(member, creator, guildId, "N/A", 30, TimeUtils.TIME_UNIT.minutes);
+            replyMessage = await this.muteUser(member, creator, guildId, timeOut, timeUnit);
             return InteractionUtils.replyOrFollowUp(interaction, replyMessage);
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, (<Error>e).message);
@@ -114,19 +144,19 @@ export class Mute extends AbstractCommandModule {
             mentionedMember: User,
         @SlashOption("reason", {
             description: "The reason why this user is muted",
-            required: true
+            required: false
         })
             reason: string,
         @SlashOption("timeout", {
             description: "timeout for how long this user should be muted.",
-            required: true,
+            required: false,
             type: "INTEGER"
         })
             timeout: number,
         @SlashChoice(TimeUtils.TIME_UNIT)
         @SlashOption("timeunit", {
             description: "The time unit used to specify how long a user should be muted",
-            required: true
+            required: false
         })
             timeUnit: TimeUtils.TIME_UNIT,
         interaction: CommandInteraction
@@ -146,14 +176,20 @@ export class Mute extends AbstractCommandModule {
         }
         let replyMessage: string;
         try {
-            replyMessage = await this.muteUser(mentionedMember, creator, guildId, reason, timeout, timeUnit);
+            if (isNaN(undefined)) {
+                timeout = 1;
+            }
+            if (!timeUnit) {
+                timeUnit = TimeUtils.TIME_UNIT.days;
+            }
+            replyMessage = await this.muteUser(mentionedMember, creator, guildId, timeout, timeUnit, reason);
             return InteractionUtils.replyOrFollowUp(interaction, replyMessage);
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, (<Error>e).message);
         }
     }
 
-    private async muteUser(mentionedMember: GuildMember, creator: GuildMember, guildId: string, reason: string, timeout: number, timeUnit: TimeUtils.TIME_UNIT): Promise<string> {
+    private async muteUser(mentionedMember: GuildMember, creator: GuildMember, guildId: string, timeout: number, timeUnit: TimeUtils.TIME_UNIT, reason?: string): Promise<string> {
         const creatorID = creator.id;
         const blockedUserId = mentionedMember.id;
         const didYouBlockABot = mentionedMember.user.bot;
@@ -175,7 +211,9 @@ export class Mute extends AbstractCommandModule {
         if (didYouBlockABot) {
             throw new Error("You can not block a bot");
         }
-
+        if (!ObjectUtil.validString(reason)) {
+            reason = `muted for: ${ObjectUtil.timeToHuman(timeout, timeUnit)}`;
+        }
         let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
         await this._muteManager.muteUser(mentionedMember, reason, creatorID, timeout, timeUnit);
         replyMessage += ` for ${ObjectUtil.timeToHuman(timeout, timeUnit)}`;

@@ -333,10 +333,12 @@ export class OnReady extends BaseDAO<any> {
                     }
                 }
                 if (ArrayUtils.isValidArray(commandsToDestroy)) {
-                    await transactionManager.delete(CommandSecurityModel, {
-                        "commandName": commandsToDestroy,
-                        guildId
-                    });
+                    for (const commandName of commandsToDestroy) {
+                        await transactionManager.delete(CommandSecurityModel, {
+                            commandName,
+                            guildId
+                        });
+                    }
                 }
             }
         }

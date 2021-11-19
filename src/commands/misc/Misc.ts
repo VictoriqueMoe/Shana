@@ -17,9 +17,11 @@ import {
     ColorResolvable,
     CommandInteraction,
     ContextMenuInteraction,
+    GuildMember,
     ImageURLOptions,
     MessageAttachment,
-    MessageEmbed
+    MessageEmbed,
+    User
 } from "discord.js";
 import {TimedSet} from "../../model/Impl/TimedSet";
 import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
@@ -79,18 +81,30 @@ const isImageFast = require('is-image-fast');
     },
     {
         "name": "avatar",
-        "type": "CONTEXT USER",
-        "description": "Display a users avatar"
+        "type": "SLASH",
+        "description": "Display a users avatar",
+        options: [{
+            name: "user",
+            type: "USER",
+            description: "The user to display the avatar",
+            optional: false
+        }]
+    },
+    {
+        "name": "banner",
+        "type": "SLASH",
+        "description": "Display a users profile banner",
+        options: [{
+            name: "user",
+            type: "USER",
+            description: "The user to display the banner",
+            optional: false
+        }]
     },
     {
         "name": "translate",
         "type": "CONTEXT MESSAGE",
         "description": "Translate a message (to EN-GB)"
-    },
-    {
-        "name": "banner",
-        "type": "CONTEXT USER",
-        "description": "Display a users profile banner"
     },
     {
         "name": "posOrNeg",
@@ -117,13 +131,7 @@ const isImageFast = require('is-image-fast');
             }
         ],
         "description": "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text."
-    }/*,
-    {
-        "name": "initServerCommandPermissions",
-        "type": "SLASH",
-        "options": [],
-        "description": "Re-init all command permissions for this server."
-    }*/
+    }
 ])
 @SlashGroup("miscellaneous", "Miscellaneous commands")
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
@@ -196,20 +204,6 @@ export class Misc extends AbstractCommandModule {
         message.reply(`This message is ${resp}`);
     }
 
-    @ContextMenu("USER", "avatar")
-    @Guard(NotBotInteraction, CommandEnabled)
-    private async avatar(interaction: ContextMenuInteraction): Promise<void> {
-        const ops: ImageURLOptions = {
-            dynamic: true,
-            size: 1024
-        };
-        const user = InteractionUtils.getUserFromUserContextInteraction(interaction);
-        const avatarUrl = user.displayAvatarURL(ops);
-        return interaction.reply({
-            files: [avatarUrl]
-        });
-    }
-
     @ContextMenu("MESSAGE", "translate")
     @Guard(NotBotInteraction, CommandEnabled)
     private async translate(interaction: ContextMenuInteraction): Promise<void> {
@@ -261,16 +255,47 @@ export class Misc extends AbstractCommandModule {
         });
     }
 
-    @ContextMenu("USER", "banner")
+    @Slash("avatar", {
+        description: "The user to display the avatar"
+    })
     @Guard(NotBotInteraction, CommandEnabled)
-    private async banner(interaction: ContextMenuInteraction): Promise<void> {
+    private async avatar(
+        @SlashOption("user", {
+            description: "The user to display the avatar",
+            required: true
+        })
+            user: User,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        const ops: ImageURLOptions = {
+            dynamic: true,
+            size: 1024
+        };
+        const avatarUrl = user.displayAvatarURL(ops);
+        return interaction.reply({
+            files: [avatarUrl]
+        });
+    }
+
+    @Slash("banner", {
+        description: "Display a users profile banner"
+    })
+    @Guard(NotBotInteraction, CommandEnabled)
+    private async banner(
+        @SlashOption("user", {
+            description: "The user to display the banner",
+            required: true
+        })
+            user: User,
+        interaction: CommandInteraction
+    ): Promise<void> {
         await interaction.deferReply();
         const ops: ImageURLOptions = {
             dynamic: true,
             size: 1024
         };
-        const user = await InteractionUtils.getUserFromUserContextInteraction(interaction).fetch(true);
-        const bannerUrl = (await user.user.fetch(true)).bannerURL(ops);
+        const userFetched: User = await (<GuildMember><unknown>user).user.fetch(true);
+        const bannerUrl = userFetched.bannerURL(ops);
         if (!ObjectUtil.validString(bannerUrl)) {
             return InteractionUtils.replyOrFollowUp(interaction, "User has no banner", true);
         }
