@@ -55,19 +55,6 @@ export class MessageListener {
                     url: bannedStickerInfo.url
                 })
                 .getCount();
-            /*const exists = await getRepository(BannedAttachmentsModel).findOne({
-                where: {
-                    guildId: message.guild.id,
-                    isSticker: true,
-                    [Op.or]: [
-                        {
-                            attachmentHash: stickerHash
-                        }, {
-                            url: bannedStickerInfo.url
-                        }
-                    ]
-                }
-            });*/
             if (count === 1) {
                 try {
                     await message.delete();
@@ -102,19 +89,6 @@ export class MessageListener {
                     url: bannedEmojiInfo.url
                 })
                 .getOne();
-            /*const exists = await BannedAttachmentsModel.findOne({
-                where: {
-                    guildId: message.guild.id,
-                    isEmoji: true,
-                    [Op.or]: [
-                        {
-                            attachmentHash: emojiHash
-                        }, {
-                            url: bannedEmojiInfo.url
-                        }
-                    ]
-                }
-            });*/
             if (exists) {
                 const reasonToDel = exists.reason;
                 try {
