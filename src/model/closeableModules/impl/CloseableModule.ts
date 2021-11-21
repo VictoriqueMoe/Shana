@@ -28,8 +28,6 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
 
     public abstract get moduleId(): string;
 
-    public abstract get isDynoReplacement(): boolean;
-
     public get submodules(): Immutable.Set<ISubModule> {
         return this._subModuleManager.getSubModulesFromParent(this);
     }

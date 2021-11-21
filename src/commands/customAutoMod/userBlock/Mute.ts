@@ -215,7 +215,7 @@ export class Mute extends AbstractCommandModule {
             reason = `muted for: ${ObjectUtil.timeToHuman(timeout, timeUnit)}`;
         }
         let replyMessage = `User "${mentionedMember.user.username}" has been muted from this server with reason "${reason}"`;
-        await this._muteManager.muteUser(mentionedMember, reason, creatorID, timeout, timeUnit);
+        await this._muteManager.muteUser(mentionedMember, creatorID, reason, timeout, timeUnit);
         replyMessage += ` for ${ObjectUtil.timeToHuman(timeout, timeUnit)}`;
         return replyMessage;
     }

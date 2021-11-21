@@ -25,10 +25,6 @@ export class DynoAutoMod extends CloseableModule<null> {
         super(CloseOptionModel);
     }
 
-    public get isDynoReplacement(): boolean {
-        return true;
-    }
-
     public get moduleId(): string {
         return "DynoAutoMod";
     }
@@ -152,7 +148,7 @@ export class DynoAutoMod extends CloseableModule<null> {
             return;
         }
         const muteSingleton = container.resolve(MuteManager);
-        const model = await muteSingleton.muteUser(user, reason, creatorID, seconds);
+        const model = await muteSingleton.muteUser(user, creatorID, reason, seconds);
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
             const humanMuted = ObjectUtil.timeToHuman(seconds, TimeUtils.TIME_UNIT.seconds);

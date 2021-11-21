@@ -9,10 +9,6 @@ export abstract class AbstractAdminAuditLogger extends CloseableModule<null> {
         super(CloseOptionModel);
     }
 
-    public get isDynoReplacement(): boolean {
-        return true;
-    }
-
     public get moduleId(): string {
         return "AdminLog";
     }

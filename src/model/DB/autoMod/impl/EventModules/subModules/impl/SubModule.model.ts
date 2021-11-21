@@ -1,24 +1,27 @@
+import {Column, Entity, Index, JoinColumn, ManyToOne} from "typeorm";
+import {CloseOptionModel} from "../../../CloseOption.model";
+import {AbstractModel} from "../../../../../AbstractModel";
 
-export class SubModuleModel {
+@Entity()
+@Index("subModuleConstraint", ["pModuleId", "guildId", "subModuleId"], {
+    unique: true
+})
+export class SubModuleModel extends AbstractModel {
 
-    /*    @Column({unique: "guildConstraint", allowNull: false})
-        public subMuldeId: string;
+    @Column({nullable: false})
+    public subModuleId: string;
 
-        @Column({unique: false, allowNull: false, defaultValue: false})
-        public isActive: boolean;
+    @Column({unique: false, nullable: false, default: false})
+    public isActive: boolean;
 
-        @ForeignKey(() => GuildableModel)
-        @Column({unique: "guildConstraint"})
-        guildId: string;
+    @Column()
+    pModuleId: string;
 
-        @ForeignKey(() => CloseOptionModel)
-        @Column({unique: "guildConstraint"})
-        pModuleId: string;
-
-        @BelongsTo(() => CloseOptionModel, {onDelete: "cascade", targetKey: "moduleId"})
-        closeOptionModel: CloseOptionModel;
-
-        @BelongsTo(() => GuildableModel, {onDelete: "cascade", targetKey: "guildId"})
-        guildableModel: GuildableModel;*/
+    @ManyToOne(() => CloseOptionModel, closeOptionModel => closeOptionModel.subModuleModels, AbstractModel.cascadeOps)
+    @JoinColumn([
+        {name: AbstractModel.joinCol, referencedColumnName: AbstractModel.joinCol},
+        {name: "pModuleId", referencedColumnName: "moduleId"}
+    ])
+    closeOptionModel: CloseOptionModel;
 
 }

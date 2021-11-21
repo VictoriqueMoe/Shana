@@ -9,7 +9,6 @@ import {container} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import {createConnection, useContainer} from "typeorm";
-import {importx} from "@discordx/importer";
 import io from "@pm2/io";
 // const https = require('http-debug').https;
 // https.debug = 1;
@@ -24,7 +23,7 @@ io.init({
 dotenv.config({path: __dirname + '/../.env'});
 
 export class Main {
-    public static testMode = false;
+    public static testMode = true;
 
     public static async start(): Promise<void> {
         DIService.container = container;
@@ -38,6 +37,7 @@ export class Main {
         const connection = await createConnection({
             type: "better-sqlite3",
             database: dbName,
+            synchronize: true,
             key: process.env.sqlIte_key,
             entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
         });
@@ -72,9 +72,9 @@ export class Main {
             }],
             silent: false
         });
-        await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
+        //  await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
         registerInstance(connection, client);
-        await client.login(Main.testMode ? process.env.test_token : process.env.token);
+        // await client.login(Main.testMode ? process.env.test_token : process.env.token);
     }
 }
 

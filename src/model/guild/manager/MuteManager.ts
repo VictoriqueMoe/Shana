@@ -80,12 +80,12 @@ export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {
     /**
      * Mute a user from the server with an optional timeout
      * @param user - the User to mute
-     * @param reason - reason for the mute
      * @param creatorID - User ID who did the mute
-     * @param timeOut - the timeout. if unit is not passed, this will be evaluated as seconds
-     * @param unit - the unit of time to apply to the timeOut argument
+     * @param reason - reason for the mute
+     * @param timeOut? - the timeout. if unit is not passed, this will be evaluated as seconds
+     * @param unit? - the unit of time to apply to the timeOut argument
      */
-    public async muteUser(user: GuildMember, reason: string, creatorID: string, timeOut?: number, unit?: TimeUtils.TIME_UNIT): Promise<MuteModel> {
+    public async muteUser(user: GuildMember, creatorID: string, reason: string, timeOut?: number, unit?: TimeUtils.TIME_UNIT): Promise<MuteModel> {
         const mutedRole = await GuildUtils.RoleUtils.getMuteRole(user.guild.id);
         if (!mutedRole) {
             return;

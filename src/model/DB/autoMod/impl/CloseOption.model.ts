@@ -1,7 +1,8 @@
 import {GuildableModel} from "../../guild/Guildable.model";
-import {Column, Entity, Index, JoinColumn, ManyToOne} from "typeorm";
+import {Column, Entity, Index, JoinColumn, ManyToOne, OneToMany} from "typeorm";
 import {AbstractModel} from "../../AbstractModel";
 import {ICloseOption} from "../ICloseOption";
+import {SubModuleModel} from "./EventModules/subModules/impl/SubModule.model";
 
 @Entity()
 @Index("uniqueConstraint", ["moduleId", "guildId"], {
@@ -30,4 +31,7 @@ export class CloseOptionModel extends AbstractModel implements ICloseOption {
     @ManyToOne(() => GuildableModel, guildableModel => guildableModel.closeOptionModel, AbstractModel.cascadeOps)
     @JoinColumn({name: AbstractModel.joinCol})
     guildableModel: GuildableModel;
+
+    @OneToMany(() => SubModuleModel, subModule => subModule.closeOptionModel)
+    public subModuleModels: SubModuleModel[];
 }

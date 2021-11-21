@@ -37,10 +37,6 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         return "AutoRole";
     }
 
-    public get isDynoReplacement(): boolean {
-        return true;
-    }
-
     public async applyRole(member: GuildMember, guildId: string, isTimed: boolean = false): Promise<void> {
         if (member.deleted) {
             return;
@@ -71,7 +67,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                 const muteRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
                 if (jailRole && rolePersisted.id === jailRole.id) {
                     if (settings.autoJail) {
-                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving in jail and has be re-jailed`, member.guild.id);
+                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving in jail and has been re-jailed`, member.guild.id);
                         await this._roleApplier.applyRole(rolePersisted, member, `added via ${botUsername}`);
                     }
                 } else if (muteRole && rolePersisted.id === muteRole.id) {

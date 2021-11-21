@@ -13,11 +13,6 @@ export interface ICloseableModule<T extends ModuleSettings> {
     readonly moduleId: string;
 
     /**
-     * Retrun true if this module is intended to replace dyno
-     */
-    readonly isDynoReplacement: boolean;
-
-    /**
      * Get an array of  child submodules for this module. if thwre are any
      */
     readonly submodules: Immutable.Set<ISubModule>;

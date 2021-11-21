@@ -15,10 +15,6 @@ export class AutoResponder extends TriggerConstraint<null> {
         super(CloseOptionModel);
     }
 
-    get isDynoReplacement(): boolean {
-        return false;
-    }
-
     get moduleId(): string {
         return "AutoResponder";
     }
@@ -112,7 +108,7 @@ export class AutoResponder extends TriggerConstraint<null> {
                             await kickMessage.delete();
                         }
                     }
-                    if (publicDelete) {
+                    if (publicDelete && !message.deleted) {
                         message.delete();
                     }
                 }

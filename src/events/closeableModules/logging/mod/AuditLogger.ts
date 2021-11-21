@@ -22,10 +22,6 @@ export class AuditLogger extends CloseableModule<null> {
         return "userLog";
     }
 
-    public get isDynoReplacement(): boolean {
-        return true;
-    }
-
     @On("guildMemberAdd")
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
         if (!await this.isEnabled(member.guild.id)) {
