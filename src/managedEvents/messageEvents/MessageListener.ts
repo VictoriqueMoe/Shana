@@ -8,7 +8,8 @@ import {GuildManager} from "../../model/guild/manager/GuildManager.js";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator.js";
 import {notBot} from "../../guards/NotABot.js";
 import {container, singleton} from "tsyringe";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
 

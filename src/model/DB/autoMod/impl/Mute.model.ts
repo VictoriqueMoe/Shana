@@ -1,6 +1,7 @@
 import {GuildUtils} from "../../../../utils/Utils.js";
 import {GuildableModel} from "../../guild/Guildable.model.js";
-import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
+import typeorm from "typeorm";
+const { Column, Entity, JoinColumn, ManyToOne } = typeorm;
 import {AbstractModel} from "../../AbstractModel.js";
 import {IdentifiableModel} from "../../IdentifiableModel.js";
 

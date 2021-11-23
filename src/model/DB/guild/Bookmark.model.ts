@@ -1,4 +1,5 @@
-import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
+import typeorm from "typeorm";
+const { Column, Entity, JoinColumn, ManyToOne } = typeorm;
 import {GuildableModel} from "./Guildable.model.js";
 import {IdentifiableModel} from "../IdentifiableModel.js";
 import {AbstractModel} from "../AbstractModel.js";

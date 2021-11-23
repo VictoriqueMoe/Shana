@@ -2,7 +2,8 @@ import {GuildMember, Role} from "discord.js";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model.js";
 import {singleton} from "tsyringe";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 import {BaseDAO} from "../../../DAO/BaseDAO.js";
 import {DiscordUtils} from "../../../utils/Utils.js";
 

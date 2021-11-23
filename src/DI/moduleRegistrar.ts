@@ -3,11 +3,13 @@ import {Beans} from "./Beans.js";
 import {ISubModule} from "../model/closeableModules/subModules/ISubModule.js";
 import {DynoAutoMod} from "../managedEvents/messageEvents/closeableModules/DynoAutoMod.js";
 import {AbstractFilter} from "../model/closeableModules/subModules/dynoAutoMod/AbstractFilter.js";
-import {ConnectionManager} from "typeorm";
+import type { ConnectionManager as IConnectionManager } from "typeorm";
+import typeorm from "typeorm";
+const {ConnectionManager} = typeorm;
 import Anilist from "anilist-node";
 
 export async function moduleRegistrar(): Promise<void> {
-    container.register<ConnectionManager>(ConnectionManager, {
+    container.register<IConnectionManager>(ConnectionManager, {
         useFactory: instanceCachingFactory(() => new ConnectionManager())
     });
     container.registerInstance(Anilist, new Anilist());

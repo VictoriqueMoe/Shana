@@ -3,7 +3,8 @@ import {BookmarkModel} from "../../DB/guild/Bookmark.model.js";
 import {singleton} from "tsyringe";
 import {BaseGuildTextChannel, GuildMember, Message} from "discord.js";
 import {ArrayUtils} from "../../../utils/Utils.js";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 
 @singleton()
 export class BookmarkManager extends BaseDAO<BookmarkModel> {

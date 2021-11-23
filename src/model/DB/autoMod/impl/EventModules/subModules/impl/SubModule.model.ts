@@ -1,4 +1,5 @@
-import {Column, Entity, Index, JoinColumn, ManyToOne} from "typeorm";
+import typeorm from "typeorm";
+const { Column, Index, Entity, JoinColumn, ManyToOne } = typeorm;
 import {CloseOptionModel} from "../../../CloseOption.model.js";
 import {AbstractModel} from "../../../../../AbstractModel.js";
 

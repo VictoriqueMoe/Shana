@@ -22,7 +22,8 @@ import {
     RoleUpdateTrigger
 } from "../../../events/eventDispatcher/Listeners/IPermissionEventListener.js";
 import {CategoryMetaData, ICategory, ICategoryItem, ICategoryItemCommand} from "@discordx/utilities";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 export type AllCommands = (DSimpleCommand | DApplicationCommand)[];

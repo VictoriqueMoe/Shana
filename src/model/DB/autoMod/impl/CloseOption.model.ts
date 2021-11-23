@@ -1,5 +1,6 @@
 import {GuildableModel} from "../../guild/Guildable.model.js";
-import {Column, Entity, Index, JoinColumn, ManyToOne, OneToMany} from "typeorm";
+import typeorm from "typeorm";
+const { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } = typeorm;
 import {AbstractModel} from "../../AbstractModel.js";
 import {ICloseOption} from "../ICloseOption.js";
 import {SubModuleModel} from "./EventModules/subModules/impl/SubModule.model.js";

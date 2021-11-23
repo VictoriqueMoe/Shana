@@ -18,7 +18,9 @@ import {CloseableModule} from "../model/closeableModules/impl/CloseableModule.js
 import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS.js";
 import {Player} from "discord-music-player";
 import {registerInstance} from "../DI/moduleRegistrar.js";
-import {EntityManager, getManager, getRepository, Transaction, TransactionManager} from "typeorm";
+import {EntityManager} from "typeorm";
+import typeorm from "typeorm";
+const { getManager, getRepository, Transaction, TransactionManager } = typeorm;
 import {InsertResult} from "typeorm/browser";
 import io from "@pm2/io";
 import {VicDropbox} from "../model/dropbox/VicDropbox.js";

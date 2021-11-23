@@ -3,7 +3,8 @@ import {GuildableModel} from "../../DB/guild/Guildable.model.js";
 import {Guild} from "discord.js";
 import {singleton} from "tsyringe";
 import {Client} from "discordx";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 
 @singleton()
 export class GuildManager extends BaseDAO<GuildableModel> {

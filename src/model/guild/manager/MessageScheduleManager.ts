@@ -7,7 +7,9 @@ import {GuildManager} from "./GuildManager.js";
 import {MessageScheduler} from "../../scheduler/impl/MessageScheduler.js";
 import {IScheduledMessageJob} from "../../scheduler/impl/ScheduledJob/IScheduledMessageJob.js";
 import {ObjectUtil} from "../../../utils/Utils.js";
-import {getRepository, Repository, Transaction, TransactionRepository} from "typeorm";
+import {Repository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository, Transaction, TransactionRepository } = typeorm;
 
 @singleton()
 export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {

@@ -10,7 +10,8 @@ import {GuildMember, TextBasedChannels} from "discord.js";
 import {Roles} from "../../../enums/Roles.js";
 import {CloseOptionModel} from "../../DB/autoMod/impl/CloseOption.model.js";
 import {container, delay} from "tsyringe";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 import RolesEnum = Roles.RolesEnum;
 
 export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<ICloseOption> implements ICloseableModule<T> {

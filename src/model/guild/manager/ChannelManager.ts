@@ -4,7 +4,8 @@ import {BaseGuildTextChannel} from "discord.js";
 import {ObjectUtil} from "../../../utils/Utils.js";
 import {GuildManager} from "./GuildManager.js";
 import {singleton} from "tsyringe";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 
 @singleton()
 export class ChannelManager extends BaseDAO<PostableChannelModel> {

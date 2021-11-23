@@ -12,7 +12,8 @@ import {ModuleController} from "./modules/impl/ModuleController.js";
 import {AllCommands, CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager.js";
 import {container, singleton} from "tsyringe";
 import {Client} from "discordx";
-import {getManager, getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getManager, getRepository } = typeorm;
 
 @singleton()
 @Controller("api/bot")

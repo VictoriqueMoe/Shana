@@ -1,4 +1,5 @@
-import {AfterLoad, BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne} from "typeorm";
+import typeorm from "typeorm";
+const { AfterLoad, BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne } = typeorm;
 import {GuildableModel} from "./Guildable.model.js";
 import {BaseGuildTextChannel} from "discord.js";
 import {IdentifiableModel} from "../IdentifiableModel.js";

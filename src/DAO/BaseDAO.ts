@@ -1,5 +1,7 @@
 import {ObjectUtil} from "../utils/Utils.js";
-import {EntityManager, getManager, QueryFailedError, Repository} from "typeorm";
+import type { EntityManager as IEntityManager, Repository } from "typeorm";
+import typeorm from "typeorm";
+const { EntityManager, QueryFailedError, getManager } = typeorm;
 import {EntityTarget} from "typeorm/common/EntityTarget";
 
 export abstract class BaseDAO<T> {
@@ -13,7 +15,7 @@ export abstract class BaseDAO<T> {
         return getManager().create(instance, data);
     }
 
-    protected async commitToDatabase(repo: Repository<T> | EntityManager, model: T[], modelClass?: EntityTarget<T>, opts: {
+    protected async commitToDatabase(repo: Repository<T> | IEntityManager, model: T[], modelClass?: EntityTarget<T>, opts: {
         silentOnDupe?: boolean
     } = {}): Promise<T[]> {
         let errorStr = "";

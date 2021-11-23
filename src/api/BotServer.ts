@@ -2,7 +2,7 @@ import {Server} from "@overnightjs/core";
 import {Main} from "../Main.js";
 import * as bodyParser from 'body-parser';
 import * as path from "path";
-import {glob} from "glob";
+import glob from "glob";
 import * as http from "http";
 import Logger from "jet-logger";
 import {singleton} from "tsyringe";

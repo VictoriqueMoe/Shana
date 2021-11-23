@@ -1,4 +1,5 @@
-import {Column, CreateDateColumn, UpdateDateColumn} from "typeorm";
+import typeorm from "typeorm";
+const { Column, CreateDateColumn, UpdateDateColumn } = typeorm;
 import {RelationOptions} from "typeorm/decorator/options/RelationOptions";
 import {IGuildAware} from "./IGuildAware.js";
 

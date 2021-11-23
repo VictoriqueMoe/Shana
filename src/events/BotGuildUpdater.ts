@@ -3,7 +3,8 @@ import {BaseDAO} from "../DAO/BaseDAO.js";
 import {GuildableModel} from "../model/DB/guild/Guildable.model.js";
 import {OnReady} from "./OnReady.js";
 import {container} from "tsyringe";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 
 @Discord()
 export class BotGuildUpdater extends BaseDAO<GuildableModel> {

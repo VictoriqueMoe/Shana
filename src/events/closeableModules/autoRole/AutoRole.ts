@@ -12,7 +12,8 @@ import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings
 import {TimedSet} from "../../../model/Impl/TimedSet.js";
 import {container, injectable} from "tsyringe";
 import {RoleApplier} from "../../customAutoMod/RoleApplier/RoleApplier.js";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 
 class JoinEntry {
     constructor(public joinCount: number) {

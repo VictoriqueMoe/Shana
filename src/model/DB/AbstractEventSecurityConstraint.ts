@@ -1,6 +1,7 @@
 import {IEventSecurityConstraint} from "./IEventSecurityConstraint.js";
 import {AbstractModel} from "./AbstractModel.js";
-import {AfterLoad, Column} from "typeorm";
+import typeorm from "typeorm";
+const { AfterLoad, Column } = typeorm;
 import {Guild, GuildChannel, Role} from "discord.js";
 import {ArrayUtils} from "../../utils/Utils.js";
 import {container} from "tsyringe";

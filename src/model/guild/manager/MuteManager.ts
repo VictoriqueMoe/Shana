@@ -9,7 +9,9 @@ import {container, singleton} from "tsyringe";
 import {GuildManager} from "./GuildManager.js";
 import {Client} from "discordx";
 import {PostConstruct} from "../../decorators/PostConstruct.js";
-import {EntityManager, getManager, getRepository, IsNull, Not} from "typeorm";
+import {EntityManager} from "typeorm";
+import typeorm from "typeorm";
+const { getManager, getRepository, IsNull, Not } = typeorm;
 
 @singleton()
 export class MuteManager extends BaseDAO<MuteModel | RolePersistenceModel> {

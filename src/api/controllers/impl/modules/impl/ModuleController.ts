@@ -7,7 +7,8 @@ import {StatusCodes} from "http-status-codes";
 import {CloseOptionModel} from "../../../../../model/DB/autoMod/impl/CloseOption.model.js";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../../../../utils/Utils.js";
 import {AutoRoleController} from "./AutoRoleController.js";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 
 
 @Controller("module")

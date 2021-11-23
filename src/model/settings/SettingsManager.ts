@@ -3,7 +3,9 @@ import {SettingsModel} from "../DB/guild/Settings.model.js";
 import {SETTINGS} from "../../enums/SETTINGS.js";
 import {ArrayUtils, ObjectUtil} from "../../utils/Utils.js";
 import {singleton} from "tsyringe";
-import {EntityManager, getRepository} from "typeorm";
+import type {EntityManager} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 
 export type ALL_SETTINGS_TYPE = {
     [key in keyof typeof SETTINGS]?: string

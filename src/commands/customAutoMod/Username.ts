@@ -8,7 +8,8 @@ import {GuildManager} from "../../model/guild/manager/GuildManager.js";
 import {AbstractCommandModule} from "../AbstractCommandModule.js";
 import {container} from "tsyringe";
 import {Category} from "@discordx/utilities";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 import {BaseDAO} from "../../DAO/BaseDAO.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 

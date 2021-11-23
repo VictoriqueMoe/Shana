@@ -8,7 +8,8 @@ import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner.js";
 import {Main} from "../../Main.js";
 import {DirResult} from "tmp";
 import {singleton} from "tsyringe";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 import ffmpeg from "ffmpeg";
 
 import isVideo from 'is-video';

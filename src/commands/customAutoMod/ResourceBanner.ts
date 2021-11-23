@@ -6,7 +6,8 @@ import {AbstractCommandModule} from "../AbstractCommandModule.js";
 import {NotBotInteraction} from "../../guards/NotABot.js";
 import {CommandEnabled} from "../../guards/CommandEnabled.js";
 import {Category} from "@discordx/utilities";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 import {BaseDAO} from "../../DAO/BaseDAO.js";
 
 import md5 from 'md5';

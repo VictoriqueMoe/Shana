@@ -26,7 +26,7 @@ import {
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model.js";
-import {glob} from "glob";
+import glob from "glob";
 import * as path from "path";
 import {ChannelManager} from "../model/guild/manager/ChannelManager.js";
 import {GuildManager} from "../model/guild/manager/GuildManager.js";
@@ -40,7 +40,8 @@ import {container} from "tsyringe";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule.js";
 import {Client} from "discordx";
 import {Beans} from "../DI/Beans.js";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 
 import emojiRegex from 'emoji-regex';
 import isImageFast from 'is-image-fast';

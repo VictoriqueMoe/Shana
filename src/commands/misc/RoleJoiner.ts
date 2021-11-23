@@ -12,7 +12,8 @@ import {
 } from "discord.js";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
 import {Category} from "@discordx/utilities";
-import {getRepository} from "typeorm";
+import typeorm from "typeorm";
+const { getRepository } = typeorm;
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()

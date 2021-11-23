@@ -1,5 +1,6 @@
 import {IIdentifiable} from "./IIdentifiable.js";
-import {Column} from "typeorm";
+import typeorm from "typeorm";
+const { Column } = typeorm;
 import {AbstractModel} from "./AbstractModel.js";
 
 export class IdentifiableModel extends AbstractModel implements IIdentifiable {

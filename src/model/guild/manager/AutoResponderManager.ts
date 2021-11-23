@@ -1,7 +1,9 @@
 import {BaseDAO} from "../../../DAO/BaseDAO.js";
 import {AutoResponderModel} from "../../DB/autoMod/impl/AutoResponder.model.js";
 import {singleton} from "tsyringe";
-import {getManager, getRepository, Repository, Transaction, TransactionRepository} from "typeorm";
+import {Repository} from "typeorm";
+import typeorm from "typeorm";
+const { getManager, getRepository, Transaction, TransactionRepository } = typeorm;
 
 @singleton()
 export class AutoResponderManager extends BaseDAO<AutoResponderModel> {

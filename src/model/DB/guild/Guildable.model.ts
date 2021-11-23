@@ -12,7 +12,8 @@ import {RoleJoinerModel} from "./RoleJoiner.model.js";
 import {BookmarkModel} from "./Bookmark.model.js";
 import {MessageScheduleModel} from "./MessageSchedule.model.js";
 import {TwitterModel} from "./Twitter.model.js";
-import {Column, Entity, OneToMany} from "typeorm";
+import typeorm from "typeorm";
+const { Column, Entity, OneToMany } = typeorm;
 
 @Entity()
 export class GuildableModel implements IGuildAware {
