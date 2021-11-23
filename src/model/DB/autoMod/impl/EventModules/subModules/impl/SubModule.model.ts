@@ -1,6 +1,6 @@
 import {Column, Entity, Index, JoinColumn, ManyToOne} from "typeorm";
-import {CloseOptionModel} from "../../../CloseOption.model";
-import {AbstractModel} from "../../../../../AbstractModel";
+import {CloseOptionModel} from "../../../CloseOption.model.js";
+import {AbstractModel} from "../../../../../AbstractModel.js";
 
 @Entity()
 @Index("subModuleConstraint", ["pModuleId", "guildId", "subModuleId"], {

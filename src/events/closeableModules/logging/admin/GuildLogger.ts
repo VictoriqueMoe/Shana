@@ -1,6 +1,6 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
-import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
+import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger.js";
+import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils.js";
 import {Guild, MessageEmbed} from "discord.js";
 
 /**

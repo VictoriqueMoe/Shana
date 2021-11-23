@@ -1,18 +1,18 @@
 import {ArgsOf, Client} from "discordx";
 import fetch from "node-fetch";
-import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
-import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
-import {Main} from "../../Main";
+import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils.js";
+import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model.js";
+import {Main} from "../../Main.js";
 import {DMChannel, GuildMember, Message, Role, Sticker, User} from "discord.js";
-import {GuildManager} from "../../model/guild/manager/GuildManager";
-import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
-import {notBot} from "../../guards/NotABot";
+import {GuildManager} from "../../model/guild/manager/GuildManager.js";
+import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator.js";
+import {notBot} from "../../guards/NotABot.js";
 import {container, singleton} from "tsyringe";
 import {getRepository} from "typeorm";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
 
-const md5 = require('md5');
+import md5 from 'md5';
 
 @singleton()
 export class MessageListener {

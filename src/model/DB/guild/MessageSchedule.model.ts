@@ -1,8 +1,8 @@
 import {AfterLoad, BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne} from "typeorm";
-import {GuildableModel} from "./Guildable.model";
+import {GuildableModel} from "./Guildable.model.js";
 import {BaseGuildTextChannel} from "discord.js";
-import {IdentifiableModel} from "../IdentifiableModel";
-import {AbstractModel} from "../AbstractModel";
+import {IdentifiableModel} from "../IdentifiableModel.js";
+import {AbstractModel} from "../AbstractModel.js";
 import {container} from "tsyringe";
 import {Client} from "discordx";
 

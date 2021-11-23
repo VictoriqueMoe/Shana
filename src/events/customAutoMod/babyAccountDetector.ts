@@ -1,5 +1,5 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
+import {DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
 
 @Discord()
 export abstract class BabyAccountDetector {

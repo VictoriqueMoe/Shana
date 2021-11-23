@@ -25,25 +25,25 @@ import {
 } from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
-import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model.js";
 import {glob} from "glob";
 import * as path from "path";
-import {ChannelManager} from "../model/guild/manager/ChannelManager";
-import {GuildManager} from "../model/guild/manager/GuildManager";
-import {SettingsManager} from "../model/settings/SettingsManager";
-import {SETTINGS} from "../enums/SETTINGS";
-import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
+import {ChannelManager} from "../model/guild/manager/ChannelManager.js";
+import {GuildManager} from "../model/guild/manager/GuildManager.js";
+import {SettingsManager} from "../model/settings/SettingsManager.js";
+import {SETTINGS} from "../enums/SETTINGS.js";
+import {ICloseableModule} from "../model/closeableModules/ICloseableModule.js";
 import fetch from "node-fetch";
 import {StatusCodes} from "http-status-codes";
-import {Typeings} from "../model/types/Typeings";
+import {Typeings} from "../model/types/Typeings.js";
 import {container} from "tsyringe";
-import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
+import {CloseableModule} from "../model/closeableModules/impl/CloseableModule.js";
 import {Client} from "discordx";
-import {Beans} from "../DI/Beans";
+import {Beans} from "../DI/Beans.js";
 import {getRepository} from "typeorm";
 
-const emojiRegex = require('emoji-regex');
-const isImageFast = require('is-image-fast');
+import emojiRegex from 'emoji-regex';
+import isImageFast from 'is-image-fast';
 
 export class CronException extends Error {
     constructor(e: string) {

@@ -1,12 +1,12 @@
-import {AbstractModuleController} from "../AbstractModuleController";
+import {AbstractModuleController} from "../AbstractModuleController.js";
 import {ChildControllers, Controller, Get, Post} from "@overnightjs/core";
-import {AutoResponderController} from "./AutoResponderController";
+import {AutoResponderController} from "./AutoResponderController.js";
 import {Request, Response} from "express";
 import {Guild} from "discord.js";
 import {StatusCodes} from "http-status-codes";
-import {CloseOptionModel} from "../../../../../model/DB/autoMod/impl/CloseOption.model";
-import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../../../../utils/Utils";
-import {AutoRoleController} from "./AutoRoleController";
+import {CloseOptionModel} from "../../../../../model/DB/autoMod/impl/CloseOption.model.js";
+import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../../../../utils/Utils.js";
+import {AutoRoleController} from "./AutoRoleController.js";
 import {getRepository} from "typeorm";
 
 

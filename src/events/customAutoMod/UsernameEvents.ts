@@ -1,7 +1,7 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
-import {DiscordUtils} from "../../utils/Utils";
-import {Roles} from "../../enums/Roles";
+import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model.js";
+import {DiscordUtils} from "../../utils/Utils.js";
+import {Roles} from "../../enums/Roles.js";
 import {getRepository} from "typeorm";
 
 @Discord()

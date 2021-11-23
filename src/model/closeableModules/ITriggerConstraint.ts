@@ -1,5 +1,5 @@
-import {ICloseableModule} from "./ICloseableModule";
-import {IEventSecurityConstraint} from "../DB/IEventSecurityConstraint";
+import {ICloseableModule} from "./ICloseableModule.js";
+import {IEventSecurityConstraint} from "../DB/IEventSecurityConstraint.js";
 import {Message} from "discord.js";
 
 export interface ITriggerConstraint extends ICloseableModule<any> {

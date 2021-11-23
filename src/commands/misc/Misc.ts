@@ -11,8 +11,8 @@ import {
     SlashGroup,
     SlashOption
 } from "discordx";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
+import {NotBotInteraction} from "../../guards/NotABot.js";
+import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils.js";
 import {
     ColorResolvable,
     CommandInteraction,
@@ -23,22 +23,22 @@ import {
     MessageEmbed,
     User
 } from "discord.js";
-import {TimedSet} from "../../model/Impl/TimedSet";
-import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
-import {Response} from "../../model/anime/AnimeTypings";
-import {CommandEnabled} from "../../guards/CommandEnabled";
-import {AbstractCommandModule} from "../AbstractCommandModule";
-import {DeepAPI} from "../../model/DeepAPI";
+import {TimedSet} from "../../model/Impl/TimedSet.js";
+import {AnimeTractApi} from "../../model/anime/AnimeTractApi.js";
+import {Response} from "../../model/anime/AnimeTypings.js";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
+import {DeepAPI} from "../../model/DeepAPI.js";
 import {container, delay, inject, injectable} from "tsyringe";
 import * as locale from 'locale-codes';
 import {Category} from "@discordx/utilities";
-import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager.js";
 import Anilist from "anilist-node";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
-const translate = require("deepl");
-const reverseImageSearch = require("node-reverse-image-search");
-const isImageFast = require('is-image-fast');
+import translate from "deepl";
+import reverseImageSearch from "node-reverse-image-search";
+import isImageFast from 'is-image-fast';
 
 @Discord()
 @Category("Miscellaneous", "Miscellaneous commands")

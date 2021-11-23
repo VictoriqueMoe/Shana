@@ -6,7 +6,7 @@ import {
     ImageEndPointGetAllResponse,
     ImageEndPointRequest,
     ImageEndPointResponse
-} from "./Typeings";
+} from "./Typeings.js";
 import {URLSearchParams} from "url";
 import fetch from 'node-fetch';
 import {singleton} from "tsyringe";

@@ -1,8 +1,8 @@
-import {GuildableModel} from "../../guild/Guildable.model";
+import {GuildableModel} from "../../guild/Guildable.model.js";
 import {Column, Entity, Index, JoinColumn, ManyToOne, OneToMany} from "typeorm";
-import {AbstractModel} from "../../AbstractModel";
-import {ICloseOption} from "../ICloseOption";
-import {SubModuleModel} from "./EventModules/subModules/impl/SubModule.model";
+import {AbstractModel} from "../../AbstractModel.js";
+import {ICloseOption} from "../ICloseOption.js";
+import {SubModuleModel} from "./EventModules/subModules/impl/SubModule.model.js";
 
 @Entity()
 @Index("uniqueConstraint", ["moduleId", "guildId"], {

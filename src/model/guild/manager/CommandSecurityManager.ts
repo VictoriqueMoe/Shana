@@ -1,26 +1,26 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
+import {BaseDAO} from "../../../DAO/BaseDAO.js";
+import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model.js";
 import {ApplicationCommandPermissions, Guild, GuildMember, Permissions} from "discord.js";
 import {Client, DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
-import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
-import {Typeings} from "../../types/Typeings";
+import {ArrayUtils, GuildUtils} from "../../../utils/Utils.js";
+import {Typeings} from "../../types/Typeings.js";
 import {container, registry, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
-import {PostConstruct} from "../../decorators/PostConstruct";
-import {MemberLogger} from "../../../events/closeableModules/logging/admin/MemberLogger";
-import {AuditLogger} from "../../../events/closeableModules/logging/mod/AuditLogger";
-import {RoleLogger} from "../../../events/closeableModules/logging/admin/RoleLogger";
-import {MessageLogger} from "../../../events/closeableModules/logging/admin/MessageLogger";
-import {Beans} from "../../../DI/Beans";
-import {AutoResponder} from "../../../managedEvents/messageEvents/closeableModules/AutoResponder";
-import {ChannelLogger} from "../../../events/closeableModules/logging/admin/ChannelLogger";
-import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
-import {AutoRole} from "../../../events/closeableModules/autoRole/AutoRole";
+import {PostConstruct} from "../../decorators/PostConstruct.js";
+import {MemberLogger} from "../../../events/closeableModules/logging/admin/MemberLogger.js";
+import {AuditLogger} from "../../../events/closeableModules/logging/mod/AuditLogger.js";
+import {RoleLogger} from "../../../events/closeableModules/logging/admin/RoleLogger.js";
+import {MessageLogger} from "../../../events/closeableModules/logging/admin/MessageLogger.js";
+import {Beans} from "../../../DI/Beans.js";
+import {AutoResponder} from "../../../managedEvents/messageEvents/closeableModules/AutoResponder.js";
+import {ChannelLogger} from "../../../events/closeableModules/logging/admin/ChannelLogger.js";
+import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod.js";
+import {AutoRole} from "../../../events/closeableModules/autoRole/AutoRole.js";
 import {
     IPermissionEventListener,
     RoleTypes,
     RoleUpdateTrigger
-} from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
+} from "../../../events/eventDispatcher/Listeners/IPermissionEventListener.js";
 import {CategoryMetaData, ICategory, ICategoryItem, ICategoryItemCommand} from "@discordx/utilities";
 import {getRepository} from "typeorm";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;

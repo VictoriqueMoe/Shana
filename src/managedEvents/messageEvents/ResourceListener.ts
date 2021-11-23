@@ -1,22 +1,22 @@
 import {ArgsOf, Client} from "discordx";
-import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil} from "../../utils/Utils";
+import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil} from "../../utils/Utils.js";
 import {Collection, MessageEmbed} from "discord.js";
-import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
+import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model.js";
 import fs from "fs";
-import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
-import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner";
-import {Main} from "../../Main";
+import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator.js";
+import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner.js";
+import {Main} from "../../Main.js";
 import {DirResult} from "tmp";
 import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
-import ffmpeg = require("ffmpeg");
+import ffmpeg from "ffmpeg";
 
-const isVideo = require('is-video');
-const tmp = require('tmp');
+import isVideo from 'is-video';
+import tmp from 'tmp';
 
-const {basename, join} = require('path');
-const sanitize = require('sanitize-filename');
-const md5 = require('md5');
+import { basename, join } from 'path';
+import sanitize from 'sanitize-filename';
+import md5 from 'md5';
 
 @singleton()
 export class ResourceListener {

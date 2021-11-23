@@ -1,13 +1,13 @@
 import "reflect-metadata";
 import * as dotenv from "dotenv";
-import {ObjectUtil} from "./utils/Utils";
+import {ObjectUtil} from "./utils/Utils.js";
 import * as v8 from "v8";
 import {Client, DIService, SimpleCommandMessage} from "discordx";
 import {Intents, Message} from "discord.js";
-import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
+import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar.js";
 import {container} from "tsyringe";
-import {GuildManager} from "./model/guild/manager/GuildManager";
-import {SettingsManager} from "./model/settings/SettingsManager";
+import {GuildManager} from "./model/guild/manager/GuildManager.js";
+import {SettingsManager} from "./model/settings/SettingsManager.js";
 import {createConnection, useContainer} from "typeorm";
 import io from "@pm2/io";
 // const https = require('http-debug').https;

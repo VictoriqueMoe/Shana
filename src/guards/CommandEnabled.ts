@@ -1,6 +1,6 @@
-import {DiscordUtils} from "../utils/Utils";
+import {DiscordUtils} from "../utils/Utils.js";
 import {GuardFunction, SimpleCommandMessage} from "discordx";
-import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
+import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager.js";
 import {CommandInteraction, ContextMenuInteraction} from "discord.js";
 import {container} from "tsyringe";
 

@@ -1,9 +1,9 @@
-import {AbstractFilter} from "../AbstractFilter";
-import {ACTION} from "../../../../../enums/ACTION";
+import {AbstractFilter} from "../AbstractFilter.js";
+import {ACTION} from "../../../../../enums/ACTION.js";
 import {GuildMember, Message} from "discord.js";
-import {BannedWordEntries, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
-import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {GuildUtils} from "../../../../../utils/Utils";
+import {BannedWordEntries, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter.js";
+import {PRIORITY} from "../../../../../enums/PRIORITY.js";
+import {GuildUtils} from "../../../../../utils/Utils.js";
 import {singleton} from "tsyringe";
 
 @singleton()

@@ -8,17 +8,17 @@ import {
     SlashGroup,
     SlashOption
 } from "discordx";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
-import {SettingsManager} from "../../model/settings/SettingsManager";
-import {SETTINGS} from "../../enums/SETTINGS";
-import {CommandEnabled} from "../../guards/CommandEnabled";
-import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
-import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {NotBotInteraction} from "../../guards/NotABot.js";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils.js";
+import {SettingsManager} from "../../model/settings/SettingsManager.js";
+import {SETTINGS} from "../../enums/SETTINGS.js";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
+import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings.js";
+import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole.js";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
 import {CommandInteraction, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
-import {Typeings} from "../../model/types/Typeings";
+import {Typeings} from "../../model/types/Typeings.js";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;

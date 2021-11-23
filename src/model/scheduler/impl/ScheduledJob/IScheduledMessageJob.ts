@@ -1,4 +1,4 @@
-import {IScheduledJob} from "./IScheduledJob";
+import {IScheduledJob} from "./IScheduledJob.js";
 import {GuildChannel} from "discord.js";
 
 export interface IScheduledMessageJob extends IScheduledJob {

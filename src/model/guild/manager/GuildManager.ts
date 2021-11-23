@@ -1,5 +1,5 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {GuildableModel} from "../../DB/guild/Guildable.model";
+import {BaseDAO} from "../../../DAO/BaseDAO.js";
+import {GuildableModel} from "../../DB/guild/Guildable.model.js";
 import {Guild} from "discord.js";
 import {singleton} from "tsyringe";
 import {Client} from "discordx";

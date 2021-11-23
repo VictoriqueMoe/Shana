@@ -1,8 +1,8 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {MessageEmbed, User} from "discord.js";
-import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
-import {Roles} from "../../../../enums/Roles";
-import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
+import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils.js";
+import {Roles} from "../../../../enums/Roles.js";
+import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger.js";
 
 
 /**

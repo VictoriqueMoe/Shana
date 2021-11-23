@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import {getReasonPhrase, StatusCodes} from "http-status-codes";
 import {Guild} from "discord.js";
-import {ObjectUtil} from "../../utils/Utils";
+import {ObjectUtil} from "../../utils/Utils.js";
 import {Client} from "discordx";
 import {container} from "tsyringe";
 

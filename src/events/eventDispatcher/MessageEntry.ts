@@ -1,7 +1,7 @@
-import {EditType, EventTriggerCondition} from "../../model/types/Typeings";
+import {EditType, EventTriggerCondition} from "../../model/types/Typeings.js";
 import {Message} from "discord.js";
 import {Client} from "discordx";
-import {ArrayUtils} from "../../utils/Utils";
+import {ArrayUtils} from "../../utils/Utils.js";
 
 export class MessageEntry {
     public constructor(private entryMethod: EditType, private triggerOnEdit: boolean, private conditions: EventTriggerCondition[] = []) {

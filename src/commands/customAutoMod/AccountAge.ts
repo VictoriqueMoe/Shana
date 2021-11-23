@@ -1,9 +1,9 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {CommandEnabled} from "../../guards/CommandEnabled";
-import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
+import {NotBotInteraction} from "../../guards/NotABot.js";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
+import {DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
 import {Channel, CommandInteraction, GuildMember, User} from "discord.js";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
 import {injectable} from "tsyringe";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;

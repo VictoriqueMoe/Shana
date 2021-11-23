@@ -1,8 +1,8 @@
-import {AbstractFilter} from "../AbstractFilter";
-import {ACTION} from "../../../../../enums/ACTION";
-import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {AbstractFilter} from "../AbstractFilter.js";
+import {ACTION} from "../../../../../enums/ACTION.js";
+import {PRIORITY} from "../../../../../enums/PRIORITY.js";
 import {Message} from "discord.js";
-import {ObjectUtil} from "../../../../../utils/Utils";
+import {ObjectUtil} from "../../../../../utils/Utils.js";
 import {singleton} from "tsyringe";
 
 @singleton()

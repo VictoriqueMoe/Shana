@@ -2,13 +2,13 @@ import {Controller, Delete, Get, Middleware, Post} from "@overnightjs/core";
 import {Request, Response} from "express";
 import {Guild} from "discord.js";
 import {StatusCodes} from "http-status-codes";
-import {AbstractModuleController} from "../AbstractModuleController";
-import {EventSecurityConstraintTypeValidator} from "../../../middleWare/EventSecurityConstraintTypeValidator";
-import {AutoResponderPayload} from "../../../../../model/types/Typeings";
-import {AutoResponderModel} from "../../../../../model/DB/autoMod/impl/AutoResponder.model";
-import {AutoResponderManager} from "../../../../../model/guild/manager/AutoResponderManager";
+import {AbstractModuleController} from "../AbstractModuleController.js";
+import {EventSecurityConstraintTypeValidator} from "../../../middleWare/EventSecurityConstraintTypeValidator.js";
+import {AutoResponderPayload} from "../../../../../model/types/Typeings.js";
+import {AutoResponderModel} from "../../../../../model/DB/autoMod/impl/AutoResponder.model.js";
+import {AutoResponderManager} from "../../../../../model/guild/manager/AutoResponderManager.js";
 import {container} from "tsyringe";
-import {BaseDAO} from "../../../../../DAO/BaseDAO";
+import {BaseDAO} from "../../../../../DAO/BaseDAO.js";
 
 
 @Controller("autoResponder")

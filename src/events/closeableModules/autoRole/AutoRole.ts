@@ -1,17 +1,17 @@
-import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
+import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule.js";
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model.js";
 import * as schedule from "node-schedule";
 import {GuildMember} from "discord.js";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
-import {GuildManager} from "../../../model/guild/manager/GuildManager";
-import {UniqueViolationError} from "../../../DAO/BaseDAO";
-import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
-import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings";
-import {TimedSet} from "../../../model/Impl/TimedSet";
+import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model.js";
+import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils.js";
+import {GuildManager} from "../../../model/guild/manager/GuildManager.js";
+import {UniqueViolationError} from "../../../DAO/BaseDAO.js";
+import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter.js";
+import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings.js";
+import {TimedSet} from "../../../model/Impl/TimedSet.js";
 import {container, injectable} from "tsyringe";
-import {RoleApplier} from "../../customAutoMod/RoleApplier/RoleApplier";
+import {RoleApplier} from "../../customAutoMod/RoleApplier/RoleApplier.js";
 import {getRepository} from "typeorm";
 
 class JoinEntry {

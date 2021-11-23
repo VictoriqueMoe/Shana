@@ -1,4 +1,4 @@
-import {IScheduledJob} from "./impl/ScheduledJob/IScheduledJob";
+import {IScheduledJob} from "./impl/ScheduledJob/IScheduledJob.js";
 
 export interface IScheduler {
 

@@ -1,4 +1,4 @@
-import {AbstractModuleController} from "../AbstractModuleController";
+import {AbstractModuleController} from "../AbstractModuleController.js";
 import {Controller} from "@overnightjs/core";
 
 

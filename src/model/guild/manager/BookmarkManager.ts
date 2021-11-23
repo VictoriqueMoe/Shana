@@ -1,8 +1,8 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {BookmarkModel} from "../../DB/guild/Bookmark.model";
+import {BaseDAO} from "../../../DAO/BaseDAO.js";
+import {BookmarkModel} from "../../DB/guild/Bookmark.model.js";
 import {singleton} from "tsyringe";
 import {BaseGuildTextChannel, GuildMember, Message} from "discord.js";
-import {ArrayUtils} from "../../../utils/Utils";
+import {ArrayUtils} from "../../../utils/Utils.js";
 import {getRepository} from "typeorm";
 
 @singleton()

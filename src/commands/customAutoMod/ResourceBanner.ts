@@ -1,15 +1,15 @@
 import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
-import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
+import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils.js";
+import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model.js";
 import {Collection, Message, Snowflake, Sticker} from "discord.js";
-import {AbstractCommandModule} from "../AbstractCommandModule";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {CommandEnabled} from "../../guards/CommandEnabled";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
+import {NotBotInteraction} from "../../guards/NotABot.js";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
 import {Category} from "@discordx/utilities";
 import {getRepository} from "typeorm";
-import {BaseDAO} from "../../DAO/BaseDAO";
+import {BaseDAO} from "../../DAO/BaseDAO.js";
 
-const md5 = require('md5');
+import md5 from 'md5';
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
 

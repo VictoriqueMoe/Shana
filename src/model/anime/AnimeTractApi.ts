@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import {Response} from "./AnimeTypings";
+import {Response} from "./AnimeTypings.js";
 import {singleton} from "tsyringe";
 
 @singleton()

@@ -1,6 +1,6 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {Message, User} from "discord.js";
-import {MessageListener} from "../managedEvents/messageEvents/MessageListener";
+import {MessageListener} from "../managedEvents/messageEvents/MessageListener.js";
 
 @Discord()
 export class MiscListeners {

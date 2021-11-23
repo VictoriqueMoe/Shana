@@ -1,6 +1,6 @@
-import {GuildableModel} from "./Guildable.model";
+import {GuildableModel} from "./Guildable.model.js";
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
-import {AbstractModel} from "../AbstractModel";
+import {AbstractModel} from "../AbstractModel.js";
 
 @Entity()
 export class BannedAttachmentsModel extends AbstractModel {

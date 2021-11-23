@@ -1,14 +1,14 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {MuteModel} from "../../DB/autoMod/impl/Mute.model";
-import {RolePersistenceModel} from "../../DB/autoMod/impl/RolePersistence.model";
+import {BaseDAO} from "../../../DAO/BaseDAO.js";
+import {MuteModel} from "../../DB/autoMod/impl/Mute.model.js";
+import {RolePersistenceModel} from "../../DB/autoMod/impl/RolePersistence.model.js";
 import {Guild, GuildMember} from "discord.js";
-import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils.js";
 import * as schedule from "node-schedule";
 import {Job} from "node-schedule";
 import {container, singleton} from "tsyringe";
-import {GuildManager} from "./GuildManager";
+import {GuildManager} from "./GuildManager.js";
 import {Client} from "discordx";
-import {PostConstruct} from "../../decorators/PostConstruct";
+import {PostConstruct} from "../../decorators/PostConstruct.js";
 import {EntityManager, getManager, getRepository, IsNull, Not} from "typeorm";
 
 @singleton()

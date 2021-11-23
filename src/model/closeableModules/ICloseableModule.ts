@@ -1,6 +1,6 @@
-import {ISubModule} from "./subModules/ISubModule";
+import {ISubModule} from "./subModules/ISubModule.js";
 import * as Immutable from "immutable";
-import {ModuleSettings} from "./ModuleSettings";
+import {ModuleSettings} from "./ModuleSettings.js";
 
 /**
  * A closable module is a module that can be deactivated and activated dynamically, this encapsulated a "Module" in the context of this application

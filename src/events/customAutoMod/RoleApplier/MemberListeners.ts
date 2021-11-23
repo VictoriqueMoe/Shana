@@ -1,12 +1,12 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {GuildUtils} from "../../../utils/Utils";
-import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
-import {MuteManager} from "../../../model/guild/manager/MuteManager";
+import {GuildUtils} from "../../../utils/Utils.js";
+import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter.js";
+import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model.js";
+import {BaseDAO} from "../../../DAO/BaseDAO.js";
+import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange.js";
+import {MuteManager} from "../../../model/guild/manager/MuteManager.js";
 import {container, injectable} from "tsyringe";
-import {RoleApplier} from "./RoleApplier";
+import {RoleApplier} from "./RoleApplier.js";
 
 @Discord()
 @injectable()

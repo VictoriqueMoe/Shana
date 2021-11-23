@@ -1,10 +1,10 @@
 import {GuildMember, Role} from "discord.js";
-import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
+import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange.js";
+import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model.js";
 import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {DiscordUtils} from "../../../utils/Utils";
+import {BaseDAO} from "../../../DAO/BaseDAO.js";
+import {DiscordUtils} from "../../../utils/Utils.js";
 
 @singleton()
 export class RoleApplier {

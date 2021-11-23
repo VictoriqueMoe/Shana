@@ -9,12 +9,12 @@ import {
     SlashGroup,
     SlashOption
 } from "discordx";
-import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
-import {NotBotInteraction} from "../../../guards/NotABot";
-import {CommandEnabled} from "../../../guards/CommandEnabled";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils.js";
+import {NotBotInteraction} from "../../../guards/NotABot.js";
+import {CommandEnabled} from "../../../guards/CommandEnabled.js";
 import {CommandInteraction, ContextMenuInteraction, GuildMember, User} from "discord.js";
-import {MuteManager} from "../../../model/guild/manager/MuteManager";
-import {AbstractCommandModule} from "../../AbstractCommandModule";
+import {MuteManager} from "../../../model/guild/manager/MuteManager.js";
+import {AbstractCommandModule} from "../../AbstractCommandModule.js";
 import {injectable} from "tsyringe";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;

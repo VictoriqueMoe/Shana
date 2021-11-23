@@ -1,8 +1,8 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {delay, injectable, injectAll, registry} from "tsyringe";
-import {Beans} from "../../DI/Beans";
-import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
-import {IPermissionEventListener, RoleTypes, RoleUpdateTrigger} from "./Listeners/IPermissionEventListener";
+import {Beans} from "../../DI/Beans.js";
+import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager.js";
+import {IPermissionEventListener, RoleTypes, RoleUpdateTrigger} from "./Listeners/IPermissionEventListener.js";
 
 @registry([
     {token: Beans.IPermissionEventListener, useToken: delay(() => CommandSecurityManager)},

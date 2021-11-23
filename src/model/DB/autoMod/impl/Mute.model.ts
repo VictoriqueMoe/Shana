@@ -1,8 +1,8 @@
-import {GuildUtils} from "../../../../utils/Utils";
-import {GuildableModel} from "../../guild/Guildable.model";
+import {GuildUtils} from "../../../../utils/Utils.js";
+import {GuildableModel} from "../../guild/Guildable.model.js";
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
-import {AbstractModel} from "../../AbstractModel";
-import {IdentifiableModel} from "../../IdentifiableModel";
+import {AbstractModel} from "../../AbstractModel.js";
+import {IdentifiableModel} from "../../IdentifiableModel.js";
 
 @Entity()
 export class MuteModel extends IdentifiableModel {

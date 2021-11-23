@@ -1,8 +1,8 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {PostableChannelModel} from "../../DB/guild/PostableChannel.model";
+import {BaseDAO} from "../../../DAO/BaseDAO.js";
+import {PostableChannelModel} from "../../DB/guild/PostableChannel.model.js";
 import {BaseGuildTextChannel} from "discord.js";
-import {ObjectUtil} from "../../../utils/Utils";
-import {GuildManager} from "./GuildManager";
+import {ObjectUtil} from "../../../utils/Utils.js";
+import {GuildManager} from "./GuildManager.js";
 import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
 

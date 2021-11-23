@@ -1,11 +1,11 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils";
+import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils.js";
 import {MessageEmbed, Util} from "discord.js";
-import {Main} from "../../../../Main";
-import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
-import {Imgur} from "../../../../model/Imgur";
+import {Main} from "../../../../Main.js";
+import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger.js";
+import {Imgur} from "../../../../model/Imgur.js";
 
-const isImageFast = require('is-image-fast');
+import isImageFast from 'is-image-fast';
 
 /**
  * Message Edited<br/>

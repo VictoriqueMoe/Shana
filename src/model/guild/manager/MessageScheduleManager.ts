@@ -1,12 +1,12 @@
 import {singleton} from "tsyringe";
-import {BaseDAO, UniqueViolationError} from "../../../DAO/BaseDAO";
-import {MessageScheduleModel} from "../../DB/guild/MessageSchedule.model";
+import {BaseDAO, UniqueViolationError} from "../../../DAO/BaseDAO.js";
+import {MessageScheduleModel} from "../../DB/guild/MessageSchedule.model.js";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
-import {PostConstruct} from "../../decorators/PostConstruct";
-import {GuildManager} from "./GuildManager";
-import {MessageScheduler} from "../../scheduler/impl/MessageScheduler";
-import {IScheduledMessageJob} from "../../scheduler/impl/ScheduledJob/IScheduledMessageJob";
-import {ObjectUtil} from "../../../utils/Utils";
+import {PostConstruct} from "../../decorators/PostConstruct.js";
+import {GuildManager} from "./GuildManager.js";
+import {MessageScheduler} from "../../scheduler/impl/MessageScheduler.js";
+import {IScheduledMessageJob} from "../../scheduler/impl/ScheduledJob/IScheduledMessageJob.js";
+import {ObjectUtil} from "../../../utils/Utils.js";
 import {getRepository, Repository, Transaction, TransactionRepository} from "typeorm";
 
 @singleton()

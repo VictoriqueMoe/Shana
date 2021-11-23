@@ -1,7 +1,7 @@
-import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
-import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
+import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule.js";
+import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model.js";
 import {GuildMember, Message, MessageEmbed} from "discord.js";
-import {DiscordUtils, GuildUtils} from "../../../../utils/Utils";
+import {DiscordUtils, GuildUtils} from "../../../../utils/Utils.js";
 
 export abstract class AbstractAdminAuditLogger extends CloseableModule<null> {
 

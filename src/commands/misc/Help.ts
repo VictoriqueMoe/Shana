@@ -1,4 +1,4 @@
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
 import {
     Client,
     DefaultPermissionResolver,
@@ -27,12 +27,12 @@ import {
     MessageSelectOptionData,
     SelectMenuInteraction
 } from "discord.js";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {CommandEnabled} from "../../guards/CommandEnabled";
-import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
+import {NotBotInteraction} from "../../guards/NotABot.js";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
+import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils.js";
 import {delay, inject, injectable} from "tsyringe";
-import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
-import {SettingsManager} from "../../model/settings/SettingsManager";
+import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager.js";
+import {SettingsManager} from "../../model/settings/SettingsManager.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()

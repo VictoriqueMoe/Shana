@@ -1,15 +1,15 @@
-import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
+import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model.js";
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {CommandEnabled} from "../../guards/CommandEnabled";
-import {DiscordUtils} from "../../utils/Utils";
+import {NotBotInteraction} from "../../guards/NotABot.js";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
+import {DiscordUtils} from "../../utils/Utils.js";
 import {CommandInteraction, GuildMember, User} from "discord.js";
-import {GuildManager} from "../../model/guild/manager/GuildManager";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {GuildManager} from "../../model/guild/manager/GuildManager.js";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
 import {container} from "tsyringe";
 import {Category} from "@discordx/utilities";
 import {getRepository} from "typeorm";
-import {BaseDAO} from "../../DAO/BaseDAO";
+import {BaseDAO} from "../../DAO/BaseDAO.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()

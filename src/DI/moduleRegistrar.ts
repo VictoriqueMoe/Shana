@@ -1,8 +1,8 @@
 import {container, instanceCachingFactory} from "tsyringe";
-import {Beans} from "./Beans";
-import {ISubModule} from "../model/closeableModules/subModules/ISubModule";
-import {DynoAutoMod} from "../managedEvents/messageEvents/closeableModules/DynoAutoMod";
-import {AbstractFilter} from "../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
+import {Beans} from "./Beans.js";
+import {ISubModule} from "../model/closeableModules/subModules/ISubModule.js";
+import {DynoAutoMod} from "../managedEvents/messageEvents/closeableModules/DynoAutoMod.js";
+import {AbstractFilter} from "../model/closeableModules/subModules/dynoAutoMod/AbstractFilter.js";
 import {ConnectionManager} from "typeorm";
 import Anilist from "anilist-node";
 

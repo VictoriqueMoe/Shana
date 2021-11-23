@@ -1,9 +1,9 @@
-import {AbstractFilter} from "../AbstractFilter";
-import {ACTION} from "../../../../../enums/ACTION";
+import {AbstractFilter} from "../AbstractFilter.js";
+import {ACTION} from "../../../../../enums/ACTION.js";
 import {Message} from "discord.js";
-import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
-import {TimedSet} from "../../../../Impl/TimedSet";
+import {PRIORITY} from "../../../../../enums/PRIORITY.js";
+import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter.js";
+import {TimedSet} from "../../../../Impl/TimedSet.js";
 import {singleton} from "tsyringe";
 
 @singleton()

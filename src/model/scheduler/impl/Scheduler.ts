@@ -2,10 +2,10 @@ import * as schedule from 'node-schedule';
 import {JobCallback} from 'node-schedule';
 import {isValidCron} from 'cron-validator';
 import {CronException, ObjectUtil} from '../../../utils/Utils';
-import {IScheduledJob} from "./ScheduledJob/IScheduledJob";
-import {ScheduledJob} from "./ScheduledJob/impl/ScheduledJob";
+import {IScheduledJob} from "./ScheduledJob/IScheduledJob.js";
+import {ScheduledJob} from "./ScheduledJob/impl/ScheduledJob.js";
 import {singleton} from "tsyringe";
-import {IScheduler} from "../Scheduler";
+import {IScheduler} from "../Scheduler.js";
 
 @singleton()
 export class Scheduler implements IScheduler {

@@ -1,7 +1,7 @@
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashOption} from "discordx";
-import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
-import {CommandEnabled} from "../../guards/CommandEnabled";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {ArrayUtils, DiscordUtils} from "../../utils/Utils.js";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
 import {CommandInteraction} from "discord.js";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;

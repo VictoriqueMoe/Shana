@@ -1,5 +1,5 @@
-import {GuildableModel} from "./Guildable.model";
-import {AbstractModel} from "../AbstractModel";
+import {GuildableModel} from "./Guildable.model.js";
+import {AbstractModel} from "../AbstractModel.js";
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 
 @Entity()

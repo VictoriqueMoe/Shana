@@ -1,5 +1,5 @@
-const imgur = require('imgur');
-const isImageFast = require('is-image-fast');
+import imgur from 'imgur';
+import isImageFast from 'is-image-fast';
 
 export class Imgur {
     private readonly clientId = process.env.imgurClientId;

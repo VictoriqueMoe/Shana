@@ -11,13 +11,13 @@ import {
     SlashGroup,
     SlashOption
 } from "discordx";
-import {AbstractCommandModule} from "../AbstractCommandModule";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {CommandEnabled} from "../../guards/CommandEnabled";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
+import {NotBotInteraction} from "../../guards/NotABot.js";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
 import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
-import {BookmarkManager} from "../../model/guild/manager/BookmarkManager";
-import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
+import {BookmarkManager} from "../../model/guild/manager/BookmarkManager.js";
+import {ArrayUtils, DiscordUtils} from "../../utils/Utils.js";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 

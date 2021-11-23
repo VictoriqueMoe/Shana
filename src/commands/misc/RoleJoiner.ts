@@ -1,5 +1,5 @@
-import {AbstractCommandModule} from "../AbstractCommandModule";
-import {RoleJoinerModel} from "../../model/DB/guild/RoleJoiner.model";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
+import {RoleJoinerModel} from "../../model/DB/guild/RoleJoiner.model.js";
 import {DefaultPermissionResolver, Discord, Permission, SelectMenuComponent, Slash, SlashGroup} from "discordx";
 import {
     CommandInteraction,
@@ -10,7 +10,7 @@ import {
     MessageSelectOptionData,
     SelectMenuInteraction
 } from "discord.js";
-import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
+import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
 import {Category} from "@discordx/utilities";
 import {getRepository} from "typeorm";
 import InteractionUtils = DiscordUtils.InteractionUtils;

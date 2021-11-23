@@ -1,11 +1,11 @@
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
-import {VicDropbox} from "../../model/dropbox/VicDropbox";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {VicDropbox} from "../../model/dropbox/VicDropbox.js";
+import {NotBotInteraction} from "../../guards/NotABot.js";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
 import {CommandInteraction} from "discord.js";
-import {CommandEnabled} from "../../guards/CommandEnabled";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
 import {injectable} from "tsyringe";
-import {DiscordUtils} from "../../utils/Utils";
+import {DiscordUtils} from "../../utils/Utils.js";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 

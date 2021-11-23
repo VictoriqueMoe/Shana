@@ -1,7 +1,7 @@
-import {AbstractFilter} from "../AbstractFilter";
-import {ACTION} from "../../../../../enums/ACTION";
+import {AbstractFilter} from "../AbstractFilter.js";
+import {ACTION} from "../../../../../enums/ACTION.js";
 import {Message} from "discord.js";
-import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {PRIORITY} from "../../../../../enums/PRIORITY.js";
 import {singleton} from "tsyringe";
 
 @singleton()

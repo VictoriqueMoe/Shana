@@ -1,6 +1,6 @@
-import {EditType, EventTriggerCondition} from "../types/Typeings";
-import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventDispatcher";
-import {MessageEntry} from "../../events/eventDispatcher/MessageEntry";
+import {EditType, EventTriggerCondition} from "../types/Typeings.js";
+import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventDispatcher.js";
+import {MessageEntry} from "../../events/eventDispatcher/MessageEntry.js";
 import constructor from "tsyringe/dist/typings/types/constructor";
 
 /**

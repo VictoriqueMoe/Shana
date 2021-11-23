@@ -1,11 +1,11 @@
 import {ArgsOf, Client} from "discordx";
-import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
-import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
-import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint";
+import {ArrayUtils, ObjectUtil} from "../../../utils/Utils.js";
+import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model.js";
+import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint.js";
 import {Message} from "discord.js";
-import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
-import {AutoResponderManager} from "../../../model/guild/manager/AutoResponderManager";
-import {notBot} from "../../../guards/NotABot";
+import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator.js";
+import {AutoResponderManager} from "../../../model/guild/manager/AutoResponderManager.js";
+import {notBot} from "../../../guards/NotABot.js";
 import {singleton} from "tsyringe";
 
 @singleton()

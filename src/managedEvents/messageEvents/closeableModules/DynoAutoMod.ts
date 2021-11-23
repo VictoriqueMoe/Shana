@@ -1,19 +1,19 @@
-import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
-import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
+import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule.js";
+import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model.js";
 import {ArgsOf, Client} from "discordx";
-import {TimedSet} from "../../../model/Impl/TimedSet";
-import {AbstractFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
-import {ACTION} from "../../../enums/ACTION";
-import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
+import {TimedSet} from "../../../model/Impl/TimedSet.js";
+import {AbstractFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter.js";
+import {ACTION} from "../../../enums/ACTION.js";
+import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter.js";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
-import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
-import {MuteManager} from "../../../model/guild/manager/MuteManager";
-import {Main} from "../../../Main";
-import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
+import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model.js";
+import {MuteManager} from "../../../model/guild/manager/MuteManager.js";
+import {Main} from "../../../Main.js";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils.js";
 import * as Immutable from "immutable";
-import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
-import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
-import {notBot} from "../../../guards/NotABot";
+import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator.js";
+import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter.js";
+import {notBot} from "../../../guards/NotABot.js";
 import {container, singleton} from "tsyringe";
 
 @singleton()

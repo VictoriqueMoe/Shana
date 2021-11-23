@@ -1,7 +1,7 @@
-import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model.js";
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
-import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
+import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule.js";
+import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils.js";
 import {Message, MessageEmbed, User} from "discord.js";
 
 /**

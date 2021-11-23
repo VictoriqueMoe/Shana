@@ -1,4 +1,4 @@
-import {ObjectUtil} from "../utils/Utils";
+import {ObjectUtil} from "../utils/Utils.js";
 import {EntityManager, getManager, QueryFailedError, Repository} from "typeorm";
 import {EntityTarget} from "typeorm/common/EntityTarget";
 

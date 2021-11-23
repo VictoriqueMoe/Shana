@@ -1,6 +1,6 @@
 import {ApplicationCommandPermissions, Guild} from "discord.js";
 import {container} from "tsyringe";
-import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
+import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager.js";
 import {ApplicationCommandMixin, ApplicationGuildMixin, SimpleCommandMessage} from "discordx";
 
 export abstract class AbstractCommandModule {

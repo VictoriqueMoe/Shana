@@ -1,6 +1,6 @@
 import {ArgsOf, Client} from "discordx";
 import {Message} from "discord.js";
-import {SETTINGS} from "../../enums/SETTINGS";
+import {SETTINGS} from "../../enums/SETTINGS.js";
 
 export namespace Typeings {
     export type UpdateCommandSettings = {

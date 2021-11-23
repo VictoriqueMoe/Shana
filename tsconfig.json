@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ES2021",
+    "module": "ESNEXT",
+    "target": "ESNEXT",
     "noImplicitAny": false,
     "sourceMap": true,
     "emitDecoratorMetadata": true,
@@ -13,10 +13,6 @@
     "watch": false,
     "noImplicitOverride": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "es2020",
-      "esnext.asynciterable"
-    ],
     "moduleResolution": "node",
     "outDir": "./build",
     "allowSyntheticDefaultImports": true

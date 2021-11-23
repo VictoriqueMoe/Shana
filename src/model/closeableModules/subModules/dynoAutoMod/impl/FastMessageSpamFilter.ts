@@ -1,10 +1,10 @@
-import {AbstractFilter} from "../AbstractFilter";
-import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
-import {TimedSet} from "../../../../Impl/TimedSet";
-import {ACTION} from "../../../../../enums/ACTION";
+import {AbstractFilter} from "../AbstractFilter.js";
+import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter.js";
+import {TimedSet} from "../../../../Impl/TimedSet.js";
+import {ACTION} from "../../../../../enums/ACTION.js";
 import {Message} from "discord.js";
-import {ObjectUtil} from "../../../../../utils/Utils";
-import {PRIORITY} from "../../../../../enums/PRIORITY";
+import {ObjectUtil} from "../../../../../utils/Utils.js";
+import {PRIORITY} from "../../../../../enums/PRIORITY.js";
 import * as Immutable from "immutable";
 import {singleton} from "tsyringe";
 

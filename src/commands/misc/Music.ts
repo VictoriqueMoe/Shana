@@ -1,6 +1,6 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {CommandEnabled} from "../../guards/CommandEnabled";
+import {NotBotInteraction} from "../../guards/NotABot.js";
+import {CommandEnabled} from "../../guards/CommandEnabled.js";
 import {
     ButtonInteraction,
     CommandInteraction,
@@ -11,9 +11,9 @@ import {
     MessageEmbed,
     Util
 } from "discord.js";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommandModule} from "../AbstractCommandModule.js";
 import {Player, Playlist, Queue, Song} from "discord-music-player";
-import {DiscordUtils} from "../../utils/Utils";
+import {DiscordUtils} from "../../utils/Utils.js";
 import {injectable} from "tsyringe";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;

@@ -1,13 +1,13 @@
 import {Server} from "@overnightjs/core";
-import {Main} from "../Main";
+import {Main} from "../Main.js";
 import * as bodyParser from 'body-parser';
 import * as path from "path";
 import {glob} from "glob";
 import * as http from "http";
 import Logger from "jet-logger";
 import {singleton} from "tsyringe";
-import {BotController} from "./controllers/impl/BotController";
-import {PostConstruct} from "../model/decorators/PostConstruct";
+import {BotController} from "./controllers/impl/BotController.js";
+import {PostConstruct} from "../model/decorators/PostConstruct.js";
 
 @singleton()
 export class BotServer extends Server {

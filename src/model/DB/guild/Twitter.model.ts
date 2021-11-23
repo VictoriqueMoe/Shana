@@ -1,6 +1,6 @@
 import {Entity, JoinColumn, ManyToOne} from "typeorm";
-import {GuildableModel} from "./Guildable.model";
-import {AbstractModel} from "../AbstractModel";
+import {GuildableModel} from "./Guildable.model.js";
+import {AbstractModel} from "../AbstractModel.js";
 
 @Entity()
 export class TwitterModel extends AbstractModel {
