@@ -29,7 +29,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Discord()
 @injectable()
 export class OnReady extends BaseDAO<any> {
-    private readonly classesToLoad = [`${__dirname}/../model/closeableModules/subModules/dynoAutoMod/impl/*.{ts,js}`, `${__dirname}/../managedEvents/**/*.{ts,js}`];
+    private readonly classesToLoad = [`${__dirname}/../model/closeableModules/subModules/dynoAutoMod/impl/*.js`, `${__dirname}/../managedEvents/**/*.js`];
 
     public constructor(private _client: Client) {
         super();

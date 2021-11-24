@@ -12,7 +12,7 @@ import {PostConstruct} from "../model/decorators/PostConstruct.js";
 @singleton()
 export class BotServer extends Server {
 
-    private readonly classesToLoad = `${__dirname}/controllers/**/*.{ts,js}`;
+    private readonly classesToLoad = `${__dirname}/controllers/**/*.js`;
     private _server: http.Server = null;
 
     constructor(initRouter: BotController) {

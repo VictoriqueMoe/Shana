@@ -40,7 +40,7 @@ export class Main {
             database: dbName,
             synchronize: true,
             key: process.env.sqlIte_key,
-            entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
+            entities: [__dirname + '/model/DB/**/*.model.js'],
         });
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
@@ -73,7 +73,7 @@ export class Main {
             }],
             silent: false
         });
-        //  await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
+        //  await importx(`${__dirname}/{commands,events}/**/*.js`);
         registerInstance(connection, client);
         // await client.login(Main.testMode ? process.env.test_token : process.env.token);
     }
