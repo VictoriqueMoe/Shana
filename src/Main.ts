@@ -10,6 +10,7 @@ import {GuildManager} from "./model/guild/manager/GuildManager";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import {createConnection, useContainer} from "typeorm";
 import io from "@pm2/io";
+import {importx} from "@discordx/importer";
 // const https = require('http-debug').https;
 // https.debug = 1;
 
@@ -23,7 +24,7 @@ io.init({
 dotenv.config({path: __dirname + '/../.env'});
 
 export class Main {
-    public static testMode = true;
+    public static testMode = false;
 
     public static async start(): Promise<void> {
         DIService.container = container;
@@ -72,9 +73,9 @@ export class Main {
             }],
             silent: false
         });
-        //  await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
+        await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
         registerInstance(connection, client);
-        // await client.login(Main.testMode ? process.env.test_token : process.env.token);
+        await client.login(Main.testMode ? process.env.test_token : process.env.token);
     }
 }
 
