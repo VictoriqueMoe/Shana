@@ -52,6 +52,14 @@ export namespace Typeings {
             "explicit" = "e"
         }
 
+        export type KonachanTagResponse = KonachanTag[];
+        export type KonachanTag = {
+            "id"?: number,
+            "name"?: string,
+            "count"?: number,
+            "type"?: number,
+            "ambiguous"?: boolean
+        };
         export type KonachanResponse = KonachanImage[];
         export type KonachanImage = {
             "id": number,

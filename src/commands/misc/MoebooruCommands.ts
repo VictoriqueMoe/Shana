@@ -1,10 +1,20 @@
-import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
+import {
+    Client,
+    DApplicationCommand,
+    DefaultPermissionResolver,
+    Discord,
+    Guard,
+    Permission,
+    Slash,
+    SlashGroup,
+    SlashOption
+} from "discordx";
 import {Category} from "@discordx/utilities";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {injectable} from "tsyringe";
+import {container, injectable} from "tsyringe";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {CommandInteraction, MessageEmbed, TextChannel} from "discord.js";
+import {AutocompleteInteraction, CommandInteraction, MessageEmbed, TextChannel} from "discord.js";
 import {KonachanApi} from "../../model/anime/Moebooru/KonachanApi";
 import {Typeings} from "../../model/types/Typeings";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
@@ -46,6 +56,8 @@ export class MoebooruCommands extends AbstractCommandModule {
         @SlashOption("tags", {
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
             required: true,
+            type: 'STRING',
+            autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(KonachanApi))
         })
             tags: string,
         interaction: CommandInteraction
@@ -63,9 +75,8 @@ export class MoebooruCommands extends AbstractCommandModule {
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, e.message);
         }
-
         if (!ArrayUtils.isValidArray(results)) {
-            return InteractionUtils.replyOrFollowUp(interaction, `No results found for tags: "${tags}"`);
+            return InteractionUtils.replyOrFollowUp(interaction, `No results found for tags: "\`${tags}\`"`);
         }
         const embed = this.buildEmbed(results, tags);
         interaction.editReply({

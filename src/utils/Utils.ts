@@ -1,4 +1,5 @@
 import {
+    AutocompleteInteraction,
     BaseCommandInteraction,
     BaseGuildTextChannel,
     CategoryChannel,
@@ -38,9 +39,10 @@ import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
 import {container} from "tsyringe";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
-import {Client} from "discordx";
+import {Client, DApplicationCommand} from "discordx";
 import {Beans} from "../DI/Beans";
 import {getRepository} from "typeorm";
+import {SearchBase} from "../model/Impl/SearchBase";
 
 const emojiRegex = require('emoji-regex');
 const isImageFast = require('is-image-fast');
@@ -283,6 +285,13 @@ export namespace TimeUtils {
         months = "mo",
         years = "y",
         decades = "de"
+    }
+
+    export enum METHOD_EXECUTOR_TIME_UNIT {
+        seconds = "seconds",
+        minutes = "minutes",
+        hours = "hours",
+        days = "days",
     }
 
     export function convertToMilli(value: number, unit: TIME_UNIT): number {
@@ -991,6 +1000,23 @@ export namespace DiscordUtils {
 }
 
 export class ObjectUtil {
+
+    public static search<T extends SearchBase<any>>(interaction: AutocompleteInteraction, command: DApplicationCommand, contextHandler: T): void {
+        const query = interaction.options.getFocused(true).value;
+        if (!ObjectUtil.validString(query)) {
+            return;
+        }
+        const result = contextHandler.search(query as string);
+        if (ArrayUtils.isValidArray(result)) {
+            const responseMap = result.map(result => {
+                return {
+                    name: result.item.name,
+                    value: result.item.name
+                };
+            });
+            interaction.respond(responseMap);
+        }
+    }
 
     public static getUrls(str: string): Set<string> {
         const regexp = /(http(s)?:\/\/.)(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/gim;

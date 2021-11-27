@@ -1,13 +1,18 @@
 import {singleton} from "tsyringe";
 import {Typeings} from "../../types/Typeings";
-import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
+import {ArrayUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import fetch from "node-fetch";
+import {RunEvery} from "../../decorators/RunEvery";
+import Fuse from "fuse.js";
+import {SearchBase} from "../../Impl/SearchBase";
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 import KonachanResponse = Typeings.MoebooruTypes.KonachanResponse;
+import KonachanTagResponse = Typeings.MoebooruTypes.KonachanTagResponse;
+import KonachanTag = Typeings.MoebooruTypes.KonachanTag;
 
 @singleton()
-export class KonachanApi {
-    private readonly baseUrl = "https://konachan.net/post.json";
+export class KonachanApi extends SearchBase<KonachanTag> {
+    private readonly baseUrl = "https://konachan.net";
 
     public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<KonachanResponse> {
         const results = await this.getPost(tags, explictRating);
@@ -25,12 +30,32 @@ export class KonachanApi {
         return retArr;
     }
 
+    @RunEvery(1, TimeUtils.METHOD_EXECUTOR_TIME_UNIT.hours)
+    private async tagUpdater(): Promise<void> {
+        const options = {
+            keys: ['name'],
+            minMatchCharLength: 1,
+            threshold: 0.3,
+            includeScore: true,
+            shouldSort: true
+        };
+        const tagsSearch = `${this.baseUrl}/tag.json?limit=0&order=name`;
+        const result = await fetch(tagsSearch);
+        if (!result.ok) {
+            throw new Error(result.statusText);
+        }
+        let json: KonachanTagResponse = await result.json();
+        json = json.filter(value => value.count > 0);
+        console.log(`Indexed: ${json.length} tags from Konachan`);
+        this.tagCache = new Fuse(json, options);
+    }
+
     public async getPost(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = -1): Promise<KonachanResponse> {
         if (!ArrayUtils.isValidArray(tags)) {
             throw new Error("Please supply at least 1 tag");
         }
         const tagsStr = tags.join(" ");
-        const url = `${this.baseUrl}?tags=${tagsStr}`;
+        const url = `${this.baseUrl}/post.json?tags=${tagsStr}`;
         return this.doCall(url, returnSize, explictRating);
     }
 
