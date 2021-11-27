@@ -95,7 +95,7 @@ export class MoebooruCommands extends AbstractCommandModule {
             embed.addField("Explicit rating", this.parseExplicitRating(randomImage.rating));
         }
         if (ObjectUtil.validString(randomImage.tags)) {
-            let tags = randomImage.tags.split(" ").join(",");
+            let tags = randomImage.tags.split(" ").join(", ");
             tags = StringUtils.truncate(tags, 1024);
             embed.addField("Tags", tags);
         }
