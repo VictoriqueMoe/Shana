@@ -7,7 +7,7 @@ import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction, MessageEmbed, TextChannel} from "discord.js";
 import {KonachanApi} from "../../model/anime/Moebooru/KonachanApi";
 import {Typeings} from "../../model/types/Typeings";
-import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
+import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 import KonachanResponse = Typeings.MoebooruTypes.KonachanResponse;
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
@@ -95,7 +95,9 @@ export class MoebooruCommands extends AbstractCommandModule {
             embed.addField("Explicit rating", this.parseExplicitRating(randomImage.rating));
         }
         if (ObjectUtil.validString(randomImage.tags)) {
-            embed.addField("Tags", randomImage.tags.split(" ").join(", "));
+            let tags = randomImage.tags.split(" ").join(",");
+            tags = StringUtils.truncate(tags, 1024);
+            embed.addField("Tags", tags);
         }
         if (typeof randomImage.created_at === "number") {
             embed.addField("Image created", new Date(randomImage.created_at * 1000).toISOString());
