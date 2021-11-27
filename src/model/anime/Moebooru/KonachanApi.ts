@@ -13,6 +13,7 @@ import KonachanTag = Typeings.MoebooruTypes.KonachanTag;
 @singleton()
 export class KonachanApi extends SearchBase<KonachanTag> {
     private readonly baseUrl = "https://konachan.net";
+    private _tagCache: Fuse<KonachanTag>;
 
     public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<KonachanResponse> {
         const results = await this.getPost(tags, explictRating);
@@ -46,8 +47,13 @@ export class KonachanApi extends SearchBase<KonachanTag> {
         }
         let json: KonachanTagResponse = await result.json();
         json = json.filter(value => value.count > 0);
+        const index = Fuse.createIndex(options.keys, json);
+        this._tagCache = new Fuse(json, options, index);
         console.log(`Indexed: ${json.length} tags from Konachan`);
-        this.tagCache = new Fuse(json, options);
+    }
+
+    protected get tagCache(): Fuse<KonachanTag> {
+        return this._tagCache;
     }
 
     public async getPost(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = -1): Promise<KonachanResponse> {

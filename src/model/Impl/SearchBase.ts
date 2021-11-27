@@ -2,7 +2,7 @@ import Fuse from "fuse.js";
 import FuseResult = Fuse.FuseResult;
 
 export abstract class SearchBase<T> {
-    protected tagCache: Fuse<T>;
+    protected abstract tagCache: Fuse<T>;
 
     public search(query: string): FuseResult<T>[] {
         if (!this.tagCache) {
