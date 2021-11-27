@@ -38,7 +38,6 @@ export class Main {
         const connection = await createConnection({
             type: "better-sqlite3",
             database: dbName,
-            synchronize: true,
             key: process.env.sqlIte_key,
             entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
         });
