@@ -52,16 +52,21 @@ export namespace Typeings {
             "explicit" = "e"
         }
 
-        export type KonachanTagResponse = KonachanTag[];
-        export type KonachanTag = {
+        export type MoebooruResponse = MoebooruImage[];
+
+        export type KonachanTag = MoebooruTag & {
+            "count"?: number
+        }
+        export type LoliBooruTag = MoebooruTag & {
+            "post_count"?: number
+        }
+        export type MoebooruTag = {
             "id"?: number,
             "name"?: string,
-            "count"?: number,
             "type"?: number,
             "ambiguous"?: boolean
         };
-        export type KonachanResponse = KonachanImage[];
-        export type KonachanImage = {
+        export type MoebooruImage = {
             "id": number,
             "tags": string,
             "created_at": number,

@@ -15,12 +15,14 @@ import {container, injectable} from "tsyringe";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AutocompleteInteraction, CommandInteraction, MessageEmbed, TextChannel} from "discord.js";
-import {KonachanApi} from "../../model/anime/Moebooru/KonachanApi";
 import {Typeings} from "../../model/types/Typeings";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
+import {KonachanApi} from "../../model/anime/Moebooru/impl/KonachanApi";
+import {LolibooruApi} from "../../model/anime/Moebooru/impl/LolibooruApi";
+import {MoebooruApi} from "../../model/anime/Moebooru/MoebooruApi";
 import InteractionUtils = DiscordUtils.InteractionUtils;
-import KonachanResponse = Typeings.MoebooruTypes.KonachanResponse;
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
+import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
 
 @Discord()
 @Category("moebooru", "Commands to get waifus\nAll images are SFW")
@@ -36,6 +38,18 @@ import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
             optional: false
         }],
         examples: ["`/Konachan gosick gothic_lolita` will result in the tags `gosick` AND `gothic lolita`"]
+    },
+    {
+        "name": "Lolibooru",
+        "type": "SLASH",
+        "description": "Get random image from lolibooru.moe",
+        options: [{
+            name: "tags",
+            description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
+            type: "STRING",
+            optional: false
+        }],
+        examples: ["`/lolibooru gosick gothic_lolita` will result in the tags `gosick` AND `gothic lolita`"]
     }
 ])
 @SlashGroup("moebooru", "Commands to get waifus")
@@ -44,9 +58,30 @@ import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 @injectable()
 export class MoebooruCommands extends AbstractCommandModule {
 
-    public constructor(private _konachanApi: KonachanApi, private _client: Client) {
+    public constructor(private _konachanApi: KonachanApi,
+                       private _lolibooruApi: LolibooruApi,
+                       private _client: Client) {
         super();
     }
+
+    @Slash("lolibooru", {
+        description: "Get random image from lolibooru.moe"
+    })
+    @Guard(NotBotInteraction, CommandEnabled)
+    private async lolibooru(
+        @SlashOption("tags", {
+            description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
+            required: true,
+            type: 'STRING',
+            autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(LolibooruApi))
+        })
+            tags: string,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply();
+        return this.executeInteraction(interaction, tags, this._lolibooruApi);
+    }
+
 
     @Slash("konachan", {
         description: "Get random image from Konachan.net"
@@ -63,15 +98,19 @@ export class MoebooruCommands extends AbstractCommandModule {
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
+        return this.executeInteraction(interaction, tags, this._konachanApi);
+    }
+
+    private async executeInteraction<T>(interaction: CommandInteraction, tags: string, manager: MoebooruApi<T>): Promise<void> {
         const tagArray = tags.split(" ");
         const explicitRating = [EXPLICIT_RATING.safe];
         const channel = interaction.channel as TextChannel;
         if (channel.nsfw) {
             explicitRating.push(EXPLICIT_RATING.questionable);
         }
-        let results: KonachanResponse;
+        let results: MoebooruResponse;
         try {
-            results = await this._konachanApi.getRandomPosts(tagArray, explicitRating);
+            results = await manager.getRandomPosts(tagArray, explicitRating);
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, e.message);
         }
@@ -84,23 +123,23 @@ export class MoebooruCommands extends AbstractCommandModule {
         });
     }
 
-    private buildEmbed(images: KonachanResponse, tags: string): MessageEmbed {
+    private buildEmbed(images: MoebooruResponse, tags: string): MessageEmbed {
         const randomImage = images[0];
         const botAvatar = this._client.user.displayAvatarURL({dynamic: true});
         const embed = new MessageEmbed()
             .setTitle(tags)
             .setAuthor(`${this._client.user.username}`, botAvatar)
             .setColor(this._client.user.hexAccentColor)
-            .setImage(randomImage.file_url)
+            .setImage(encodeURI(randomImage.file_url))
             .setTimestamp();
         if (ObjectUtil.validString(randomImage.preview_url)) {
-            embed.setThumbnail(randomImage.preview_url);
+            embed.setThumbnail(encodeURI(randomImage.preview_url));
         }
         if (ObjectUtil.validString(randomImage.author)) {
             embed.addField("Author", randomImage.author);
         }
         if (ObjectUtil.validString(randomImage.source)) {
-            embed.addField("Source", randomImage.source);
+            embed.addField("Source", encodeURI(randomImage.source));
         }
         if (ObjectUtil.validString(randomImage.rating)) {
             embed.addField("Explicit rating", this.parseExplicitRating(randomImage.rating));
