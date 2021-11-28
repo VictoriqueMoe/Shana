@@ -176,7 +176,7 @@ export class Mute extends AbstractCommandModule {
         }
         let replyMessage: string;
         try {
-            if (isNaN(undefined)) {
+            if (isNaN(timeout)) {
                 timeout = 1;
             }
             if (!timeUnit) {
