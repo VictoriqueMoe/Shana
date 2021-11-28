@@ -10,7 +10,7 @@ import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
 export abstract class MoebooruApi<T> extends SearchBase<T> {
     protected abstract baseUrl: string;
     protected abstract name: string;
-    private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "tail"];
+    private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "tail", "bottomless"];
 
     public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<MoebooruResponse> {
         const results = await this.getPosts(tags, explictRating);
