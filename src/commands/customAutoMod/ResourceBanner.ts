@@ -42,7 +42,7 @@ export abstract class ResourceBanner extends AbstractCommandModule {
 
     public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false, isSticker: boolean = false): Promise<BannedAttachmentsModel> {
         const attachmentHash = md5(attachment);
-        const repo = getRepository(AbstractCommandModule);
+        const repo = getRepository(BannedAttachmentsModel);
         const exists = await repo.count({
             where: {
                 attachmentHash,
