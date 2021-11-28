@@ -19,10 +19,9 @@ import {Typeings} from "../../model/types/Typeings";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {KonachanApi} from "../../model/anime/Moebooru/impl/KonachanApi";
 import {LolibooruApi} from "../../model/anime/Moebooru/impl/LolibooruApi";
-import {MoebooruApi} from "../../model/anime/Moebooru/MoebooruApi";
+import {MoebooruApi, RandomImageResponse} from "../../model/anime/Moebooru/MoebooruApi";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
-import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
 
 @Discord()
 @Category("moebooru", "Commands to get waifus\nAll images are SFW")
@@ -108,7 +107,7 @@ export class MoebooruCommands extends AbstractCommandModule {
         if (channel.nsfw) {
             explicitRating.push(EXPLICIT_RATING.questionable);
         }
-        let results: MoebooruResponse;
+        let results: RandomImageResponse;
         try {
             results = await manager.getRandomPosts(tagArray, explicitRating);
         } catch (e) {
@@ -117,14 +116,16 @@ export class MoebooruCommands extends AbstractCommandModule {
         if (!ArrayUtils.isValidArray(results)) {
             return InteractionUtils.replyOrFollowUp(interaction, `No results found for tags: "\`${tags}\`"`);
         }
+        const {of, maxPossible} = results[0];
         const embed = this.buildEmbed(results, tags);
         interaction.editReply({
+            content: `picked image ${of} out of a possible ${maxPossible}`,
             embeds: [embed]
         });
     }
 
-    private buildEmbed(images: MoebooruResponse, tags: string): MessageEmbed {
-        const randomImage = images[0];
+    private buildEmbed(images: RandomImageResponse, tags: string): MessageEmbed {
+        const randomImage = images[0].image;
         const botAvatar = this._client.user.displayAvatarURL({dynamic: true});
         const embed = new MessageEmbed()
             .setTitle(tags)

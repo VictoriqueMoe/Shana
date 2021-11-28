@@ -6,23 +6,35 @@ import {SearchBase} from "../../Impl/SearchBase";
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
 import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
+import MoebooruImage = Typeings.MoebooruTypes.MoebooruImage;
+
+export type RandomImageResponse = {
+    image: MoebooruImage,
+    maxPossible: number,
+    of: number
+}[]
 
 export abstract class MoebooruApi<T> extends SearchBase<T> {
     protected abstract baseUrl: string;
     protected abstract name: string;
     private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "tail", "bottomless"];
 
-    public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<MoebooruResponse> {
+    public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<RandomImageResponse> {
         const results = await this.getPosts(tags, explictRating);
 
         if (!ArrayUtils.isValidArray(results)) {
             return [];
         }
 
-        const retArr: MoebooruResponse = [];
+        const retArr: RandomImageResponse = [];
         for (let i = 0; i < returnSize; i++) {
-            const randomImage = results[Math.floor(Math.random() * results.length)];
-            retArr.push(randomImage);
+            const of = Math.floor(Math.random() * results.length);
+            const randomImage = results[of];
+            retArr.push({
+                image: randomImage,
+                maxPossible: results.length,
+                of: of + 1
+            });
         }
 
         return retArr;
@@ -61,10 +73,10 @@ export abstract class MoebooruApi<T> extends SearchBase<T> {
             returnSize = 500;
         }
         const retJson: MoebooruResponse = [];
-        let currentPage = -1;
+        let currentPage = 0;
         while (retJson.length !== returnSize) {
-            if (currentPage === -1) {
-                url += "&page=-1";
+            if (currentPage === 0) {
+                url += "&page=0";
             }
             url = url.replace(`&page=${currentPage}`, `&page=${++currentPage}`);
             const result = await fetch(url);
