@@ -12,7 +12,7 @@ export type RandomImageResponse = {
     image: MoebooruImage,
     maxPossible: number,
     of: number
-}[]
+}[];
 
 export abstract class MoebooruApi<T> extends SearchBase<T> {
     protected abstract baseUrl: string;
