@@ -14,11 +14,11 @@ export class KonachanApi extends MoebooruApi<KonachanTag> {
         return "https://konachan.net";
     }
 
-    protected get tagCache(): Fuse<KonachanTag> {
+    protected get fuseCache(): Fuse<KonachanTag> {
         return this._tagCache;
     }
 
-    protected set tagCache(cache: Fuse<KonachanTag>) {
+    protected set fuseCache(cache: Fuse<KonachanTag>) {
         this._tagCache = cache;
     }
 

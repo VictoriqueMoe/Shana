@@ -14,11 +14,11 @@ export class LolibooruApi extends MoebooruApi<LoliBooruTag> {
         return "https://lolibooru.moe";
     }
 
-    protected get tagCache(): Fuse<LoliBooruTag> {
+    protected get fuseCache(): Fuse<LoliBooruTag> {
         return this._tagCache;
     }
 
-    protected set tagCache(cache: Fuse<LoliBooruTag>) {
+    protected set fuseCache(cache: Fuse<LoliBooruTag>) {
         this._tagCache = cache;
     }
 

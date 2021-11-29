@@ -61,7 +61,7 @@ export abstract class MoebooruApi<T> extends SearchBase<T> {
         }
         json = json.filter(tag => !this.blackList.some(v => (tag as any).name.includes(v)));
         const index = Fuse.createIndex(options.keys, json);
-        this.tagCache = new Fuse(json, options, index);
+        this.fuseCache = new Fuse(json, options, index);
         console.log(`Indexed: ${json.length} tags from ${this.name}`);
     }
 
