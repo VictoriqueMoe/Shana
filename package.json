@@ -59,7 +59,6 @@
     "graphicsmagick": "^0.0.1",
     "http-debug": "^0.1.2",
     "http-status-codes": "^2.1.4",
-    "i": "^0.3.7",
     "imgur": "^1.0.2",
     "immutable": "^4.0.0",
     "is-image-fast": "^1.0.0",
