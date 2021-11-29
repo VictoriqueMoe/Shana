@@ -62,7 +62,7 @@ export namespace Typeings {
         }
         export type MoebooruTag = {
             "id"?: number,
-            "name"?: string,
+            "name": string,
             "type"?: number,
             "ambiguous"?: boolean
         };

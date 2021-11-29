@@ -1,6 +1,7 @@
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {
     Client,
+    DApplicationCommand,
     DefaultPermissionResolver,
     Discord,
     Guard,
@@ -19,6 +20,7 @@ import {
     ICategoryItemOption
 } from "@discordx/utilities";
 import {
+    AutocompleteInteraction,
     CommandInteraction,
     GuildMember,
     MessageActionRow,
@@ -30,9 +32,12 @@ import {
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {delay, inject, injectable} from "tsyringe";
+import {container, delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
 import {SettingsManager} from "../../model/settings/SettingsManager";
+import {defaultSearch, ISearchBase, options, SearchBase} from "../../model/ISearchBase";
+import Fuse from "fuse.js";
+import {PostConstructDependsOn} from "../../model/decorators/PostConstruct";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -61,13 +66,22 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()
-export class Help extends AbstractCommandModule {
+export class Help extends AbstractCommandModule implements ISearchBase<SearchBase> {
+
+    private _fuseCache: Fuse<SearchBase>;
 
     constructor(@inject(delay(() => CommandSecurityManager))
                 private _commandSecurityManager: CommandSecurityManager,
                 private _client: Client,
                 private _settingsManager: SettingsManager) {
         super();
+    }
+
+    @PostConstructDependsOn(CommandSecurityManager)
+    private init(): void {
+        const allCommandNames = this._commandSecurityManager.getAllCommandNames(true);
+        const obj = allCommandNames.map(command => ({name: command}));
+        this._fuseCache = new Fuse(obj, options);
     }
 
     @Slash("help", {
@@ -77,6 +91,8 @@ export class Help extends AbstractCommandModule {
     private async help(
         @SlashOption("commandname", {
             description: "Command name to drill into",
+            autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(Help)),
+            type: "STRING",
             required: false,
         })
             commandName: string,
@@ -188,7 +204,7 @@ export class Help extends AbstractCommandModule {
         const embed = new MessageEmbed();
         const {type, examples} = command;
         let {description} = command;
-        const title = await this.getCommandName(command, caller);
+        const title = await this.getCommandName(command, cat, caller);
         const prefix = await this._settingsManager.getPrefix(caller?.guild?.id);
         embed.setTitle(title);
         if (!ObjectUtil.validString(description)) {
@@ -266,7 +282,7 @@ export class Help extends AbstractCommandModule {
             }
             if (this.isICategoryItemCommand(item)) {
                 const {options, attachments} = item;
-                const argumentsToUse: ICategoryItemOption[] | ICategoryAttachment[] = {...options, ...attachments};
+                const argumentsToUse: ICategoryItemOption[] | ICategoryAttachment[] = [...options ?? [], ...attachments ?? []];
                 if (ArrayUtils.isValidArray(argumentsToUse)) {
                     const requiredArgs = argumentsToUse.filter(argumentToUse => !argumentToUse.optional).length;
                     if (requiredArgs > 0) {
@@ -275,18 +291,18 @@ export class Help extends AbstractCommandModule {
                 }
             }
             fieldValue += `\n\nCommand type: ${type}`;
-            const nameToDisplay = await this.getCommandName(item, caller);
+            const nameToDisplay = await this.getCommandName(item, categoryObject, caller);
             embed.addField(nameToDisplay, fieldValue, resultOfPage.length > 5);
         }
         // display a category
         return embed;
     }
 
-    private async getCommandName(command: ICategoryItem | ICategoryItemCommand, caller: GuildMember): Promise<string> {
+    private async getCommandName(command: ICategoryItem | ICategoryItemCommand, cat: ICategory, caller: GuildMember): Promise<string> {
         const prefix = await this._settingsManager.getPrefix(caller?.guild?.id);
         const {name} = command;
         if (command.type === "SLASH") {
-            return `/${name}`;
+            return `/${cat.name.toLowerCase()} ${name}`;
         } else if (command.type === "SIMPLECOMMAND") {
             return `${prefix}${name}`;
         } else {
@@ -310,4 +326,9 @@ export class Help extends AbstractCommandModule {
         }
         return r;
     }
+
+    public search(query: string): Fuse.FuseResult<SearchBase>[] {
+        return defaultSearch(query, this._fuseCache);
+    }
+
 }

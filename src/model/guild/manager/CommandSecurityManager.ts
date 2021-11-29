@@ -89,10 +89,11 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
 
 
     public getAllCommandNames(includeAlias: boolean = false): string[] {
+        const commands = [...this._metadata.simpleCommands, ...this._metadata.allApplicationCommands];
         if (!includeAlias) {
-            return this.commands.map(command => command.name);
+            return commands.map(command => command.name);
         }
-        return this.commands.flatMap(command => {
+        return commands.flatMap(command => {
             const {name} = command;
             if (command instanceof DSimpleCommand) {
                 if (ArrayUtils.isValidArray(command.aliases)) {

@@ -42,7 +42,7 @@ import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {Client, DApplicationCommand} from "discordx";
 import {Beans} from "../DI/Beans";
 import {getRepository} from "typeorm";
-import {SearchBase} from "../model/Impl/SearchBase";
+import {ISearchBase, SearchBase} from "../model/ISearchBase";
 
 const emojiRegex = require('emoji-regex');
 const isImageFast = require('is-image-fast');
@@ -1001,10 +1001,10 @@ export namespace DiscordUtils {
 
 export class ObjectUtil {
 
-    public static search<T extends SearchBase<any>>(interaction: AutocompleteInteraction, command: DApplicationCommand, contextHandler: T): void {
-        const query = interaction.options.getFocused(true).value;
+    public static search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, command: DApplicationCommand, contextHandler: T): Promise<void> {
+        let query = interaction.options.getFocused(true).value;
         if (!ObjectUtil.validString(query)) {
-            return;
+            query = "a";
         }
         const result = contextHandler.search(query as string);
         if (ArrayUtils.isValidArray(result)) {
@@ -1014,8 +1014,9 @@ export class ObjectUtil {
                     value: result.item.name
                 };
             });
-            interaction.respond(responseMap);
+            return interaction.respond(responseMap);
         }
+        return interaction.respond([]);
     }
 
     public static getUrls(str: string): Set<string> {

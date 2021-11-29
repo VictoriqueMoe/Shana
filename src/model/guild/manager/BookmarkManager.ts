@@ -35,6 +35,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
             }, {
                 messageIds: arr
             });
+            return bookMarksExists;
         } else {
             const newModel = BaseDAO.build(BookmarkModel, {
                 guildId,

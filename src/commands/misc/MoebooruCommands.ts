@@ -22,6 +22,7 @@ import {LolibooruApi} from "../../model/anime/Moebooru/impl/LolibooruApi";
 import {MoebooruApi, RandomImageResponse} from "../../model/anime/Moebooru/MoebooruApi";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
+import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
 
 @Discord()
 @Category("moebooru", "Commands to get waifus\nAll images are SFW")
@@ -100,7 +101,7 @@ export class MoebooruCommands extends AbstractCommandModule {
         return this.executeInteraction(interaction, tags, this._konachanApi);
     }
 
-    private async executeInteraction<T>(interaction: CommandInteraction, tags: string, manager: MoebooruApi<T>): Promise<void> {
+    private async executeInteraction<T extends MoebooruTag>(interaction: CommandInteraction, tags: string, manager: MoebooruApi<T>): Promise<void> {
         const tagArray = tags.split(" ");
         const explicitRating = [EXPLICIT_RATING.safe];
         const channel = interaction.channel as TextChannel;

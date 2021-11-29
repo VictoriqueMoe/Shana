@@ -2,7 +2,7 @@ import {Typeings} from "../../types/Typeings";
 import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 import fetch from "node-fetch";
 import Fuse from "fuse.js";
-import {SearchBase} from "../../Impl/SearchBase";
+import {defaultSearch, ISearchBase, options} from "../../ISearchBase";
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
 import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
@@ -14,10 +14,11 @@ export type RandomImageResponse = {
     of: number
 }[];
 
-export abstract class MoebooruApi<T> extends SearchBase<T> {
+export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<T> {
     protected abstract baseUrl: string;
     protected abstract name: string;
     private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "tail", "bottomless"];
+    protected abstract fuseCache: Fuse<T>;
 
     public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<RandomImageResponse> {
         const results = await this.getPosts(tags, explictRating);
@@ -43,13 +44,6 @@ export abstract class MoebooruApi<T> extends SearchBase<T> {
     protected abstract update(): Promise<void>;
 
     protected async tagUpdater(filter?: (value: T, index: number, array: MoebooruTag[]) => boolean): Promise<void> {
-        const options = {
-            keys: ['name'],
-            minMatchCharLength: 1,
-            threshold: 0.3,
-            includeScore: true,
-            shouldSort: true
-        };
         const tagsSearch = `${this.baseUrl}/tag.json?limit=0&order=name`;
         const result = await fetch(tagsSearch);
         if (!result.ok) {
@@ -59,7 +53,7 @@ export abstract class MoebooruApi<T> extends SearchBase<T> {
         if (filter) {
             json = json.filter(filter);
         }
-        json = json.filter(tag => !this.blackList.some(v => (tag as any).name.includes(v)));
+        json = json.filter(tag => !this.blackList.some(v => tag.name.includes(v)));
         const index = Fuse.createIndex(options.keys, json);
         this.fuseCache = new Fuse(json, options, index);
         console.log(`Indexed: ${json.length} tags from ${this.name}`);
@@ -115,6 +109,10 @@ export abstract class MoebooruApi<T> extends SearchBase<T> {
         const tagsStr = tags.join(" ");
         const url = `${this.baseUrl}/post.json?tags=${tagsStr}`;
         return this.doCall(url, returnSize, explictRating);
+    }
+
+    public search(query: string): Fuse.FuseResult<T>[] {
+        return defaultSearch(query, this.fuseCache);
     }
 }
 
