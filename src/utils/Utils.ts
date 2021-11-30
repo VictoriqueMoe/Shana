@@ -1001,8 +1001,8 @@ export namespace DiscordUtils {
 
 export class ObjectUtil {
 
-    public static search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, command: DApplicationCommand, contextHandler: T): Promise<void> {
-        const result = contextHandler.search(interaction);
+    public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, command: DApplicationCommand, contextHandler: T): Promise<void> {
+        const result = await contextHandler.search(interaction);
         if (ArrayUtils.isValidArray(result)) {
             const responseMap = result.map(result => {
                 return {

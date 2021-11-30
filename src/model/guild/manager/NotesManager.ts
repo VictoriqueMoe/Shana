@@ -7,16 +7,17 @@ import {ObjectUtil} from "../../../utils/Utils";
 import {defaultSearch, ISearchBase, options} from "../../ISearchBase";
 import Fuse from "fuse.js";
 import {PostConstruct} from "../../decorators/PostConstruct";
+import {ShanaFuse} from "../../Impl/ShanaFuse";
 
 @singleton()
 export class NotesManager extends BaseDAO<NotesModel> implements ISearchBase<NotesModel> {
-    private _fuseCache: Fuse<NotesModel> = null;
+    private _fuseCache: ShanaFuse<NotesModel> = null;
 
     @PostConstruct
     private async init(): Promise<void> {
         const repo = getRepository(NotesModel);
         const allModels = await repo.find();
-        this._fuseCache = new Fuse(allModels, options);
+        this._fuseCache = new ShanaFuse(allModels, options);
     }
 
     public async getNotes(member: GuildMember, title?: string): Promise<NotesModel[]> {

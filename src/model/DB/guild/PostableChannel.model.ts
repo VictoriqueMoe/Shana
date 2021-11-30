@@ -14,6 +14,9 @@ export class PostableChannelModel extends AbstractModel {
     @Column({unique: true, default: null, nullable: true})
     public JailChannel: string;
 
+    @Column({unique: true, default: null, nullable: true})
+    public birthdayChannel: string;
+
     @ManyToOne(() => GuildableModel, guildableModel => guildableModel.postableChannels, AbstractModel.cascadeOps)
     @JoinColumn({name: AbstractModel.joinCol})
     guildableModel: GuildableModel;

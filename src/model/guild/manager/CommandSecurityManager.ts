@@ -107,7 +107,6 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
     }
 
     public async getCommandsForMember(member: GuildMember, category: ICategory): Promise<(ICategoryItem | ICategoryItemCommand)[]> {
-
         function populateArray(this: CommandSecurityManager, command: CommandSecurityModel, item: (ICategoryItem | ICategoryItemCommand)): boolean {
             if (command.allowedRoles.includes("*")) {
                 retArr.push(item);
@@ -275,6 +274,25 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
             .where(`commandSecurityModel.guildId = :guildId`, {guildId})
             .andWhere("LOWER(commandSecurityModel.commandName) = LOWER(:commandName)", {commandName})
             .getOne();
+    }
+
+    public async getCommandGroup(member: GuildMember, commandName: string): Promise<[ICategory | null, ICategoryItem | ICategoryItemCommand | null]> {
+        const availableCategories = await this.getCommandModulesForMember(member);
+        let command: ICategoryItem | ICategoryItemCommand = null;
+        let cat: ICategory = null;
+        outer:
+            for (const availableCat of availableCategories) {
+                const items = await this.getCommandsForMember(member, availableCat);
+                for (const item of items) {
+                    const serialisedName = item.name.replace(/\s/g, '').toLowerCase();
+                    if (serialisedName === commandName.toLowerCase()) {
+                        command = item;
+                        cat = availableCat;
+                        break outer;
+                    }
+                }
+            }
+        return [cat, command];
     }
 
     public async canRunCommand(member: GuildMember, category: ICategory, command: (ICategoryItem | ICategoryItemCommand)): Promise<boolean> {

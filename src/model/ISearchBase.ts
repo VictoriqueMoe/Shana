@@ -1,6 +1,7 @@
 import Fuse from "fuse.js";
 import {AutocompleteInteraction} from "discord.js";
 import {ObjectUtil} from "../utils/Utils";
+import {ShanaFuse} from "./Impl/ShanaFuse";
 import FuseResult = Fuse.FuseResult;
 
 export type SearchBase = {
@@ -12,7 +13,7 @@ export type SearchBase = {
  */
 export const options = {
     keys: ['name'],
-    minMatchCharLength: 1,
+    minMatchCharLength: 0,
     threshold: 0.3,
     includeScore: true,
     useExtendedSearch: true,
@@ -24,7 +25,7 @@ export interface ISearchBase<T extends SearchBase> {
      * Preform a search on the Fuse container
      * @param interaction
      */
-    search(interaction: AutocompleteInteraction): FuseResult<T>[];
+    search(interaction: AutocompleteInteraction): FuseResult<T>[] | Promise<FuseResult<T>[]>;
 }
 
 /**
@@ -32,13 +33,13 @@ export interface ISearchBase<T extends SearchBase> {
  * @param interaction
  * @param cache
  */
-export function defaultSearch<T extends SearchBase>(interaction: AutocompleteInteraction, cache: Fuse<T>): Fuse.FuseResult<T>[] {
+export function defaultSearch<T extends SearchBase>(interaction: AutocompleteInteraction, cache: ShanaFuse<T>): Fuse.FuseResult<T>[] {
     if (!cache) {
         return [];
     }
-    let query = interaction.options.getFocused(true).value as string;
+    const query = interaction.options.getFocused(true).value as string;
     if (!ObjectUtil.validString(query)) {
-        query = "a";
+        return cache.getFirstNItems(25);
     }
     return cache.search(query, {
         limit: 25

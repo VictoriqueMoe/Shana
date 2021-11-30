@@ -38,6 +38,7 @@ import {SettingsManager} from "../../model/settings/SettingsManager";
 import {defaultSearch, ISearchBase, options, SearchBase} from "../../model/ISearchBase";
 import Fuse from "fuse.js";
 import {PostConstructDependsOn} from "../../model/decorators/PostConstruct";
+import {ShanaFuse} from "../../model/Impl/ShanaFuse";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -68,7 +69,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @injectable()
 export class Help extends AbstractCommandModule implements ISearchBase<SearchBase> {
 
-    private _fuseCache: Fuse<SearchBase>;
+    private _fuseCache: ShanaFuse<SearchBase>;
 
     constructor(@inject(delay(() => CommandSecurityManager))
                 private _commandSecurityManager: CommandSecurityManager,
@@ -81,7 +82,7 @@ export class Help extends AbstractCommandModule implements ISearchBase<SearchBas
     private init(): void {
         const allCommandNames = this._commandSecurityManager.getAllCommandNames(true);
         const obj = allCommandNames.map(command => ({name: command}));
-        this._fuseCache = new Fuse(obj, options);
+        this._fuseCache = new ShanaFuse(obj, options);
     }
 
     @Slash("help", {
@@ -185,19 +186,9 @@ export class Help extends AbstractCommandModule implements ISearchBase<SearchBas
         if (!ArrayUtils.isValidArray(availableCategories)) {
             throw new Error(`You do not have permissions to view use any commands`);
         }
-        let command: ICategoryItem | ICategoryItemCommand = null;
-        let cat: ICategory = null;
-        outer:
-            for (const availableCat of availableCategories) {
-                const items = await this._commandSecurityManager.getCommandsForMember(caller, availableCat);
-                for (const item of items) {
-                    if (item.name.toLowerCase() === commandName.toLowerCase()) {
-                        command = item;
-                        cat = availableCat;
-                        break outer;
-                    }
-                }
-            }
+        const commandGroup = await this._commandSecurityManager.getCommandGroup(caller, commandName);
+        const command: ICategoryItem | ICategoryItemCommand = commandGroup[1];
+        const cat: ICategory = commandGroup[0];
         if (!command) {
             throw new Error(`Unable to find command: ${commandName}`);
         }
@@ -327,8 +318,25 @@ export class Help extends AbstractCommandModule implements ISearchBase<SearchBas
         return r;
     }
 
-    public search(interaction: AutocompleteInteraction): Fuse.FuseResult<SearchBase>[] {
-        return defaultSearch(interaction, this._fuseCache);
+    public async search(interaction: AutocompleteInteraction): Promise<Fuse.FuseResult<SearchBase>[]> {
+        const member = interaction.member;
+        if (!(member instanceof GuildMember)) {
+            return [];
+        }
+        const retArr: Fuse.FuseResult<SearchBase>[] = [];
+        const results = defaultSearch(interaction, this._fuseCache);
+        for (const result of results) {
+            const commandName = result.item.name;
+            const commandGroup = await this._commandSecurityManager.getCommandGroup(member, commandName);
+            const [cat, command] = commandGroup;
+            if (!cat || !command) {
+                continue;
+            }
+            const canRun = this._commandSecurityManager.canRunCommand(member, cat, command);
+            if (canRun) {
+                retArr.push(result);
+            }
+        }
+        return retArr;
     }
-
 }

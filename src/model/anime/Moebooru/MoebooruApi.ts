@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import Fuse from "fuse.js";
 import {defaultSearch, ISearchBase, options} from "../../ISearchBase";
 import {AutocompleteInteraction} from "discord.js";
+import {ShanaFuse} from "../../Impl/ShanaFuse";
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
 import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
@@ -19,7 +20,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
     protected abstract baseUrl: string;
     protected abstract name: string;
     private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "tail", "bottomless"];
-    protected abstract fuseCache: Fuse<T>;
+    protected abstract fuseCache: ShanaFuse<T>;
 
     public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<RandomImageResponse> {
         const results = await this.getPosts(tags, explictRating);
@@ -56,7 +57,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         }
         json = json.filter(tag => !this.blackList.some(v => tag.name.includes(v)));
         const index = Fuse.createIndex(options.keys, json);
-        this.fuseCache = new Fuse(json, options, index);
+        this.fuseCache = new ShanaFuse(json, options, index);
         console.log(`Indexed: ${json.length} tags from ${this.name}`);
     }
 
