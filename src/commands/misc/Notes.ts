@@ -116,7 +116,11 @@ export class Notes extends AbstractCommandModule {
             ephemeral: true
         });
         const member = InteractionUtils.getInteractionCaller(interaction);
-        await this._notesManager.addOrUpdateNote(member, title, value);
+        try {
+            await this._notesManager.addOrUpdateNote(member, title, value);
+        } catch {
+            return InteractionUtils.replyOrFollowUp(interaction, `Note: "${title}" already exists`);
+        }
         return InteractionUtils.replyOrFollowUp(interaction, `Note: "${title}" has been created`);
     }
 
