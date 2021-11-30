@@ -11,6 +11,7 @@ import {SettingsManager} from "./model/settings/SettingsManager";
 import {createConnection, useContainer} from "typeorm";
 import io from "@pm2/io";
 import {importx} from "@discordx/importer";
+import {Settings} from "luxon";
 // const https = require('http-debug').https;
 // https.debug = 1;
 
@@ -27,6 +28,7 @@ export class Main {
     public static testMode = false;
 
     public static async start(): Promise<void> {
+        Settings.defaultZone = "utc";
         DIService.container = container;
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);

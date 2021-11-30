@@ -63,6 +63,18 @@ export class OnReady extends BaseDAO<any> {
         });
     }
 
+    @On("interactionCreate")
+    private async intersectionInit([interaction]: ArgsOf<"interactionCreate">): Promise<void> {
+        try {
+            await this._client.executeInteraction(interaction);
+        } catch (e) {
+            console.error(e);
+            if (interaction.isApplicationCommand() || interaction.isMessageComponent()) {
+                return InteractionUtils.replyOrFollowUp(interaction, "Something went wrong, please notify my developer: <@697417252320051291>");
+            }
+        }
+    }
+
 
     private async cleanCommands(justGuilds: boolean): Promise<void> {
         if (justGuilds) {
@@ -167,18 +179,6 @@ export class OnReady extends BaseDAO<any> {
         await this.populatePostableChannels(manager);
         await this.cleanUpGuilds(manager);
         await this.initAppCommands();
-    }
-
-    @On("interactionCreate")
-    private async intersectionInit([interaction]: ArgsOf<"interactionCreate">): Promise<void> {
-        try {
-            await this._client.executeInteraction(interaction);
-        } catch (e) {
-            console.error(e);
-            if (interaction.isApplicationCommand() || interaction.isMessageComponent()) {
-                return InteractionUtils.replyOrFollowUp(interaction, "Something went wrong, please notify my developer: <@697417252320051291>");
-            }
-        }
     }
 
     public initMusicPlayer(): void {

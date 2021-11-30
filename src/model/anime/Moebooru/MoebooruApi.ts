@@ -3,6 +3,7 @@ import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 import fetch from "node-fetch";
 import Fuse from "fuse.js";
 import {defaultSearch, ISearchBase, options} from "../../ISearchBase";
+import {AutocompleteInteraction} from "discord.js";
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
 import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
@@ -111,8 +112,8 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         return this.doCall(url, returnSize, explictRating);
     }
 
-    public search(query: string): Fuse.FuseResult<T>[] {
-        return defaultSearch(query, this.fuseCache);
+    public search(interaction: AutocompleteInteraction): Fuse.FuseResult<T>[] {
+        return defaultSearch(interaction, this.fuseCache);
     }
 }
 

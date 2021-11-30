@@ -327,8 +327,8 @@ export class Help extends AbstractCommandModule implements ISearchBase<SearchBas
         return r;
     }
 
-    public search(query: string): Fuse.FuseResult<SearchBase>[] {
-        return defaultSearch(query, this._fuseCache);
+    public search(interaction: AutocompleteInteraction): Fuse.FuseResult<SearchBase>[] {
+        return defaultSearch(interaction, this._fuseCache);
     }
 
 }

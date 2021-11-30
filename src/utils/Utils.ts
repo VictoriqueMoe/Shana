@@ -1002,11 +1002,7 @@ export namespace DiscordUtils {
 export class ObjectUtil {
 
     public static search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, command: DApplicationCommand, contextHandler: T): Promise<void> {
-        let query = interaction.options.getFocused(true).value;
-        if (!ObjectUtil.validString(query)) {
-            query = "a";
-        }
-        const result = contextHandler.search(query as string);
+        const result = contextHandler.search(interaction);
         if (ArrayUtils.isValidArray(result)) {
             const responseMap = result.map(result => {
                 return {

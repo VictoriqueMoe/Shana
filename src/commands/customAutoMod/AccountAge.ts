@@ -50,18 +50,16 @@ export class AccountAge extends AbstractCommandModule {
         super();
     }
 
-    private static getAge(toCall: { createdAt: Date }): { ageHumanReadable: string, utcDate: string } {
+    private static getAge(toCall: { createdTimestamp: number }): { ageHumanReadable: string, epoch: number } {
         if (toCall instanceof GuildMember) {
             toCall = toCall.user;
         }
-        const guildDate = toCall.createdAt;
-        const timeStamp = guildDate.getTime();
+        const timeStamp = toCall.createdTimestamp;
         const age = Date.now() - timeStamp;
         const ageHumanReadable = ObjectUtil.timeToHuman(age);
-        const utcDate = guildDate.toUTCString();
         return {
             ageHumanReadable,
-            utcDate
+            epoch: Math.round(timeStamp / 1000)
         };
     }
 
@@ -73,7 +71,7 @@ export class AccountAge extends AbstractCommandModule {
         const guildId = interaction.guild.id;
         const guild = await this._client.guilds.fetch(guildId);
         const ageObject = AccountAge.getAge(guild);
-        return InteractionUtils.replyOrFollowUp(interaction, `Server is: ${ageObject.ageHumanReadable} old\n and was created at: ${ageObject.utcDate}`);
+        return InteractionUtils.replyOrFollowUp(interaction, `Server is: ${ageObject.ageHumanReadable} old\n and was created on: <t:${ageObject.epoch}:F>`);
     }
 
     @Slash("channelage", {
@@ -89,7 +87,7 @@ export class AccountAge extends AbstractCommandModule {
         interaction: CommandInteraction
     ): Promise<void> {
         const ageObject = AccountAge.getAge(channel);
-        return InteractionUtils.replyOrFollowUp(interaction, `<#${channel.id}> is: ${ageObject.ageHumanReadable} old\n and was created at: ${ageObject.utcDate}`);
+        return InteractionUtils.replyOrFollowUp(interaction, `<#${channel.id}> is: ${ageObject.ageHumanReadable} old\n and was created on: <t:${ageObject.epoch}:F>`);
     }
 
 
@@ -106,6 +104,6 @@ export class AccountAge extends AbstractCommandModule {
         interaction: CommandInteraction
     ): Promise<void> {
         const ageObject = AccountAge.getAge(user);
-        return InteractionUtils.replyOrFollowUp(interaction, ` <@${user.id}>'s account is: ${ageObject.ageHumanReadable}\nand was created at: ${ageObject.utcDate}`);
+        return InteractionUtils.replyOrFollowUp(interaction, ` <@${user.id}>'s account is: ${ageObject.ageHumanReadable}\nand was created on: <t:${ageObject.epoch}:F>`);
     }
 }
