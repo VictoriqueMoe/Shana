@@ -1,14 +1,86 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {BirthdaysModel} from "../../DB/guild/Birthdays.model";
 import {singleton} from "tsyringe";
-import {GuildMember} from "discord.js";
+import {Guild, GuildMember, MessageEmbed} from "discord.js";
 import {DateTime} from "luxon";
 import {getRepository} from "typeorm";
+import {PostConstruct} from "../../decorators/PostConstruct";
+import {GuildManager} from "./GuildManager";
+import schedule, {Job, RecurrenceSpecObjLit} from "node-schedule";
+import {ChannelManager} from "./ChannelManager";
+import {Channels} from "../../../enums/Channels";
+import {ObjectUtil} from "../../../utils/Utils";
 
 @singleton()
 export class BirthdayManager extends BaseDAO<BirthdaysModel> {
 
+    private _birthdayJobs: Job[] = [];
+
+    public constructor(private _guildManager: GuildManager, private _channelManager: ChannelManager) {
+        super();
+    }
+
+    private async isEnabled(guildId: string): Promise<boolean> {
+        const channel = await this._channelManager.getChannel(guildId, Channels.BIRTHDAY_CHANNEL);
+        return ObjectUtil.isValidObject(channel);
+    }
+
+    @PostConstruct
+    private async initBirthdays(): Promise<void> {
+        const model = getRepository(BirthdaysModel);
+        const allBirthdays = await model.find();
+        for (const birthday of allBirthdays) {
+            await this.registerBirthdayListener(birthday);
+        }
+    }
+
+    private getNumberWithOrdinal(n: number): string {
+        return ["st", "nd", "rd"][((n + 90) % 100 - 10) % 10 - 1] || "th";
+    }
+
+    private async registerBirthdayListener(model: BirthdaysModel): Promise<void> {
+        const {guildId, userId, includeYear, birthday} = model;
+        const guild = await this._guildManager.getGuild(guildId);
+        let member: GuildMember = null;
+        try {
+            member = await guild.members.fetch(userId);
+        } catch {
+            await this.removeBirthday(userId, guild);
+            return;
+        }
+        const date = DateTime.fromSeconds(birthday);
+        const rule: RecurrenceSpecObjLit = {
+            month: date.month,
+            date: date.day
+        };
+        const channel = await this._channelManager.getChannel(guildId, Channels.BIRTHDAY_CHANNEL);
+        console.log(`Registering ${member.user.tag}'s birthday`);
+        const job = schedule.scheduleJob(`${member.id}${guildId}`, rule, () => {
+            const displayHexColor = member.displayHexColor;
+            const avatar = member.displayAvatarURL({dynamic: true});
+            const embed = new MessageEmbed()
+                .setAuthor(member.displayName, avatar)
+                .setColor(displayHexColor)
+                .setTimestamp();
+            let str = `It's <@${member.id}>'s `;
+            if (includeYear) {
+                const age = -date.diffNow().as('years');
+                const suffix = this.getNumberWithOrdinal(age);
+                str += `${age}${suffix} `;
+            }
+            str += "Birthday, Happy Birthday! 🎉";
+            embed.setDescription(str);
+            channel.send({
+                embeds: [embed]
+            });
+        });
+        this._birthdayJobs.push(job);
+    }
+
     public async addBirthday(member: GuildMember, discordFormat: string): Promise<BirthdaysModel> {
+        if (!await this.isEnabled(member.guild.id)) {
+            throw new Error("Birthday is not enabled on this server");
+        }
         const dateWithoutYear = DateTime.fromFormat(discordFormat, "dd-MM");
         const dateWithYear = DateTime.fromFormat(discordFormat, "YYYY-MM-dd");
         if (!dateWithoutYear.isValid && !dateWithYear.isValid) {
@@ -24,17 +96,22 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
             guildId,
             userId
         });
-        return super.commitToDatabase(getRepository(BirthdaysModel), [obj]).then(values => values[0]);
+        const model = await super.commitToDatabase(getRepository(BirthdaysModel), [obj]).then(values => values[0]);
+        await this.registerBirthdayListener(model);
+        return model;
     }
 
-    public async removeBirthday(member: GuildMember): Promise<boolean> {
-        const userId = member.id;
-        const guildId = member.guild.id;
+    public async removeBirthday(userId: string, guild: Guild): Promise<boolean> {
+        const guildId = guild.id;
         const repo = getRepository(BirthdaysModel);
         const deleteResult = await repo.delete({
             userId,
             guildId
         });
+        const key = `${userId}${guildId}`;
+        const job = this._birthdayJobs.find(job => job.name === key);
+        ObjectUtil.removeObjectFromArray(job, this._birthdayJobs);
+        job.cancel(false);
         return deleteResult.affected === 1;
     }
 }

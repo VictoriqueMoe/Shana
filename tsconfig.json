@@ -8,6 +8,7 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "allowJs": true,
+    "checkJs": true,
     "esModuleInterop": true,
     "noEmit": false,
     "watch": false,

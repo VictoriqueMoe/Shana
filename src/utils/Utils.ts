@@ -43,6 +43,7 @@ import {Client, DApplicationCommand} from "discordx";
 import {Beans} from "../DI/Beans";
 import {getRepository} from "typeorm";
 import {ISearchBase, SearchBase} from "../model/ISearchBase";
+import {Channels} from "../enums/Channels";
 
 const emojiRegex = require('emoji-regex');
 const isImageFast = require('is-image-fast');
@@ -144,7 +145,7 @@ export namespace GuildUtils {
 
         let message = dmStr;
         const channelManager = container.resolve(ChannelManager);
-        const jailChannel = await channelManager.getJailChannel(guild.id);
+        const jailChannel = await channelManager.getChannel(guild.id, Channels.JAIL_CHANNEL);
         if (jailChannel) {
             message += `\nPlease post in the #${jailChannel.name} channel for faster verification process`;
         }
@@ -175,7 +176,7 @@ export namespace GuildUtils {
         }
         await member.roles.add(jailRole);
         const channelManager = container.resolve(ChannelManager);
-        const jailChannel = await channelManager.getJailChannel(guildId);
+        const jailChannel = await channelManager.getChannel(guildId, Channels.JAIL_CHANNEL);
         if (!jailChannel) {
             return;
         }
@@ -913,9 +914,9 @@ export namespace DiscordUtils {
         let channel: BaseGuildTextChannel;
         const channelManager = container.resolve(ChannelManager);
         if (adminLog) {
-            channel = await channelManager.getAdminLogChannel(guildId);
+            channel = await channelManager.getChannel(guildId, Channels.ADMIN_LOG_CHANNEL);
         } else {
-            channel = await channelManager.getLogChannel(guildId);
+            channel = await channelManager.getChannel(guildId, Channels.LOG_CHANNEL);
         }
         if (channel == null) {
             return null;

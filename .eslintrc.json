@@ -9,6 +9,7 @@
         "allowEmptyCatch": true
       }
     ],
+    "no-sparse-arrays": "off",
     "no-shadow-restricted-names": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/ban-ts-comment": "off",

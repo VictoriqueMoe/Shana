@@ -1,3 +1,6 @@
 export enum Channels {
-    TEST_CHANNEL = "793994947241312296"
+    LOG_CHANNEL = "logChannel",
+    ADMIN_LOG_CHANNEL = "AdminLogchannel",
+    JAIL_CHANNEL = "JailChannel",
+    BIRTHDAY_CHANNEL = "BirthdayChannel"
 }

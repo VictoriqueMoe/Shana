@@ -95,10 +95,9 @@ export class SettingsCommands extends AbstractCommandModule {
                 if (!theRole) {
                     return InteractionUtils.replyOrFollowUp(interaction, `Unable to find role with id ${value}`);
                 }
-                await this._settingsManager.saveOrUpdateSetting(setting as SETTINGS, value, guildId);
-                break;
             }
         }
+        await this._settingsManager.saveOrUpdateSetting(setting as SETTINGS, value, guildId);
         return InteractionUtils.replyOrFollowUp(interaction, `Setting "${setting}" has been saved with value ${value}`);
     }
 

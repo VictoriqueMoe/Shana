@@ -5,6 +5,7 @@ import {ObjectUtil} from "../../../utils/Utils";
 import {GuildManager} from "./GuildManager";
 import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
+import {Channels} from "../../../enums/Channels";
 
 @singleton()
 export class ChannelManager extends BaseDAO<PostableChannelModel> {
@@ -13,16 +14,15 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
         super();
     }
 
-    private static getModel(guildId: string, attra: "logChannel" | "AdminLogchannel" | "JailChannel"): Promise<PostableChannelModel> {
+    private getModel(guildId: string): Promise<PostableChannelModel> {
         return getRepository(PostableChannelModel).findOne({
-            select: [attra],
             where: {
                 guildId
             }
         });
     }
 
-    public async setChannel(guildId: string, channelType: "logChannel" | "AdminLogchannel" | "JailChannel", value: string): Promise<PostableChannelModel[] | null> {
+    public async setChannel(guildId: string, channelType: Channels, value: string): Promise<PostableChannelModel[] | null> {
         const result = await getRepository(PostableChannelModel).update({
             guildId
         }, {
@@ -34,36 +34,14 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
         return result[1];
     }
 
-    public async getLogChannel(guildId: string): Promise<BaseGuildTextChannel | null> {
-        const model = await ChannelManager.getModel(guildId, "logChannel");
-        if (!model || !ObjectUtil.validString(model.logChannel)) {
+    public async getChannel(guildId: string, channelEnum: Channels): Promise<BaseGuildTextChannel | null> {
+        const model = await this.getModel(guildId);
+        if (!model || !ObjectUtil.validString(model[channelEnum])) {
             return null;
         }
-        const channelId = model.logChannel;
-        return await this.getChannel(guildId, channelId);
-    }
-
-    public async getAdminLogChannel(guildId: string): Promise<BaseGuildTextChannel | null> {
-        const model = await ChannelManager.getModel(guildId, "AdminLogchannel");
-        if (!model || !ObjectUtil.validString(model.AdminLogchannel)) {
-            return null;
-        }
-        const channelId = model.AdminLogchannel;
-        return await this.getChannel(guildId, channelId);
-    }
-
-    public async getJailChannel(guildId: string): Promise<BaseGuildTextChannel | null> {
-        const model = await ChannelManager.getModel(guildId, "JailChannel");
-        if (!model || !ObjectUtil.validString(model.JailChannel)) {
-            return null;
-        }
-        const channelId = model.JailChannel;
-        return await this.getChannel(guildId, channelId);
-    }
-
-    private async getChannel(guildId: string, channelId: string): Promise<BaseGuildTextChannel | null> {
+        const channelId = model[channelEnum] as string;
         const guild = await this._guildManager.getGuild(guildId);
-        const channel = await guild.channels.resolve(channelId);
+        const channel = guild.channels.resolve(channelId);
         if (channel instanceof BaseGuildTextChannel) {
             return channel;
         }
