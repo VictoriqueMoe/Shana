@@ -13,10 +13,6 @@
     "watch": false,
     "noImplicitOverride": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "es2020",
-      "esnext.asynciterable"
-    ],
     "moduleResolution": "node",
     "outDir": "./build",
     "allowSyntheticDefaultImports": true
