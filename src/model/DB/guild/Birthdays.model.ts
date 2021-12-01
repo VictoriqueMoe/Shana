@@ -9,5 +9,8 @@ export class BirthdaysModel extends IdentifiableModel {
     public birthday: number;
 
     @Column({nullable: false})
+    public dayOfYear: number;
+
+    @Column({nullable: false})
     public includeYear: boolean;
 }

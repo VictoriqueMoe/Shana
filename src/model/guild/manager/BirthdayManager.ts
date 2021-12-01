@@ -38,6 +38,27 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
         return ["st", "nd", "rd"][((n + 90) % 100 - 10) % 10 - 1] || "th";
     }
 
+    public async getNext10Birthdays(guildId: string): Promise<BirthdaysModel[]> {
+        const model = getRepository(BirthdaysModel);
+        const allBirthdays = await model.find({
+            where: {
+                guildId
+            }
+        });
+        const getNextBirthday = (date: number): DateTime => {
+            const currentDate = DateTime.now();
+            let birthday = DateTime.fromSeconds(date).set({year: currentDate.year});
+            if (birthday.millisecond - currentDate.millisecond < 0) {
+                birthday = birthday.plus({year: 1});
+            }
+            return birthday;
+        };
+
+        return allBirthdays.sort((a, b) =>
+            getNextBirthday(a.birthday).millisecond - getNextBirthday(b.birthday).millisecond
+        );
+    }
+
     private async registerBirthdayListener(model: BirthdaysModel): Promise<void> {
         const {guildId, userId, includeYear, birthday} = model;
         const guild = await this._guildManager.getGuild(guildId);
