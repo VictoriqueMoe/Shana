@@ -17,15 +17,16 @@ export abstract class BaseDAO<T> {
         silentOnDupe?: boolean
     } = {}): Promise<T[]> {
         let errorStr = "";
+        let result: T[];
         try {
             try {
                 if (repo instanceof EntityManager) {
                     if (!modelClass) {
                         throw new Error("Must supply class");
                     }
-                    return repo.save(modelClass, model);
+                    result = await repo.save(modelClass, model);
                 } else {
-                    return repo.save(model);
+                    result = await repo.save(model);
                 }
             } catch (e) {
                 if (e instanceof QueryFailedError) {
@@ -50,6 +51,7 @@ export abstract class BaseDAO<T> {
                 console.error(`An error occurred: ${errorStr}`);
             }
         }
+        return result;
     }
 }
 

@@ -34,29 +34,32 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
         }
     }
 
-    private getNumberWithOrdinal(n: number): string {
+    public getNumberWithOrdinal(n: number): string {
         return ["st", "nd", "rd"][((n + 90) % 100 - 10) % 10 - 1] || "th";
     }
 
     public async getNext10Birthdays(guildId: string): Promise<BirthdaysModel[]> {
         const model = getRepository(BirthdaysModel);
-        const allBirthdays = await model.find({
-            where: {
-                guildId
-            }
-        });
-        const getNextBirthday = (date: number): DateTime => {
-            const currentDate = DateTime.now();
-            let birthday = DateTime.fromSeconds(date).set({year: currentDate.year});
-            if (birthday.millisecond - currentDate.millisecond < 0) {
-                birthday = birthday.plus({year: 1});
-            }
-            return birthday;
-        };
+        const currentDayOfYear = DateTime.now().ordinal;
+        // sort by day of year
+        //get next 10 records where day of the year is >= current day of year
+        const first10 = await model.createQueryBuilder("BirthdaysModel")
+            .where("BirthdaysModel.guildId = :guildId", {guildId})
+            .andWhere("BirthdaysModel.dayOfYear >= :currentDayOfYear", {currentDayOfYear})
+            .orderBy("BirthdaysModel.dayOfYear", "ASC")
+            .limit(10)
+            .getMany();
 
-        return allBirthdays.sort((a, b) =>
-            getNextBirthday(a.birthday).millisecond - getNextBirthday(b.birthday).millisecond
-        );
+        if (first10.length < 10) {
+            const next10 = await model.createQueryBuilder("BirthdaysModel")
+                .where("BirthdaysModel.guildId = :guildId", {guildId})
+                .andWhere("BirthdaysModel.dayOfYear < :currentDayOfYear", {currentDayOfYear})
+                .orderBy("BirthdaysModel.dayOfYear", "ASC")
+                .limit(10 - first10.length)
+                .getMany();
+            return [...first10, ...next10];
+        }
+        return first10;
     }
 
     private async registerBirthdayListener(model: BirthdaysModel): Promise<void> {
@@ -85,11 +88,11 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
                 .setTimestamp();
             let str = `It's <@${member.id}>'s `;
             if (includeYear) {
-                const age = -date.diffNow().as('years');
+                const age = -Math.round(date.diffNow().as('years'));
                 const suffix = this.getNumberWithOrdinal(age);
                 str += `${age}${suffix} `;
             }
-            str += "Birthday, Happy Birthday! 🎉";
+            str += "birthday, Happy Birthday! 🍰";
             embed.setDescription(str);
             channel.send({
                 embeds: [embed]
@@ -103,16 +106,19 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
             throw new Error("Birthday is not enabled on this server");
         }
         const dateWithoutYear = DateTime.fromFormat(discordFormat, "dd-MM");
-        const dateWithYear = DateTime.fromFormat(discordFormat, "YYYY-MM-dd");
+        const dateWithYear = DateTime.fromFormat(discordFormat, "yyyy-MM-dd");
         if (!dateWithoutYear.isValid && !dateWithYear.isValid) {
             throw new Error("Invalid date format, please use MM-dd (03-12 third of december) OR YYYY-MM-dd (1995-07-03 (3rd of July 1995) ♥");
         }
         const userId = member.id;
         const guildId = member.guild.id;
         const includeYear = dateWithYear.isValid;
-        const birthday = (includeYear ? dateWithYear : dateWithoutYear).toSeconds();
+        const luxonBirthday = (includeYear ? dateWithYear : dateWithoutYear);
+        const dayOfYear = luxonBirthday.ordinal;
+        const seconds = luxonBirthday.toSeconds();
         const obj = BaseDAO.build(BirthdaysModel, {
-            birthday,
+            birthday: seconds,
+            dayOfYear,
             includeYear,
             guildId,
             userId
@@ -129,10 +135,13 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
             userId,
             guildId
         });
+        if (deleteResult.affected !== 1) {
+            return false;
+        }
         const key = `${userId}${guildId}`;
         const job = this._birthdayJobs.find(job => job.name === key);
         ObjectUtil.removeObjectFromArray(job, this._birthdayJobs);
         job.cancel(false);
-        return deleteResult.affected === 1;
+        return true;
     }
 }

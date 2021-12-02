@@ -2,7 +2,7 @@ import {IdentifiableModel} from "../IdentifiableModel";
 import {Column, Entity, Unique} from "typeorm";
 
 @Entity()
-@Unique("BirthdayConstraint", ["birthday", "userId", "guildId"])
+@Unique("BirthdayConstraint", ["userId", "guildId"])
 export class BirthdaysModel extends IdentifiableModel {
 
     @Column({nullable: false})
