@@ -54,7 +54,7 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
             const next10 = await model.createQueryBuilder("BirthdaysModel")
                 .where("BirthdaysModel.guildId = :guildId", {guildId})
                 .andWhere("BirthdaysModel.dayOfYear < :currentDayOfYear", {currentDayOfYear})
-                .orderBy("BirthdaysModel.dayOfYear", "ASC")
+                .orderBy("BirthdaysModel.dayOfYear", "ASC") // should this be DESC?
                 .limit(10 - first10.length)
                 .getMany();
             return [...first10, ...next10];
