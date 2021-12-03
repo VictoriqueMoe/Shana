@@ -105,7 +105,7 @@ export class BirthdayCommands extends AbstractCommandModule {
             for (const birthdayModel of birthdayModels) {
                 const {userId, includeYear} = birthdayModel;
                 const member = await interaction.guild.members.fetch(userId);
-                str += `**${dateStr}**\n<@${member.id}>`;
+                str += `\n\n**${dateStr}**\n<@${member.id}>`;
                 if (includeYear) {
                     const age = (-Math.ceil(DateTime.fromSeconds(birthdayModel.birthday).diffNow().as('years'))) + 1;
                     str += ` (${age})`;
@@ -178,7 +178,7 @@ export class BirthdayCommands extends AbstractCommandModule {
         let birthday = DateTime.fromSeconds(date).set({
             year: currentDate.year
         });
-        if (birthday.millisecond - currentDate.millisecond < 0) {
+        if (birthday.toMillis() - currentDate.toMillis() < 0) {
             birthday = birthday.plus({
                 year: 1
             });
