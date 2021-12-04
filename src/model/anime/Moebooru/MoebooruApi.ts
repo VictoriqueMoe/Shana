@@ -28,7 +28,9 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         if (!ArrayUtils.isValidArray(results)) {
             return [];
         }
-
+        if (returnSize > results.length) {
+            returnSize = results.length;
+        }
         const retArr: RandomImageResponse = [];
         for (let i = 0; i < returnSize; i++) {
             const of = Math.floor(Math.random() * results.length);

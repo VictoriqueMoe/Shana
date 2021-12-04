@@ -56,14 +56,15 @@ export class AutoResponder extends TriggerConstraint<null> {
             const {responseType} = autoResponder;
             switch (responseType) {
                 case "message": {
-                    if (isUpdate) {
-                        continue;
-                    }
                     const responseText: string = this._parseVars(autoResponder.response, message);
                     if (publicDelete) {
                         message.delete();
                     }
-                    channel.send(responseText);
+                    if (isUpdate) {
+                        message.reply(responseText);
+                    } else {
+                        channel.send(responseText);
+                    }
                     break;
                 }
                 case "delete":
