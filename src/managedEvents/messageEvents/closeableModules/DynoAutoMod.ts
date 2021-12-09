@@ -152,9 +152,9 @@ export class DynoAutoMod extends CloseableModule<null> {
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
             const humanMuted = ObjectUtil.timeToHuman(seconds, TimeUtils.TIME_UNIT.seconds);
-            await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: "${violationObj.filterId}" for ${humanMuted}`, user.guild.id);
+            await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: \`"${violationObj.filterId}"\` for ${humanMuted}`, user.guild.id);
             if (channel) {
-                await channel.send(`<@${user.id}>, you have been muted for ${humanMuted} due to the violation of the ${violationObj.filterId}`);
+                await channel.send(`<@${user.id}>, you have been muted for ${humanMuted} due to the violation of the \`${violationObj.filterId}\``);
             }
         }
         return model;

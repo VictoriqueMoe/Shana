@@ -14,6 +14,7 @@ import {MassMentionsFilter} from "../subModules/dynoAutoMod/impl/MassMentionsFil
 import {DiscordInviteFilter} from "../subModules/dynoAutoMod/impl/DiscordInviteFilter";
 import {BannedWordFilter} from "../subModules/dynoAutoMod/impl/BannedWordFilter";
 import {AllCapsFilter} from "../subModules/dynoAutoMod/impl/AllCapsFilter";
+import {EveryoneMentionsFilter} from "../subModules/dynoAutoMod/impl/EveryoneMentionsFilter";
 
 @registry([
     {token: Beans.ISubModuleToken, useToken: ZalgoTextFilter},
@@ -25,7 +26,8 @@ import {AllCapsFilter} from "../subModules/dynoAutoMod/impl/AllCapsFilter";
     {token: Beans.ISubModuleToken, useToken: MassMentionsFilter},
     {token: Beans.ISubModuleToken, useToken: DiscordInviteFilter},
     {token: Beans.ISubModuleToken, useToken: BannedWordFilter},
-    {token: Beans.ISubModuleToken, useToken: AllCapsFilter}
+    {token: Beans.ISubModuleToken, useToken: AllCapsFilter},
+    {token: Beans.ISubModuleToken, useToken: EveryoneMentionsFilter}
 ])
 @singleton()
 export class SubModuleManager {
