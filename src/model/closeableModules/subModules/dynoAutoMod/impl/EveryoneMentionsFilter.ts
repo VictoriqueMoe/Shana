@@ -2,7 +2,7 @@ import {singleton} from "tsyringe";
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {Message} from "discord.js";
+import {Message, Permissions} from "discord.js";
 
 @singleton()
 export class EveryoneMentionsFilter extends AbstractFilter {
@@ -27,6 +27,10 @@ export class EveryoneMentionsFilter extends AbstractFilter {
     }
 
     public async doFilter(content: Message): Promise<boolean> {
+        const hasPerms = content?.member?.permissions.has(Permissions.FLAGS.MENTION_EVERYONE);
+        if (hasPerms) {
+            return true;
+        }
         const mentions = content.mentions;
         return !mentions.everyone;
     }
