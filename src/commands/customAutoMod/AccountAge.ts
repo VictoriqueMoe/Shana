@@ -91,7 +91,7 @@ export class AccountAge extends AbstractCommandModule {
     }
 
 
-    @Slash("age", {
+    @Slash("userage", {
         description: "Get the age on an account"
     })
     @Guard(NotBotInteraction, CommandEnabled)
