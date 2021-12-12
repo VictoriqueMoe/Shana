@@ -32,7 +32,7 @@ export class AuditLogger extends CloseableModule<null> {
     }
 
     @On("guildMemberRemove")
-    private async memberLeaves([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
+    private async memberLeaves([member]: ArgsOf<"guildMemberRemove">, client: Client): Promise<void> {
         const memberLeft = member.id;
         const memberUsername = member.user.username;
         const memeberTag = member.user.tag;

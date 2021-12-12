@@ -75,22 +75,6 @@ export class OnReady extends BaseDAO<any> {
         }
     }
 
-
-    private async cleanCommands(justGuilds: boolean): Promise<void> {
-        if (justGuilds) {
-            const guildManager = container.resolve(GuildManager);
-            for (const guild of await guildManager.getGuilds()) {
-                try {
-                    await this._client.clearApplicationCommands(guild.id);
-                } catch {
-
-                }
-            }
-        } else {
-            await this._client.clearApplicationCommands();
-        }
-    }
-
     private static async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
         const retMap: Map<Guild, string[]> = new Map();
         const guildModels = await getRepository(GuildableModel).find({
@@ -173,7 +157,6 @@ export class OnReady extends BaseDAO<any> {
     @Transaction()
     public async init(@TransactionManager() manager?: EntityManager): Promise<void> {
         await this.populateCommandSecurity(manager);
-        await this.populateClosableEvents(manager);
         await this.populateClosableEvents(manager);
         await this.setDefaultSettings(manager);
         await this.populatePostableChannels(manager);

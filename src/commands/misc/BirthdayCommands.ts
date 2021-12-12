@@ -1,7 +1,18 @@
 import {Category} from "@discordx/utilities";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {injectable} from "tsyringe";
-import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
+import {
+    ArgsOf,
+    Client,
+    DefaultPermissionResolver,
+    Discord,
+    Guard,
+    On,
+    Permission,
+    Slash,
+    SlashGroup,
+    SlashOption
+} from "discordx";
 import {BirthdayManager} from "../../model/guild/manager/BirthdayManager";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
@@ -58,6 +69,13 @@ type NextBirthday = {
 export class BirthdayCommands extends AbstractCommandModule {
     public constructor(private _birthdayManager: BirthdayManager, private _channelManager: ChannelManager) {
         super();
+    }
+
+    @On("guildMemberRemove")
+    private async memberLeaves([member]: ArgsOf<"guildMemberRemove">, client: Client): Promise<void> {
+        const memberId = member.id;
+        const {guild} = member;
+        this._birthdayManager.removeBirthday(memberId, guild);
     }
 
     @Slash("removebirthday", {

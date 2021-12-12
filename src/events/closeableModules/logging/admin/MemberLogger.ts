@@ -131,7 +131,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
     }
 
     @On("guildMemberRemove")
-    private async memberLeaves([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
+    private async memberLeaves([member]: ArgsOf<"guildMemberRemove">, client: Client): Promise<void> {
         const guild = member.guild;
         const banLog = await DiscordUtils.getAuditLogEntry("MEMBER_BAN_ADD", guild);
         if (banLog) {
