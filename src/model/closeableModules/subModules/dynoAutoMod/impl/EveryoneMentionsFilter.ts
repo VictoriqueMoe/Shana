@@ -31,8 +31,8 @@ export class EveryoneMentionsFilter extends AbstractFilter {
         if (hasPerms) {
             return true;
         }
-        const mentions = content.mentions;
-        return !mentions.everyone;
+        return !content.content.includes("@everyone");
+
     }
 
     public async postProcess(message: Message): Promise<void> {
