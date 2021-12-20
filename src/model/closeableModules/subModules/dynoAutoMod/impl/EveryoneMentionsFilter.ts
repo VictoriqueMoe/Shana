@@ -11,7 +11,7 @@ export class EveryoneMentionsFilter extends AbstractFilter {
     }
 
     public get id(): string {
-        return "Discord `@everyone` filter";
+        return "Discord `everyone` filter";
     }
 
     public get isActive(): boolean {
@@ -23,7 +23,7 @@ export class EveryoneMentionsFilter extends AbstractFilter {
     }
 
     public get warnMessage(): string {
-        return "Your message can not contain `@everyone` pings";
+        return "Your message can not contain `everyone` pings";
     }
 
     public async doFilter(content: Message): Promise<boolean> {
@@ -36,6 +36,6 @@ export class EveryoneMentionsFilter extends AbstractFilter {
     }
 
     public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("`@everyone` ping", message);
+        await super.postToLog("`everyone` ping", message);
     }
 }
