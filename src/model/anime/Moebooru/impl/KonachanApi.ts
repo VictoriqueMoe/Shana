@@ -27,7 +27,7 @@ export class KonachanApi extends MoebooruApi<KonachanTag> {
     }
 
     public get enabled(): Promise<boolean> {
-        return Promise.resolve(false);
+        return Promise.resolve(true);
     }
 
     @RunEvery(1, TimeUtils.METHOD_EXECUTOR_TIME_UNIT.hours)
