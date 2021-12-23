@@ -26,8 +26,13 @@ export class LolibooruApi extends MoebooruApi<LoliBooruTag> {
         return "lolibooru";
     }
 
+    public get enabled(): Promise<boolean> {
+        return Promise.resolve(false);
+    }
+
     @RunEvery(1, TimeUtils.METHOD_EXECUTOR_TIME_UNIT.hours)
     protected update(): Promise<void> {
         return this.tagUpdater(value => value.post_count > 0);
     }
+
 }

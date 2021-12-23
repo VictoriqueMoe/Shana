@@ -102,6 +102,9 @@ export class MoebooruCommands extends AbstractCommandModule {
     }
 
     private async executeInteraction<T extends MoebooruTag>(interaction: CommandInteraction, tags: string, manager: MoebooruApi<T>): Promise<void> {
+        if (!await manager.enabled) {
+            return InteractionUtils.replyOrFollowUp(interaction, "Command is not enabled");
+        }
         const tagArray = tags.split(" ");
         const explicitRating = [EXPLICIT_RATING.safe];
         const channel = interaction.channel as TextChannel;
