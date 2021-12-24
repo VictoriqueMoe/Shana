@@ -52,7 +52,7 @@
     "ffmpeg": "0.0.4",
     "ffmpeg-static": "^4.4.0",
     "funcster": "0.0.5",
-    "fuse.js": "^6.5.0",
+    "fuse.js": "^6.5.3",
     "glob": "^7.1.7",
     "gm": "^1.23.1",
     "graphicsmagick": "^0.0.1",
