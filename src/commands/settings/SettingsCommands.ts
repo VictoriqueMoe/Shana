@@ -87,8 +87,7 @@ export class SettingsCommands extends AbstractCommandModule {
         const guildId = interaction.guild.id;
         switch (setting) {
             case SETTINGS.JAIL_ROLE:
-            case SETTINGS.YOUNG_ACCOUNT_ROLE:
-            case SETTINGS.MUTE_ROLE: {
+            case SETTINGS.YOUNG_ACCOUNT_ROLE: {
                 const theRole = interaction.guild.roles.cache.get(value);
                 if (!theRole) {
                     return InteractionUtils.replyOrFollowUp(interaction, `Unable to find role with id ${value}`);

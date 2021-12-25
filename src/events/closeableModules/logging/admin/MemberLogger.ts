@@ -12,7 +12,7 @@ import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
  * Member kick<br/>
  * Member leave<br/>
  * Member unBanned<br/>
- * Member username changed<br/>
+ * Member updated<br/>
  * Member joins/leaves VC<br/>
  */
 @Discord()
@@ -56,37 +56,65 @@ export class MemberLogger extends AbstractAdminAuditLogger {
     }
 
     @On("guildMemberUpdate")
-    private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
-        const {id, user} = newUser;
-        const {tag} = user;
-        const oldNickname = oldUser.nickname;
-        const newNickname = newUser.nickname;
-        const didNicknameChange = oldNickname !== newNickname;
-        if (!didNicknameChange) {
+    private async memberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
+        const memberUpdate = DiscordUtils.getMemberChanges(oldUser, newUser);
+        if (!ObjectUtil.isValidObject(memberUpdate)) {
             return;
         }
+        const {id} = newUser;
+        const {user} = newUser;
+        const {tag} = user;
         const avatarUrl = user.displayAvatarURL({dynamic: true});
         const embed = new MessageEmbed()
             .setColor('#337FD5')
-            .setTitle('Member Nickname changed')
             .setAuthor(tag, avatarUrl)
             .setThumbnail(avatarUrl)
             .setTimestamp()
             .setFooter(`${user.id}`);
-        if (newNickname == null) {
-            embed.setDescription("Nickname reset");
-        } else {
-            embed.setDescription("Nickname updated");
-            embed.addField("Before", `${ObjectUtil.validString(oldUser.nickname) ? oldUser.nickname : "none"}`);
-            embed.addField("After", newUser.nickname);
+        const {nickName, timeout} = memberUpdate;
+        if (ObjectUtil.isValidObject(nickName)) {
+            const {before, after} = nickName;
+            embed.addFields([
+                {
+                    "name": "Old nickname",
+                    "value": before
+                },
+                {
+                    "name": "New nickname",
+                    "value": after ?? "Nickname reset"
+                }
+            ]);
+            embed.setTitle('Member Nickname changed');
+        } else if (ObjectUtil.isValidObject(timeout)) {
+            const before = Number.isInteger(timeout.before) ? ObjectUtil.timeToHuman(this.getTimeoutLeft(timeout.before)) : "None";
+            const after = Number.isInteger(timeout.after) ? ObjectUtil.timeToHuman(this.getTimeoutLeft(timeout.after)) : "None";
+            embed.setTitle('Member timeout changed');
+            embed.addFields([
+                {
+                    "name": "Old timeout",
+                    "value": before
+                },
+                {
+                    "name": "New timeout",
+                    "value": after
+                }
+            ]);
         }
         const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_UPDATE", newUser.guild);
         if (auditEntry) {
             if (auditEntry.target instanceof User && auditEntry.target.id === id) {
-                embed.addField("Nickname changed by", auditEntry.executor.tag);
+                embed.addField("Changed by", auditEntry.executor.tag);
+            }
+            if (ObjectUtil.validString(auditEntry.reason)) {
+                embed.addField("Reason", auditEntry.reason);
             }
         }
         super.postToLog(embed, newUser.guild.id);
+    }
+
+    private getTimeoutLeft(timeout: number): number {
+        const today = Date.now();
+        return Math.abs(today - timeout);
     }
 
     @On("guildBanRemove")

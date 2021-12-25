@@ -25,22 +25,6 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
     }
 
     @On("guildMemberUpdate")
-    public async muteRoleListener([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
-        const mutedRole = await GuildUtils.RoleUtils.getMuteRole(newUser.guild.id);
-        if (!mutedRole) {
-            return;
-        }
-        const didRemove = await this._roleApplier.onChange(mutedRole, new MemberRoleChange(oldUser, newUser), RolePersistenceModel);
-        // mute was removed, so clear the timeout and mute Model if one exists
-        if (didRemove) {
-            try {
-                await this._muteManager.unMute(newUser, newUser.guild.id, true);
-            } catch {
-            }
-        }
-    }
-
-    @On("guildMemberUpdate")
     private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
         const filter: BannedWordFilter = container.resolve(BannedWordFilter);
         if (!filter.isActive) {

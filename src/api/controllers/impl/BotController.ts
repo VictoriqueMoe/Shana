@@ -1,18 +1,16 @@
 import {ChildControllers, Controller, Get, Post} from "@overnightjs/core";
 import {Request, Response} from 'express';
 import {baseController} from "../BaseController";
-import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil} from "../../../utils/Utils";
+import {DiscordUtils, EnumEx, ObjectUtil} from "../../../utils/Utils";
 import {Channel, Guild, GuildBasedChannel, GuildChannel, GuildMember} from "discord.js";
 import {StatusCodes} from "http-status-codes";
 import {SETTINGS} from "../../../enums/SETTINGS";
 import {SettingsManager} from "../../../model/settings/SettingsManager";
-import {MuteModel} from "../../../model/DB/autoMod/impl/Mute.model";
-import {MuteManager} from "../../../model/guild/manager/MuteManager";
 import {ModuleController} from "./modules/impl/ModuleController";
 import {AllCommands, CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager";
 import {container, singleton} from "tsyringe";
 import {Client} from "discordx";
-import {getManager, getRepository} from "typeorm";
+import {MuteManager} from "../../../model/guild/manager/MuteManager";
 
 @singleton()
 @Controller("api/bot")
@@ -34,17 +32,11 @@ export class BotController extends baseController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
-        const muteRole = await GuildUtils.RoleUtils.getMuteRole(guild.id);
-        if (!muteRole) {
-            return;
-        }
         const body: payload = req.body;
-        const muteSingleton = container.resolve(MuteManager);
-        await getManager().transaction(async entityManager => {
-            for (const userId of body) {
-                await muteSingleton.unMute(userId, guild.id, false, entityManager);
-            }
-        });
+        for (const userId of body) {
+            const member = await guild.members.fetch(userId);
+            await member.timeout(null);
+        }
         return super.ok(res, {});
     }
 
@@ -221,35 +213,15 @@ export class BotController extends baseController {
         } catch (e) {
             return super.doError(res, e.message, StatusCodes.NOT_FOUND);
         }
-        const currentBlocks = await getRepository(MuteModel).find({
-            where: {
-                guildId: guild.id
-            }
-        });
-        if (currentBlocks.length == 0) {
-            return super.ok(res, []);
-        }
         const data: string[][] = [];
-
-        for (const currentBlock of currentBlocks) {
-            const {userId, creatorID, timeout, reason, createdAt} = currentBlock;
-            let username = currentBlock.username;
-            let member: GuildMember = null;
-            try {
-                member = await guild.members.fetch(userId);
-            } catch {
-
-            }
-            let creatorObj: GuildMember = null;
-            try {
-                creatorObj = await guild.members.fetch(creatorID);
-            } catch {
-
-            }
-            let creatorTag = "N/A";
-            if (creatorObj) {
-                creatorTag = creatorObj.user.tag;
-            }
+        const manager = container.resolve(MuteManager);
+        const blockedMembers = await manager.getAllMutedMembers(guild.id);
+        for (const member of blockedMembers) {
+            const timeout = member.communicationDisabledUntilTimestamp;
+            const user = member.user;
+            let username = user.username;
+            const appliedAudit = await manager.getAudit(member);
+            const creatorTag = appliedAudit.executor.tag;
             let nickName = "N/A";
             if (member) {
                 if (member.nickname) {
@@ -259,10 +231,9 @@ export class BotController extends baseController {
                     username = member.user.tag;
                 }
             }
-            const dateCreated = (createdAt as Date).getTime();
-            const timeLeft = timeout - (Date.now() - dateCreated);
+            const timeLeft = timeout - (Date.now() - timeout);
             const tmeLeftStr = ObjectUtil.timeToHuman(timeLeft);
-            data.push([null, username, nickName, tmeLeftStr, creatorTag, reason, currentBlock.userId]);
+            data.push([null, username, nickName, tmeLeftStr, creatorTag, appliedAudit.reason, user.id]);
         }
         return super.ok(res, data);
     }

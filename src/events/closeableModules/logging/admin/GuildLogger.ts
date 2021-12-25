@@ -5,7 +5,8 @@ import {Guild, MessageEmbed} from "discord.js";
 
 /**
  * Will log: <br />
- * Server changes
+ * Server changes <br />
+ * Event created <br />
  */
 @Discord()
 export class GuildLogger extends AbstractAdminAuditLogger {

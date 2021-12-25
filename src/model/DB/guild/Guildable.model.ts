@@ -1,5 +1,4 @@
 import {IGuildAware} from "../IGuildAware";
-import {MuteModel} from "../autoMod/impl/Mute.model";
 import {RolePersistenceModel} from "../autoMod/impl/RolePersistence.model";
 import {UsernameModel} from "../autoMod/impl/Username.model";
 import {CloseOptionModel} from "../autoMod/impl/CloseOption.model";
@@ -21,9 +20,6 @@ export class GuildableModel implements IGuildAware {
         primary: true
     })
     public guildId: string;
-
-    @OneToMany(() => MuteModel, muteModel => muteModel.guildableModel)
-    public muteModel: MuteModel[];
 
     @OneToMany(() => RolePersistenceModel, rolePersistence => rolePersistence.guildableModel)
     public rolePersistence: RolePersistenceModel[];

@@ -64,15 +64,9 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             if (persistedRole) {
                 const rolePersisted = await guild.roles.fetch(persistedRole.roleId);
                 const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
-                const muteRole = await GuildUtils.RoleUtils.getMuteRole(guildId);
                 if (jailRole && rolePersisted.id === jailRole.id) {
                     if (settings.autoJail) {
                         DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving in jail and has been re-jailed`, member.guild.id);
-                        await this._roleApplier.applyRole(rolePersisted, member, `added via ${botUsername}`);
-                    }
-                } else if (muteRole && rolePersisted.id === muteRole.id) {
-                    if (settings.autoMute) {
-                        DiscordUtils.postToLog(`Member <@${member.user.id}> has rejoined after leaving as muted and has been re-muted.`, member.guild.id);
                         await this._roleApplier.applyRole(rolePersisted, member, `added via ${botUsername}`);
                     }
                 } else {

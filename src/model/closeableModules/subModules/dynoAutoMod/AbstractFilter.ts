@@ -2,7 +2,7 @@ import {IDynoAutoModFilter} from "./IDynoAutoModFilter";
 import {Message, MessageEmbed} from "discord.js";
 import {ACTION} from "../../../../enums/ACTION";
 import {ICloseableModule} from "../../ICloseableModule";
-import {DiscordUtils} from "../../../../utils/Utils";
+import {DiscordUtils, TimeUtils} from "../../../../utils/Utils";
 
 export abstract class AbstractFilter implements IDynoAutoModFilter {
 
@@ -33,7 +33,7 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
      * How long (in seconds) are members muted for if they violate "mute" filters according to the autoMuteViolationCount
      */
     public static get autoMuteTimeout(): number {
-        return 1800; //  hard-coded for now
+        return TimeUtils.TIME_OUT["1 hour"] / 1000; //  hard-coded for now
     }
 
     /**

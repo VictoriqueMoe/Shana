@@ -15,6 +15,7 @@ import {
     Message,
     MessageComponentInteraction,
     MessageEmbed,
+    PartialGuildMember,
     Permissions,
     Role,
     StaticImageURLOptions,
@@ -92,10 +93,6 @@ export namespace GuildUtils {
 
         export function getYoungAccountRole(guildId: string): Promise<Role | null> {
             return getRole(guildId, SETTINGS.YOUNG_ACCOUNT_ROLE);
-        }
-
-        export function getMuteRole(guildId: string): Promise<Role | null> {
-            return getRole(guildId, SETTINGS.MUTE_ROLE);
         }
 
         async function getRole(guildId: string, setting: SETTINGS): Promise<Role | null> {
@@ -286,6 +283,15 @@ export namespace TimeUtils {
         months = "mo",
         years = "y",
         decades = "de"
+    }
+
+    export enum TIME_OUT {
+        "60 seconds" = convertToMilli(60, TIME_UNIT.seconds),
+        "5 min" = convertToMilli(5, TIME_UNIT.minutes),
+        "10 min" = convertToMilli(10, TIME_UNIT.minutes),
+        "1 hour" = convertToMilli(1, TIME_UNIT.hours),
+        "1 day" = convertToMilli(1, TIME_UNIT.days),
+        "1 week" = convertToMilli(1, TIME_UNIT.weeks)
     }
 
     export enum METHOD_EXECUTOR_TIME_UNIT {
@@ -563,6 +569,34 @@ export namespace DiscordUtils {
         slowMode?: ObjectChange<number>,
         archiveDuration?: ObjectChange<ThreadAutoArchiveDuration | null>
     };
+
+    export type MemberUpdate = {
+        nickName?: ObjectChange<string>,
+        timeout?: ObjectChange<number>
+    }
+
+    export function getMemberChanges(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember): MemberUpdate {
+        const retObj: MemberUpdate = {};
+        const oldNick = oldMember.nickname;
+        const newNick = newMember.nickname;
+        if (oldNick !== newNick) {
+            retObj["nickName"] = {
+                before: oldNick,
+                after: newNick
+            };
+        }
+
+        const oldTimeout = oldMember.communicationDisabledUntilTimestamp;
+        const newTimeout = newMember.communicationDisabledUntilTimestamp;
+        if (oldTimeout !== newTimeout) {
+            retObj["timeout"] = {
+                before: oldTimeout,
+                after: newTimeout
+            };
+        }
+
+        return retObj;
+    }
 
     export function getThreadChanges(oldThread: ThreadChannel, newThread: ThreadChannel): ThreadUpdate {
         const retObj: ThreadUpdate = {};

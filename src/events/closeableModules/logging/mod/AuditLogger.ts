@@ -10,6 +10,7 @@ import {Message, MessageEmbed, User} from "discord.js";
  * Member ban<br/>
  * Member kick<br/>
  * Member leave<br/>
+ * Member un-muted<br/>
  */
 @Discord()
 export class AuditLogger extends CloseableModule<null> {
@@ -30,6 +31,21 @@ export class AuditLogger extends CloseableModule<null> {
         const memberJoined = member.id;
         this.postToLog(`<@${memberJoined}> has joined the server`, member.guild.id);
     }
+
+    @On("guildMemberUpdate")
+    private async memberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
+        const memberUpdate = DiscordUtils.getMemberChanges(oldUser, newUser);
+        if (!ObjectUtil.isValidObject(memberUpdate)) {
+            return;
+        }
+        const {timeout} = memberUpdate;
+        if (ObjectUtil.isValidObject(timeout)) {
+            if (timeout.after === null) {
+                this.postToLog(`${newUser.user.tag} has been un-muted`, newUser.guild.id);
+            }
+        }
+    }
+
 
     @On("guildMemberRemove")
     private async memberLeaves([member]: ArgsOf<"guildMemberRemove">, client: Client): Promise<void> {
