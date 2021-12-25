@@ -8,12 +8,11 @@ import {
     Message,
     MessageActionRow,
     MessageButton,
-    MessageEmbed,
-    Util
+    MessageEmbed
 } from "discord.js";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {Player, Playlist, Queue, Song} from "discord-music-player";
-import {DiscordUtils} from "../../utils/Utils";
+import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {injectable} from "tsyringe";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
@@ -105,7 +104,7 @@ export class Music extends AbstractCommandModule {
             switch (buttonId) {
                 case "btn-next": {
                     guildQueue.skip();
-                    await Util.delayFor(900);
+                    await ObjectUtil.delayFor(900);
                     break;
                 }
                 case "btn-pause":
@@ -177,7 +176,6 @@ export class Music extends AbstractCommandModule {
     private async play(
         @SlashOption("song", {
             description: "The song name or URL",
-            required: true
         })
             search: string,
         @SlashOption("isplaylist", {

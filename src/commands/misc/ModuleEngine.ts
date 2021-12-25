@@ -71,12 +71,10 @@ export abstract class ModuleEngine extends AbstractCommandModule {
     private async enableModule(
         @SlashOption("setting", {
             description: "the name of the module to close or open",
-            required: true
         })
             moduleId: string,
         @SlashOption("value", {
             description: "true = enable, false = disable",
-            required: true,
             type: "BOOLEAN"
         })
             isEnable: boolean,

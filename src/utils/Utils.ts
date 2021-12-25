@@ -937,7 +937,7 @@ export namespace DiscordUtils {
      * @param type
      * @param guild
      */
-    export async function getAuditLogEntry(type: GuildAuditLogsAction, guild: Guild): Promise<GuildAuditLogsEntry> {
+    export async function getAuditLogEntry(type: GuildAuditLogsAction, guild: Guild): Promise<GuildAuditLogsEntry<GuildAuditLogsAction>> {
         const fetchedAuditLog = await getAuditLogEntries(type, guild);
         if (!fetchedAuditLog) {
             return null;
@@ -955,8 +955,8 @@ export namespace DiscordUtils {
      * @param guild
      * @param limit
      */
-    export async function getAuditLogEntries(type: GuildAuditLogsAction, guild: Guild, limit: number = 1): Promise<GuildAuditLogs | null> {
-        const fetchObj: GuildAuditLogsFetchOptions = {
+    export async function getAuditLogEntries(type: GuildAuditLogsAction, guild: Guild, limit: number = 1): Promise<GuildAuditLogs<GuildAuditLogsAction> | null> {
+        const fetchObj: GuildAuditLogsFetchOptions<GuildAuditLogsAction> = {
             limit,
             type
         };
@@ -1001,6 +1001,10 @@ export namespace DiscordUtils {
 }
 
 export class ObjectUtil {
+
+    public static delayFor(ms: number): Promise<void> {
+        return new Promise(res => setTimeout(res, ms));
+    }
 
     public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, command: DApplicationCommand, contextHandler: T): Promise<void> {
         const result = await contextHandler.search(interaction);

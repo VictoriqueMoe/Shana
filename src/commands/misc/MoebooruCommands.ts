@@ -71,7 +71,6 @@ export class MoebooruCommands extends AbstractCommandModule {
     private async lolibooru(
         @SlashOption("tags", {
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
-            required: true,
             type: 'STRING',
             autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(LolibooruApi))
         })
@@ -90,7 +89,6 @@ export class MoebooruCommands extends AbstractCommandModule {
     private async konachan(
         @SlashOption("tags", {
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
-            required: true,
             type: 'STRING',
             autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(KonachanApi))
         })

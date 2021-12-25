@@ -138,8 +138,7 @@ export class Mute extends AbstractCommandModule {
     @Guard(NotBotInteraction, CommandEnabled)
     private async shut(
         @SlashOption("user", {
-            description: "User you wish to mute",
-            required: true
+            description: "User you wish to mute"
         })
             mentionedMember: User,
         @SlashOption("reason", {

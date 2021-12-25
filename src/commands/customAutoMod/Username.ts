@@ -90,13 +90,11 @@ export abstract class Username extends AbstractCommandModule {
     @Guard(NotBotInteraction, CommandEnabled)
     private async setUsername(
         @SlashOption("user", {
-            description: "The user you want to change nickname",
-            required: true
+            description: "The user you want to change nickname"
         })
             mentionedMember: User,
         @SlashOption("newnickname", {
-            description: "The new nickname for the user",
-            required: true
+            description: "The new nickname for the user"
         })
             usernameToPersist: string,
         @SlashOption("blockchanges", {

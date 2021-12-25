@@ -80,8 +80,7 @@ export class AccountAge extends AbstractCommandModule {
     @Guard(NotBotInteraction, CommandEnabled)
     private async channelAge(
         @SlashOption("channel", {
-            description: "The reference to the channel",
-            required: true
+            description: "The reference to the channel"
         })
             channel: Channel,
         interaction: CommandInteraction
@@ -97,8 +96,7 @@ export class AccountAge extends AbstractCommandModule {
     @Guard(NotBotInteraction, CommandEnabled)
     private async getAccountAge(
         @SlashOption("user", {
-            description: "The user you want to check the account age of",
-            required: true
+            description: "The user you want to check the account age of"
         })
             user: User,
         interaction: CommandInteraction

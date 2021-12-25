@@ -147,8 +147,7 @@ export class Bookmark extends AbstractCommandModule {
     @Guard(NotBotInteraction, CommandEnabled)
     private async deleteBookmarks(
         @SlashOption("id", {
-            description: "ID of the bookmark",
-            required: true
+            description: "ID of the bookmark"
         })
             bookmarkId: string,
         interaction: CommandInteraction

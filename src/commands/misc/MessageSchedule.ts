@@ -128,7 +128,7 @@ export class MessageSchedule extends AbstractCommandModule {
     private async removeScheduledMessage(
         @SlashOption("name", {
             description: "The Unique ID of the schedule schedule you want to remove",
-            required: true,
+
         })
             name: string,
         interaction: CommandInteraction
@@ -155,22 +155,22 @@ export class MessageSchedule extends AbstractCommandModule {
     private async scheduleMessage(
         @SlashOption("name", {
             description: "The Unique ID of this scheduled job",
-            required: true,
+
         })
             name: string,
         @SlashOption("channel", {
             description: "The channel to post to",
-            required: true,
+
         })
             channel: Channel,
         @SlashOption("cron", {
             description: "the cron string to represent the time",
-            required: true,
+
         })
             cron: string,
         @SlashOption("message", {
             description: "the message to post",
-            required: true,
+
         })
             message: string,
         interaction: CommandInteraction

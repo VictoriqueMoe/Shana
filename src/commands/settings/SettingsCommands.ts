@@ -75,12 +75,10 @@ export class SettingsCommands extends AbstractCommandModule {
         @SlashChoice(SETTINGS)
         @SlashOption("setting", {
             description: "the name of the setting you wish to change",
-            required: true
         })
             setting: SETTINGS,
         @SlashOption("value", {
             description: "the value of the setting",
-            required: true
         })
             value: string,
         interaction: CommandInteraction
@@ -110,12 +108,10 @@ export class SettingsCommands extends AbstractCommandModule {
         @SlashChoice(AutoRoleSettingsEnum)
         @SlashOption("setting", {
             description: "the name of the setting you wish to change",
-            required: true
         })
             setting: AutoRoleSettingsEnum,
         @SlashOption("value", {
             description: "the value of the setting",
-            required: true
         })
             value: string,
         interaction: CommandInteraction

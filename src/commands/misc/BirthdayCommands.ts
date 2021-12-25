@@ -142,8 +142,7 @@ export class BirthdayCommands extends AbstractCommandModule {
     @Guard(NotBotInteraction, CommandEnabled)
     private async addBirthday(
         @SlashOption("date", {
-            description: "your birthday (ex: YYYY-MM-dd) 1995-07-05 OR (dd-MM) 03-12)",
-            required: true,
+            description: "your birthday (ex: YYYY-MM-dd) 1995-07-05 OR (dd-MM) 03-12)"
         })
             dateStr: string,
         interaction: CommandInteraction

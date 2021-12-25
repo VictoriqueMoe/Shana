@@ -6,7 +6,7 @@ import * as Immutable from "immutable";
 import {SubModuleManager} from "../manager/SubModuleManager";
 import {ModuleSettings} from "../ModuleSettings";
 import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
-import {GuildMember, TextBasedChannels} from "discord.js";
+import {GuildMember, TextBasedChannel} from "discord.js";
 import {Roles} from "../../../enums/Roles";
 import {CloseOptionModel} from "../../DB/autoMod/impl/CloseOption.model";
 import {container, delay} from "tsyringe";
@@ -133,7 +133,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
      * @param channel
      * @protected
      */
-    protected async canRun(guildId: string, member: GuildMember | null, channel: TextBasedChannels | null): Promise<boolean> {
+    protected async canRun(guildId: string, member: GuildMember | null, channel: TextBasedChannel | null): Promise<boolean> {
         if (!ObjectUtil.validString(guildId)) {
             throw new Error("Unable to find guild");
         }

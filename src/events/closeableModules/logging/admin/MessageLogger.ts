@@ -1,6 +1,6 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils";
-import {MessageEmbed, Util} from "discord.js";
+import {MessageEmbed} from "discord.js";
 import {Main} from "../../../../Main";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {Imgur} from "../../../../model/Imgur";
@@ -68,7 +68,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
         if (!member || !member.user) {
             return;
         }
-        await Util.delayFor(900);
+        await ObjectUtil.delayFor(900);
         const fetchedLogs = await DiscordUtils.getAuditLogEntries("MESSAGE_DELETE", message.guild, 6);
         let executor = null;
         if (fetchedLogs) {

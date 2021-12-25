@@ -52,7 +52,7 @@ export class Main {
                     return container.resolve(SettingsManager).getPrefix(guildId);
                 },
                 responses: {
-                    unauthorised: (command: SimpleCommandMessage): void => {
+                    unauthorized: (command: SimpleCommandMessage): void => {
                         console.log(command);
                     }
                 }
@@ -72,8 +72,7 @@ export class Main {
                 const guildManager = container.resolve(GuildManager);
                 const guilds = await guildManager.getGuilds();
                 return guilds.map(guild => guild.id);
-            }],
-            silent: false
+            }]
         });
         await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
         registerInstance(connection, client);

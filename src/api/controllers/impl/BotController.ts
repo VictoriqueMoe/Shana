@@ -2,7 +2,7 @@ import {ChildControllers, Controller, Get, Post} from "@overnightjs/core";
 import {Request, Response} from 'express';
 import {baseController} from "../BaseController";
 import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil} from "../../../utils/Utils";
-import {Channel, Guild, GuildChannel, GuildMember} from "discord.js";
+import {Channel, Guild, GuildBasedChannel, GuildChannel, GuildMember} from "discord.js";
 import {StatusCodes} from "http-status-codes";
 import {SETTINGS} from "../../../enums/SETTINGS";
 import {SettingsManager} from "../../../model/settings/SettingsManager";
@@ -288,7 +288,8 @@ export class BotController extends baseController {
         }
         const allChannels = [...guild.channels.cache.values()];
         const ret: Record<string, any> = allChannels
-            .sort((a: GuildChannel, b: GuildChannel) => a.rawPosition - b.rawPosition)
+            .filter(value => value instanceof GuildChannel)
+            .sort((a: GuildBasedChannel, b: GuildBasedChannel) => (a as GuildChannel).rawPosition - (b as GuildChannel).rawPosition)
             .map(channel => channel.toJSON());
 
         return super.ok(res, ret);

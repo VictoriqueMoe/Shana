@@ -102,12 +102,10 @@ export class Notes extends AbstractCommandModule {
     private async addNote(
         @SlashOption("title", {
             description: "Unique title for this note",
-            required: true,
         })
             title: string,
         @SlashOption("value", {
             description: "The text for this note",
-            required: true,
         })
             value: string,
         interaction: CommandInteraction
@@ -133,12 +131,10 @@ export class Notes extends AbstractCommandModule {
             description: "The note to modify",
             type: "STRING",
             autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(NotesManager)),
-            required: true,
         })
             title: string,
         @SlashOption("value", {
             description: "the new text",
-            required: true,
         })
             value: string,
         interaction: CommandInteraction

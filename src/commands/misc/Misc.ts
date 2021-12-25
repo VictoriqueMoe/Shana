@@ -169,8 +169,7 @@ export class Misc extends AbstractCommandModule {
     @Guard(NotBotInteraction, CommandEnabled)
     private async generateText(
         @SlashOption("value", {
-            description: "the text to include in the generation",
-            required: true
+            description: "the text to include in the generation"
         })
             value: string,
         interaction: CommandInteraction
@@ -262,7 +261,7 @@ export class Misc extends AbstractCommandModule {
     private async avatar(
         @SlashOption("user", {
             description: "The user to display the avatar",
-            required: true
+
         })
             user: User,
         interaction: CommandInteraction
@@ -284,7 +283,7 @@ export class Misc extends AbstractCommandModule {
     private async banner(
         @SlashOption("user", {
             description: "The user to display the banner",
-            required: true
+
         })
             user: User,
         interaction: CommandInteraction
