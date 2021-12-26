@@ -29,10 +29,9 @@ import {Response} from "../../model/anime/AnimeTypings";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DeepAPI} from "../../model/DeepAPI";
-import {container, delay, inject, injectable} from "tsyringe";
+import {container, injectable} from "tsyringe";
 import * as locale from 'locale-codes';
 import {Category} from "@discordx/utilities";
-import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
 import Anilist from "anilist-node";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
@@ -142,25 +141,10 @@ export class Misc extends AbstractCommandModule {
 
     constructor(
         private _client: Client,
-        @inject(delay(() => CommandSecurityManager)) private _commandSecurityManager: CommandSecurityManager,
         private _animeTractApi: AnimeTractApi,
         private _anilist: Anilist
     ) {
         super();
-    }
-
-    @Slash("initservercommandpermissions", {
-        description: "Re-init all command permissions for this server"
-    })
-    @Guard(NotBotInteraction, CommandEnabled)
-    private async initServerCommandPermissions(
-        interaction: CommandInteraction
-    ): Promise<void> {
-        await interaction.deferReply({
-            ephemeral: true
-        });
-        await this._commandSecurityManager.initGuildApplicationPermissions(interaction.guild);
-        InteractionUtils.replyOrFollowUp(interaction, "Permissions synchronised");
     }
 
     @Slash("generatetext", {

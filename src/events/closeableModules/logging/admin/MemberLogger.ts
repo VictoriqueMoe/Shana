@@ -77,7 +77,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
             embed.addFields([
                 {
                     "name": "Old nickname",
-                    "value": before
+                    "value": before ?? "None"
                 },
                 {
                     "name": "New nickname",
