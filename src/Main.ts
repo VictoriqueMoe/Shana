@@ -48,7 +48,7 @@ export class Main {
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             simpleCommand: {
                 prefix: async (message: Message): Promise<string> => {
-                    const guildId = message?.guild?.id;
+                    const guildId = message?.guildId;
                     return container.resolve(SettingsManager).getPrefix(guildId);
                 },
                 responses: {
@@ -68,6 +68,7 @@ export class Main {
                 Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
                 Intents.FLAGS.GUILD_VOICE_STATES
             ],
+            silent: false,
             botGuilds: [async (): Promise<string[]> => {
                 const guildManager = container.resolve(GuildManager);
                 const guilds = await guildManager.getGuilds();
