@@ -38,7 +38,7 @@
     "cronstrue": "^1.119.0",
     "deepai": "^1.0.17",
     "deepl": "^1.0.13",
-    "discord-api-types": "^0.25.2",
+    "discord-api-types": "^0.26.0",
     "discord-music-player": "^8.3.1",
     "discord.js": "^13.4.0",
     "discordx": "^9.1.5",
