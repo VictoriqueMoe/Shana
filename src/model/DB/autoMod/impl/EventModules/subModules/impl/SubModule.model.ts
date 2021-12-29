@@ -19,8 +19,14 @@ export class SubModuleModel extends AbstractModel {
 
     @ManyToOne(() => CloseOptionModel, closeOptionModel => closeOptionModel.subModuleModels, AbstractModel.cascadeOps)
     @JoinColumn([
-        {name: AbstractModel.joinCol, referencedColumnName: AbstractModel.joinCol},
-        {name: "pModuleId", referencedColumnName: "moduleId"}
+        {
+            name: AbstractModel.joinCol,
+            referencedColumnName: AbstractModel.joinCol
+        },
+        {
+            name: "pModuleId",
+            referencedColumnName: "moduleId"
+        }
     ])
     closeOptionModel: CloseOptionModel;
 

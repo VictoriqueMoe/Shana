@@ -47,13 +47,10 @@ export class Main {
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             simpleCommand: {
-                prefix: async (message: Message): Promise<string> => {
-                    const guildId = message?.guildId;
-                    return container.resolve(SettingsManager).getPrefix(guildId);
-                },
+                prefix: async (message: Message): Promise<string> => container.resolve(SettingsManager).getPrefix(message?.guildId),
                 responses: {
                     unauthorized: (command: SimpleCommandMessage): void => {
-                        console.log(command);
+                        console.warn(command);
                     }
                 }
             },
