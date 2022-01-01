@@ -75,7 +75,10 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
         const date = DateTime.fromSeconds(birthday);
         const rule: RecurrenceSpecObjLit = {
             month: date.month - 1,
-            date: date.day
+            date: date.day,
+            hour: 0,
+            minute: 0,
+            tz: "Etc/UTC"
         };
         const channel = await this._channelManager.getChannel(guildId, Channels.BIRTHDAY_CHANNEL);
         console.log(`Registering ${member.user.tag}'s birthday on guild ${guild.name}`);
@@ -97,6 +100,7 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
             channel.send({
                 embeds: [embed]
             });
+
         });
         this._birthdayJobs.push(job);
     }
