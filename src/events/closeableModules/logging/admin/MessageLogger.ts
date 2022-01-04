@@ -53,7 +53,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
                 })
             .setTimestamp()
             .setFooter(`${member.id}`);
-        super.postToLog(embed, member.guild.id, newMessage.member);
+        super.postToLog(embed, member.guild.id);
     }
 
 
@@ -121,7 +121,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
                 embed.addField("Stickers", stickerUrls.join("\n"));
             }
         }
-        super.postToLog(embed, message.guild.id, message.member);
+        super.postToLog(embed, message.guild.id);
     }
 
     @On("messageDeleteBulk")

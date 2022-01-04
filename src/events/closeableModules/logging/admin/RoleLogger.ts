@@ -139,6 +139,21 @@ export class RoleLogger extends AbstractAdminAuditLogger {
             embed.setColor(after);
         }
 
+        const hoistChange = roleChange.hoist;
+        if (ObjectUtil.isValidObject(hoistChange)) {
+            const {before, after} = hoistChange;
+            embed.addFields([
+                {
+                    "name": "Old hoist value",
+                    "value": String(before)
+                },
+                {
+                    "name": "New hoist value",
+                    "value": String(after)
+                }
+            ]);
+        }
+
         const {iconChange} = roleChange;
         if (ObjectUtil.isValidObject(iconChange)) {
             const {before, after} = iconChange;

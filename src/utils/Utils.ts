@@ -537,7 +537,8 @@ export namespace DiscordUtils {
         permissions?: ObjectChange<Array<string>>
         nameChange?: ObjectChange<string>,
         colourChange?: ObjectChange<HexColorString>,
-        iconChange?: ObjectChange<string>
+        iconChange?: ObjectChange<string>,
+        hoist?: ObjectChange<boolean>
     };
 
     export type ChannelUpdate = {
@@ -862,6 +863,16 @@ export namespace DiscordUtils {
                 "after": sanitiseString(newIcon)
             };
         }
+
+        const oldHoist = oldRole.hoist;
+        const newHoist = newRole.hoist;
+        if (oldHoist !== newHoist) {
+            retObj["hoist"] = {
+                "before": oldHoist,
+                "after": newHoist
+            };
+        }
+
         return retObj;
     }
 
