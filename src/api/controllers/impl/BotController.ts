@@ -216,7 +216,7 @@ export class BotController extends baseController {
         const data: string[][] = [];
         const manager = container.resolve(MuteManager);
         const blockedMembers = await manager.getAllMutedMembers(guild.id);
-        for (const member of blockedMembers) {
+        /*for (const member of blockedMembers) {
             const timeout = member.communicationDisabledUntilTimestamp;
             const user = member.user;
             let username = user.username;
@@ -234,7 +234,7 @@ export class BotController extends baseController {
             const timeLeft = timeout - (Date.now() - timeout);
             const tmeLeftStr = ObjectUtil.timeToHuman(timeLeft);
             data.push([null, username, nickName, tmeLeftStr, creatorTag, appliedAudit.reason, user.id]);
-        }
+        }*/
         return super.ok(res, data);
     }
 

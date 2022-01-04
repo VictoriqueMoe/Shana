@@ -27,7 +27,7 @@ export class MuteManager {
 
     public async getAudit(user: GuildMember): Promise<GuildAuditLogsEntry> {
         const guild = await this._guildManager.getGuild(user.guild.id);
-        const auditEntries = await DiscordUtils.getAuditLogEntries("MEMBER_UPDATE", guild, -1);
+        const auditEntries = await DiscordUtils.getAuditLogEntries("MEMBER_UPDATE", guild, null);
         const filteredEntries = [...auditEntries.entries.filter(entry =>
             entry.actionType === "UPDATE" && entry.target instanceof User && entry.target.id === user.id
         ).values()];
