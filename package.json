@@ -50,7 +50,7 @@
     "express-promise-router": "^4.1.1",
     "express-validator": "^6.13.0",
     "ffmpeg": "0.0.4",
-    "ffmpeg-static": "^4.4.0",
+    "ffmpeg-static": "^4.4.1",
     "funcster": "0.0.5",
     "fuse.js": "^6.5.3",
     "glob": "^7.1.7",
