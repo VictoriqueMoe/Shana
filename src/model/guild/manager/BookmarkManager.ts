@@ -14,7 +14,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
      * @param message
      */
     public async addBookmark(member: GuildMember, message: Message | string): Promise<BookmarkModel> {
-        const messageToAddId = typeof message === "string" ? message : message.id;
+        const messageToAddUrls = typeof message === "string" ? message : message.url;
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
@@ -27,7 +27,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         });
         if (bookMarksExists) {
             const messageIds = new Set<string>(bookMarksExists.messageIds);
-            messageIds.add(messageToAddId);
+            messageIds.add(messageToAddUrls);
             const arr = Array.from(messageIds);
             await repo.update({
                 guildId,
@@ -40,7 +40,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
             const newModel = BaseDAO.build(BookmarkModel, {
                 guildId,
                 userId: id,
-                messageIds: [messageToAddId]
+                messageIds: [messageToAddUrls]
             });
             return super.commitToDatabase(repo, [newModel]).then(values => values[0]);
         }
@@ -63,7 +63,10 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         });
         if (bookMarksExists) {
             const {messageIds} = bookMarksExists;
-            const indexInArray = messageIds.indexOf(messageToDeleteId);
+            const indexInArray = messageIds.findIndex(value => {
+                const [messageId] = value.split("/").splice(6);
+                return messageId === messageToDeleteId;
+            });
             if (indexInArray === -1) {
                 return false;
             }
@@ -101,24 +104,18 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
             return retArr;
         }
         const allMessageIds = bookMarks.messageIds;
-        outer:
-            for (const messageId of allMessageIds) {
-                for (const [, channel] of guild.channels.cache) {
-                    if (channel instanceof BaseGuildTextChannel) {
-                        try {
-                            const message = await channel.messages.fetch(messageId);
-                            if (message.deleted) {
-                                await this.deleteBookmark(member, messageId);
-                            } else {
-                                retArr.push(message);
-                            }
-                        } catch {
-                            continue;
-                        }
-                        continue outer;
-                    }
+        for (const messageUrl of allMessageIds) {
+            const [channelId, messageId] = messageUrl.split("/").splice(5);
+            const channel = await guild.channels.fetch(channelId);
+            if (channel instanceof BaseGuildTextChannel) {
+                try {
+                    const message = await channel.messages.fetch(messageId);
+                    retArr.push(message);
+                } catch {
+                    await this.deleteBookmark(member, messageId);
                 }
             }
+        }
         return retArr;
     }
 }

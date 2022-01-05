@@ -1,10 +1,9 @@
 import {Typeings} from "./types/Typeings";
 import {singleton} from "tsyringe";
+import deepai from 'deepai';
 import SenimentTypes = Typeings.DEEP_AI.SenimentTypes;
 import ImageSimilarity = Typeings.DEEP_AI.ImageSimilarity;
 import TextGeneration = Typeings.DEEP_AI.TextGeneration;
-
-const deepai = require('deepai');
 
 @singleton()
 export class DeepAPI {
