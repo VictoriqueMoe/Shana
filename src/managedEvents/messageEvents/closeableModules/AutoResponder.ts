@@ -99,7 +99,7 @@ export class AutoResponder extends TriggerConstraint<null> {
                         try {
                             kickMessage = await member.send(toDm);
                         } catch {
-                            kickReason = ", however, I could not DM this member, so did not get an invite";
+                            kickReason = ", however, I could not DM this member";
                         }
                     }
                     try {
