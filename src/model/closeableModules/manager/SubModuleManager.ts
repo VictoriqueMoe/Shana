@@ -38,10 +38,6 @@ export class SubModuleManager {
         this._subModules = new Set(modules);
     }
 
-    public get allSubModules(): Immutable.Set<ISubModule> {
-        return Immutable.Set.of(...this._subModules.values());
-    }
-
     public getSubModulesFromParent(parent: ICloseableModule<ModuleSettings>): Immutable.Set<ISubModule> {
         const returnSet: Set<ISubModule> = new Set();
         for (const subModule of this._subModules) {

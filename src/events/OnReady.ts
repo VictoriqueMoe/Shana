@@ -34,7 +34,7 @@ export class OnReady extends BaseDAO<any> {
     }
 
     @On("ready")
-    private async initialize([client]: ArgsOf<"ready">): Promise<void> {
+    private async initialise([client]: ArgsOf<"ready">): Promise<void> {
         if (Main.testMode) {
             await this._client.user.setActivity("Under development", {type: "LISTENING"});
             await this._client.user.setPresence({
