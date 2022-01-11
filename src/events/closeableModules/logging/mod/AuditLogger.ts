@@ -10,6 +10,7 @@ import {Message, MessageEmbed, User} from "discord.js";
  * Member ban<br/>
  * Member kick<br/>
  * Member leave<br/>
+ * Member muted<br/>
  * Member un-muted<br/>
  */
 @Discord()
@@ -42,8 +43,16 @@ export class AuditLogger extends CloseableModule<null> {
         if (ObjectUtil.isValidObject(timeout)) {
             if (timeout.after === null) {
                 this.postToLog(`${newUser.user.tag} has been un-muted`, newUser.guild.id);
+            } else if (Number.isInteger(timeout.after)) {
+                const after = ObjectUtil.timeToHuman(this.getTimeoutLeft(timeout.after));
+                this.postToLog(`${newUser.user.tag} has been muted for ${after}`, newUser.guild.id);
             }
         }
+    }
+
+    private getTimeoutLeft(timeout: number): number {
+        const today = Date.now();
+        return Math.abs(today - timeout);
     }
 
 
