@@ -23,9 +23,9 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
     }
 
     /**
-     * this sets the amount of filters that define "mute" as punishment that needs to fail before they are muted automatically by the set autoMuteTimeout value
+     * this sets the amount of filters that define "terminal operation (mute, kick and ban)" as punishment that needs to fail before the action is automatically taken
      */
-    public static get autoMuteViolationCount(): number {
+    public static get autoTerminalViolationCount(): number {
         return 3; //  hard-coded for now
     }
 
@@ -39,10 +39,10 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
     /**
      * How long to wait (in seconds) to cooldown the autoMuteViolationCount value
      * <br/><br/>
-     * if autoMuteViolationCount is set to 2 and this is set to 30 then each member will have 30 seconds to violate 2 MUTE filters starting from the first violation. If a member violates ONE mute role and not another within 30 seconds, then then the counter is reset to 0
+     * if autoTerminalViolationCount is set to 2 and this is set to 30 then each member will have 30 seconds to violate 2 terminal filters starting from the first violation. If a member violates ONE terminal filter and not another within 30 seconds, then the counter is reset to 0
      *
      */
-    public static get muteViolationTimeout(): number {
+    public static get terminalViolationTimeout(): number {
         return 15; //  hard-coded for now
     }
 

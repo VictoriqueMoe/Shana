@@ -11,7 +11,7 @@ export class MuteManager {
     }
 
     public isMuted(user: GuildMember): boolean {
-        return Number.isInteger(user.communicationDisabledUntilTimestamp) && user.communicationDisabledUntilTimestamp > Date.now();
+        return user.isCommunicationDisabled();
     }
 
     public async muteUser(user: GuildMember, reason: string, length: TimeUtils.TIME_OUT): Promise<GuildMember> {

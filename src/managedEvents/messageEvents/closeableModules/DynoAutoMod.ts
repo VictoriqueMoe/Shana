@@ -19,7 +19,7 @@ import TIME_OUT = TimeUtils.TIME_OUT;
 @singleton()
 export class DynoAutoMod extends CloseableModule<null> {
 
-    private _muteTimeoutArray: TimedSet<MuteViolation> = new TimedSet(AbstractFilter.muteViolationTimeout * 1000);
+    private _muteTimeoutArray: TimedSet<TerminalViolation> = new TimedSet(AbstractFilter.terminalViolationTimeout * 1000);
 
     constructor(private _client: Client, private _muteManager: MuteManager) {
         super(CloseOptionModel);
@@ -66,26 +66,42 @@ export class DynoAutoMod extends CloseableModule<null> {
                 let didPreformTerminaloperation = false;
                 for (const action of actionsToTake) {
                     switch (action) {
+                        case ACTION.BAN:
+                        case ACTION.KICK:
                         case ACTION.MUTE: {
-                            if (this._muteManager.isMuted(member)) {
+                            if (action === ACTION.MUTE && this._muteManager.isMuted(member)) {
                                 continue;
                             }
                             let fromArray = this.getFromArray(userId, guildid);
                             if (fromArray) {
-                                fromArray.muteViolations++;
+                                fromArray.violations++;
                                 this._muteTimeoutArray.refresh(fromArray);
                             } else {
-                                fromArray = new MuteViolation(userId, filter.id, guildid);
+                                fromArray = new TerminalViolation(userId, filter.id, guildid);
                                 this._muteTimeoutArray.add(fromArray);
                             }
                             if (fromArray.hasViolationLimitReached) {
                                 try {
-                                    let textChannel: BaseGuildTextChannel = null;
-                                    const channel = message.channel;
-                                    if (channel instanceof BaseGuildTextChannel) {
-                                        textChannel = channel;
+                                    switch (action) {
+                                        case ACTION.KICK:
+                                            await member.kick(`Auto mod violation limit reached \`${fromArray.filterId}\``);
+                                            break;
+                                        case ACTION.BAN:
+                                            await member.ban({
+                                                reason: `Auto mod violation limit reached \`${fromArray.filterId}\``,
+                                                days: 1
+                                            });
+                                            break;
+                                        case ACTION.MUTE: {
+                                            let textChannel: BaseGuildTextChannel = null;
+                                            const channel = message.channel;
+                                            if (channel instanceof BaseGuildTextChannel) {
+                                                textChannel = channel;
+                                            }
+                                            await this.muteUser(fromArray, member, "Auto mod violation limit reached", this._client.user.id, textChannel, AbstractFilter.autoMuteTimeout);
+                                            break;
+                                        }
                                     }
-                                    await this.muteUser(fromArray, member, "Auto mod violation limit reached", this._client.user.id, textChannel, AbstractFilter.autoMuteTimeout);
                                     didPreformTerminaloperation = true;
                                 } catch (e) {
                                     console.error(e);
@@ -139,7 +155,7 @@ export class DynoAutoMod extends CloseableModule<null> {
             }
     }
 
-    private async muteUser(violationObj: MuteViolation, user: GuildMember, reason: string, creatorID: string, channel?: BaseGuildTextChannel, time?: number): Promise<GuildMember> {
+    private async muteUser(violationObj: TerminalViolation, user: GuildMember, reason: string, creatorID: string, channel?: BaseGuildTextChannel, time?: number): Promise<GuildMember> {
         if (!user) {
             return;
         }
@@ -159,21 +175,21 @@ export class DynoAutoMod extends CloseableModule<null> {
         return model;
     }
 
-    private getFromArray(userId: string, guildid: string): MuteViolation {
+    private getFromArray(userId: string, guildid: string): TerminalViolation {
         const arr = this._muteTimeoutArray.rawSet;
         return arr.find(value => value.userId === userId && value._guildId === guildid);
     }
 
 }
 
-class MuteViolation {
-    public muteViolations: number;
+class TerminalViolation {
+    public violations: number;
 
     constructor(public userId: string, public filterId: string, public _guildId: string) {
-        this.muteViolations = 1;
+        this.violations = 1;
     }
 
     public get hasViolationLimitReached(): boolean {
-        return this.muteViolations >= AbstractFilter.autoMuteViolationCount;
+        return this.violations >= AbstractFilter.autoTerminalViolationCount;
     }
 }

@@ -7,7 +7,7 @@ import {Message, Permissions} from "discord.js";
 @singleton()
 export class EveryoneMentionsFilter extends AbstractFilter {
     public get actions(): ACTION[] {
-        return [ACTION.MUTE, ACTION.DELETE, ACTION.WARN];
+        return [ACTION.BAN, ACTION.DELETE, ACTION.WARN];
     }
 
     public get id(): string {
