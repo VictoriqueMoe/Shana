@@ -90,7 +90,7 @@
     "@types/ffmpeg": "^1.0.4",
     "@types/follow-redirects": "^1.13.1",
     "@types/glob": "^7.2.0",
-    "@types/jsonwebtoken": "^8.5.6",
+    "@types/jsonwebtoken": "^8.5.7",
     "@types/luxon": "^2.0.9",
     "@types/node": "^17.0.8",
     "@types/node-fetch": "^2.5.12",
