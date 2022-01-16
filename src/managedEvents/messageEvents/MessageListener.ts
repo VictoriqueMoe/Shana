@@ -164,17 +164,17 @@ export class MessageListener {
             shouldReply = true;
             const repliedMessage = message.reference;
             if (!repliedMessage) {
-                shouldReply = false;
+                return;
             }
             const repliedMessageId = repliedMessage.messageId;
             let repliedMessageObj: Message;
             try {
                 repliedMessageObj = await message.channel.messages.fetch(repliedMessageId);
             } catch {
-                shouldReply = false;
+                return;
             }
             if (!repliedMessageObj.member || repliedMessageObj.member.id !== me) {
-                shouldReply = false;
+                return;
             }
         }
         if (!shouldReply || this._timer.has(userId)) {

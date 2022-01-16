@@ -117,6 +117,7 @@ export class SettingsCommands extends AbstractCommandModule {
     ): Promise<void> {
         const guildId = interaction.guild.id;
         const settingObj: AutoRoleSettings = {};
+        let str = "";
         switch (setting) {
             // numbers
             case AutoRoleSettingsEnum.MASS_JOIN_PROTECTION:
@@ -124,6 +125,9 @@ export class SettingsCommands extends AbstractCommandModule {
                 const settingValue = parseInt(value);
                 if (isNaN(settingValue)) {
                     return InteractionUtils.replyOrFollowUp(interaction, "Please supply a number");
+                }
+                if (settingValue <= 0) {
+                    str = `${setting} has been disabled`;
                 }
                 settingObj[setting] = settingValue;
                 break;
@@ -133,10 +137,12 @@ export class SettingsCommands extends AbstractCommandModule {
             case AutoRoleSettingsEnum.AUTO_MUTE:
             case AutoRoleSettingsEnum.PANIC_MODE: {
                 settingObj[setting] = value === "true";
+                str = `${setting} has been ${value === "true" ? "enabled" : "disabled"}`;
                 break;
             }
             // strings
             case AutoRoleSettingsEnum.ROLE:
+                str = `${setting} has been bound to the role with id ${value}`;
                 settingObj[setting] = value;
                 break;
         }
@@ -145,6 +151,7 @@ export class SettingsCommands extends AbstractCommandModule {
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, e.message);
         }
+        return InteractionUtils.replyOrFollowUp(interaction, str);
     }
 
 
