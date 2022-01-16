@@ -4,6 +4,8 @@ import {Category} from "@discordx/utilities";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction} from "discord.js";
+import {DiscordUtils} from "../../utils/Utils";
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @Category("bans", "commands to manage bans in this server")
@@ -20,18 +22,32 @@ import {CommandInteraction} from "discord.js";
 @SlashGroup("bans", "commands to manage bans in this server")
 export class BanManager extends AbstractCommandModule {
 
-
     @Slash("cleanbans", {
-        description: "Get the age of this server"
+        description: "Remove all the deleted accounts from your bans"
     })
     @Guard(NotBotInteraction, CommandEnabled)
-    private async serverAge(interaction: CommandInteraction): Promise<void> {
+    private async cleanBans(interaction: CommandInteraction): Promise<void> {
         const {guild} = interaction;
         const banManager = guild.bans;
-        const banCache = banManager.cache;
+        const banCache = await banManager.fetch();
+        let count = 0;
         for (const [id, guildBan] of banCache) {
             const bannedUser = guildBan.user;
-            console.log(bannedUser);
+            const {username, discriminator} = bannedUser;
+            if (discriminator === "0000" || this.hasValidDeletedUser(username)) {
+                await banManager.remove(id, "Deleted user");
+                count++;
+            }
         }
+        return InteractionUtils.replyOrFollowUp(interaction, count === 0 ? "No accounts have been removed" : `${count} accounts have been unbanned because they are deleted`);
+    }
+
+    private hasValidDeletedUser(userName: string): boolean {
+        const split = userName.split(" ");
+        if (split.length !== 3) {
+            return false;
+        }
+        const hash = split.pop();
+        return hash.length === 8 && split.join(" ") === "Deleted User";
     }
 }
