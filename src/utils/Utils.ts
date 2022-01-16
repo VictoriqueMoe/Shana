@@ -66,7 +66,6 @@ export function loadClasses(...paths: string[]): Promise<any[]> {
 }
 
 export namespace GuildUtils {
-    export const vicBotId = "806288433323966514";
     const settingsManager = container.resolve(SettingsManager);
 
     export namespace RoleUtils {
@@ -388,9 +387,6 @@ export namespace DiscordUtils {
 
     export type StickerInfo = EmojiInfo;
 
-    export function getClient(): Client {
-        return container.resolve(Client);
-    }
 
     export async function getBot(guildId: string): Promise<GuildMember> {
         const guildManager = container.resolve(GuildManager);
@@ -919,12 +915,17 @@ export namespace DiscordUtils {
         return retStr.trim();
     }
 
+    export function removeMentions(str: string): string {
+        return str.replace(/<@.?[0-9]*?>/gm, "");
+    }
+
     export function sanitiseTextForApiConsumption(message: Message | string): string {
         let retStr = typeof message === "string" ? message : message.content;
         retStr = `${retStr}`;
         retStr = stripAllEmojiFromText(retStr);
         retStr = stripUrls(retStr);
-        return retStr;
+        retStr = removeMentions(retStr);
+        return retStr.trim();
     }
 
     export function stripAllEmojiFromText(message: Message | string): string {

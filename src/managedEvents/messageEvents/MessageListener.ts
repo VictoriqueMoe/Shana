@@ -9,6 +9,7 @@ import {MessageListenerDecorator} from "../../model/decorators/messageListenerDe
 import {notBot} from "../../guards/NotABot";
 import {container, singleton} from "tsyringe";
 import {getRepository} from "typeorm";
+import {TimedSet} from "../../model/Impl/TimedSet";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
 
@@ -106,29 +107,6 @@ export class MessageListener {
         }
     }
 
-    @MessageListenerDecorator(true, notBot)
-    private async moeLoliDestroyer([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
-        if (!message.member) {
-            return;
-        }
-        if (message.member.id === "270632394137010177") {
-            const banned = ["ì", "|", "lol", "loli", "l0l"];
-            let messageContent = message.content.replace(/\s/g, '').toLocaleLowerCase();
-            messageContent = messageContent.replace(/[ ,.-]/g, "");
-            let shouldBlock = false;
-            for (const ban of banned) {
-                if (messageContent.includes(ban.toLocaleLowerCase())) {
-                    shouldBlock = true;
-                    break;
-                }
-            }
-            if (shouldBlock) {
-                this.doPoser(message);
-                return;
-            }
-        }
-    }
-
     private doPoser(message: Message): void {
         message.reply("Poser").then(value => {
             setTimeout(() => {
@@ -172,30 +150,39 @@ export class MessageListener {
         }
     }
 
-    //TODO: disabled
-    // @MessageListenerDecorator(false, notBot)
+    private _timer = new TimedSet<string>(30000);
+
+    @MessageListenerDecorator(false, notBot)
     private async replier([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         if (!message.member) {
             return;
         }
-        if (message.channel.id === "815042892120457216" || message.member.id === "323890636166135808") {
+        const me = message.guild.me.id;
+        const userId = message.member.id;
+        let shouldReply = message.mentions.has(me);
+        if (!shouldReply) {
+            shouldReply = true;
+            const repliedMessage = message.reference;
+            if (!repliedMessage) {
+                shouldReply = false;
+            }
+            const repliedMessageId = repliedMessage.messageId;
+            let repliedMessageObj: Message;
+            try {
+                repliedMessageObj = await message.channel.messages.fetch(repliedMessageId);
+            } catch {
+                shouldReply = false;
+            }
+            if (!repliedMessageObj.member || repliedMessageObj.member.id !== me) {
+                shouldReply = false;
+            }
+        }
+        if (!shouldReply || this._timer.has(userId)) {
             return;
         }
-        const repliedMessage = message.reference;
-        if (!repliedMessage) {
-            return;
-        }
-        const repliedMessageId = repliedMessage.messageId;
-        let repliedMessageObj: Message;
-        try {
-            repliedMessageObj = await message.channel.messages.fetch(repliedMessageId);
-        } catch {
-            return;
-        }
-        if (!repliedMessageObj.member || repliedMessageObj.member.id !== GuildUtils.vicBotId) {
-            return;
-        }
-        const messageContent = message.content;
+        this._timer.add(userId);
+        let messageContent = message.content;
+        messageContent = DiscordUtils.sanitiseTextForApiConsumption(messageContent);
         if (!ObjectUtil.validString(messageContent)) {
             return;
         }
