@@ -9,7 +9,7 @@ export abstract class TriggerConstraint<T extends ModuleSettings> extends Closea
 
     public abstract override get moduleId(): string;
 
-    canTrigger(obj: IEventSecurityConstraint, message: Message): boolean {
+    public canTrigger(obj: IEventSecurityConstraint, message: Message): boolean {
         const member = message.member;
         if (!member) {
             return false;

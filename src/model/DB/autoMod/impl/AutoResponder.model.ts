@@ -24,6 +24,9 @@ export class AutoResponderModel extends AbstractEventSecurityConstraint {
     @Column({type: "text", nullable: true, default: null})
     public response: string;
 
+    @Column({type: "boolean", default: false})
+    public useOCR: boolean;
+
     @Column({
         type: "simple-array",
         nullable: false,

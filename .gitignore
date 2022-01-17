@@ -115,3 +115,4 @@ node-gyp
 /database_test.sqlite-shm
 /database.sqlite-shm
 /database.sqlite-wal
+/eng.traineddata

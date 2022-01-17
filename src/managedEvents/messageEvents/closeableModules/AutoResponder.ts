@@ -1,5 +1,5 @@
 import {ArgsOf, Client} from "discordx";
-import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
+import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../../utils/Utils";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint";
 import {Message} from "discord.js";
@@ -7,6 +7,8 @@ import {MessageListenerDecorator} from "../../../model/decorators/messageListene
 import {AutoResponderManager} from "../../../model/guild/manager/AutoResponderManager";
 import {notBot} from "../../../guards/NotABot";
 import {singleton} from "tsyringe";
+import {AutoResponderModel} from "../../../model/DB/autoMod/impl/AutoResponder.model";
+import {createWorker, Worker} from "tesseract.js";
 
 @singleton()
 export class AutoResponder extends TriggerConstraint<null> {
@@ -26,38 +28,57 @@ export class AutoResponder extends TriggerConstraint<null> {
         if (!await this.canRun(guildId, null, channel)) {
             return;
         }
+
         const allRespondObjects = await this._autoResponderManager.getAllAutoResponders(guildId);
         const messageContent = message.content?.trim().toLowerCase();
-        if (!ObjectUtil.validString(messageContent) || !ArrayUtils.isValidArray(allRespondObjects)) {
+        if (!ArrayUtils.isValidArray(allRespondObjects)) {
             return;
         }
         for (const autoResponder of allRespondObjects) {
-            const trigger = autoResponder.title;
-            const {wildCard, useRegex, publicDelete} = autoResponder;
-            let shouldTrigger = false;
-            if (wildCard) {
-                if (messageContent.includes(trigger.toLowerCase())) {
-                    shouldTrigger = true;
-                }
-            } else if (useRegex) {
-                const newContent = messageContent.replace(/[*_]/gi, "");
-                const regex = new RegExp(trigger, 'gium');
-                if (regex.test(newContent)) {
-                    shouldTrigger = true;
-                }
-            } else {
-                if (messageContent === trigger.toLowerCase()) {
-                    shouldTrigger = true;
-                }
-            }
-            if (!shouldTrigger || !super.canTrigger(autoResponder, message)) {
+            if (!autoResponder.useOCR && !ObjectUtil.validString(messageContent)) {
                 continue;
             }
+            if (!super.canTrigger(autoResponder, message)) {
+                continue;
+            }
+            if (autoResponder.useOCR) {
+                const imageUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(message, {
+                    ref: true
+                });
+                if (imageUrls.size > 0) {
+                    let worker: Worker = null;
+                    try {
+                        worker = createWorker({
+                            logger: m => console.log(m)
+                        });
+                        await worker.load();
+                        await worker.loadLanguage('eng');
+                        await worker.initialize('eng');
+                        for (const url of imageUrls) {
+                            const {data: {text}} = await worker.recognize(url);
+                            const shouldTrigger = this.shouldExecuteResponder(autoResponder, text);
+                            if (shouldTrigger) {
+                                break;
+                            }
+                        }
+                    } finally {
+                        if (worker) {
+                            await worker.terminate();
+                        }
+                    }
+                }
+            } else {
+                const shouldTrigger = this.shouldExecuteResponder(autoResponder, messageContent);
+                if (!shouldTrigger) {
+                    continue;
+                }
+            }
+
             const {responseType} = autoResponder;
             switch (responseType) {
                 case "message": {
                     const responseText: string = this._parseVars(autoResponder.response, message);
-                    if (publicDelete) {
+                    if (autoResponder.publicDelete) {
                         message.delete();
                     }
                     if (isUpdate) {
@@ -103,18 +124,39 @@ export class AutoResponder extends TriggerConstraint<null> {
                         }
                     }
                     try {
-                        member = await member.kick(`Kicked via auto responder rule: "${trigger}"${kickReason}`);
+                        member = await member.kick(`Kicked via auto responder rule: "${autoResponder.title}"${kickReason}`);
                     } catch {
                         if (kickMessage) {
                             await kickMessage.delete();
                         }
                     }
-                    if (publicDelete && !message.deleted) {
+                    if (autoResponder.publicDelete && !message.deleted) {
                         message.delete();
                     }
                 }
             }
         }
+    }
+
+    private shouldExecuteResponder(autoResponder: AutoResponderModel, messageContent: string): boolean {
+        const {wildCard, useRegex} = autoResponder;
+        let shouldTrigger = false;
+        if (wildCard) {
+            if (messageContent.includes(autoResponder.title.toLowerCase())) {
+                shouldTrigger = true;
+            }
+        } else if (useRegex) {
+            const newContent = messageContent.replace(/[*_]/gi, "");
+            const regex = new RegExp(autoResponder.title, 'gium');
+            if (regex.test(newContent)) {
+                shouldTrigger = true;
+            }
+        } else {
+            if (messageContent === autoResponder.title.toLowerCase()) {
+                shouldTrigger = true;
+            }
+        }
+        return shouldTrigger;
     }
 
     private _parseVars(response: string, {channel, guild, member}: Message): string {

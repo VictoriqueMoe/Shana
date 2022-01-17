@@ -450,10 +450,15 @@ export namespace DiscordUtils {
      * message URL
      * reference message
      * @param message
+     * @param ignore -  supply true to each prop you want to ignore
      */
-    export async function getImageUrlsFromMessageOrReference(message: Message): Promise<Set<string>> {
+    export async function getImageUrlsFromMessageOrReference(message: Message, ignore: { attachments?: boolean, url?: boolean, ref?: boolean } = {
+        url: false,
+        attachments: false,
+        ref: false
+    }): Promise<Set<string>> {
         const messageAttachments = message.attachments;
-        if (messageAttachments && messageAttachments.size > 0) {
+        if (!ignore.attachments && messageAttachments && messageAttachments.size > 0) {
             const attachmentUrls: string[] = messageAttachments.map(value => value.attachment).filter(attachment => ObjectUtil.validString(attachment)) as string[];
             const urlMessageSet = new Set<string>();
             if (ArrayUtils.isValidArray(attachmentUrls)) {
@@ -470,7 +475,7 @@ export namespace DiscordUtils {
 
         // message URL
         const messageContent = message.content;
-        if (ObjectUtil.validString(messageContent)) {
+        if (!ignore.url && ObjectUtil.validString(messageContent)) {
             const urlsInMessage = ObjectUtil.getUrls(messageContent);
             if (urlsInMessage && urlsInMessage.size > 0) {
                 const urlMessageSet = new Set<string>();
@@ -485,7 +490,7 @@ export namespace DiscordUtils {
             }
         }
         // replied attachment
-        {
+        if (!ignore.ref) {
             const repliedMessageRef = message.reference;
             const urlMessageSet = new Set<string>();
             if (repliedMessageRef) {
@@ -526,6 +531,8 @@ export namespace DiscordUtils {
 
             return new Set();
         }
+
+        return new Set();
     }
 
 

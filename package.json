@@ -75,6 +75,7 @@
     "promisify": "0.0.3",
     "reflect-metadata": "^0.1.13",
     "sanitize-filename": "^1.6.3",
+    "tesseract.js": "^2.1.5",
     "tmp": "^0.2.1",
     "toad-scheduler": "^1.6.0",
     "tsyringe": "^4.6.0",
