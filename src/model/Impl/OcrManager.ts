@@ -1,4 +1,6 @@
 import {singleton} from "tsyringe";
+import axios from "axios";
+import FormData from "form-data";
 
 @singleton()
 export class OcrManager {
@@ -6,17 +8,17 @@ export class OcrManager {
     private baseUrl = process.env.ocr_loc;
 
     public async getText(image: Buffer): Promise<string> {
-        const formData = new FormData();
-        const blob = new Blob([image]);
-        formData.append("file", blob);
-        const request = await fetch(this.baseUrl, {
-            method: "POST",
-            body: formData
+        const data = new FormData();
+        data.append('file', image, {
+            filename: "filename"
+
         });
-        if (request.status !== 200) {
-            throw new Error(request.statusText);
+        const result = await axios.post(this.baseUrl, data, {
+            headers: data.getHeaders()
+        });
+        if (result.status !== 200) {
+            throw new Error(result.statusText);
         }
-        const json = await request.json();
-        return json.result;
+        return result.data.result;
     }
 }
