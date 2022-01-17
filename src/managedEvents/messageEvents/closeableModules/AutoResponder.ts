@@ -43,6 +43,7 @@ export class AutoResponder extends TriggerConstraint<null> {
             if (!super.canTrigger(autoResponder, message)) {
                 continue;
             }
+            let shouldTrigger = false;
             if (autoResponder.useOCR) {
                 const imageUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(message, {
                     ref: true
@@ -56,7 +57,6 @@ export class AutoResponder extends TriggerConstraint<null> {
                         await worker.load();
                         await worker.loadLanguage('eng');
                         await worker.initialize('eng');
-                        let shouldTrigger = false;
                         for (const url of imageUrls) {
                             const isImage: boolean = await isImageFast(url);
                             if (!isImage) {
@@ -72,6 +72,7 @@ export class AutoResponder extends TriggerConstraint<null> {
                                 fileType === "jpg" ||
                                 fileType === "png") {
                                 const {data: {text}} = await worker.recognize(image);
+                                console.log(`Image text recognised as: ${text}`);
                                 shouldTrigger = this.shouldExecuteResponder(autoResponder, text);
                                 if (shouldTrigger) {
                                     break;
@@ -87,9 +88,9 @@ export class AutoResponder extends TriggerConstraint<null> {
                         }
                     }
                 }
-            } else {
-                const shouldTrigger = this.shouldExecuteResponder(autoResponder, messageContent);
-                if (!shouldTrigger) {
+            }
+            if (!shouldTrigger) {
+                if (!this.shouldExecuteResponder(autoResponder, messageContent)) {
                     continue;
                 }
             }
@@ -162,7 +163,7 @@ export class AutoResponder extends TriggerConstraint<null> {
         const {wildCard, useRegex} = autoResponder;
         let shouldTrigger = false;
         if (wildCard) {
-            if (messageContent.includes(autoResponder.title.toLowerCase())) {
+            if (messageContent.toLowerCase().includes(autoResponder.title.toLowerCase())) {
                 shouldTrigger = true;
             }
         } else if (useRegex) {
