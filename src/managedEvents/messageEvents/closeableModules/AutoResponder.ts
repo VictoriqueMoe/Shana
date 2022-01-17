@@ -8,14 +8,14 @@ import {AutoResponderManager} from "../../../model/guild/manager/AutoResponderMa
 import {notBot} from "../../../guards/NotABot";
 import {singleton} from "tsyringe";
 import {AutoResponderModel} from "../../../model/DB/autoMod/impl/AutoResponder.model";
-import {createWorker, Worker} from "tesseract.js";
 import path from 'path';
 import isImageFast from 'is-image-fast';
+import {OcrManager} from "../../../model/Impl/OcrManager";
 
 @singleton()
 export class AutoResponder extends TriggerConstraint<null> {
 
-    constructor(private _autoResponderManager: AutoResponderManager) {
+    constructor(private _autoResponderManager: AutoResponderManager, private _ocrManager: OcrManager) {
         super(CloseOptionModel);
     }
 
@@ -45,12 +45,15 @@ export class AutoResponder extends TriggerConstraint<null> {
             }
             let shouldTrigger = this.shouldExecuteResponder(autoResponder, messageContent);
             if (!shouldTrigger && autoResponder.useOCR) {
-                const textArr = await this.getTextFromImages(message);
-                for (const txt of textArr) {
-                    if (this.shouldExecuteResponder(autoResponder, txt)) {
-                        shouldTrigger = true;
-                        break;
+                try {
+                    const textArr = await this.getTextFromImages(message);
+                    for (const txt of textArr) {
+                        if (this.shouldExecuteResponder(autoResponder, txt)) {
+                            shouldTrigger = true;
+                            break;
+                        }
                     }
+                } catch {
                 }
             }
 
@@ -130,36 +133,24 @@ export class AutoResponder extends TriggerConstraint<null> {
         if (imageUrls.size === 0) {
             return retArr;
         }
-        let worker: Worker = null;
-        try {
-            worker = createWorker({
-                cachePath: `${__dirname}/../../../../trainData`
-            });
-            await worker.load();
-            await worker.loadLanguage('eng');
-            await worker.initialize('eng');
-            for (const url of imageUrls) {
-                const isImage: boolean = await isImageFast(url);
-                if (!isImage) {
-                    continue;
-                }
+        for (const url of imageUrls) {
+            const isImage: boolean = await isImageFast(url);
+            if (!isImage) {
+                continue;
+            }
+            const fileType = path.extname(url).split('.').pop();
+            if (fileType === "bmp" ||
+                fileType === "jpg" ||
+                fileType === "png") {
                 const image = await DiscordUtils.loadResourceFromURL(url);
                 // if larger or equal to 2mb, ignore it
                 if (Buffer.byteLength(image) >= 1048576) {
                     continue;
                 }
-                const fileType = path.extname(url).split('.').pop();
-                if (fileType === "bmp" ||
-                    fileType === "jpg" ||
-                    fileType === "png") {
-                    const {data: {text}} = await worker.recognize(image);
-                    console.log(`Image text recognised as: ${text}`);
-                    retArr.push(text);
-                }
-            }
-        } finally {
-            if (worker) {
-                await worker.terminate();
+
+                const text = await this._ocrManager.getText(image);
+                console.log(`Image text recognised as: ${text}`);
+                retArr.push(text);
             }
         }
         return retArr;
