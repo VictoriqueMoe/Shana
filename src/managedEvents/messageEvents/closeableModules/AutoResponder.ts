@@ -9,6 +9,8 @@ import {notBot} from "../../../guards/NotABot";
 import {singleton} from "tsyringe";
 import {AutoResponderModel} from "../../../model/DB/autoMod/impl/AutoResponder.model";
 import {createWorker, Worker} from "tesseract.js";
+import path from 'path';
+import isImageFast from 'is-image-fast';
 
 @singleton()
 export class AutoResponder extends TriggerConstraint<null> {
@@ -49,17 +51,35 @@ export class AutoResponder extends TriggerConstraint<null> {
                     let worker: Worker = null;
                     try {
                         worker = createWorker({
-                            logger: m => console.log(m)
+                            cachePath: `${__dirname}/../../../../trainData`
                         });
                         await worker.load();
                         await worker.loadLanguage('eng');
                         await worker.initialize('eng');
+                        let shouldTrigger = false;
                         for (const url of imageUrls) {
-                            const {data: {text}} = await worker.recognize(url);
-                            const shouldTrigger = this.shouldExecuteResponder(autoResponder, text);
-                            if (shouldTrigger) {
-                                break;
+                            const isImage: boolean = await isImageFast(url);
+                            if (!isImage) {
+                                continue;
                             }
+                            const image = await DiscordUtils.loadResourceFromURL(url);
+                            // if larger or equal to 2mb, ignore it
+                            if (Buffer.byteLength(image) >= 1048576) {
+                                continue;
+                            }
+                            const fileType = path.extname(url).split('.').pop();
+                            if (fileType === "bmp" ||
+                                fileType === "jpg" ||
+                                fileType === "png") {
+                                const {data: {text}} = await worker.recognize(image);
+                                shouldTrigger = this.shouldExecuteResponder(autoResponder, text);
+                                if (shouldTrigger) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (!shouldTrigger) {
+                            continue;
                         }
                     } finally {
                         if (worker) {
