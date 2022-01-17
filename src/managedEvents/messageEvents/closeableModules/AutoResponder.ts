@@ -43,56 +43,19 @@ export class AutoResponder extends TriggerConstraint<null> {
             if (!super.canTrigger(autoResponder, message)) {
                 continue;
             }
-            let shouldTrigger = false;
-            if (autoResponder.useOCR) {
-                const imageUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(message, {
-                    ref: true
-                });
-                if (imageUrls.size > 0) {
-                    let worker: Worker = null;
-                    try {
-                        worker = createWorker({
-                            cachePath: `${__dirname}/../../../../trainData`
-                        });
-                        await worker.load();
-                        await worker.loadLanguage('eng');
-                        await worker.initialize('eng');
-                        for (const url of imageUrls) {
-                            const isImage: boolean = await isImageFast(url);
-                            if (!isImage) {
-                                continue;
-                            }
-                            const image = await DiscordUtils.loadResourceFromURL(url);
-                            // if larger or equal to 2mb, ignore it
-                            if (Buffer.byteLength(image) >= 1048576) {
-                                continue;
-                            }
-                            const fileType = path.extname(url).split('.').pop();
-                            if (fileType === "bmp" ||
-                                fileType === "jpg" ||
-                                fileType === "png") {
-                                const {data: {text}} = await worker.recognize(image);
-                                console.log(`Image text recognised as: ${text}`);
-                                shouldTrigger = this.shouldExecuteResponder(autoResponder, text);
-                                if (shouldTrigger) {
-                                    break;
-                                }
-                            }
-                        }
-                        if (!shouldTrigger) {
-                            continue;
-                        }
-                    } finally {
-                        if (worker) {
-                            await worker.terminate();
-                        }
+            let shouldTrigger = this.shouldExecuteResponder(autoResponder, messageContent);
+            if (!shouldTrigger && autoResponder.useOCR) {
+                const textArr = await this.getTextFromImages(message);
+                for (const txt of textArr) {
+                    if (this.shouldExecuteResponder(autoResponder, txt)) {
+                        shouldTrigger = true;
+                        break;
                     }
                 }
             }
+
             if (!shouldTrigger) {
-                if (!this.shouldExecuteResponder(autoResponder, messageContent)) {
-                    continue;
-                }
+                continue;
             }
 
             const {responseType} = autoResponder;
@@ -157,6 +120,49 @@ export class AutoResponder extends TriggerConstraint<null> {
                 }
             }
         }
+    }
+
+    private async getTextFromImages(message: Message): Promise<string[]> {
+        const retArr: string[] = [];
+        const imageUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(message, {
+            ref: true
+        });
+        if (imageUrls.size === 0) {
+            return retArr;
+        }
+        let worker: Worker = null;
+        try {
+            worker = createWorker({
+                cachePath: `${__dirname}/../../../../trainData`
+            });
+            await worker.load();
+            await worker.loadLanguage('eng');
+            await worker.initialize('eng');
+            for (const url of imageUrls) {
+                const isImage: boolean = await isImageFast(url);
+                if (!isImage) {
+                    continue;
+                }
+                const image = await DiscordUtils.loadResourceFromURL(url);
+                // if larger or equal to 2mb, ignore it
+                if (Buffer.byteLength(image) >= 1048576) {
+                    continue;
+                }
+                const fileType = path.extname(url).split('.').pop();
+                if (fileType === "bmp" ||
+                    fileType === "jpg" ||
+                    fileType === "png") {
+                    const {data: {text}} = await worker.recognize(image);
+                    console.log(`Image text recognised as: ${text}`);
+                    retArr.push(text);
+                }
+            }
+        } finally {
+            if (worker) {
+                await worker.terminate();
+            }
+        }
+        return retArr;
     }
 
     private shouldExecuteResponder(autoResponder: AutoResponderModel, messageContent: string): boolean {
