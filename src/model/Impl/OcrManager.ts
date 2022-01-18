@@ -19,6 +19,6 @@ export class OcrManager {
         if (result.status !== 200) {
             throw new Error(result.statusText);
         }
-        return result.data.result;
+        return result.data.result.trim();
     }
 }

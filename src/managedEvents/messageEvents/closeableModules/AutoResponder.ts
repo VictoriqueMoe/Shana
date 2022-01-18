@@ -149,6 +149,9 @@ export class AutoResponder extends TriggerConstraint<null> {
                 }
 
                 const text = await this._ocrManager.getText(image);
+                if (!ObjectUtil.validString(text)) {
+                    continue;
+                }
                 console.log(`Image text recognised as: ${text}`);
                 retArr.push(text);
             }
