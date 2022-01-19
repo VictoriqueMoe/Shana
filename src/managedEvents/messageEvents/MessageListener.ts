@@ -1,5 +1,4 @@
 import {ArgsOf, Client} from "discordx";
-import fetch from "node-fetch";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
 import {Main} from "../../Main";
@@ -10,6 +9,7 @@ import {notBot} from "../../guards/NotABot";
 import {container, singleton} from "tsyringe";
 import {getRepository} from "typeorm";
 import {TimedSet} from "../../model/Impl/TimedSet";
+import axios from "axios";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
 
@@ -193,10 +193,8 @@ export class MessageListener {
         const url = Object.keys(request).map(key => `${key}=${encodeURIComponent(request[key])}`).join('&');
         let reply = null;
         try {
-            const replyPayload = await fetch(`https://www.cleverbot.com/getreply?${url}`, {
-                method: 'get'
-            });
-            reply = await replyPayload.json();
+            const replyPayload = await axios.get(`https://www.cleverbot.com/getreply?${url}`);
+            reply = replyPayload.data;
         } catch (e) {
             return;
         }

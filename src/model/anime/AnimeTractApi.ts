@@ -1,6 +1,6 @@
-import fetch from "node-fetch";
 import {Response} from "./AnimeTypings";
 import {singleton} from "tsyringe";
+import axios from "axios";
 
 @singleton()
 export class AnimeTractApi {
@@ -10,15 +10,15 @@ export class AnimeTractApi {
      * @param {string} imageURL The URL for the image.
      */
     public async fetchAnime(imageURL: string): Promise<Response> {
-        return fetch(`https://api.trace.moe/search?url=${encodeURIComponent(`${imageURL}`)}`).then(e => e.json());
+        return axios.get(`https://api.trace.moe/search?url=${encodeURIComponent(`${imageURL}`)}`).then(e => e.data);
     }
 
     public async fetchPreview(vidUrl: string): Promise<Buffer> {
         try {
-            const res = await fetch(`${vidUrl}&size=l`, {
-                method: "GET"
+            const res = await axios.get(`${vidUrl}&size=l`, {
+                responseType: "arraybuffer"
             });
-            return res.buffer();
+            return res.data;
         } catch (e) {
             console.error(e);
             throw e;

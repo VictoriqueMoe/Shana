@@ -1,10 +1,10 @@
 import {Typeings} from "../../types/Typeings";
 import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
-import fetch from "node-fetch";
 import Fuse from "fuse.js";
 import {defaultSearch, ISearchBase, options} from "../../ISearchBase";
 import {AutocompleteInteraction} from "discord.js";
 import {ShanaFuse} from "../../Impl/ShanaFuse";
+import axios from "axios";
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
 import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
@@ -53,11 +53,11 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
             return;
         }
         const tagsSearch = `${this.baseUrl}/tag.json?limit=0&order=name`;
-        const result = await fetch(tagsSearch);
-        if (!result.ok) {
+        const result = await axios.get(tagsSearch);
+        if (result.status !== 200) {
             throw new Error(result.statusText);
         }
-        let json: T[] = await result.json();
+        let json: T[] = result.data;
         if (filter) {
             json = json.filter(filter);
         }
@@ -81,11 +81,11 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
                 url += "&page=0";
             }
             url = url.replace(`&page=${currentPage}`, `&page=${++currentPage}`);
-            const result = await fetch(url);
-            if (!result.ok) {
+            const result = await axios.get(url);
+            if (result.status !== 200) {
                 throw new Error(result.statusText);
             }
-            const responseArray: MoebooruResponse = await result.json();
+            const responseArray: MoebooruResponse = result.data;
             if (!ArrayUtils.isValidArray(responseArray)) {
                 break;
             }

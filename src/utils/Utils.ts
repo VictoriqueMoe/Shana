@@ -35,7 +35,6 @@ import {GuildManager} from "../model/guild/manager/GuildManager";
 import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
-import fetch from "node-fetch";
 import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
 import {container} from "tsyringe";
@@ -45,6 +44,7 @@ import {Beans} from "../DI/Beans";
 import {getRepository} from "typeorm";
 import {ISearchBase, SearchBase} from "../model/ISearchBase";
 import {Channels} from "../enums/Channels";
+import axios from "axios";
 
 const emojiRegex = require('emoji-regex');
 const isImageFast = require('is-image-fast');
@@ -884,8 +884,10 @@ export namespace DiscordUtils {
     }
 
     export async function loadResourceFromURL(url: string): Promise<Buffer> {
-        const response = await fetch(url);
-        const buffer = await response.buffer();
+        const response = await axios.get(url, {
+            responseType: "arraybuffer"
+        });
+        const buffer: Buffer = response.data;
         if (response.status !== StatusCodes.OK) {
             throw new Error(buffer.toString("utf-8"));
         }
