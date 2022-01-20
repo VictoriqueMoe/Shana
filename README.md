@@ -4,7 +4,7 @@ This bot has many functions, it's initial idea was to completely replace Dyno, a
 faster. After fully implementing both Dyno's AutoRole and AutoMod modules, this bot has expected upon its own custom
 automod features and more.
 
-feel free to add me on Discord: `Victorique#0002`
+feel free to add me on Discord: `Victorique#0001`
 
 ## <ins>Modules</ins>
 
