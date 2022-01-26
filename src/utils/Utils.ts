@@ -39,7 +39,7 @@ import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
 import {container} from "tsyringe";
 import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
-import {Client, DApplicationCommand} from "discordx";
+import {Client} from "discordx";
 import {Beans} from "../DI/Beans";
 import {getRepository} from "typeorm";
 import {ISearchBase, SearchBase} from "../model/ISearchBase";
@@ -1022,12 +1022,6 @@ export namespace DiscordUtils {
         }
     }
 
-    export async function canUserPreformBlock(memberUsingBlock: GuildMember, memberAttemptingToBeBlocked: GuildMember): Promise<boolean> {
-        const userToBlockHighestRole = memberAttemptingToBeBlocked.roles.highest;
-        const userPreformingActionHighestRole = memberUsingBlock.roles.highest;
-        return userPreformingActionHighestRole.position > userToBlockHighestRole.position;
-    }
-
     export async function getAllClosableModules(guildId?: string): Promise<CloseOptionModel[]> {
         const builder = getRepository(CloseOptionModel)
             .createQueryBuilder("closeOptionModel")
@@ -1061,7 +1055,7 @@ export class ObjectUtil {
         return new Promise(res => setTimeout(res, ms));
     }
 
-    public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, command: DApplicationCommand, contextHandler: T): Promise<void> {
+    public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, contextHandler: T): Promise<void> {
         const result = await contextHandler.search(interaction);
         if (ArrayUtils.isValidArray(result)) {
             const responseMap = result.map(result => {
@@ -1195,11 +1189,6 @@ export class ObjectUtil {
 
     public static isValidObject(obj: unknown): obj is Record<string, any> {
         return typeof obj === "object" && obj !== null && obj !== undefined && Object.keys(obj).length > 0;
-    }
-
-    public static isNumeric(n: string): boolean {
-        // @ts-ignore
-        return !isNaN(parseFloat(n)) && isFinite(n);
     }
 
     public static timeToHuman(value: number, timeUnit: TimeUtils.TIME_UNIT = TimeUtils.TIME_UNIT.milliseconds): string {

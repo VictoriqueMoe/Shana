@@ -1,14 +1,5 @@
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {
-    DApplicationCommand,
-    DefaultPermissionResolver,
-    Discord,
-    Guard,
-    Permission,
-    Slash,
-    SlashGroup,
-    SlashOption
-} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {container, injectable} from "tsyringe";
 import {NotesManager} from "../../model/guild/manager/NotesManager";
 import {NotBotInteraction} from "../../guards/NotABot";
@@ -130,7 +121,7 @@ export class Notes extends AbstractCommandModule {
         @SlashOption("title", {
             description: "The note to modify",
             type: "STRING",
-            autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(NotesManager)),
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(NotesManager)),
         })
             title: string,
         @SlashOption("value", {
@@ -159,7 +150,7 @@ export class Notes extends AbstractCommandModule {
         @SlashOption("title", {
             description: "title of the note to get",
             type: "STRING",
-            autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(NotesManager)),
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(NotesManager)),
             required: false,
         })
             title: string,
@@ -204,7 +195,7 @@ export class Notes extends AbstractCommandModule {
         @SlashOption("title", {
             description: "title of the note to delete",
             type: "STRING",
-            autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(NotesManager)),
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(NotesManager)),
             required: false,
         })
             title: string,

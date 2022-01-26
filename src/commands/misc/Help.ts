@@ -1,7 +1,6 @@
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {
     Client,
-    DApplicationCommand,
     DefaultPermissionResolver,
     Discord,
     Guard,
@@ -92,7 +91,7 @@ export class Help extends AbstractCommandModule implements ISearchBase<SearchBas
     private async help(
         @SlashOption("commandname", {
             description: "Command name to drill into",
-            autocomplete: (interaction: AutocompleteInteraction, command: DApplicationCommand) => ObjectUtil.search(interaction, command, container.resolve(Help)),
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(Help)),
             type: "STRING",
             required: false,
         })

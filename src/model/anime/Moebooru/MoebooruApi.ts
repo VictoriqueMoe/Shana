@@ -67,7 +67,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         console.log(`Indexed: ${json.length} tags from ${this.name}`);
     }
 
-    protected async doCall(url: string, returnSize: number, explictRating: EXPLICIT_RATING[]): Promise<MoebooruResponse> {
+    private async doCall(url: string, returnSize: number, explictRating: EXPLICIT_RATING[]): Promise<MoebooruResponse> {
         if (returnSize < 100 && returnSize > 0) {
             url += `&limit=${returnSize}`;
         }
