@@ -28,7 +28,7 @@ export class BotServer extends Server {
 
     public start(port: number): http.Server {
         return this.app.listen(port, () => {
-            Logger.Imp('Server listening on port: ' + port);
+            Logger.imp('Server listening on port: ' + port);
         });
     }
 
@@ -37,7 +37,7 @@ export class BotServer extends Server {
         const files = glob.sync(this.classesToLoad) || [];
         const pArr = files.map(filePath => {
             import(path.resolve(filePath)).then(module => {
-                Logger.Imp(`load ${Object.keys(module)[0]}`);
+                Logger.imp(`load ${Object.keys(module)[0]}`);
             });
         });
         return Promise.all(pArr).then(() => {
