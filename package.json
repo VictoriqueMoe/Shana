@@ -42,7 +42,7 @@
     "discord-api-types": "^0.26.1",
     "discord-music-player": "^8.3.1",
     "discord.js": "^13.6.0",
-    "discordx": "^9.1.13",
+    "discordx": "^9.1.15",
     "dotenv": "^16.0.0",
     "dropbox": "^10.24.0",
     "emoji-regex": "^10.0.0",
