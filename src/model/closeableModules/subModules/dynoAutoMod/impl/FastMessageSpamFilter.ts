@@ -22,7 +22,7 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
      * How many messages they are allowed to send in 5 seconds
      */
     public get value(): string {
-        return "3"; // hard coded for now
+        return "5"; // hard coded for now
     }
 
     public get actions(): ACTION[] {
