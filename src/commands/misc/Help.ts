@@ -45,7 +45,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Category("Help", [
     {
         name: "help",
-        description: "Get a random image of <@697417252320051291>",
+        description: "Display all the categories and commands",
         type: "SLASH",
         options: [
             {
