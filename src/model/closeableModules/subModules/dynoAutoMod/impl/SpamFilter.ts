@@ -40,6 +40,10 @@ export class SpamFilter extends AbstractFilter {
     }
 
     public async doFilter(message: Message): Promise<boolean> {
+        const content = message.content;
+        if (content.startsWith("https://discord.gift")) {
+            return true;
+        }
         return !SpamMeta.isSpam(message.content);
     }
 
