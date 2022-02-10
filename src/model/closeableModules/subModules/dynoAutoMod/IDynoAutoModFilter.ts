@@ -22,6 +22,16 @@ export interface IDynoAutoModFilter extends ISubModule {
     readonly priority: number;
 
     /**
+     * this sets the amount of filters that define "terminal operation (mute, kick and ban)" as punishment that needs to fail before the action is automatically taken
+     */
+    autoTerminalViolationCount: number;
+
+    /**
+     * How long (in seconds) are members muted for if they violate "mute" filters according to the autoMuteViolationCount
+     */
+    autoMuteTimeout: number;
+
+    /**
      * Do the actual filter and return true if it passes or false otherwise
      * @param content
      */

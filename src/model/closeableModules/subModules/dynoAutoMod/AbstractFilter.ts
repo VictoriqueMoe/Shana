@@ -22,17 +22,11 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
         return this._parentModule;
     }
 
-    /**
-     * this sets the amount of filters that define "terminal operation (mute, kick and ban)" as punishment that needs to fail before the action is automatically taken
-     */
-    public static get autoTerminalViolationCount(): number {
+    public get autoTerminalViolationCount(): number {
         return 3; //  hard-coded for now
     }
 
-    /**
-     * How long (in seconds) are members muted for if they violate "mute" filters according to the autoMuteViolationCount
-     */
-    public static get autoMuteTimeout(): number {
+    public get autoMuteTimeout(): number {
         return TimeUtils.TIME_OUT["1 hour"] / 1000; //  hard-coded for now
     }
 
