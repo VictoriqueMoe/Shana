@@ -41,7 +41,7 @@
     "deepl": "^1.0.13",
     "discord-api-types": "^0.27.0",
     "discord-music-player": "^8.3.1",
-    "discord-spams": "^1.2.0",
+    "discord-spams": "^1.3.0",
     "discord.js": "^13.6.0",
     "discordx": "^9.1.15",
     "dotenv": "^16.0.0",
