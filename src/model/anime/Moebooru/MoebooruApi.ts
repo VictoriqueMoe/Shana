@@ -17,11 +17,16 @@ export type RandomImageResponse = {
 }[];
 
 export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<T> {
+    private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "bottomless"];
+
     protected abstract baseUrl: string;
     protected abstract name: string;
-    private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "tail", "bottomless"];
     protected abstract fuseCache: ShanaFuse<T>;
+
+    protected abstract update(): Promise<void>;
+
     public abstract enabled: Promise<boolean>;
+
 
     public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<RandomImageResponse> {
         const results = await this.getPosts(tags, explictRating);
@@ -45,8 +50,6 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
 
         return retArr;
     }
-
-    protected abstract update(): Promise<void>;
 
     protected async tagUpdater(filter?: (value: T, index: number, array: MoebooruTag[]) => boolean, limit: number = 0): Promise<void> {
         if (!await this.enabled) {
