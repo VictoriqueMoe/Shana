@@ -89,9 +89,6 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
             if (!ArrayUtils.isValidArray(responseArray)) {
                 break;
             }
-            if (!ArrayUtils.isValidArray(responseArray)) {
-                continue;
-            }
             for (const jsonResponse of responseArray) {
                 if (ObjectUtil.validString(jsonResponse.rating) && explictRating.includes(jsonResponse.rating)) {
                     if (this.blackList.some(v => jsonResponse.tags.includes(v))) {
