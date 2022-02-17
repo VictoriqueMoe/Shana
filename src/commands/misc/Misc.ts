@@ -12,7 +12,7 @@ import {
     SlashOption
 } from "discordx";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
+import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {
     ColorResolvable,
     CommandInteraction,
@@ -28,8 +28,7 @@ import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
 import {Response} from "../../model/anime/AnimeTypings";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommandModule} from "../AbstractCommandModule";
-import {DeepAPI} from "../../model/DeepAPI";
-import {container, injectable} from "tsyringe";
+import {injectable} from "tsyringe";
 import * as locale from 'locale-codes';
 import {Category} from "@discordx/utilities";
 import Anilist from "anilist-node";
@@ -104,32 +103,6 @@ const isImageFast = require('is-image-fast');
         "name": "translate",
         "type": "CONTEXT MESSAGE",
         "description": "Translate a message (to EN-GB)"
-    },
-    {
-        "name": "posOrNeg",
-        "type": "SIMPLECOMMAND",
-        "options": [
-            {
-                "name": "text",
-                "description": "the text to analyse",
-                "optional": false,
-                "type": "STRING"
-            }
-        ],
-        "description": "This algorithm classifies each sentence in the input as very negative, negative, neutral, positive, or very positive"
-    },
-    {
-        "name": "generateText",
-        "type": "SLASH",
-        "options": [
-            {
-                "name": "text",
-                "description": "the text to include",
-                "optional": false,
-                "type": "STRING"
-            }
-        ],
-        "description": "The text generation API is backed by a large-scale unsupervised language model that can generate paragraphs of text."
     }
 ])
 @SlashGroup("miscellaneous", "Miscellaneous commands")
@@ -147,45 +120,6 @@ export class Misc extends AbstractCommandModule {
         super();
     }
 
-    @Slash("generatetext", {
-        description: "The text generation is a large unsupervised language model that can generate paragraphs of text"
-    })
-    @Guard(NotBotInteraction, CommandEnabled)
-    private async generateText(
-        @SlashOption("value", {
-            description: "the text to include in the generation"
-        })
-            value: string,
-        interaction: CommandInteraction
-    ): Promise<void> {
-        await interaction.deferReply();
-        const deepAPI = container.resolve(DeepAPI);
-        const resp = await deepAPI.textGeneration(value);
-        await InteractionUtils.replyOrFollowUp(interaction, resp);
-    }
-
-    @SimpleCommand("posOrNeg")
-    @Guard(NotBotInteraction, CommandEnabled)
-    private async posOrNeg({message}: SimpleCommandMessage): Promise<void> {
-        const reference = message.reference;
-        let text = "";
-        if (reference) {
-            const repliedMessageObj = await message.channel.messages.fetch(reference.messageId);
-            if (ObjectUtil.validString(repliedMessageObj.content)) {
-                text = repliedMessageObj.content;
-            }
-        } else {
-            const argumentArray = StringUtils.splitCommandLine(message.content);
-            text = argumentArray[0];
-        }
-        if (!ObjectUtil.validString(text)) {
-            message.reply(`Command arguments wrong, usage: ~posOrNeg "text" or reference a message with text`);
-            return;
-        }
-        const deepAPI = container.resolve(DeepAPI);
-        const resp = await deepAPI.sentimentAnalysis(text);
-        message.reply(`This message is ${resp}`);
-    }
 
     @ContextMenu("MESSAGE", "translate")
     @Guard(NotBotInteraction, CommandEnabled)

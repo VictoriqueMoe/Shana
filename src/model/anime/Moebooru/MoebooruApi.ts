@@ -48,11 +48,11 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
 
     protected abstract update(): Promise<void>;
 
-    protected async tagUpdater(filter?: (value: T, index: number, array: MoebooruTag[]) => boolean): Promise<void> {
+    protected async tagUpdater(filter?: (value: T, index: number, array: MoebooruTag[]) => boolean, limit: number = 0): Promise<void> {
         if (!await this.enabled) {
             return;
         }
-        const tagsSearch = `${this.baseUrl}/tag.json?limit=0&order=name`;
+        const tagsSearch = `${this.baseUrl}/tag.json?limit=${limit}&order=name`;
         const result = await axios.get(tagsSearch);
         if (result.status !== 200) {
             throw new Error(result.statusText);
