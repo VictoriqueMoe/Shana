@@ -9,6 +9,7 @@
     "importHelpers": true,
     "allowJs": true,
     "checkJs": true,
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "noEmit": false,
     "watch": false,
