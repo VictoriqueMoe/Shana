@@ -198,7 +198,7 @@ export class MessageListener {
         } catch (e) {
             return;
         }
-        message.channel.send(reply.output);
+        message.reply(reply.output);
     }
 
     @MessageListenerDecorator(true)
