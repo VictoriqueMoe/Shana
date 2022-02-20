@@ -1288,3 +1288,60 @@ export class EnumEx {
         return Object.keys(e).map(k => e[k]);
     }
 }
+
+export function getDatabaseConfig(env: any): any {
+    const dbName = env.test_mode ? env.database_name_test : env.database_name;
+
+    let baseConfig: any = {
+        type: env.database_type,
+        database: dbName,
+        synchronize: true,
+        entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
+    };
+
+    if (env.database_type !== 'better-sqlite3' && env.database_type !== 'sqlite') {
+        baseConfig = {
+            ...baseConfig,
+            host: env.database_host,
+            port: env.database_port,
+            username: env.database_username,
+            password: env.database_password,
+        };
+    }
+
+    switch (env.database_type) {
+        case 'mysql':
+        case 'mariadb':
+            baseConfig = {
+                ...baseConfig,
+            };
+            break;
+
+        case 'postgres':
+            baseConfig = {
+                ...baseConfig,
+            };
+            break;
+
+        case 'mongodb':
+            baseConfig = {
+                ...baseConfig,
+            };
+            break;
+
+        case 'better-sqlite3':
+            baseConfig = {
+                ...baseConfig,
+                key: env.database_sqlite_key,
+            };
+            break;
+    }
+
+    return {
+        type: env.database_type ?? "better-sqlite3",
+        database: dbName,
+        synchronize: true,
+        key: env.sqlIte_key,
+        entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
+    };
+}

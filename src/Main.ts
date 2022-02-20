@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import * as dotenv from "dotenv";
-import {ObjectUtil} from "./utils/Utils";
+import {ObjectUtil, getDatabaseConfig} from "./utils/Utils";
 import * as v8 from "v8";
 import {Client, DIService, SimpleCommandMessage} from "discordx";
 import {Intents, Message} from "discord.js";
@@ -24,26 +24,20 @@ io.init({
 dotenv.config({path: __dirname + '/../.env'});
 
 export class Main {
-    public static testMode = false;
+    static testMode: boolean;
 
     public static async start(): Promise<void> {
-        Settings.defaultZone = "utc";
-        Settings.defaultLocale = "en-gb";
+        this.testMode = process.env.test_mode === 'true';
+        Settings.defaultZone = process.env.timezone_defaultZone;
+        Settings.defaultLocale = process.env.defaultLocale;
         DIService.container = container;
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         await moduleRegistrar();
-        const dbName = Main.testMode ? "database_test.sqlite" : "database.sqlite";
         useContainer(
             {get: someClass => container.resolve(someClass as any)},
         );
-        const connection = await createConnection({
-            type: "better-sqlite3",
-            database: dbName,
-            synchronize: true,
-            key: process.env.sqlIte_key,
-            entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
-        });
+        const connection = await createConnection(getDatabaseConfig(process.env));
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
             simpleCommand: {
@@ -74,7 +68,7 @@ export class Main {
         });
         await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
         registerInstance(connection, client);
-        await client.login(Main.testMode ? process.env.test_token : process.env.token);
+        await client.login(process.env.test_mode ? process.env.test_token : process.env.token);
     }
 }
 
