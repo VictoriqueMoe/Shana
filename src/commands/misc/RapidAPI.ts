@@ -29,7 +29,7 @@ export class RapidAPI extends AbstractCommandModule {
         description: "Get covid status by a country name"
     })
     @SlashGroup("covid")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled(container.resolve(Covid19DataManager)))
     private async covidByCountry(
         @SlashOption("country", {
             description: "the name of the country to lookup",

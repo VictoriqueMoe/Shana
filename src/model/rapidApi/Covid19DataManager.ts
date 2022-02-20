@@ -61,9 +61,8 @@ export class Covid19DataManager extends AbstractRapidApiResponse implements ISea
         return response.data;
     }
 
-    search(interaction: AutocompleteInteraction): Fuse.FuseResult<SearchBase>[] {
+    public search(interaction: AutocompleteInteraction): Fuse.FuseResult<SearchBase>[] {
         return defaultSearch(interaction, this._fuseCache);
     }
-
 
 }

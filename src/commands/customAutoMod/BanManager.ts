@@ -25,7 +25,7 @@ export class BanManager extends AbstractCommandModule {
     @Slash("cleanbans", {
         description: "Remove all the deleted accounts from your bans"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async cleanBans(interaction: CommandInteraction): Promise<void> {
         const {guild} = interaction;
         const banManager = guild.bans;

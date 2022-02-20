@@ -32,6 +32,7 @@ import {injectable} from "tsyringe";
 import * as locale from 'locale-codes';
 import {Category} from "@discordx/utilities";
 import Anilist from "anilist-node";
+import {Property} from "../../model/decorators/Property";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 const translate = require("deepl");
@@ -112,6 +113,9 @@ const isImageFast = require('is-image-fast');
 export class Misc extends AbstractCommandModule {
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
 
+    @Property("deepl")
+    private readonly deepl: string;
+
     constructor(
         private _client: Client,
         private _animeTractApi: AnimeTractApi,
@@ -122,7 +126,7 @@ export class Misc extends AbstractCommandModule {
 
 
     @ContextMenu("MESSAGE", "translate")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async translate(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -132,7 +136,7 @@ export class Misc extends AbstractCommandModule {
         if (!ObjectUtil.validString(text)) {
             return InteractionUtils.replyOrFollowUp(interaction, "No text found");
         }
-        const auth_key = process.env.deepl;
+        const auth_key = this.deepl;
         const response = await translate({
             free_api: true,
             text,
@@ -175,7 +179,7 @@ export class Misc extends AbstractCommandModule {
     @Slash("avatar", {
         description: "The user to display the avatar"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async avatar(
         @SlashOption("user", {
             description: "The user to display the avatar",
@@ -197,7 +201,7 @@ export class Misc extends AbstractCommandModule {
     @Slash("banner", {
         description: "Display a users profile banner"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async banner(
         @SlashOption("user", {
             description: "The user to display the banner",
@@ -223,7 +227,7 @@ export class Misc extends AbstractCommandModule {
 
 
     @SimpleCommand("findAnime")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async findAnime({message}: SimpleCommandMessage): Promise<void> {
         const freshHold = 0.86;
         const messaheUrls = await DiscordUtils.getImageUrlsFromMessageOrReference(message);
@@ -338,7 +342,7 @@ export class Misc extends AbstractCommandModule {
 
 
     @SimpleCommand("findSource")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async imageSearch({message}: SimpleCommandMessage): Promise<void> {
         type GoogleImageResult = {
             url?: string,

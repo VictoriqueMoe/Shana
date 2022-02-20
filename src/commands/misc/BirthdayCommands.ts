@@ -81,7 +81,7 @@ export class BirthdayCommands extends AbstractCommandModule {
     @Slash("removebirthday", {
         description: "Remove your birthday (if set)"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async removeBirthday(
         interaction: CommandInteraction
     ): Promise<void> {
@@ -97,7 +97,7 @@ export class BirthdayCommands extends AbstractCommandModule {
     @Slash("nextbirthdays", {
         description: "Get the next 10 birthdays"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async nextBirthday(
         interaction: CommandInteraction
     ): Promise<void> {
@@ -139,7 +139,7 @@ export class BirthdayCommands extends AbstractCommandModule {
     @Slash("addbirthday", {
         description: "Add your birthday"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async addBirthday(
         @SlashOption("date", {
             description: "your birthday (ex: YYYY-MM-dd) 1995-07-05 OR (dd-MM) 03-12)"

@@ -87,7 +87,7 @@ export class Help extends AbstractCommandModule implements ISearchBase<SearchBas
     @Slash("help", {
         description: "Get the description of a command or all commands"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async help(
         @SlashOption("commandname", {
             description: "Command name to drill into",

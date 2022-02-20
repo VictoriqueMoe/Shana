@@ -10,7 +10,7 @@ import {AssertionError} from "assert";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {injectable} from "tsyringe";
+import {container, injectable} from "tsyringe";
 import {Category} from "@discordx/utilities";
 
 @Discord()
@@ -1046,7 +1046,7 @@ export class Meme extends AbstractCommandModule {
     @SimpleCommand("Memes", {
         aliases: EnumEx.getNames(GENERATE_ENDPOINT)
     })
-    @Guard(CommandEnabled)
+    @Guard(CommandEnabled(container.resolve(ImageFun)))
     private async generate(command: SimpleCommandMessage): Promise<void> {
         const {message} = command;
         const {content} = message;

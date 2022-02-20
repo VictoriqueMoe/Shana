@@ -1,14 +1,29 @@
-import {Dropbox, files} from "dropbox";
+import {Dropbox, DropboxResponse, files} from "dropbox";
 import {singleton} from "tsyringe";
+import {Property} from "../decorators/Property";
+import {PostConstruct} from "../decorators/PostConstruct";
+import {ModelEnabledConfigure} from "../Impl/ModelEnabledConfigure";
+
+
+class DropBoxProxy extends Dropbox {
+    constructor(accessToken: string) {
+        super({
+            accessToken
+        });
+    }
+}
 
 @singleton()
-export class VicDropbox extends Dropbox {
+export class VicDropbox extends ModelEnabledConfigure {
     private imageCache: files.FolderMetadataReference[];
 
+    @Property("dropboxToken", {required: false})
+    private readonly dropboxToken: string;
+
+    private _dropbox: Dropbox;
+
     public constructor() {
-        super({
-            accessToken: process.env.dropboxToken
-        });
+        super("dropboxToken");
         this.imageCache = [];
     }
 
@@ -28,7 +43,18 @@ export class VicDropbox extends Dropbox {
 
     public async index(): Promise<void> {
         console.log("Indexing images...");
-        this.imageCache = ((await this.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
+        this.imageCache = ((await this._dropbox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
         console.log(`Indexed ${this.imageCache.length} images`);
+    }
+
+    async filesDownload(param: { path: string }): Promise<DropboxResponse<files.FileMetadata>> {
+        return this._dropbox.filesDownload(param);
+    }
+
+    @PostConstruct
+    private init(): void {
+        if (this.enabled) {
+            this._dropbox = new DropBoxProxy(this.dropboxToken);
+        }
     }
 }

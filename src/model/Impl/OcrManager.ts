@@ -1,11 +1,13 @@
 import {singleton} from "tsyringe";
 import axios from "axios";
 import FormData from "form-data";
+import {Property} from "../decorators/Property";
 
 @singleton()
 export class OcrManager {
 
-    private baseUrl = process.env.ocr_loc;
+    @Property("ocr_loc", {required: false})
+    private readonly baseUrl;
 
     public async getText(image: Buffer): Promise<string> {
         const data = new FormData();

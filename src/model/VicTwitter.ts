@@ -1,3 +1,4 @@
+/*
 import Twitter from "twitter-v2";
 import {singleton} from "tsyringe";
 import TwitterStream from "twitter-v2/build/TwitterStream";
@@ -8,14 +9,14 @@ export class VicTwitter extends Twitter {
         super({
             bearer_token: process.env.twitter_bearer_token
         });
-        /*this.listenForever(
+        /!*this.listenForever(
             () => this.stream('tweets/search/stream', {
                 "media.fields": ["preview_image_url"],
                 "expansions": ["attachments.media_keys", "referenced_tweets.id", "author_id"],
                 "tweet.fields": ["attachments", "referenced_tweets"]
             }),
             (data) => console.log(data)
-        );*/
+        );*!/
     }
 
     public async listenForever(streamFactory: () => TwitterStream, dataConsumer: (data: any) => void): Promise<void> {
@@ -35,4 +36,4 @@ export class VicTwitter extends Twitter {
         }
     }
 
-}
+}*/

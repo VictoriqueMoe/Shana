@@ -10,11 +10,19 @@ import {
 import {URLSearchParams} from "url";
 import fetch from 'node-fetch';
 import {singleton} from "tsyringe";
+import {Property} from "../../decorators/Property";
+import {ModelEnabledConfigure} from "../ModelEnabledConfigure";
 
 @singleton()
-export class ImageFun {
-    private readonly token: string = process.env.amethysteToken;
+export class ImageFun extends ModelEnabledConfigure {
+
+    @Property("amethysteToken", {required: false})
+    private readonly token: string;
     private readonly baseUrl: string = "https://v1.api.amethyste.moe";
+
+    public constructor() {
+        super("token");
+    }
 
     private get authHeader(): Record<string, string> {
         return {

@@ -48,7 +48,7 @@ export abstract class ModuleEngine extends AbstractCommandModule {
     @Slash("getallenabled", {
         description: "Get the enabled status for modules"
     })
-    @Guard(CommandEnabled)
+    @Guard(CommandEnabled())
     private async getAllEnabled(
         interaction: CommandInteraction
     ): Promise<void> {
@@ -67,7 +67,7 @@ export abstract class ModuleEngine extends AbstractCommandModule {
     @Slash("enablemodule", {
         description: "Enable a module to run. These modules are designed to be shut down and started dynamically"
     })
-    @Guard(CommandEnabled)
+    @Guard(CommandEnabled())
     private async enableModule(
         @SlashOption("setting", {
             description: "the name of the module to close or open",
@@ -102,7 +102,7 @@ export abstract class ModuleEngine extends AbstractCommandModule {
     @Slash("getmodulenames", {
         description: "Return a list of all modules to use with the 'enableModule' command"
     })
-    @Guard(CommandEnabled)
+    @Guard(CommandEnabled())
     private async getModuleNames(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const guildId = interaction.guild.id;
