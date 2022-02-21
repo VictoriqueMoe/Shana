@@ -20,7 +20,7 @@ export function CommandEnabled(manager?: ModelEnabledConfigure): GuardFunction<C
             }
         }
         const securityManager = container.resolve(CommandSecurityManager);
-        const commandEnabled = manager && manager.enabled;
+        const commandEnabled = !manager ? true : manager.enabled;
         if (commandEnabled && await securityManager.isEnabled(commandName, guildId)) {
             return next();
         }
