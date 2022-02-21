@@ -57,7 +57,7 @@ export class MoebooruCommands extends AbstractCommandModule {
     @Slash("lolibooru", {
         description: "Get random image from lolibooru.moe"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async lolibooru(
         @SlashOption("tags", {
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
@@ -75,7 +75,7 @@ export class MoebooruCommands extends AbstractCommandModule {
     @Slash("konachan", {
         description: "Get random image from Konachan.net"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async konachan(
         @SlashOption("tags", {
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",

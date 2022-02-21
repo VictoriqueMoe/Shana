@@ -82,7 +82,7 @@ export class MessageSchedule extends AbstractCommandModule {
     @Slash("getscheduledmessage", {
         description: "get all scheduled posts optionally by channel"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async getScheduledMessage(
         @SlashOption("channel", {
             description: "A filter for all scheduled messages by channel",
@@ -124,7 +124,7 @@ export class MessageSchedule extends AbstractCommandModule {
     @Slash("removescheduledmessage", {
         description: "remove a scheduled post by name"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async removeScheduledMessage(
         @SlashOption("name", {
             description: "The Unique ID of the schedule schedule you want to remove",
@@ -151,7 +151,7 @@ export class MessageSchedule extends AbstractCommandModule {
     @Slash("addschedulemessage", {
         description: "create a message to schedule to a channel"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async scheduleMessage(
         @SlashOption("name", {
             description: "The Unique ID of this scheduled job",

@@ -66,7 +66,7 @@ export class AccountAge extends AbstractCommandModule {
     @Slash("serverage", {
         description: "Get the age of this server"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async serverAge(interaction: CommandInteraction): Promise<void> {
         const guildId = interaction.guild.id;
         const guild = await this._client.guilds.fetch(guildId);
@@ -77,7 +77,7 @@ export class AccountAge extends AbstractCommandModule {
     @Slash("channelage", {
         description: "View the age of a channel"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async channelAge(
         @SlashOption("channel", {
             description: "The reference to the channel"
@@ -93,7 +93,7 @@ export class AccountAge extends AbstractCommandModule {
     @Slash("userage", {
         description: "Get the age on an account"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async getAccountAge(
         @SlashOption("user", {
             description: "The user you want to check the account age of"

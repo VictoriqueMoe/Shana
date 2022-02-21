@@ -1,16 +1,50 @@
+import {Property} from "./decorators/Property";
+import {singleton} from "tsyringe";
+import {ModelEnabledConfigure} from "./Impl/ModelEnabledConfigure";
+import {PostConstruct} from "./decorators/PostConstruct";
+
 const imgur = require('imgur');
 const isImageFast = require('is-image-fast');
 
-export class Imgur {
-    private readonly clientId = process.env.imgurClientId;
-    private readonly albumId = process.env.imgurAlbumId;
+@singleton()
+export class Imgur extends ModelEnabledConfigure {
 
-    constructor() {
-        imgur.setClientId(this.clientId);
-        imgur.setCredentials(process.env.imgurEmail, process.env.imgurPassword, this.clientId);
+    @Property("imgurClientId", {
+        required: false
+    })
+    private readonly clientId;
+
+    @Property("imgurAlbumId", {
+        required: false
+    })
+    private readonly albumId;
+
+    @Property("imgurEmail", {
+        required: false
+    })
+    private readonly imgurEmail;
+
+    @Property("imgurPassword", {
+        required: false
+    })
+    private readonly imgurPassword;
+
+    public constructor() {
+        super("clientId", "albumId", "imgurEmail", "imgurPassword");
+    }
+
+    @PostConstruct
+    private init(): void {
+        if (this.enabled) {
+            imgur.setClientId(this.clientId);
+            imgur.setCredentials(this.imgurEmail, this.imgurPassword, this.clientId);
+        }
     }
 
     public async uploadImageFromUrl(url: string): Promise<string> {
+        if (!this.enabled) {
+            throw new Error("Module not enabled");
+        }
         const isImage: boolean = await isImageFast(url);
         if (!isImage) {
             throw new Error("url is not an image");

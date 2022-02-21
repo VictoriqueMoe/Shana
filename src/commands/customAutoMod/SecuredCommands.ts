@@ -37,7 +37,7 @@ export class SecuredCommands extends AbstractCommandModule {
     @Slash("mutes", {
         description: "Get a list of all mutes"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async mutes(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -59,7 +59,7 @@ export class SecuredCommands extends AbstractCommandModule {
     @Slash("initservercommandpermissions", {
         description: "Re-init all command permissions for this server"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async initServerCommandPermissions(
         interaction: CommandInteraction
     ): Promise<void> {

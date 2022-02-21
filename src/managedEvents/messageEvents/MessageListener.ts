@@ -10,6 +10,7 @@ import {container, singleton} from "tsyringe";
 import {getRepository} from "typeorm";
 import {TimedSet} from "../../model/Impl/TimedSet";
 import axios from "axios";
+import {Property} from "../../model/decorators/Property";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
 
@@ -33,39 +34,12 @@ export class MessageListener {
         }
     }*/
 
-    private async doStickerBan(stickers: Sticker[], message: Message): Promise<void> {
-        for (const sticker of stickers) {
-            let bannedStickerInfo: StickerInfo = null;
-            try {
-                bannedStickerInfo = await DiscordUtils.getStickerInfo(sticker);
-            } catch {
+    private _timer = new TimedSet<string>(30000);
 
-            }
-            if (!bannedStickerInfo) {
-                return;
-            }
-            const stickerHash = md5(bannedStickerInfo.buffer);
-            const count = await getRepository(BannedAttachmentsModel)
-                .createQueryBuilder("bannedAttachment")
-                .where(`bannedAttachment.guildId = :id`, {
-                    id: message.guild.id
-                })
-                .andWhere(`bannedAttachment.isSticker = true`)
-                .andWhere(`bannedAttachment.attachmentHash = :hash OR bannedAttachment.url = :url`, {
-                    hash: stickerHash,
-                    url: bannedStickerInfo.url
-                })
-                .getCount();
-            if (count === 1) {
-                try {
-                    await message.delete();
-                    message.channel.send(`Message contains a banned Sticker`);
-                } catch {
-                }
-                break;
-            }
-        }
-    }
+    @Property("cleverBotKey", {
+        required: false
+    })
+    private readonly cleverBotKey: string;
 
     public static async doEmojiBan(emojiIds: string[], user: User, message: Message, isReaction: boolean): Promise<void> {
         for (const emoji of emojiIds) {
@@ -100,6 +74,40 @@ export class MessageListener {
                         message.channel.send(`Message contains a banned emoji`);
                         DiscordUtils.postToLog(`Member: <@${message.member.id}> posted a message that contained a banned emoji with reason: "${reasonToDel}"`, message.guild.id);
                     }
+                } catch {
+                }
+                break;
+            }
+        }
+    }
+
+    private async doStickerBan(stickers: Sticker[], message: Message): Promise<void> {
+        for (const sticker of stickers) {
+            let bannedStickerInfo: StickerInfo = null;
+            try {
+                bannedStickerInfo = await DiscordUtils.getStickerInfo(sticker);
+            } catch {
+
+            }
+            if (!bannedStickerInfo) {
+                return;
+            }
+            const stickerHash = md5(bannedStickerInfo.buffer);
+            const count = await getRepository(BannedAttachmentsModel)
+                .createQueryBuilder("bannedAttachment")
+                .where(`bannedAttachment.guildId = :id`, {
+                    id: message.guild.id
+                })
+                .andWhere(`bannedAttachment.isSticker = true`)
+                .andWhere(`bannedAttachment.attachmentHash = :hash OR bannedAttachment.url = :url`, {
+                    hash: stickerHash,
+                    url: bannedStickerInfo.url
+                })
+                .getCount();
+            if (count === 1) {
+                try {
+                    await message.delete();
+                    message.channel.send(`Message contains a banned Sticker`);
                 } catch {
                 }
                 break;
@@ -150,11 +158,9 @@ export class MessageListener {
         }
     }
 
-    private _timer = new TimedSet<string>(30000);
-
     @MessageListenerDecorator(false, notBot)
     private async replier([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
-        if (!message.member) {
+        if (!ObjectUtil.validString(this.cleverBotKey) || !message.member) {
             return;
         }
         const me = message.guild.me.id;
@@ -187,7 +193,7 @@ export class MessageListener {
             return;
         }
         const request = {
-            "key": process.env.cleverBotKey,
+            "key": this.cleverBotKey,
             "input": messageContent
         };
         const url = Object.keys(request).map(key => `${key}=${encodeURIComponent(request[key])}`).join('&');

@@ -30,7 +30,6 @@ export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
 @registry([
     {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
     {token: Beans.ICloseableModuleToken, useToken: DynoAutoMod},
-    {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
     {token: Beans.ICloseableModuleToken, useToken: RoleLogger},
     {token: Beans.ICloseableModuleToken, useToken: MemberLogger},
     {token: Beans.ICloseableModuleToken, useToken: ChannelLogger},

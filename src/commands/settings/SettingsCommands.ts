@@ -70,7 +70,7 @@ export class SettingsCommands extends AbstractCommandModule {
         description: "Change or set any global setting"
     })
     @SlashGroup("set")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async globalSettings(
         @SlashChoice(SETTINGS)
         @SlashOption("setting", {
@@ -102,7 +102,7 @@ export class SettingsCommands extends AbstractCommandModule {
         description: "Change or set any setting to do with Auto roles"
     })
     @SlashGroup("set")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async autoMuteSettings(
         @SlashChoice(AutoRoleSettingsEnum)
         @SlashOption("setting", {
@@ -159,7 +159,7 @@ export class SettingsCommands extends AbstractCommandModule {
         description: "Get all the auto role settings"
     })
     @SlashGroup("get")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async getGlobalSettings(interaction: CommandInteraction): Promise<void> {
         const {guild} = interaction;
         const guildId = guild.id;

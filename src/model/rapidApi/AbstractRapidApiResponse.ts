@@ -1,4 +1,6 @@
 import {Method} from "axios";
+import {Property} from "../decorators/Property";
+import {ModelEnabledConfigure} from "../Impl/ModelEnabledConfigure";
 
 export type RapidApiBaseOptions = {
     method: Method,
@@ -8,9 +10,13 @@ export type RapidApiBaseOptions = {
     }
 }
 
-export abstract class AbstractRapidApiResponse {
+export abstract class AbstractRapidApiResponse extends ModelEnabledConfigure {
+
+    @Property("rapid_api_code", {required: false})
+    private readonly rapidApiCode: string;
 
     protected constructor(private _rapidApiHost: string, private _method: Method) {
+        super("rapidApiCode");
     }
 
     protected getBaseOptions(): RapidApiBaseOptions {
@@ -18,7 +24,7 @@ export abstract class AbstractRapidApiResponse {
             method: this._method,
             headers: {
                 "x-rapidapi-host": this._rapidApiHost,
-                "x-rapidapi-key": process.env.rapid_api_code
+                "x-rapidapi-key": this.rapidApiCode
             }
         };
     }

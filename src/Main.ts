@@ -5,31 +5,32 @@ import * as v8 from "v8";
 import {Client, DIService, SimpleCommandMessage} from "discordx";
 import {Intents, Message} from "discord.js";
 import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
-import {container} from "tsyringe";
+import {container, singleton} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
 import {SettingsManager} from "./model/settings/SettingsManager";
 import {createConnection, useContainer} from "typeorm";
 import io from "@pm2/io";
 import {importx} from "@discordx/importer";
 import {Settings} from "luxon";
+import {Property} from "./model/decorators/Property";
 // const https = require('http-debug').https;
 // https.debug = 1;
 
-io.init({
-    tracing: true,
-    metrics: {
-        http: true
-    }
-});
-dotenv.config({path: __dirname + '/../.env'});
-
+@singleton()
 export class Main {
+
+    @Property("test_mode", {required: false})
     public static testMode = false;
 
-    public static async start(): Promise<void> {
+    @Property("token")
+    private readonly token: string;
+
+    @Property("test_token", {required: Main.testMode})
+    private readonly testToken: string;
+
+    public async start(): Promise<void> {
         Settings.defaultZone = "utc";
         Settings.defaultLocale = "en-gb";
-        DIService.container = container;
         console.log(process.execArgv);
         console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         await moduleRegistrar();
@@ -41,8 +42,7 @@ export class Main {
             type: "better-sqlite3",
             database: dbName,
             synchronize: true,
-            key: process.env.sqlIte_key,
-            entities: [__dirname + '/model/DB/**/*.model.{ts,js}'],
+            entities: [__dirname + '/model/DB/**/*.model.{ts,js}']
         });
         const client = new Client({
             botId: `ShanaBot_${ObjectUtil.guid()}`,
@@ -74,10 +74,18 @@ export class Main {
         });
         await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
         registerInstance(connection, client);
-        await client.login(Main.testMode ? process.env.test_token : process.env.token);
+        await client.login(Main.testMode ? this.testToken : this.token);
     }
 }
 
 ((async (): Promise<void> => {
-    await Main.start();
+    io.init({
+        tracing: true,
+        metrics: {
+            http: true
+        }
+    });
+    dotenv.config({path: __dirname + '/../.env'});
+    DIService.container = container;
+    await container.resolve(Main).start();
 })());

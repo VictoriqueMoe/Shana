@@ -64,7 +64,7 @@ export abstract class ResourceBanner extends AbstractCommandModule {
     }
 
     @SimpleCommand("banSticker")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async banSticker({message}: SimpleCommandMessage): Promise<void> {
         const {reference} = message;
         if (!reference) {
@@ -103,7 +103,7 @@ export abstract class ResourceBanner extends AbstractCommandModule {
     }
 
     @SimpleCommand("banEmoji")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async banEmoji({message}: SimpleCommandMessage): Promise<void> {
         const repliedMessageLink = message.reference;
         if (!repliedMessageLink) {
@@ -176,7 +176,7 @@ export abstract class ResourceBanner extends AbstractCommandModule {
     }
 
     @SimpleCommand("banAttachment")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async banAttachment({message}: SimpleCommandMessage): Promise<void> {
         const repliedMessageRef = message.reference;
         if (!repliedMessageRef) {

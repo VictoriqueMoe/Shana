@@ -55,7 +55,7 @@ export abstract class Username extends AbstractCommandModule {
     @Slash("viewusernames", {
         description: "View all the persisted usernames this bot is aware of"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async ViewAllSetUsernames(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const {guild} = interaction;
@@ -87,7 +87,7 @@ export abstract class Username extends AbstractCommandModule {
     @Slash("username", {
         description: "force a username to always be set to a member"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async setUsername(
         @SlashOption("user", {
             description: "The user you want to change nickname"

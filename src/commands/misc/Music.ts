@@ -62,7 +62,7 @@ export class Music extends AbstractCommandModule {
     @Slash("playercontrols", {
         description: "Player controls to skip, pause, skip, stop, resume, etc..."
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async playerControls(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const guildQueue = this.getGuildQueue(interaction);
@@ -158,7 +158,7 @@ export class Music extends AbstractCommandModule {
     @Slash("nowplaying", {
         description: "View the current playlist"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async nowPlaying(interaction: CommandInteraction): Promise<void> {
         const guildQueue = this.getGuildQueue(interaction);
         if (!guildQueue || !guildQueue.isPlaying) {

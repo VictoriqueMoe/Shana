@@ -4,6 +4,7 @@ import {MessageEmbed} from "discord.js";
 import {Main} from "../../../../Main";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {Imgur} from "../../../../model/Imgur";
+import {injectable} from "tsyringe";
 
 const isImageFast = require('is-image-fast');
 
@@ -13,9 +14,14 @@ const isImageFast = require('is-image-fast');
  * Bulk Message Deletion<br/>
  */
 @Discord()
+@injectable()
 export class MessageLogger extends AbstractAdminAuditLogger {
+
+    public constructor(private _imgur: Imgur) {
+        super();
+    }
+
     private static messageLimit = 1024;
-    private imgur = new Imgur();
 
     @On("messageUpdate")
     private async messageEdited([oldMessage, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
@@ -95,14 +101,14 @@ export class MessageLogger extends AbstractAdminAuditLogger {
         if (ObjectUtil.validString(executor)) {
             embed.addField("Deleted by", executor);
         }
-        if (attatchments.size === 1) {
+        if (attatchments.size === 1 && this._imgur.enabled) {
             const messageAttachment = attatchments.first();
             const url = messageAttachment.attachment as string;
             try {
                 if (ObjectUtil.validString(url)) {
                     const isImage: boolean = await isImageFast(url);
                     if (isImage) {
-                        const newUrl = await this.imgur.uploadImageFromUrl(url);
+                        const newUrl = await this._imgur.uploadImageFromUrl(url);
                         embed.setImage(newUrl);
                     }
                 }

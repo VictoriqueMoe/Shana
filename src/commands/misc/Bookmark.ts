@@ -79,7 +79,7 @@ export class Bookmark extends AbstractCommandModule {
 
 
     @ContextMenu("MESSAGE", "bookmark")
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async addBookmark(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -99,7 +99,7 @@ export class Bookmark extends AbstractCommandModule {
     @Slash("getbookmark", {
         description: "Gets all of your saved bookmarks"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async getbookmark(
         @SlashOption("public", {
             description: "make message public",
@@ -144,7 +144,7 @@ export class Bookmark extends AbstractCommandModule {
     @Slash("deletebookmarks", {
         description: "Delete a bookmark"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async deleteBookmarks(
         @SlashOption("id", {
             description: "ID of the bookmark"

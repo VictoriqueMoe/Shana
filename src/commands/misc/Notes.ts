@@ -89,7 +89,7 @@ export class Notes extends AbstractCommandModule {
     @Slash("addnote", {
         description: "Add a private note"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async addNote(
         @SlashOption("title", {
             description: "Unique title for this note",
@@ -116,7 +116,7 @@ export class Notes extends AbstractCommandModule {
     @Slash("editnote", {
         description: "modify a note"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async editNote(
         @SlashOption("title", {
             description: "The note to modify",
@@ -145,7 +145,7 @@ export class Notes extends AbstractCommandModule {
     @Slash("getnotes", {
         description: "Get all of your private notes"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async getNotes(
         @SlashOption("title", {
             description: "title of the note to get",
@@ -190,7 +190,7 @@ export class Notes extends AbstractCommandModule {
     @Slash("deletenote", {
         description: "Delete a note"
     })
-    @Guard(NotBotInteraction, CommandEnabled)
+    @Guard(NotBotInteraction, CommandEnabled())
     private async deleteNote(
         @SlashOption("title", {
             description: "title of the note to delete",

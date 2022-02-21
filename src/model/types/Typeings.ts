@@ -3,6 +3,30 @@ import {Message} from "discord.js";
 import {SETTINGS} from "../../enums/SETTINGS";
 
 export namespace Typeings {
+
+    export type envTypes = {
+        token: string,
+        test_token?: string,
+        loveSenseToken: string,
+        uid: string,
+        toyId: string
+        dropboxToken?: string,
+        amethysteToken: string,
+        cleverBotKey?: string,
+        imgurClientId?: string,
+        imgurClientSecret?: string,
+        imgurEmail?: string,
+        imgurPassword?: string,
+        imgurAlbumId?: string
+        deepapi?: string,
+        deepl?: string,
+        twitter_bearer_token: string,
+        Danbooru?: string,
+        ocr_loc: string,
+        rapid_api_code?: string,
+        test_mode?: boolean
+    }
+
     export type UpdateCommandSettings = {
         roles: string[],
         enabled: boolean
