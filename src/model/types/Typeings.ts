@@ -18,10 +18,8 @@ export namespace Typeings {
         imgurEmail?: string,
         imgurPassword?: string,
         imgurAlbumId?: string
-        deepapi?: string,
         deepl?: string,
         twitter_bearer_token: string,
-        Danbooru?: string,
         ocr_loc: string,
         rapid_api_code?: string,
         test_mode?: boolean
