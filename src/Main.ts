@@ -19,13 +19,13 @@ import {Property} from "./model/decorators/Property";
 @singleton()
 export class Main {
 
-    @Property("test_mode", {required: false})
+    @Property("test_mode", false)
     public static testMode = false;
 
     @Property("token")
     private readonly token: string;
 
-    @Property("test_token", {required: Main.testMode})
+    @Property("test_token", Main.testMode)
     private readonly testToken: string;
 
     public async start(): Promise<void> {

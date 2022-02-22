@@ -16,7 +16,7 @@ import {ModelEnabledConfigure} from "../ModelEnabledConfigure";
 @singleton()
 export class ImageFun extends ModelEnabledConfigure {
 
-    @Property("amethysteToken", {required: false})
+    @Property("amethysteToken", false)
     private readonly token: string;
     private readonly baseUrl: string = "https://v1.api.amethyste.moe";
 

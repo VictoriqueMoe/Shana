@@ -12,7 +12,7 @@ export type RapidApiBaseOptions = {
 
 export abstract class AbstractRapidApiResponse extends ModelEnabledConfigure {
 
-    @Property("rapid_api_code", {required: false})
+    @Property("rapid_api_code", false)
     private readonly rapidApiCode: string;
 
     protected constructor(private _rapidApiHost: string, private _method: Method) {

@@ -17,7 +17,7 @@ class DropBoxProxy extends Dropbox {
 export class VicDropbox extends ModelEnabledConfigure {
     private imageCache: files.FolderMetadataReference[];
 
-    @Property("dropboxToken", {required: false})
+    @Property("dropboxToken", false)
     private readonly dropboxToken: string;
 
     private _dropbox: Dropbox;
