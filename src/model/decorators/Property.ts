@@ -11,7 +11,7 @@ export function Property(prop: keyof Typeings.envTypes, required: boolean = true
                 if (required && !ObjectUtil.validString(propValue)) {
                     throw new Error(`Unable to find prop with key "${prop}" in .env file`);
                 }
-                if (original != null) {
+                if (!required && !ObjectUtil.validString(propValue) && original != null) {
                     return original;
                 }
                 return propValue ?? null;

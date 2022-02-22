@@ -11,10 +11,10 @@ import {URLSearchParams} from "url";
 import fetch from 'node-fetch';
 import {singleton} from "tsyringe";
 import {Property} from "../../decorators/Property";
-import {ModelEnabledConfigure} from "../ModelEnabledConfigure";
+import {ModuleEnabledConfigure} from "../ModuleEnabledConfigure";
 
 @singleton()
-export class ImageFun extends ModelEnabledConfigure {
+export class ImageFun extends ModuleEnabledConfigure {
 
     @Property("amethysteToken", false)
     private readonly token: string;

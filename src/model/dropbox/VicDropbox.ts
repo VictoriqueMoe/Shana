@@ -2,7 +2,7 @@ import {Dropbox, DropboxResponse, files} from "dropbox";
 import {singleton} from "tsyringe";
 import {Property} from "../decorators/Property";
 import {PostConstruct} from "../decorators/PostConstruct";
-import {ModelEnabledConfigure} from "../Impl/ModelEnabledConfigure";
+import {ModuleEnabledConfigure} from "../Impl/ModuleEnabledConfigure";
 
 
 class DropBoxProxy extends Dropbox {
@@ -14,7 +14,7 @@ class DropBoxProxy extends Dropbox {
 }
 
 @singleton()
-export class VicDropbox extends ModelEnabledConfigure {
+export class VicDropbox extends ModuleEnabledConfigure {
     private imageCache: files.FolderMetadataReference[];
 
     @Property("dropboxToken", false)

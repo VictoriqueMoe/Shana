@@ -1,6 +1,6 @@
 import {Method} from "axios";
 import {Property} from "../decorators/Property";
-import {ModelEnabledConfigure} from "../Impl/ModelEnabledConfigure";
+import {ModuleEnabledConfigure} from "../Impl/ModuleEnabledConfigure";
 
 export type RapidApiBaseOptions = {
     method: Method,
@@ -10,7 +10,7 @@ export type RapidApiBaseOptions = {
     }
 }
 
-export abstract class AbstractRapidApiResponse extends ModelEnabledConfigure {
+export abstract class AbstractRapidApiResponse extends ModuleEnabledConfigure {
 
     @Property("rapid_api_code", false)
     private readonly rapidApiCode: string;

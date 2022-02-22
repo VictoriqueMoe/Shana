@@ -1,13 +1,13 @@
 import {Property} from "./decorators/Property";
 import {singleton} from "tsyringe";
-import {ModelEnabledConfigure} from "./Impl/ModelEnabledConfigure";
+import {ModuleEnabledConfigure} from "./Impl/ModuleEnabledConfigure";
 import {PostConstruct} from "./decorators/PostConstruct";
 
 const imgur = require('imgur');
 const isImageFast = require('is-image-fast');
 
 @singleton()
-export class Imgur extends ModelEnabledConfigure {
+export class Imgur extends ModuleEnabledConfigure {
 
     @Property("imgurClientId", false)
     private readonly clientId;

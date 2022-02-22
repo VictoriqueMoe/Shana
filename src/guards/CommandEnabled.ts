@@ -3,9 +3,9 @@ import {Client, GuardFunction, Next, SimpleCommandMessage} from "discordx";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {CommandInteraction, ContextMenuInteraction} from "discord.js";
 import {container} from "tsyringe";
-import {ModelEnabledConfigure} from "../model/Impl/ModelEnabledConfigure";
+import {ModuleEnabledConfigure} from "../model/Impl/ModuleEnabledConfigure";
 
-export function CommandEnabled(manager?: ModelEnabledConfigure): GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> {
+export function CommandEnabled(manager?: ModuleEnabledConfigure): GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> {
 
     return async function (arg: CommandInteraction | SimpleCommandMessage | ContextMenuInteraction, client: Client, next: Next) {
         let commandName = "";

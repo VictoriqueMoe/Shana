@@ -1,6 +1,6 @@
 import {ObjectUtil} from "../../utils/Utils";
 
-export abstract class ModelEnabledConfigure {
+export abstract class ModuleEnabledConfigure {
     private readonly _props: string[];
 
     protected constructor(...props: string[]) {
