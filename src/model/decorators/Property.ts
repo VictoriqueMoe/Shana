@@ -22,7 +22,7 @@ export function Property(prop: keyof Typeings.envTypes, required: boolean = true
                     }
                 }
                 if (required && propValue === null) {
-                    throw new Error(`Unable to find prop with key "${prop}" in .env file`);
+                    throw new Error(`Unable to find prop with key "${prop}"`);
                 }
                 if (!required && propValue === null && original != null) {
                     return original;
