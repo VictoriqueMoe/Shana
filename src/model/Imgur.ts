@@ -9,24 +9,16 @@ const isImageFast = require('is-image-fast');
 @singleton()
 export class Imgur extends ModelEnabledConfigure {
 
-    @Property("imgurClientId", {
-        required: false
-    })
+    @Property("imgurClientId", false)
     private readonly clientId;
 
-    @Property("imgurAlbumId", {
-        required: false
-    })
+    @Property("imgurAlbumId", false)
     private readonly albumId;
 
-    @Property("imgurEmail", {
-        required: false
-    })
+    @Property("imgurEmail", false)
     private readonly imgurEmail;
 
-    @Property("imgurPassword", {
-        required: false
-    })
+    @Property("imgurPassword", false)
     private readonly imgurPassword;
 
     public constructor() {

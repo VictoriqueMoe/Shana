@@ -36,9 +36,7 @@ export class MessageListener {
 
     private _timer = new TimedSet<string>(30000);
 
-    @Property("cleverBotKey", {
-        required: false
-    })
+    @Property("cleverBotKey", false)
     private readonly cleverBotKey: string;
 
     public static async doEmojiBan(emojiIds: string[], user: User, message: Message, isReaction: boolean): Promise<void> {
