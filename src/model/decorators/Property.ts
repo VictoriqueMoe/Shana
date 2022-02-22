@@ -3,11 +3,13 @@ import {container} from "tsyringe";
 import {PropertyResolutionFactory} from "../factory/PropertyResolutionFactory";
 import {Property} from "../engine/IPropertyResolutionEngine";
 
+
+const factory = container.resolve(PropertyResolutionFactory);
+const engines = factory.engines;
+
 export function Property(prop: keyof Typeings.envTypes, required: boolean = true): PropertyDecorator {
     return (target, key): void => {
         const original = target[key];
-        const factory = container.resolve(PropertyResolutionFactory);
-        const engines = factory.engines;
         Reflect.deleteProperty(target, key);
         Reflect.defineProperty(target, key, {
             get: () => {
