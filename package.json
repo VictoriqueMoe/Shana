@@ -79,7 +79,7 @@
     "toad-scheduler": "^1.6.0",
     "tsyringe": "^4.6.0",
     "twitter-v2": "^1.1.0",
-    "typeorm": "^0.2.41",
+    "typeorm": "^0.2.43",
     "url-unshort": "^5.0.0",
     "utf-8-validate": "^5.0.8"
   },

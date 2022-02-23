@@ -113,6 +113,7 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
             retRow = result[0];
             textPrefix = "Updated";
         } else {
+            // @ts-ignore
             await super.commitToDatabase(repo, [newModel]);
             this.updateCache(setting, value, guildId);
             retRow = 1;
