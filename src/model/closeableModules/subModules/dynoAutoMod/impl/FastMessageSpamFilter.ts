@@ -9,7 +9,7 @@ import * as Immutable from "immutable";
 import {singleton} from "tsyringe";
 
 @singleton()
-export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
+export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter<number> {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
 
@@ -21,8 +21,8 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
     /**
      * How many messages they are allowed to send in 5 seconds
      */
-    public get value(): string {
-        return "5"; // hard coded for now
+    public get value(): number {
+        return 5; // hard coded for now
     }
 
     public get actions(): ACTION[] {
@@ -84,7 +84,7 @@ class MessageSpamEntry {
     private _messages: Message[] = [];
 
     public get hasViolationLimitReached(): boolean {
-        return this.count > Number.parseInt(this._instance.value);
+        return this.count > this._instance.value;
     }
 
     public get messages(): Immutable.List<Message> {

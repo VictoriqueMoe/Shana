@@ -6,7 +6,7 @@ import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
 import {singleton} from "tsyringe";
 
 @singleton()
-export class MassMentionsFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
+export class MassMentionsFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter<number> {
 
     public get actions(): ACTION[] {
         return [ACTION.DELETE, ACTION.WARN];
@@ -19,8 +19,8 @@ export class MassMentionsFilter extends AbstractFilter implements IValueBackedDy
     /**
      * How many mentions per message fail this filter
      */
-    public get value(): string {
-        return "6";
+    public get value(): number {
+        return 6;
     }
 
     public get id(): string {
@@ -37,7 +37,7 @@ export class MassMentionsFilter extends AbstractFilter implements IValueBackedDy
 
     public async doFilter(content: Message): Promise<boolean> {
         const mentions = content.mentions;
-        return mentions.members.size < Number.parseInt(this.value);
+        return mentions.members.size < this.value;
     }
 
     public async postProcess(message: Message): Promise<void> {

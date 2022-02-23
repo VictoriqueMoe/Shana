@@ -8,12 +8,12 @@ import {singleton} from "tsyringe";
 import {ObjectUtil} from "../../../../../utils/Utils";
 
 @singleton()
-export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
+export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter<number> {
     private readonly _cooldownArray: TimedSet<LinkCooldownEntry>;
 
     public constructor() {
         super();
-        this._cooldownArray = new TimedSet(Number.parseInt(this.value) * 1000);
+        this._cooldownArray = new TimedSet(this.value * 1000);
     }
 
     public get actions(): ACTION[] {
@@ -31,8 +31,8 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedDy
     /**
      * The time between links
      */
-    public get value(): string {
-        return "5"; // hard coded for now
+    public get value(): number {
+        return 5; // hard coded for now
     }
 
     public get id(): string {

@@ -7,7 +7,7 @@ import {TimedSet} from "../../../../Impl/TimedSet";
 import {singleton} from "tsyringe";
 
 @singleton()
-export class ImageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
+export class ImageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter<number> {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
 
@@ -19,8 +19,8 @@ export class ImageSpamFilter extends AbstractFilter implements IValueBackedDynoA
     /**
      * How many images are allowed at once in the space of 10 seconds
      */
-    public get value(): string {
-        return "4"; // hard coded for now
+    public get value(): number {
+        return 4; // hard coded for now
     }
 
     public get actions(): ACTION[] {
@@ -80,6 +80,6 @@ class MessageSpamEntry {
     }
 
     public get hasViolationLimitReached(): boolean {
-        return this.count > Number.parseInt(this._instance.value);
+        return this.count > this._instance.value;
     }
 }

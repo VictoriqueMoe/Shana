@@ -7,7 +7,7 @@ import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
 import {singleton} from "tsyringe";
 
 @singleton()
-export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter {
+export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter<number> {
 
     public get actions(): ACTION[] {
         return [ACTION.DELETE, ACTION.WARN, ACTION.MUTE];
@@ -20,8 +20,8 @@ export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoA
     /**
      * Limit of the emoji allowed in a single message
      */
-    public get value(): string {
-        return "6";
+    public get value(): number {
+        return 6;
     }
 
     public get id(): string {
@@ -37,7 +37,7 @@ export class EmojiSpamFilter extends AbstractFilter implements IValueBackedDynoA
     }
 
     public async doFilter(content: Message): Promise<boolean> {
-        return DiscordUtils.getEmojiFromMessage(content).length <= Number.parseInt(this.value);
+        return DiscordUtils.getEmojiFromMessage(content).length <= this.value;
     }
 
     public async postProcess(message: Message): Promise<void> {
