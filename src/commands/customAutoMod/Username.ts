@@ -49,7 +49,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 ])
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
-@SlashGroup("username", "Commands to set usernames for people")
+@SlashGroup({
+    name: "username",
+    description: "Commands to set usernames for people",
+})
+@SlashGroup("username")
 export abstract class Username extends AbstractCommandModule {
 
     @Slash("viewusernames", {

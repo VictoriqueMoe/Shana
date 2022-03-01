@@ -42,7 +42,11 @@ import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
         examples: ["`/lolibooru gosick gothic_lolita` will result in the tags `gosick` AND `gothic lolita`"]
     }
 ])
-@SlashGroup("moebooru", "Commands to get waifus")
+@SlashGroup({
+    name: "moebooru",
+    description: "Commands to get waifus",
+})
+@SlashGroup("moebooru")
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()

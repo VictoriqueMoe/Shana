@@ -77,7 +77,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         "description": "Get all of your private notes"
     },
 ])
-@SlashGroup("notes", "Commands to manage your personal notes")
+@SlashGroup({
+    name: "notes",
+    description: "Commands to manage your personal notes",
+})
+@SlashGroup("notes")
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()

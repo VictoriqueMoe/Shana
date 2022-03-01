@@ -28,7 +28,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 ])
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
-@SlashGroup("vicimage", "Obtain images of Victorique#0002")
+@SlashGroup({
+    name: "vicimage",
+    description: "Obtain images of Victorique#0002",
+})
+@SlashGroup("vicimage")
 @injectable()
 export class VicImage extends AbstractCommandModule {
 

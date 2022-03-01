@@ -62,7 +62,11 @@ type NextBirthday = {
         "description": "Remove your birthday (if set)"
     }
 ])
-@SlashGroup("birthday", "Commands to add your Birthday!")
+@SlashGroup({
+    name: "birthday",
+    description: "Commands to add your Birthday!",
+})
+@SlashGroup("birthday")
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()

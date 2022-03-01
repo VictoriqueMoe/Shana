@@ -46,7 +46,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         "description": "View the current playlist"
     }
 ])
-@SlashGroup("music", "Commands to play music from Youtube")
+@SlashGroup({
+    name: "music",
+    description: "Commands to play music from Youtube",
+})
+@SlashGroup("music")
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()

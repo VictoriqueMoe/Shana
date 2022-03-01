@@ -19,7 +19,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 ])
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
-@SlashGroup("bans", "commands to manage bans in this server")
+@SlashGroup({
+    name: "bans",
+    description: "commands to manage bans in this server",
+})
+@SlashGroup("bans")
 export class BanManager extends AbstractCommandModule {
 
     @Slash("cleanbans", {
