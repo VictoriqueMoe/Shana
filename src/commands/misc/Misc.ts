@@ -106,7 +106,11 @@ const isImageFast = require('is-image-fast');
         "description": "Translate a message (to EN-GB)"
     }
 ])
-@SlashGroup("miscellaneous", "Miscellaneous commands")
+@SlashGroup({
+    name: "miscellaneous",
+    description: "Miscellaneous commands",
+})
+@SlashGroup("miscellaneous")
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()

@@ -42,7 +42,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 ])
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
-@SlashGroup("ages", "commands to get ages of accounts and servers")
+@SlashGroup({
+    name: "ages",
+    description: "commands to get ages of accounts and servers",
+})
+@SlashGroup("ages")
 @injectable()
 export class AccountAge extends AbstractCommandModule {
 

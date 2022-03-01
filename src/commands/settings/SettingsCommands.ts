@@ -53,9 +53,19 @@ import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
         "description": "Get and set all the Auto Role settings"
     }
 ])
-@SlashGroup("settings", "Get and Set settings for this bot", {
-    set: "Command to set settings",
-    get: "Commands to get settings"
+@SlashGroup({
+    name: "settings",
+    description: "Get and Set settings for this bot",
+})
+@SlashGroup({
+    name: "get",
+    description: "Commands to get settings",
+    root: "settings"
+})
+@SlashGroup({
+    name: "set",
+    description: "Commands to set settings",
+    root: "settings"
 })
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
@@ -69,7 +79,7 @@ export class SettingsCommands extends AbstractCommandModule {
     @Slash("globalsettings", {
         description: "Change or set any global setting"
     })
-    @SlashGroup("set")
+    @SlashGroup("set", "settings")
     @Guard(NotBotInteraction, CommandEnabled())
     private async globalSettings(
         @SlashChoice(SETTINGS)
@@ -101,7 +111,7 @@ export class SettingsCommands extends AbstractCommandModule {
     @Slash("autorole", {
         description: "Change or set any setting to do with Auto roles"
     })
-    @SlashGroup("set")
+    @SlashGroup("set", "settings")
     @Guard(NotBotInteraction, CommandEnabled())
     private async autoMuteSettings(
         @SlashChoice(AutoRoleSettingsEnum)
@@ -158,7 +168,7 @@ export class SettingsCommands extends AbstractCommandModule {
     @Slash("autorole", {
         description: "Get all the auto role settings"
     })
-    @SlashGroup("get")
+    @SlashGroup("get", "settings")
     @Guard(NotBotInteraction, CommandEnabled())
     private async getGlobalSettings(interaction: CommandInteraction): Promise<void> {
         const {guild} = interaction;

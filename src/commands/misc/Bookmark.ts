@@ -56,7 +56,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         "description": "Delete a bookmark"
     }
 ])
-@SlashGroup("bookmarks", "Commands to manage bookmarks")
+@SlashGroup({
+    name: "bookmarks",
+    description: "Commands to manage bookmarks",
+})
+@SlashGroup("bookmarks")
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()

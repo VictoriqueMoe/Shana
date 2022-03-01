@@ -27,7 +27,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 ])
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
-@SlashGroup("rolejoiner", "Commands to allow users to join vanity roles")
+@SlashGroup({
+    name: "rolejoiner",
+    description: "Commands to allow users to join vanity roles",
+})
+@SlashGroup("rolejoiner")
 export class RoleJoiner extends AbstractCommandModule {
 
 

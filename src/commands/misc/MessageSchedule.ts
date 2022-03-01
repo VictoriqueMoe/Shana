@@ -70,7 +70,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         "description": "get all scheduled posts optionally by channel"
     }
 ])
-@SlashGroup("messageschedule", "Commands to schedule posts to channels")
+@SlashGroup({
+    name: "messageschedule",
+    description: "Commands to schedule posts to channels",
+})
+@SlashGroup("messageschedule")
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
 @injectable()

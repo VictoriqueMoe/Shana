@@ -22,7 +22,11 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 ])
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
-@SlashGroup("secure", "secured commands used as moderation utilities")
+@SlashGroup({
+    name: "secure",
+    description: "secured commands used as moderation utilities",
+})
+@SlashGroup("secure")
 @injectable()
 export class SecuredCommands extends AbstractCommandModule {
 

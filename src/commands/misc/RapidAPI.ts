@@ -13,8 +13,14 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Discord()
 @Category("rapid_api", "Commands to interact with various endpoints")
 @Category("rapid_api", [])
-@SlashGroup("rapid_api", "Commands to interact with various endpoints", {
-    covid: "get covid info for countries and world data",
+@SlashGroup({
+    name: "rapid_api",
+    description: "Commands to interact with various endpoints",
+})
+@SlashGroup({
+    name: "covid",
+    description: "get covid info for countries and world data",
+    root: "rapid_api"
 })
 @Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
 @Permission(AbstractCommandModule.getPermissions)
@@ -28,7 +34,7 @@ export class RapidAPI extends AbstractCommandModule {
     @Slash("covid_by_country", {
         description: "Get covid status by a country name"
     })
-    @SlashGroup("covid")
+    @SlashGroup("covid", "rapid_api")
     @Guard(NotBotInteraction, CommandEnabled(container.resolve(Covid19DataManager)))
     private async covidByCountry(
         @SlashOption("country", {
