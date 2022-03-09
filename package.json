@@ -69,7 +69,7 @@
     "mime-types": "^2.1.34",
     "node-base64-image": "^2.0.4",
     "node-exiftool": "^2.3.0",
-    "node-fetch": "^2.6.6",
+    "node-fetch": "^3.2.2",
     "node-reverse-image-search": "^1.0.2",
     "node-schedule": "^2.1.0",
     "promisify": "0.0.3",
