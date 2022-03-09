@@ -1048,6 +1048,10 @@ export class Meme extends AbstractCommandModule {
     })
     @Guard(CommandEnabled(container.resolve(ImageFun)))
     private async generate(command: SimpleCommandMessage): Promise<void> {
+        // i dunno, i just hate this guy
+        if (command.message.author.id === "765562801720524802") {
+            return;
+        }
         const {message} = command;
         const {content} = message;
         if (!ObjectUtil.validString(content)) {

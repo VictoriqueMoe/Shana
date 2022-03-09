@@ -1,6 +1,7 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {Message, User} from "discord.js";
 import {MessageListener} from "../managedEvents/messageEvents/MessageListener";
+import {DiscordUtils} from "../utils/Utils";
 
 @Discord()
 export class MiscListeners {
@@ -29,5 +30,21 @@ export class MiscListeners {
     @On("rateLimit")
     private async rateLimit([rateLimitData]: ArgsOf<"rateLimit">, client: Client): Promise<void> {
         console.warn(rateLimitData);
+    }
+
+    @On("threadCreate")
+    private async threadCreate([thread]: ArgsOf<"threadCreate">, client: Client): Promise<void> {
+        if (!thread.joinable && !thread.joined) {
+            await DiscordUtils.postToLog(`Unable to join created thread: "${thread.name}"`, thread.guildId);
+            return;
+        }
+        try {
+            await thread.join();
+        } catch (e) {
+            console.error(e);
+            await DiscordUtils.postToLog(`Unable to join created thread: "${thread.name}"`, thread.guildId);
+            return;
+        }
+        await DiscordUtils.postToLog(`joined thread: "${thread.name}"`, thread.guildId);
     }
 }

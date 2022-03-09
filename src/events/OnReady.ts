@@ -33,6 +33,88 @@ export class OnReady extends BaseDAO<any> {
         super();
     }
 
+    private static async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
+        const retMap: Map<Guild, string[]> = new Map();
+        const guildModels = await getRepository(GuildableModel).find({
+            relations: ["commandSecurityModel"]
+        });
+        const guildManager = container.resolve(GuildManager);
+        for (const guildModel of guildModels) {
+            const guildId = guildModel.guildId;
+            const guild = await guildManager.getGuild(guildId);
+            const autoRoleModule = container.resolve(AutoRole);
+            const enabled = await autoRoleModule.isEnabled(guildId);
+            if (enabled) {
+                const membersApplied: string[] = [];
+                const members = await guild.members.fetch({
+                    force: true
+                });
+                const noRoles = [...members.values()].filter(member => {
+                    const roles = [...member.roles.cache.values()];
+                    for (const role of roles) {
+                        if (role.name !== "@everyone") {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+                for (const noRole of noRoles) {
+                    console.log(`setting roles for ${noRole.user.tag} as they have no roles`);
+                    membersApplied.push(noRole.user.tag);
+                    await autoRoleModule.applyRole(noRole, guildId);
+                }
+                retMap.set(guild, membersApplied);
+            }
+        }
+        return retMap;
+    }
+
+    private static async startServer(): Promise<void> {
+        if (Main.testMode) {
+            return;
+        }
+        container.resolve(BotServer);
+    }
+
+    /**
+     * Commands that are run on application start AND on join new guild
+     */
+    @Transaction()
+    public async init(@TransactionManager() manager?: EntityManager): Promise<void> {
+        await this.populateCommandSecurity(manager);
+        await this.populateClosableEvents(manager);
+        await this.setDefaultSettings(manager);
+        await this.populatePostableChannels(manager);
+        await this.cleanUpGuilds(manager);
+        await this.initAppCommands();
+        await this.joinThreads();
+    }
+
+    public initMusicPlayer(): void {
+        const player = new Player(this._client, {
+            leaveOnEmpty: true,
+            quality: "high"
+        });
+        registerInstance(player);
+    }
+
+    public async setDefaultSettings(manager: EntityManager): Promise<void> {
+        const guilds = this._client.guilds;
+        const cache = guilds.cache;
+        const nameValue = EnumEx.getNamesAndValues(DEFAULT_SETTINGS) as any;
+        const settingsManager = container.resolve(SettingsManager);
+        for (const [guildId] of cache) {
+            for (const keyValuesObj of nameValue) {
+                const setting: SETTINGS = keyValuesObj.name;
+                let value = keyValuesObj.value;
+                if (!ObjectUtil.validString(value)) {
+                    value = null;
+                }
+                await settingsManager.saveOrUpdateSetting(setting, value, guildId, true, manager);
+            }
+        }
+    }
+
     @On("ready")
     private async initialise([client]: ArgsOf<"ready">): Promise<void> {
         if (Main.testMode) {
@@ -75,42 +157,6 @@ export class OnReady extends BaseDAO<any> {
         }
     }
 
-    private static async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
-        const retMap: Map<Guild, string[]> = new Map();
-        const guildModels = await getRepository(GuildableModel).find({
-            relations: ["commandSecurityModel"]
-        });
-        const guildManager = container.resolve(GuildManager);
-        for (const guildModel of guildModels) {
-            const guildId = guildModel.guildId;
-            const guild = await guildManager.getGuild(guildId);
-            const autoRoleModule = container.resolve(AutoRole);
-            const enabled = await autoRoleModule.isEnabled(guildId);
-            if (enabled) {
-                const membersApplied: string[] = [];
-                const members = await guild.members.fetch({
-                    force: true
-                });
-                const noRoles = [...members.values()].filter(member => {
-                    const roles = [...member.roles.cache.values()];
-                    for (const role of roles) {
-                        if (role.name !== "@everyone") {
-                            return false;
-                        }
-                    }
-                    return true;
-                });
-                for (const noRole of noRoles) {
-                    console.log(`setting roles for ${noRole.user.tag} as they have no roles`);
-                    membersApplied.push(noRole.user.tag);
-                    await autoRoleModule.applyRole(noRole, guildId);
-                }
-                retMap.set(guild, membersApplied);
-            }
-        }
-        return retMap;
-    }
-
     private async loadCustomActions(): Promise<void> {
         io.action('getLogs', async (cb) => {
             const url = `${__dirname}/../../logs/combined.log`;
@@ -149,44 +195,6 @@ export class OnReady extends BaseDAO<any> {
             }
             return cb(message);
         });
-    }
-
-    /**
-     * Commands that are run on application start AND on join new guild
-     */
-    @Transaction()
-    public async init(@TransactionManager() manager?: EntityManager): Promise<void> {
-        await this.populateCommandSecurity(manager);
-        await this.populateClosableEvents(manager);
-        await this.setDefaultSettings(manager);
-        await this.populatePostableChannels(manager);
-        await this.cleanUpGuilds(manager);
-        await this.initAppCommands();
-    }
-
-    public initMusicPlayer(): void {
-        const player = new Player(this._client, {
-            leaveOnEmpty: true,
-            quality: "high"
-        });
-        registerInstance(player);
-    }
-
-    public async setDefaultSettings(manager: EntityManager): Promise<void> {
-        const guilds = this._client.guilds;
-        const cache = guilds.cache;
-        const nameValue = EnumEx.getNamesAndValues(DEFAULT_SETTINGS) as any;
-        const settingsManager = container.resolve(SettingsManager);
-        for (const [guildId] of cache) {
-            for (const keyValuesObj of nameValue) {
-                const setting: SETTINGS = keyValuesObj.name;
-                let value = keyValuesObj.value;
-                if (!ObjectUtil.validString(value)) {
-                    value = null;
-                }
-                await settingsManager.saveOrUpdateSetting(setting, value, guildId, true, manager);
-            }
-        }
     }
 
     private async initAppCommands(): Promise<void> {
@@ -248,13 +256,6 @@ export class OnReady extends BaseDAO<any> {
                 }
             }
         }
-    }
-
-    private static async startServer(): Promise<void> {
-        if (Main.testMode) {
-            return;
-        }
-        container.resolve(BotServer);
     }
 
     private async populateGuilds(): Promise<void> {
@@ -365,6 +366,19 @@ export class OnReady extends BaseDAO<any> {
                 await transactionManager.delete(GuildableModel, {
                     guildId: guildsJoinedId
                 });
+            }
+        }
+    }
+
+    private async joinThreads(): Promise<void> {
+        const guilds = [...this._client.guilds.cache.values()];
+        for (const guild of guilds) {
+            const threads = await guild.channels.fetchActiveThreads(true);
+            for (const [, thread] of threads.threads) {
+                if (thread.joinable && !thread.joined) {
+                    await thread.join();
+                    await DiscordUtils.postToLog(`joined thread: "${thread.name}"`, thread.guildId);
+                }
             }
         }
     }
