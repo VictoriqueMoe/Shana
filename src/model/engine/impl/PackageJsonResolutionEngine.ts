@@ -15,7 +15,6 @@ export class PackageJsonResolutionEngine implements IPropertyResolutionEngine {
 
     @PostConstruct
     private init(): void {
-        console.log(process.env);
         if (!ObjectUtil.validString(this.packageLocation)) {
             return;
         }
