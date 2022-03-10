@@ -4,8 +4,6 @@ Shana is a bot with many functions, its initial idea was to completely replace D
 faster. After fully implementing both Dyno's AutoRole and AutoMod modules, this bot has expected upon its own custom
 automod features and more.
 
-feel free to add me on Discord: `Victorique#0001`
-
 ## <ins>Modules</ins>
 
 There are 12 main modules in this bot, each one has its own set of permissions as defined by the`CommandSecurityModels`
