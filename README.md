@@ -1,6 +1,6 @@
-# <ins>WeebBot</ins>
+# <ins>Shana</ins>
 
-This bot has many functions, it's initial idea was to completely replace Dyno, as such, to make it more reliable and
+Shana is a bot with many functions, its initial idea was to completely replace Dyno, as such, to make it more reliable and
 faster. After fully implementing both Dyno's AutoRole and AutoMod modules, this bot has expected upon its own custom
 automod features and more.
 
