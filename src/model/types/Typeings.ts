@@ -4,7 +4,9 @@ import {SETTINGS} from "../../enums/SETTINGS";
 
 export namespace Typeings {
 
-    export type envTypes = {
+    export type propTypes = envTypes & packageJsonTypes
+
+    type envTypes = {
         token: string,
         test_token?: string,
         loveSenseToken: string,
@@ -23,6 +25,27 @@ export namespace Typeings {
         ocr_loc: string,
         rapid_api_code?: string,
         test_mode?: boolean
+    }
+
+    type packageJsonTypes = {
+        "name"?: string,
+        "version"?: string,
+        "description"?: string,
+        "type"?: string,
+        "main"?: string,
+        "scripts"?: { [key: string]: string },
+        "repository"?: {
+            "type"?: string,
+            "url"?: string
+        },
+        "author"?: string,
+        "license"?: string,
+        "bugs"?: {
+            "url"?: string
+        },
+        "dependencies"?: { [key: string]: string },
+        "homepage"?: string,
+        "devDependencies"?: { [key: string]: string }
     }
 
     export type UpdateCommandSettings = {

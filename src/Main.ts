@@ -25,10 +25,14 @@ export class Main {
     @Property("token")
     private readonly token: string;
 
+    @Property("name")
+    private readonly botName: string;
+
     @Property("test_token", Main.testMode)
     private readonly testToken: string;
 
     public async start(): Promise<void> {
+        console.log(`starting ${this.botName}`);
         Settings.defaultZone = "utc";
         Settings.defaultLocale = "en-gb";
         console.log(process.execArgv);

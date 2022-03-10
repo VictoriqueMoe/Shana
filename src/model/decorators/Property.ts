@@ -7,7 +7,7 @@ import {Property} from "../engine/IPropertyResolutionEngine";
 const factory = container.resolve(PropertyResolutionFactory);
 const engines = factory.engines;
 
-export function Property(prop: keyof Typeings.envTypes, required: boolean = true): PropertyDecorator {
+export function Property(prop: keyof Typeings.propTypes, required: boolean = true): PropertyDecorator {
     return (target, key): void => {
         const original = target[key];
         Reflect.deleteProperty(target, key);
