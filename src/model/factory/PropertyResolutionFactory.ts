@@ -3,6 +3,7 @@ import {Beans} from "../../DI/Beans";
 import {EnvPropertyResolutionEngine} from "../engine/impl/EnvPropertyResolutionEngine";
 import {IPropertyResolutionEngine} from "../engine/IPropertyResolutionEngine";
 import {PackageJsonResolutionEngine} from "../engine/impl/PackageJsonResolutionEngine";
+import {PostConstruct} from "../decorators/PostConstruct";
 
 @registry([
     {token: Beans.IPropertyResolutionEngine, useToken: EnvPropertyResolutionEngine},
@@ -11,8 +12,15 @@ import {PackageJsonResolutionEngine} from "../engine/impl/PackageJsonResolutionE
 @singleton()
 export class PropertyResolutionFactory {
 
+    private _engines: IPropertyResolutionEngine[];
+
     public get engines(): IPropertyResolutionEngine[] {
-        return container.resolveAll(Beans.IPropertyResolutionEngine);
+        return this._engines;
+    }
+
+    @PostConstruct
+    private init(): void {
+        this._engines = container.resolveAll(Beans.IPropertyResolutionEngine);
     }
 
 }

@@ -5,14 +5,15 @@ import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersisten
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
 import {MuteManager} from "../../../model/guild/manager/MuteManager";
-import {container, injectable} from "tsyringe";
+import {injectable} from "tsyringe";
 import {RoleApplier} from "./RoleApplier";
+import {SubModuleManager} from "../../../model/closeableModules/manager/SubModuleManager";
 
 @Discord()
 @injectable()
 export class MemberListeners extends BaseDAO<RolePersistenceModel> {
 
-    public constructor(private _roleApplier: RoleApplier, private _muteManager: MuteManager) {
+    public constructor(private _roleApplier: RoleApplier, private _muteManager: MuteManager, private _subModuleManager: SubModuleManager) {
         super();
     }
 
@@ -26,7 +27,7 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
 
     @On("guildMemberUpdate")
     private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
-        const filter: BannedWordFilter = container.resolve(BannedWordFilter);
+        const filter: BannedWordFilter = this._subModuleManager.getSubModule(BannedWordFilter);
         if (!filter.isActive) {
             return;
         }

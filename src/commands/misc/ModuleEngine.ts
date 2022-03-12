@@ -4,6 +4,8 @@ import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommandModule} from "../AbstractCommandModule";
 import {CommandInteraction} from "discord.js";
 import {Category} from "@discordx/utilities";
+import {container} from "tsyringe";
+import {CloseableModuleManager} from "../../model/guild/manager/CloseableModuleManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -87,7 +89,7 @@ export abstract class ModuleEngine extends AbstractCommandModule {
         if (!ids.includes(moduleId)) {
             return InteractionUtils.replyOrFollowUp(interaction, `Unable to find that module, all available modules are: \n ${ids.join(", ")}`);
         }
-        const module = DiscordUtils.getModule(moduleId);
+        const module = container.resolve(CloseableModuleManager).getModule(moduleId);
         const subModules = module.submodules.filter(sm => sm.isActive);
         const subModulesStr = (subModules.map(s => s.id)).join(", ");
         if (isEnable) {

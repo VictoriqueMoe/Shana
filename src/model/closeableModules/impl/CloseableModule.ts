@@ -17,7 +17,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
 
     private _isEnabled: Map<string, boolean | null>;
     private _settings: Map<string, T | null>;
-    private readonly _subModuleManager: SubModuleManager;
+    protected readonly _subModuleManager: SubModuleManager;
 
     protected constructor(private _model: typeof CloseOptionModel) {
         super();

@@ -14,7 +14,6 @@ import {MessageListenerDecorator} from "../../../model/decorators/messageListene
 import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
 import {notBot} from "../../../guards/NotABot";
 import {container, singleton} from "tsyringe";
-import TIME_OUT = TimeUtils.TIME_OUT;
 
 @singleton()
 export class DynoAutoMod extends CloseableModule<null> {
@@ -160,7 +159,7 @@ export class DynoAutoMod extends CloseableModule<null> {
             return;
         }
         if (!time) {
-            time = TIME_OUT["1 hour"];
+            time = TimeUtils.TIME_OUT["1 hour"];
         }
         const muteSingleton = container.resolve(MuteManager);
         const model = await muteSingleton.muteUser(user, reason, time * 1000);

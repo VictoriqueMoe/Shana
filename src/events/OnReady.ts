@@ -1,20 +1,16 @@
 import {Main} from "../Main";
 import {ArrayUtils, DiscordUtils, EnumEx, loadClasses, ObjectUtil} from "../utils/Utils";
-import {Guild} from "discord.js";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
 import {BotServer} from "../api/BotServer";
 import {GuildableModel} from "../model/DB/guild/Guildable.model";
 import {CommandSecurityModel} from "../model/DB/guild/CommandSecurity.model";
 import {PostableChannelModel} from "../model/DB/guild/PostableChannel.model";
 import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
-import {AutoRole} from "./closeableModules/autoRole/AutoRole";
-import {GuildManager} from "../model/guild/manager/GuildManager";
 import * as fs from 'fs';
 import {SettingsManager} from "../model/settings/SettingsManager";
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {container, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
-import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS";
 import {Player} from "discord-music-player";
 import {registerInstance} from "../DI/moduleRegistrar";
@@ -22,6 +18,10 @@ import {EntityManager, getManager, getRepository, Transaction, TransactionManage
 import {InsertResult} from "typeorm/browser";
 import io from "@pm2/io";
 import {VicDropbox} from "../model/dropbox/VicDropbox";
+import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
+import Immutable from "immutable";
+import {CloseableModuleManager} from "../model/guild/manager/CloseableModuleManager";
+import {AutoRole} from "./closeableModules/autoRole/AutoRole";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -31,42 +31,6 @@ export class OnReady extends BaseDAO<any> {
 
     public constructor(private _client: Client) {
         super();
-    }
-
-    private static async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
-        const retMap: Map<Guild, string[]> = new Map();
-        const guildModels = await getRepository(GuildableModel).find({
-            relations: ["commandSecurityModel"]
-        });
-        const guildManager = container.resolve(GuildManager);
-        for (const guildModel of guildModels) {
-            const guildId = guildModel.guildId;
-            const guild = await guildManager.getGuild(guildId);
-            const autoRoleModule = container.resolve(AutoRole);
-            const enabled = await autoRoleModule.isEnabled(guildId);
-            if (enabled) {
-                const membersApplied: string[] = [];
-                const members = await guild.members.fetch({
-                    force: true
-                });
-                const noRoles = [...members.values()].filter(member => {
-                    const roles = [...member.roles.cache.values()];
-                    for (const role of roles) {
-                        if (role.name !== "@everyone") {
-                            return false;
-                        }
-                    }
-                    return true;
-                });
-                for (const noRole of noRoles) {
-                    console.log(`setting roles for ${noRole.user.tag} as they have no roles`);
-                    membersApplied.push(noRole.user.tag);
-                    await autoRoleModule.applyRole(noRole, guildId);
-                }
-                retMap.set(guild, membersApplied);
-            }
-        }
-        return retMap;
     }
 
     private static async startServer(): Promise<void> {
@@ -133,7 +97,6 @@ export class OnReady extends BaseDAO<any> {
         pArr.push(this.initUsernames());
         await this.init();
         // wait for the initial transaction to finish
-        pArr.push(OnReady.applyEmptyRoles());
         pArr.push(loadClasses(...this.classesToLoad));
         pArr.push(OnReady.startServer());
         pArr.push(this.loadCustomActions());
@@ -178,7 +141,8 @@ export class OnReady extends BaseDAO<any> {
         });
 
         io.action('force member roles', async (cb) => {
-            const appliedMembers = await OnReady.applyEmptyRoles();
+            const autoRole = container.resolve(CloseableModuleManager).getCloseableModule(AutoRole);
+            const appliedMembers = await autoRole.applyEmptyRoles();
             let message = "";
             for (const [guild, members] of appliedMembers) {
                 if (members.length === 0) {
@@ -226,7 +190,7 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private async populateClosableEvents(transactionManager: EntityManager): Promise<void> {
-        const allModules: CloseableModule<any>[] = DiscordUtils.getCloseableModules();
+        const allModules: Immutable.Set<ICloseableModule<unknown>> = container.resolve(CloseableModuleManager).closeableModules;
         for (const module of allModules) {
             for (const [guildId, guild] of this._client.guilds.cache) {
                 const moduleId = module.moduleId;

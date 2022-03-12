@@ -20,6 +20,7 @@ import {CommandInteraction, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
 import {Typeings} from "../../model/types/Typeings";
 import {Category} from "@discordx/utilities";
+import {CloseableModuleManager} from "../../model/guild/manager/CloseableModuleManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
 
@@ -72,7 +73,7 @@ import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
 @injectable()
 export class SettingsCommands extends AbstractCommandModule {
 
-    constructor(private _settingsManager: SettingsManager, private _autoRole: AutoRole) {
+    constructor(private _settingsManager: SettingsManager, private _closeableModuleManager: CloseableModuleManager) {
         super();
     }
 
@@ -157,7 +158,7 @@ export class SettingsCommands extends AbstractCommandModule {
                 break;
         }
         try {
-            await this._autoRole.saveSettings(guildId, settingObj, true);
+            await this._closeableModuleManager.getCloseableModule(AutoRole).saveSettings(guildId, settingObj, true);
         } catch (e) {
             return InteractionUtils.replyOrFollowUp(interaction, e.message);
         }
@@ -173,7 +174,7 @@ export class SettingsCommands extends AbstractCommandModule {
     private async getGlobalSettings(interaction: CommandInteraction): Promise<void> {
         const {guild} = interaction;
         const guildId = guild.id;
-        const settings = await this._autoRole.getSettings(guildId);
+        const settings = await this._closeableModuleManager.getCloseableModule(AutoRole).getSettings(guildId);
         const embed = new MessageEmbed()
             .setColor('#0099ff')
             .setDescription("Below are the auto role settings of this server")

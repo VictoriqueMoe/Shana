@@ -4,18 +4,9 @@ import {ApplicationCommandPermissions, Guild, GuildMember, Permissions} from "di
 import {Client, DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
 import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
 import {Typeings} from "../../types/Typeings";
-import {container, registry, singleton} from "tsyringe";
+import {container, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
 import {PostConstruct} from "../../decorators/PostConstruct";
-import {MemberLogger} from "../../../events/closeableModules/logging/admin/MemberLogger";
-import {AuditLogger} from "../../../events/closeableModules/logging/mod/AuditLogger";
-import {RoleLogger} from "../../../events/closeableModules/logging/admin/RoleLogger";
-import {MessageLogger} from "../../../events/closeableModules/logging/admin/MessageLogger";
-import {Beans} from "../../../DI/Beans";
-import {AutoResponder} from "../../../managedEvents/messageEvents/closeableModules/AutoResponder";
-import {ChannelLogger} from "../../../events/closeableModules/logging/admin/ChannelLogger";
-import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
-import {AutoRole} from "../../../events/closeableModules/autoRole/AutoRole";
 import {
     IPermissionEventListener,
     RoleTypes,
@@ -27,16 +18,6 @@ import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 
 export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
 
-@registry([
-    {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
-    {token: Beans.ICloseableModuleToken, useToken: DynoAutoMod},
-    {token: Beans.ICloseableModuleToken, useToken: RoleLogger},
-    {token: Beans.ICloseableModuleToken, useToken: MemberLogger},
-    {token: Beans.ICloseableModuleToken, useToken: ChannelLogger},
-    {token: Beans.ICloseableModuleToken, useToken: MessageLogger},
-    {token: Beans.ICloseableModuleToken, useToken: AutoRole},
-    {token: Beans.ICloseableModuleToken, useToken: AutoResponder}
-])
 @singleton()
 export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implements IPermissionEventListener {
 

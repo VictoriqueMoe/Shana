@@ -16,6 +16,7 @@ import {BannedWordFilter} from "../subModules/dynoAutoMod/impl/BannedWordFilter"
 import {AllCapsFilter} from "../subModules/dynoAutoMod/impl/AllCapsFilter";
 import {EveryoneMentionsFilter} from "../subModules/dynoAutoMod/impl/EveryoneMentionsFilter";
 import {SpamFilter} from "../subModules/dynoAutoMod/impl/SpamFilter";
+import constructor from "tsyringe/dist/typings/types/constructor";
 
 @registry([
     {token: Beans.ISubModuleToken, useToken: ZalgoTextFilter},
@@ -40,6 +41,10 @@ export class SubModuleManager {
         this._subModules = new Set(modules);
     }
 
+    public get subModules(): Immutable.Set<ISubModule> {
+        return Immutable.Set.of(...this._subModules.values());
+    }
+
     public getSubModulesFromParent(parent: ICloseableModule<ModuleSettings>): Immutable.Set<ISubModule> {
         const returnSet: Set<ISubModule> = new Set();
         for (const subModule of this._subModules) {
@@ -49,5 +54,9 @@ export class SubModuleManager {
             }
         }
         return Immutable.Set.of(...returnSet.values());
+    }
+
+    public getSubModule<T extends ISubModule>(subModule: constructor<T>): T {
+        return this.subModules.find(value => value.constructor === subModule) as T;
     }
 }

@@ -5,7 +5,6 @@ import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {singleton} from "tsyringe";
 import {SpamMeta} from "discord-spams";
 import {RunEvery} from "../../../../decorators/RunEvery";
-import {TimeUtils} from "../../../../../utils/Utils";
 
 @singleton()
 export class SpamFilter extends AbstractFilter {
@@ -51,7 +50,7 @@ export class SpamFilter extends AbstractFilter {
         await super.postToLog("spam", message);
     }
 
-    @RunEvery(3, TimeUtils.METHOD_EXECUTOR_TIME_UNIT.hours)
+    @RunEvery(3, "hours")
     private update(): Promise<void> {
         return SpamMeta.refreshMasterList();
     }

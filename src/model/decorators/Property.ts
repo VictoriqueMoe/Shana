@@ -7,6 +7,11 @@ import {Property} from "../engine/IPropertyResolutionEngine";
 const factory = container.resolve(PropertyResolutionFactory);
 const engines = factory.engines;
 
+
+/**
+ * Get a property from the system. The location where the property is loaded from is agnostic and defined by the registered IPropertyResolutionEngine classes.
+ * This acts the similar to Spring's Property annotation
+ */
 export function Property(prop: keyof Typeings.propTypes, required: boolean = true): PropertyDecorator {
     return (target, key): void => {
         const original = target[key];

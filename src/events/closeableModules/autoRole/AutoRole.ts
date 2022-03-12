@@ -2,7 +2,7 @@ import {CloseableModule} from "../../../model/closeableModules/impl/CloseableMod
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
 import * as schedule from "node-schedule";
-import {GuildMember} from "discord.js";
+import {Guild, GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
 import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import {GuildManager} from "../../../model/guild/manager/GuildManager";
@@ -13,6 +13,9 @@ import {TimedSet} from "../../../model/Impl/TimedSet";
 import {container, injectable} from "tsyringe";
 import {RoleApplier} from "../../customAutoMod/RoleApplier/RoleApplier";
 import {getRepository} from "typeorm";
+import {PostConstruct} from "../../../model/decorators/PostConstruct";
+import {GuildableModel} from "../../../model/DB/guild/Guildable.model";
+import {CloseableModuleManager} from "../../../model/guild/manager/CloseableModuleManager";
 
 class JoinEntry {
     constructor(public joinCount: number) {
@@ -45,7 +48,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (await this.doPanic(member, settings)) {
             return;
         }
-        const filter: BannedWordFilter = container.resolve(BannedWordFilter);
+        const filter: BannedWordFilter = this._subModuleManager.getSubModule(BannedWordFilter);
         if (filter.isActive && await filter.checkUsername(member)) {
             return;
         }
@@ -177,5 +180,43 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                 }
             }
         }
+    }
+
+
+    @PostConstruct
+    public async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
+        const retMap: Map<Guild, string[]> = new Map();
+        const guildModels = await getRepository(GuildableModel).find({
+            relations: ["commandSecurityModel"]
+        });
+        const guildManager = container.resolve(GuildManager);
+        for (const guildModel of guildModels) {
+            const guildId = guildModel.guildId;
+            const guild = await guildManager.getGuild(guildId);
+            const autoRoleModule = container.resolve(CloseableModuleManager).getCloseableModule(AutoRole);
+            const enabled = await autoRoleModule.isEnabled(guildId);
+            if (enabled) {
+                const membersApplied: string[] = [];
+                const members = await guild.members.fetch({
+                    force: true
+                });
+                const noRoles = [...members.values()].filter(member => {
+                    const roles = [...member.roles.cache.values()];
+                    for (const role of roles) {
+                        if (role.name !== "@everyone") {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+                for (const noRole of noRoles) {
+                    console.log(`setting roles for ${noRole.user.tag} as they have no roles`);
+                    membersApplied.push(noRole.user.tag);
+                    await autoRoleModule.applyRole(noRole, guildId);
+                }
+                retMap.set(guild, membersApplied);
+            }
+        }
+        return retMap;
     }
 }

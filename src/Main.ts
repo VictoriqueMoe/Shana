@@ -4,15 +4,15 @@ import {ObjectUtil} from "./utils/Utils";
 import * as v8 from "v8";
 import {Client, DIService, SimpleCommandMessage} from "discordx";
 import {Intents, Message} from "discord.js";
-import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
-import {container, singleton} from "tsyringe";
+import {container, instanceCachingFactory, singleton} from "tsyringe";
 import {GuildManager} from "./model/guild/manager/GuildManager";
 import {SettingsManager} from "./model/settings/SettingsManager";
-import {createConnection, useContainer} from "typeorm";
+import {ConnectionManager, createConnection, useContainer} from "typeorm";
 import io from "@pm2/io";
 import {importx} from "@discordx/importer";
 import {Settings} from "luxon";
 import {Property} from "./model/decorators/Property";
+import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 // const https = require('http-debug').https;
 // https.debug = 1;
 
@@ -88,6 +88,9 @@ export class Main {
         metrics: {
             http: true
         }
+    });
+    container.register<ConnectionManager>(ConnectionManager, {
+        useFactory: instanceCachingFactory(() => new ConnectionManager())
     });
     dotenv.config({path: __dirname + '/../.env'});
     DIService.container = container;

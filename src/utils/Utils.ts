@@ -34,13 +34,10 @@ import {ChannelManager} from "../model/guild/manager/ChannelManager";
 import {GuildManager} from "../model/guild/manager/GuildManager";
 import {SettingsManager} from "../model/settings/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
-import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
 import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";
 import {container} from "tsyringe";
-import {CloseableModule} from "../model/closeableModules/impl/CloseableModule";
 import {Client} from "discordx";
-import {Beans} from "../DI/Beans";
 import {getRepository} from "typeorm";
 import {ISearchBase, SearchBase} from "../model/ISearchBase";
 import {Channels} from "../enums/Channels";
@@ -1034,19 +1031,6 @@ export namespace DiscordUtils {
         return await builder.getMany();
     }
 
-    export function getCloseableModules(): CloseableModule<any>[] {
-        return container.resolveAll<CloseableModule<any>>(Beans.ICloseableModuleToken);
-    }
-
-    export function getModule(moduleId: string): ICloseableModule<any> {
-        const modules = DiscordUtils.getCloseableModules();
-        for (const module of modules) {
-            if (module.moduleId === moduleId) {
-                return module;
-            }
-        }
-        return null;
-    }
 }
 
 export class ObjectUtil {
