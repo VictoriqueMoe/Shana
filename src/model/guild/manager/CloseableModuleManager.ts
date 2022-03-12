@@ -1,4 +1,4 @@
-import {container, injectAll, registry, singleton} from "tsyringe";
+import {injectAll, registry, singleton} from "tsyringe";
 import {Beans} from "../../../DI/Beans";
 import {AuditLogger} from "../../../events/closeableModules/logging/mod/AuditLogger";
 import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
@@ -11,9 +11,6 @@ import {AutoResponder} from "../../../managedEvents/messageEvents/closeableModul
 import {ICloseableModule} from "../../closeableModules/ICloseableModule";
 import Immutable from "immutable";
 import {constructor} from "tsyringe/dist/typings/types";
-import {PostConstruct} from "../../decorators/PostConstruct";
-import {ISubModule} from "../../closeableModules/subModules/ISubModule";
-import {AbstractFilter} from "../../closeableModules/subModules/dynoAutoMod/AbstractFilter";
 
 @registry([
     {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
@@ -43,32 +40,7 @@ export class CloseableModuleManager {
     }
 
     public getModule(moduleId: string): ICloseableModule<any> {
-        const modules = this.closeableModules;
-        for (const module of modules) {
-            if (module.moduleId === moduleId) {
-                return module;
-            }
-        }
-        return null;
-    }
-
-    @PostConstruct
-    private init(): void {
-        container.afterResolution(
-            Beans.ISubModuleToken,
-            (_t, result: ISubModule[], resolutionType) => {
-                const dynoAutoMod = this.getCloseableModule(DynoAutoMod);
-                for (const subModule of result) {
-                    if (subModule instanceof AbstractFilter) {
-                        console.log(`Registering submodule ${subModule.id} with parent module ${dynoAutoMod.constructor.name}`);
-                        subModule.parentModule = dynoAutoMod;
-                    }
-                }
-            },
-            {
-                frequency: "Once"
-            }
-        );
+        return this.closeableModules.find(closeableModule => closeableModule.moduleId === moduleId) ?? null;
     }
 
 }

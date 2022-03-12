@@ -2,7 +2,7 @@ import * as Immutable from 'immutable';
 import {ICloseableModule} from "../ICloseableModule";
 import {ISubModule} from "../subModules/ISubModule";
 import {ModuleSettings} from "../ModuleSettings";
-import {injectAll, registry, singleton} from "tsyringe";
+import {delay, inject, injectAll, registry, singleton} from "tsyringe";
 import {Beans} from "../../../DI/Beans";
 import {ZalgoTextFilter} from "../subModules/dynoAutoMod/impl/ZalgoTextFilter";
 import {ImageSpamFilter} from "../subModules/dynoAutoMod/impl/ImageSpamFilter";
@@ -17,6 +17,10 @@ import {AllCapsFilter} from "../subModules/dynoAutoMod/impl/AllCapsFilter";
 import {EveryoneMentionsFilter} from "../subModules/dynoAutoMod/impl/EveryoneMentionsFilter";
 import {SpamFilter} from "../subModules/dynoAutoMod/impl/SpamFilter";
 import constructor from "tsyringe/dist/typings/types/constructor";
+import {PostConstruct} from "../../decorators/PostConstruct";
+import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
+import {AbstractFilter} from "../subModules/dynoAutoMod/AbstractFilter";
+import {CloseableModuleManager} from "../../guild/manager/CloseableModuleManager";
 
 @registry([
     {token: Beans.ISubModuleToken, useToken: ZalgoTextFilter},
@@ -37,7 +41,9 @@ export class SubModuleManager {
 
     private readonly _subModules: Set<ISubModule>;
 
-    public constructor(@injectAll(Beans.ISubModuleToken) modules: ISubModule[]) {
+    public constructor(
+        @injectAll(Beans.ISubModuleToken) modules: ISubModule[],
+        @inject(delay(() => CloseableModuleManager)) private _closeableModuleManager: CloseableModuleManager) {
         this._subModules = new Set(modules);
     }
 
@@ -58,5 +64,16 @@ export class SubModuleManager {
 
     public getSubModule<T extends ISubModule>(subModule: constructor<T>): T {
         return this.subModules.find(value => value.constructor === subModule) as T;
+    }
+
+    @PostConstruct
+    private init(): void {
+        const dynoAutoMod = this._closeableModuleManager.getModule("DynoAutoMod");
+        for (const subModule of this._subModules) {
+            if (subModule instanceof AbstractFilter) {
+                console.log(`Registering submodule ${subModule.id} with parent module ${dynoAutoMod.constructor.name}`);
+                subModule.parentModule = dynoAutoMod;
+            }
+        }
     }
 }
