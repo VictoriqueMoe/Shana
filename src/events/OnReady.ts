@@ -12,8 +12,6 @@ import {ArgsOf, Client, Discord, On} from "discordx";
 import {container, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS";
-import {Player} from "discord-music-player";
-import {registerInstance} from "../DI/moduleRegistrar";
 import {EntityManager, getManager, getRepository, Transaction, TransactionManager} from "typeorm";
 import {InsertResult} from "typeorm/browser";
 import io from "@pm2/io";
@@ -54,13 +52,6 @@ export class OnReady extends BaseDAO<any> {
         await this.joinThreads();
     }
 
-    public initMusicPlayer(): void {
-        const player = new Player(this._client, {
-            leaveOnEmpty: true,
-            quality: "high"
-        });
-        registerInstance(player);
-    }
 
     public async setDefaultSettings(manager: EntityManager): Promise<void> {
         const guilds = this._client.guilds;
@@ -92,7 +83,6 @@ export class OnReady extends BaseDAO<any> {
         const vicDropbox = container.resolve(VicDropbox);
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
-        this.initMusicPlayer();
         pArr.push(vicDropbox.index());
         pArr.push(this.initUsernames());
         await this.init();

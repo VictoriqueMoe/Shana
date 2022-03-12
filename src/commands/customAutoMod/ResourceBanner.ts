@@ -2,7 +2,7 @@ import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, Si
 import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
 import {Collection, Message, Snowflake, Sticker} from "discord.js";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {Category} from "@discordx/utilities";
@@ -36,9 +36,9 @@ import StickerInfo = DiscordUtils.StickerInfo;
         options: []
     }
 ])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
-export abstract class ResourceBanner extends AbstractCommandModule {
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
+export abstract class ResourceBanner extends AbstractCommand {
 
     public static async doBanAttachment(attachment: Buffer, reason: string, url: string, guildId: string, isEmoji: boolean = false, isSticker: boolean = false): Promise<BannedAttachmentsModel> {
         const attachmentHash = md5(attachment);

@@ -1,6 +1,6 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {Category} from "@discordx/utilities";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {container, injectable} from "tsyringe";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
@@ -47,10 +47,10 @@ import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
     description: "Commands to get waifus",
 })
 @SlashGroup("moebooru")
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @injectable()
-export class MoebooruCommands extends AbstractCommandModule {
+export class MoebooruCommands extends AbstractCommand {
 
     public constructor(private _konachanApi: KonachanApi,
                        private _lolibooruApi: LolibooruApi,

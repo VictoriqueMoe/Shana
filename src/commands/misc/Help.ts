@@ -1,4 +1,4 @@
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {
     Client,
     DefaultPermissionResolver,
@@ -63,10 +63,10 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         ]
     }
 ])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @injectable()
-export class Help extends AbstractCommandModule implements ISearchBase<SearchBase> {
+export class Help extends AbstractCommand implements ISearchBase<SearchBase> {
 
     private _fuseCache: ShanaFuse<SearchBase>;
 

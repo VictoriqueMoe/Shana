@@ -27,7 +27,7 @@ import {TimedSet} from "../../model/Impl/TimedSet";
 import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
 import {Response} from "../../model/anime/AnimeTypings";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {injectable} from "tsyringe";
 import * as locale from 'locale-codes';
 import {Category} from "@discordx/utilities";
@@ -111,10 +111,10 @@ const isImageFast = require('is-image-fast');
     description: "Miscellaneous commands",
 })
 @SlashGroup("miscellaneous")
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @injectable()
-export class Misc extends AbstractCommandModule {
+export class Misc extends AbstractCommand {
     private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
 
     @Property("deepl")

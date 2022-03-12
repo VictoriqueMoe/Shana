@@ -1,5 +1,5 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction} from "discord.js";
@@ -20,15 +20,15 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         options: []
     }
 ])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @SlashGroup({
     name: "secure",
     description: "secured commands used as moderation utilities",
 })
 @SlashGroup("secure")
 @injectable()
-export class SecuredCommands extends AbstractCommandModule {
+export class SecuredCommands extends AbstractCommand {
 
     constructor(
         private _muteManager: MuteManager,

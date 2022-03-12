@@ -1,7 +1,7 @@
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashOption} from "discordx";
 import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {CommandInteraction} from "discord.js";
 import {Category} from "@discordx/utilities";
 import {container} from "tsyringe";
@@ -43,9 +43,9 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         "description": "Get the enabled status for modules"
     }
 ])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
-export abstract class ModuleEngine extends AbstractCommandModule {
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
+export abstract class ModuleEngine extends AbstractCommand {
 
     @Slash("getallenabled", {
         description: "Get the enabled status for modules"

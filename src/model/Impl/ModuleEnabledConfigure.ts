@@ -1,5 +1,8 @@
 import {ObjectUtil} from "../../utils/Utils";
 
+/**
+ * Sometimes components can not function without props retrieved from `@Property`. this class defines if a service, manager or singleton as "enabled" by checking a list of required props
+ */
 export abstract class ModuleEnabledConfigure {
     private readonly _props: string[];
 

@@ -1,5 +1,5 @@
 import {Category} from "@discordx/utilities";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {injectable} from "tsyringe";
 import {
     ArgsOf,
@@ -67,10 +67,10 @@ type NextBirthday = {
     description: "Commands to add your Birthday!",
 })
 @SlashGroup("birthday")
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @injectable()
-export class BirthdayCommands extends AbstractCommandModule {
+export class BirthdayCommands extends AbstractCommand {
     public constructor(private _birthdayManager: BirthdayManager, private _channelManager: ChannelManager) {
         super();
     }

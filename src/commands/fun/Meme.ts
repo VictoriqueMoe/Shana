@@ -7,7 +7,7 @@ import {
     GenerateEndPointResponse
 } from "../../model/Impl/ImageFun/Typeings";
 import {AssertionError} from "assert";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {container, injectable} from "tsyringe";
@@ -1034,10 +1034,10 @@ import {Category} from "@discordx/utilities";
         ]
     }
 ])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @injectable()
-export class Meme extends AbstractCommandModule {
+export class Meme extends AbstractCommand {
 
     public constructor(private _handler: ImageFun) {
         super();

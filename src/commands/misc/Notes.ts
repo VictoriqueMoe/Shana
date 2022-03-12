@@ -1,4 +1,4 @@
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {container, injectable} from "tsyringe";
 import {NotesManager} from "../../model/guild/manager/NotesManager";
@@ -82,10 +82,10 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
     description: "Commands to manage your personal notes",
 })
 @SlashGroup("notes")
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @injectable()
-export class Notes extends AbstractCommandModule {
+export class Notes extends AbstractCommand {
     public constructor(private _notesManager: NotesManager) {
         super();
     }

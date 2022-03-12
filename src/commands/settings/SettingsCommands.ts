@@ -15,7 +15,7 @@ import {SETTINGS} from "../../enums/SETTINGS";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
 import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {CommandInteraction, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
 import {Typeings} from "../../model/types/Typeings";
@@ -68,10 +68,10 @@ import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
     description: "Commands to set settings",
     root: "settings"
 })
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @injectable()
-export class SettingsCommands extends AbstractCommandModule {
+export class SettingsCommands extends AbstractCommand {
 
     constructor(private _settingsManager: SettingsManager, private _closeableModuleManager: CloseableModuleManager) {
         super();

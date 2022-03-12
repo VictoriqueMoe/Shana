@@ -11,7 +11,7 @@ import {
     SlashGroup,
     SlashOption
 } from "discordx";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";
@@ -61,10 +61,10 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
     description: "Commands to manage bookmarks",
 })
 @SlashGroup("bookmarks")
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @injectable()
-export class Bookmark extends AbstractCommandModule {
+export class Bookmark extends AbstractCommand {
     constructor(private _bookmarkManager: BookmarkManager) {
         super();
     }

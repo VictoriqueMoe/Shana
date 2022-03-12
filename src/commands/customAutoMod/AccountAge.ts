@@ -3,7 +3,7 @@ import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Channel, CommandInteraction, GuildMember, User} from "discord.js";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {injectable} from "tsyringe";
 import {Category} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
@@ -40,15 +40,15 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         }]
     }
 ])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @SlashGroup({
     name: "ages",
     description: "commands to get ages of accounts and servers",
 })
 @SlashGroup("ages")
 @injectable()
-export class AccountAge extends AbstractCommandModule {
+export class AccountAge extends AbstractCommand {
 
     public constructor(private _client: Client) {
         super();

@@ -1,6 +1,6 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {injectable} from "tsyringe";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {MessageScheduleManager} from "../../model/guild/manager/MessageScheduleManager";
 import {NotBotInteraction} from "../../guards/NotABot";
 import {CommandEnabled} from "../../guards/CommandEnabled";
@@ -75,10 +75,10 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
     description: "Commands to schedule posts to channels",
 })
 @SlashGroup("messageschedule")
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @injectable()
-export class MessageSchedule extends AbstractCommandModule {
+export class MessageSchedule extends AbstractCommand {
     public constructor(private _messageScheduleManager: MessageScheduleManager, private _client: Client) {
         super();
     }

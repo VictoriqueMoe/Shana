@@ -1,7 +1,7 @@
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBotInteraction} from "../../guards/NotABot";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {CommandInteraction} from "discord.js";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {container, injectable} from "tsyringe";
@@ -26,15 +26,15 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         options: []
     }
 ])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @SlashGroup({
     name: "vicimage",
     description: "Obtain images of Victorique#0002",
 })
 @SlashGroup("vicimage")
 @injectable()
-export class VicImage extends AbstractCommandModule {
+export class VicImage extends AbstractCommand {
 
     constructor(private _vicDropbox: VicDropbox) {
         super();

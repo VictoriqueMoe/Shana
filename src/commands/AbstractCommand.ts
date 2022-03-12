@@ -3,7 +3,7 @@ import {container} from "tsyringe";
 import {CommandSecurityManager} from "../model/guild/manager/CommandSecurityManager";
 import {ApplicationCommandMixin, ApplicationGuildMixin, SimpleCommandMessage} from "discordx";
 
-export abstract class AbstractCommandModule {
+export abstract class AbstractCommand {
     protected static async getPermissions(guild: Guild, command: ApplicationCommandMixin | SimpleCommandMessage): Promise<ApplicationCommandPermissions[]> {
         const securityManger = container.resolve(CommandSecurityManager);
         return securityManger.getPermissions(guild, command.name);

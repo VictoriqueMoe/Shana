@@ -5,7 +5,7 @@ import {CommandEnabled} from "../../guards/CommandEnabled";
 import {DiscordUtils} from "../../utils/Utils";
 import {CommandInteraction, GuildMember, User} from "discord.js";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {container} from "tsyringe";
 import {Category} from "@discordx/utilities";
 import {getRepository} from "typeorm";
@@ -47,14 +47,14 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         ]
     }
 ])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @SlashGroup({
     name: "username",
     description: "Commands to set usernames for people",
 })
 @SlashGroup("username")
-export abstract class Username extends AbstractCommandModule {
+export abstract class Username extends AbstractCommand {
 
     @Slash("viewusernames", {
         description: "View all the persisted usernames this bot is aware of"

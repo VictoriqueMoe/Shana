@@ -1,4 +1,4 @@
-import {AbstractCommandModule} from "../AbstractCommandModule";
+import {AbstractCommand} from "../AbstractCommand";
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
 import {Category} from "@discordx/utilities";
 import {NotBotInteraction} from "../../guards/NotABot";
@@ -17,14 +17,14 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         options: []
     }
 ])
-@Permission(new DefaultPermissionResolver(AbstractCommandModule.getDefaultPermissionAllow))
-@Permission(AbstractCommandModule.getPermissions)
+@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
+@Permission(AbstractCommand.getPermissions)
 @SlashGroup({
     name: "bans",
     description: "commands to manage bans in this server",
 })
 @SlashGroup("bans")
-export class BanManager extends AbstractCommandModule {
+export class BanManager extends AbstractCommand {
 
     @Slash("cleanbans", {
         description: "Remove all the deleted accounts from your bans"
