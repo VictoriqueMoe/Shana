@@ -74,7 +74,7 @@ export abstract class ResourceBanner extends AbstractCommand {
         const repliedMessageID = reference.messageId;
         const repliedMessageObj = await message.channel.messages.fetch(repliedMessageID);
         const {stickers} = repliedMessageObj;
-        // you can have more than one sticker per message???? fuck it
+        // you can have more than one sticker per message???? 
         if (stickers.size !== 1) {
             message.reply("Please reply to a message that contains only one sticker");
             return;
