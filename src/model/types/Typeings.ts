@@ -24,6 +24,7 @@ export namespace Typeings {
         twitter_bearer_token: string,
         ocr_loc: string,
         rapid_api_code?: string,
+        d7_authKey?: string,
         test_mode?: boolean
     }
 
