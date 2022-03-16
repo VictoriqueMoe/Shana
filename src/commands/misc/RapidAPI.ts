@@ -11,7 +11,33 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @Category("rapid_api", "Commands to interact with various endpoints")
-@Category("rapid_api", [])
+@Category("rapid_api", [
+    {
+        "name": "sms",
+        "type": "SLASH",
+        "options": [
+            {
+                "name": "to",
+                "description": "The number (with extension) to send to",
+                "optional": false,
+                "type": "STRING"
+            },
+            {
+                "name": "from",
+                "description": "The name that will appear as the sender",
+                "optional": false,
+                "type": "STRING"
+            },
+            {
+                "name": "content",
+                "description": "the sms content",
+                "optional": false,
+                "type": "STRING"
+            }
+        ],
+        "description": "Send an sms to any number from any name"
+    }
+])
 @SlashGroup({
     name: "rapid_api",
     description: "Commands to interact with various endpoints",
