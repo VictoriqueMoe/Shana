@@ -31,7 +31,7 @@
     "@discordx/utilities": "^3.2.0",
     "@overnightjs/core": "^1.7.6",
     "@pm2/io": "^5.0.0",
-    "anilist-node": "^1.11.1",
+    "anilist-node": "^1.11.2",
     "axios": "^0.26.1",
     "better-sqlite3": "^7.5.0",
     "bufferutil": "^4.0.6",
