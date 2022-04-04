@@ -49,8 +49,8 @@ Inversion of Control (IOC) architecture to the low level bootstrapping and initi
 Each class defined by a `@Discord()` or `@singleton()` are all registered with tsyringe's global object registry
 container. and is injected into the constructors of classes that need them.
 
-There also exists Spring-link `@PostConstruct` annotations to facilitate the post construction initialisation method
-that is called after the object is constructed and resolved
+There also exists Spring-like `@PostConstruct` annotations to facilitate the post construction initialisation method
+that is called after the object is constructed and resolved and `@Property` used to inject settings from source agnostic paths
 
 ### <ins>Package Design</ins>
 
