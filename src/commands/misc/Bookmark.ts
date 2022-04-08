@@ -12,13 +12,13 @@ import {
     SlashOption
 } from "discordx";
 import {AbstractCommand} from "../AbstractCommand";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
 import {BookmarkManager} from "../../model/guild/manager/BookmarkManager";
 import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -83,7 +83,7 @@ export class Bookmark extends AbstractCommand {
 
 
     @ContextMenu("MESSAGE", "bookmark")
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async addBookmark(interaction: ContextMenuInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -103,7 +103,7 @@ export class Bookmark extends AbstractCommand {
     @Slash("getbookmark", {
         description: "Gets all of your saved bookmarks"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async getbookmark(
         @SlashOption("public", {
             description: "make message public",
@@ -148,7 +148,7 @@ export class Bookmark extends AbstractCommand {
     @Slash("deletebookmarks", {
         description: "Delete a bookmark"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async deleteBookmarks(
         @SlashOption("id", {
             description: "ID of the bookmark"

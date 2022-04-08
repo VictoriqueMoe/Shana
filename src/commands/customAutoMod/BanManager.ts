@@ -1,7 +1,7 @@
 import {AbstractCommand} from "../AbstractCommand";
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
-import {Category} from "@discordx/utilities";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {Category} from "../../modules/category";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction} from "discord.js";
 import {DiscordUtils} from "../../utils/Utils";
@@ -29,7 +29,7 @@ export class BanManager extends AbstractCommand {
     @Slash("cleanbans", {
         description: "Remove all the deleted accounts from your bans"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async cleanBans(interaction: CommandInteraction): Promise<void> {
         const {guild} = interaction;
         const banManager = guild.bans;

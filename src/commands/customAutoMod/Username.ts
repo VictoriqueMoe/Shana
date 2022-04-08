@@ -1,13 +1,13 @@
 import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {DiscordUtils} from "../../utils/Utils";
 import {CommandInteraction, GuildMember, User} from "discord.js";
 import {GuildManager} from "../../model/guild/manager/GuildManager";
 import {AbstractCommand} from "../AbstractCommand";
 import {container} from "tsyringe";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import {getRepository} from "typeorm";
 import {BaseDAO} from "../../DAO/BaseDAO";
 import InteractionUtils = DiscordUtils.InteractionUtils;
@@ -59,7 +59,7 @@ export abstract class Username extends AbstractCommand {
     @Slash("viewusernames", {
         description: "View all the persisted usernames this bot is aware of"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async ViewAllSetUsernames(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const {guild} = interaction;
@@ -91,7 +91,7 @@ export abstract class Username extends AbstractCommand {
     @Slash("username", {
         description: "force a username to always be set to a member"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async setUsername(
         @SlashOption("user", {
             description: "The user you want to change nickname"

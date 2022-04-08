@@ -11,7 +11,7 @@ import {AbstractCommand} from "../AbstractCommand";
 import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {container, injectable} from "tsyringe";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 
 @Discord()
 @Category("Memes", "Commands generate memes. All commands that are marked as type 'attachment' can take both an uploaded image (has to be jpg) OR a mention")

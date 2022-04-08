@@ -11,7 +11,7 @@ import {
     SelectMenuInteraction
 } from "discord.js";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import {getRepository} from "typeorm";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 

@@ -1,4 +1,4 @@
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import {AbstractCommand} from "../AbstractCommand";
 import {injectable} from "tsyringe";
 import {
@@ -14,7 +14,7 @@ import {
     SlashOption
 } from "discordx";
 import {BirthdayManager} from "../../model/guild/manager/BirthdayManager";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction, MessageEmbed} from "discord.js";
 import {DiscordUtils} from "../../utils/Utils";
@@ -85,7 +85,7 @@ export class BirthdayCommands extends AbstractCommand {
     @Slash("removebirthday", {
         description: "Remove your birthday (if set)"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async removeBirthday(
         interaction: CommandInteraction
     ): Promise<void> {
@@ -101,7 +101,7 @@ export class BirthdayCommands extends AbstractCommand {
     @Slash("nextbirthdays", {
         description: "Get the next 10 birthdays"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async nextBirthday(
         interaction: CommandInteraction
     ): Promise<void> {
@@ -143,7 +143,7 @@ export class BirthdayCommands extends AbstractCommand {
     @Slash("addbirthday", {
         description: "Add your birthday"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async addBirthday(
         @SlashOption("date", {
             description: "your birthday (ex: YYYY-MM-dd) 1995-07-05 OR (dd-MM) 03-12)"

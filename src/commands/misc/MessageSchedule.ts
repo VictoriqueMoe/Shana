@@ -2,11 +2,11 @@ import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, Sl
 import {injectable} from "tsyringe";
 import {AbstractCommand} from "../AbstractCommand";
 import {MessageScheduleManager} from "../../model/guild/manager/MessageScheduleManager";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {BaseGuildTextChannel, Channel, CommandInteraction, MessageEmbed} from "discord.js";
 import {ArrayUtils, CronUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -86,7 +86,7 @@ export class MessageSchedule extends AbstractCommand {
     @Slash("getscheduledmessage", {
         description: "get all scheduled posts optionally by channel"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async getScheduledMessage(
         @SlashOption("channel", {
             description: "A filter for all scheduled messages by channel",
@@ -128,7 +128,7 @@ export class MessageSchedule extends AbstractCommand {
     @Slash("removescheduledmessage", {
         description: "remove a scheduled post by name"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async removeScheduledMessage(
         @SlashOption("name", {
             description: "The Unique ID of the schedule schedule you want to remove",
@@ -155,7 +155,7 @@ export class MessageSchedule extends AbstractCommand {
     @Slash("addschedulemessage", {
         description: "create a message to schedule to a channel"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async scheduleMessage(
         @SlashOption("name", {
             description: "The Unique ID of this scheduled job",

@@ -1,11 +1,11 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Channel, CommandInteraction, GuildMember, User} from "discord.js";
 import {AbstractCommand} from "../AbstractCommand";
 import {injectable} from "tsyringe";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -70,7 +70,7 @@ export class AccountAge extends AbstractCommand {
     @Slash("serverage", {
         description: "Get the age of this server"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async serverAge(interaction: CommandInteraction): Promise<void> {
         const guildId = interaction.guild.id;
         const guild = await this._client.guilds.fetch(guildId);
@@ -81,7 +81,7 @@ export class AccountAge extends AbstractCommand {
     @Slash("channelage", {
         description: "View the age of a channel"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async channelAge(
         @SlashOption("channel", {
             description: "The reference to the channel"
@@ -97,7 +97,7 @@ export class AccountAge extends AbstractCommand {
     @Slash("userage", {
         description: "Get the age on an account"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async getAccountAge(
         @SlashOption("user", {
             description: "The user you want to check the account age of"

@@ -1,8 +1,8 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import {AbstractCommand} from "../AbstractCommand";
 import {container, injectable} from "tsyringe";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AutocompleteInteraction, CommandInteraction, MessageEmbed, TextChannel} from "discord.js";
 import {Typeings} from "../../model/types/Typeings";
@@ -61,7 +61,7 @@ export class MoebooruCommands extends AbstractCommand {
     @Slash("lolibooru", {
         description: "Get random image from lolibooru.moe"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async lolibooru(
         @SlashOption("tags", {
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
@@ -79,7 +79,7 @@ export class MoebooruCommands extends AbstractCommand {
     @Slash("konachan", {
         description: "Get random image from Konachan.net"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async konachan(
         @SlashOption("tags", {
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",

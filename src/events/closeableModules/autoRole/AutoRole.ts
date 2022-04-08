@@ -9,13 +9,13 @@ import {GuildManager} from "../../../model/guild/manager/GuildManager";
 import {UniqueViolationError} from "../../../DAO/BaseDAO";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
 import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings";
-import {TimedSet} from "../../../model/Impl/TimedSet";
 import {container, injectable} from "tsyringe";
 import {RoleApplier} from "../../customAutoMod/RoleApplier/RoleApplier";
 import {getRepository} from "typeorm";
 import {PostConstruct} from "../../../model/decorators/PostConstruct";
 import {GuildableModel} from "../../../model/DB/guild/Guildable.model";
 import {CloseableModuleManager} from "../../../model/guild/manager/CloseableModuleManager";
+import {TimedSet} from "@discordx/utilities";
 
 class JoinEntry {
     constructor(public joinCount: number) {

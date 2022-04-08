@@ -1,7 +1,6 @@
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
 import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client} from "discordx";
-import {TimedSet} from "../../../model/Impl/TimedSet";
 import {AbstractFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
 import {ACTION} from "../../../enums/ACTION";
 import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
@@ -14,6 +13,7 @@ import {MessageListenerDecorator} from "../../../model/decorators/messageListene
 import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
 import {notBot} from "../../../guards/NotABot";
 import {container, singleton} from "tsyringe";
+import {TimedSet} from "@discordx/utilities";
 
 @singleton()
 export class DynoAutoMod extends CloseableModule<null> {

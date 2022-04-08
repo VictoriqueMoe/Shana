@@ -8,9 +8,9 @@ import {MessageListenerDecorator} from "../../model/decorators/messageListenerDe
 import {notBot} from "../../guards/NotABot";
 import {container, singleton} from "tsyringe";
 import {getRepository} from "typeorm";
-import {TimedSet} from "../../model/Impl/TimedSet";
 import axios from "axios";
 import {Property} from "../../model/decorators/Property";
+import {TimedSet} from "@discordx/utilities";
 import EmojiInfo = DiscordUtils.EmojiInfo;
 import StickerInfo = DiscordUtils.StickerInfo;
 

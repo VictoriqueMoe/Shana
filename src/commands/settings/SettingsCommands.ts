@@ -8,8 +8,7 @@ import {
     SlashGroup,
     SlashOption
 } from "discordx";
-import {NotBotInteraction} from "../../guards/NotABot";
-import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
+import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {CommandEnabled} from "../../guards/CommandEnabled";
@@ -19,14 +18,15 @@ import {AbstractCommand} from "../AbstractCommand";
 import {CommandInteraction, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
 import {Typeings} from "../../model/types/Typeings";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import {CloseableModuleManager} from "../../model/guild/manager/CloseableModuleManager";
+import {NotBot} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;
 
 
 @Discord()
-@Category("Settings", "Commands to change internal seetings of this bot")
+@Category("Settings", "Commands to change internal settings of this bot")
 @Category("Settings", [
     {
         "name": "globalSettings",
@@ -81,9 +81,9 @@ export class SettingsCommands extends AbstractCommand {
         description: "Change or set any global setting"
     })
     @SlashGroup("set", "settings")
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async globalSettings(
-        @SlashChoice(SETTINGS)
+        @SlashChoice(...EnumEx.forChoice(SETTINGS))
         @SlashOption("setting", {
             description: "the name of the setting you wish to change",
         })
@@ -113,9 +113,9 @@ export class SettingsCommands extends AbstractCommand {
         description: "Change or set any setting to do with Auto roles"
     })
     @SlashGroup("set", "settings")
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async autoMuteSettings(
-        @SlashChoice(AutoRoleSettingsEnum)
+        @SlashChoice(...EnumEx.forChoice(AutoRoleSettingsEnum))
         @SlashOption("setting", {
             description: "the name of the setting you wish to change",
         })
@@ -170,7 +170,7 @@ export class SettingsCommands extends AbstractCommand {
         description: "Get all the auto role settings"
     })
     @SlashGroup("get", "settings")
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async getGlobalSettings(interaction: CommandInteraction): Promise<void> {
         const {guild} = interaction;
         const guildId = guild.id;

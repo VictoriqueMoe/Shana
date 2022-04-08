@@ -10,15 +10,6 @@ import {
     SlashOption
 } from "discordx";
 import {
-    Category,
-    CategoryMetaData,
-    ICategory,
-    ICategoryAttachment,
-    ICategoryItem,
-    ICategoryItemCommand,
-    ICategoryItemOption
-} from "@discordx/utilities";
-import {
     AutocompleteInteraction,
     CommandInteraction,
     GuildMember,
@@ -28,7 +19,7 @@ import {
     MessageSelectOptionData,
     SelectMenuInteraction
 } from "discord.js";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {container, delay, inject, injectable} from "tsyringe";
@@ -38,6 +29,15 @@ import {defaultSearch, ISearchBase, options, SearchBase} from "../../model/ISear
 import Fuse from "fuse.js";
 import {PostConstructDependsOn} from "../../model/decorators/PostConstruct";
 import {ShanaFuse} from "../../model/Impl/ShanaFuse";
+import {
+    Category,
+    CategoryMetaData,
+    ICategory,
+    ICategoryAttachment,
+    ICategoryItem,
+    ICategoryItemCommand,
+    ICategoryItemOption
+} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -87,7 +87,7 @@ export class Help extends AbstractCommand implements ISearchBase<SearchBase> {
     @Slash("help", {
         description: "Get the description of a command or all commands"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async help(
         @SlashOption("commandname", {
             description: "Command name to drill into",

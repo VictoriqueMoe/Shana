@@ -2,10 +2,10 @@ import {AbstractCommand} from "../AbstractCommand";
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {container, injectable} from "tsyringe";
 import {NotesManager} from "../../model/guild/manager/NotesManager";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AutocompleteInteraction, CommandInteraction, MessageEmbed} from "discord.js";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
@@ -93,7 +93,7 @@ export class Notes extends AbstractCommand {
     @Slash("addnote", {
         description: "Add a private note"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async addNote(
         @SlashOption("title", {
             description: "Unique title for this note",
@@ -120,7 +120,7 @@ export class Notes extends AbstractCommand {
     @Slash("editnote", {
         description: "modify a note"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async editNote(
         @SlashOption("title", {
             description: "The note to modify",
@@ -149,7 +149,7 @@ export class Notes extends AbstractCommand {
     @Slash("getnotes", {
         description: "Get all of your private notes"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async getNotes(
         @SlashOption("title", {
             description: "title of the note to get",
@@ -194,7 +194,7 @@ export class Notes extends AbstractCommand {
     @Slash("deletenote", {
         description: "Delete a note"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async deleteNote(
         @SlashOption("title", {
             description: "title of the note to delete",

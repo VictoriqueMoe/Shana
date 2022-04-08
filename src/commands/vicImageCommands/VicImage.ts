@@ -1,12 +1,12 @@
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {AbstractCommand} from "../AbstractCommand";
 import {CommandInteraction} from "discord.js";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {container, injectable} from "tsyringe";
 import {DiscordUtils} from "../../utils/Utils";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 
@@ -43,7 +43,7 @@ export class VicImage extends AbstractCommand {
     @Slash("vicimage", {
         description: "Get a random image of Victorique#0002"
     })
-    @Guard(NotBotInteraction, CommandEnabled(container.resolve(VicDropbox)))
+    @Guard(NotBot, CommandEnabled(container.resolve(VicDropbox)))
     private async vicImage(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply();
         const randomImageMetadata = this._vicDropbox.randomImage;
@@ -71,7 +71,7 @@ export class VicImage extends AbstractCommand {
     @Slash("vicreindex", {
         description: "Re-index image metadata from dropbox"
     })
-    @Guard(NotBotInteraction, CommandEnabled(container.resolve(VicDropbox)))
+    @Guard(NotBot, CommandEnabled(container.resolve(VicDropbox)))
     private async vicReIndex(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true

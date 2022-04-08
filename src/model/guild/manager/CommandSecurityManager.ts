@@ -12,7 +12,7 @@ import {
     RoleTypes,
     RoleUpdateTrigger
 } from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
-import {CategoryMetaData, ICategory, ICategoryItem, ICategoryItemCommand} from "@discordx/utilities";
+import {CategoryMetaData, ICategory, ICategoryItem, ICategoryItemCommand} from "../../../modules/category";
 import {getRepository} from "typeorm";
 import UpdateCommandSettings = Typeings.UpdateCommandSettings;
 

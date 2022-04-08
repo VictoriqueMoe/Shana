@@ -3,8 +3,8 @@ import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
-import {TimedSet} from "../../../../Impl/TimedSet";
 import {singleton} from "tsyringe";
+import {TimedSet} from "@discordx/utilities";
 
 @singleton()
 export class ImageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter<number> {

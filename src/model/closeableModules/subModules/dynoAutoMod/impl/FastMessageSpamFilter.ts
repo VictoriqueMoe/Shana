@@ -1,12 +1,12 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
-import {TimedSet} from "../../../../Impl/TimedSet";
 import {ACTION} from "../../../../../enums/ACTION";
 import {Message} from "discord.js";
 import {ObjectUtil} from "../../../../../utils/Utils";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import * as Immutable from "immutable";
 import {singleton} from "tsyringe";
+import {TimedSet} from "@discordx/utilities";
 
 @singleton()
 export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedDynoAutoModFilter<number> {

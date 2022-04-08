@@ -3,9 +3,9 @@ import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
 import {Collection, Message, Snowflake, Sticker} from "discord.js";
 import {AbstractCommand} from "../AbstractCommand";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import {getRepository} from "typeorm";
 import {BaseDAO} from "../../DAO/BaseDAO";
 
@@ -64,7 +64,7 @@ export abstract class ResourceBanner extends AbstractCommand {
     }
 
     @SimpleCommand("banSticker")
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async banSticker({message}: SimpleCommandMessage): Promise<void> {
         const {reference} = message;
         if (!reference) {
@@ -103,7 +103,7 @@ export abstract class ResourceBanner extends AbstractCommand {
     }
 
     @SimpleCommand("banEmoji")
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async banEmoji({message}: SimpleCommandMessage): Promise<void> {
         const repliedMessageLink = message.reference;
         if (!repliedMessageLink) {
@@ -176,7 +176,7 @@ export abstract class ResourceBanner extends AbstractCommand {
     }
 
     @SimpleCommand("banAttachment")
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async banAttachment({message}: SimpleCommandMessage): Promise<void> {
         const repliedMessageRef = message.reference;
         if (!repliedMessageRef) {

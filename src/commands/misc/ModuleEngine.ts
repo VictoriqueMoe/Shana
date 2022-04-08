@@ -3,7 +3,7 @@ import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommand} from "../AbstractCommand";
 import {CommandInteraction} from "discord.js";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import {container} from "tsyringe";
 import {CloseableModuleManager} from "../../model/guild/manager/CloseableModuleManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;

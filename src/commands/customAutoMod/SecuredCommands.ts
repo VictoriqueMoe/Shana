@@ -1,12 +1,12 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
 import {AbstractCommand} from "../AbstractCommand";
-import {NotBotInteraction} from "../../guards/NotABot";
+import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction} from "discord.js";
 import {delay, inject, injectable} from "tsyringe";
 import {MuteManager} from "../../model/guild/manager/MuteManager";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
-import {Category} from "@discordx/utilities";
+import {Category} from "../../modules/category";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
@@ -41,7 +41,7 @@ export class SecuredCommands extends AbstractCommand {
     @Slash("mutes", {
         description: "Get a list of all mutes"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async mutes(interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
@@ -63,7 +63,7 @@ export class SecuredCommands extends AbstractCommand {
     @Slash("initservercommandpermissions", {
         description: "Re-init all command permissions for this server"
     })
-    @Guard(NotBotInteraction, CommandEnabled())
+    @Guard(NotBot, CommandEnabled())
     private async initServerCommandPermissions(
         interaction: CommandInteraction
     ): Promise<void> {
