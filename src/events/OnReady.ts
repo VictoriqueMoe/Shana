@@ -15,7 +15,6 @@ import {DEFAULT_SETTINGS, SETTINGS} from "../enums/SETTINGS";
 import {EntityManager, getManager, getRepository, Transaction, TransactionManager} from "typeorm";
 import {InsertResult} from "typeorm/browser";
 import io from "@pm2/io";
-import {VicDropbox} from "../model/dropbox/VicDropbox";
 import {ICloseableModule} from "../model/closeableModules/ICloseableModule";
 import Immutable from "immutable";
 import {CloseableModuleManager} from "../model/guild/manager/CloseableModuleManager";
@@ -80,10 +79,8 @@ export class OnReady extends BaseDAO<any> {
         } else {
             await this._client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
         }
-        const vicDropbox = container.resolve(VicDropbox);
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
-        pArr.push(vicDropbox.index());
         pArr.push(this.initUsernames());
         await this.init();
         // wait for the initial transaction to finish

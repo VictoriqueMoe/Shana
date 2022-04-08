@@ -8,7 +8,7 @@ import {
     SlashGroup,
     SlashOption
 } from "discordx";
-import {DiscordUtils, EnumEx, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
+import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
 import {SettingsManager} from "../../model/settings/SettingsManager";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {CommandEnabled} from "../../guards/CommandEnabled";
@@ -83,7 +83,7 @@ export class SettingsCommands extends AbstractCommand {
     @SlashGroup("set", "settings")
     @Guard(NotBot, CommandEnabled())
     private async globalSettings(
-        @SlashChoice(...EnumEx.forChoice(SETTINGS))
+        @SlashChoice(...Object.keys(SETTINGS).map(key => ({name: key, value: SETTINGS[key]})))
         @SlashOption("setting", {
             description: "the name of the setting you wish to change",
         })
@@ -115,7 +115,7 @@ export class SettingsCommands extends AbstractCommand {
     @SlashGroup("set", "settings")
     @Guard(NotBot, CommandEnabled())
     private async autoMuteSettings(
-        @SlashChoice(...EnumEx.forChoice(AutoRoleSettingsEnum))
+        @SlashChoice(...Object.keys(AutoRoleSettingsEnum).map(key => ({name: key, value: AutoRoleSettingsEnum[key]})))
         @SlashOption("setting", {
             description: "the name of the setting you wish to change",
         })

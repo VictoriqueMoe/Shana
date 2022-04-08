@@ -1,11 +1,11 @@
-import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBot} from "@discordx/utilities";
 import {AbstractCommand} from "../AbstractCommand";
-import {CommandInteraction} from "discord.js";
+import {AutocompleteInteraction, CommandInteraction} from "discord.js";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {container, injectable} from "tsyringe";
-import {DiscordUtils} from "../../utils/Utils";
+import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Category} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
@@ -17,7 +17,14 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         name: "vicImage",
         description: "Get a random image of <@697417252320051291>",
         type: "SLASH",
-        options: []
+        options: [
+            {
+                name: "file_name",
+                type: "STRING",
+                description: "Know the filename? put it here",
+                optional: true
+            }
+        ]
     },
     {
         name: "vicReIndex",
@@ -44,26 +51,35 @@ export class VicImage extends AbstractCommand {
         description: "Get a random image of Victorique#0002"
     })
     @Guard(NotBot, CommandEnabled(container.resolve(VicDropbox)))
-    private async vicImage(interaction: CommandInteraction): Promise<void> {
+    private async vicImage(
+        @SlashOption("file_name", {
+            description: "Know the filename? put it here",
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(VicDropbox)),
+            type: "STRING",
+            required: false,
+        })
+            fileName: string,
+        interaction: CommandInteraction
+    ): Promise<void> {
         await interaction.deferReply();
-        const randomImageMetadata = this._vicDropbox.randomImage;
-        if (!randomImageMetadata) {
-            return InteractionUtils.replyOrFollowUp(interaction, "no images found");
+        const image = ObjectUtil.validString(fileName) ? this._vicDropbox.getImageFromFileName(fileName) : this._vicDropbox.randomImage;
+        if (!image) {
+            return InteractionUtils.replyOrFollowUp(interaction, "no image found");
         }
-        const randomImage = (await this._vicDropbox.filesDownload({"path": randomImageMetadata.path_lower})).result;
-        const buffer: Buffer = (randomImage as any).fileBinary;
+        const loadedImage = (await this._vicDropbox.filesDownload({"path": image.path_lower})).result;
+        const buffer: Buffer = (loadedImage as any).fileBinary;
         try {
             await interaction.editReply({
-                content: "Found one!",
+                content: `${loadedImage.name}`,
                 files: [{
                     attachment: buffer,
-                    name: `${randomImage.name}`
+                    name: `${loadedImage.name}`
                 }]
             });
         } catch (e) {
             InteractionUtils.replyOrFollowUp(interaction, "Failed to send, maybe image is too large?");
             console.error(e);
-            console.log(`Failed to send ${randomImage.name}`);
+            console.log(`Failed to send ${loadedImage.name}`);
         }
     }
 

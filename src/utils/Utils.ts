@@ -1238,10 +1238,6 @@ export class ObjectUtil {
 
 export class EnumEx {
 
-    public static forChoice<T>(enumO: T): { name: string; value: keyof T }[] {
-        return {...Object.keys(enumO).map(key => ({name: key, value: enumO[key]}))};
-    }
-
     public static getNamesAndValues<T extends number>(e: any): Array<unknown> {
         return EnumEx.getNames(e).map(n => ({name: n, value: e[n] as T}));
     }

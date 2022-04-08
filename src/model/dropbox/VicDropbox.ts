@@ -3,6 +3,10 @@ import {singleton} from "tsyringe";
 import {Property} from "../decorators/Property";
 import {PostConstruct} from "../decorators/PostConstruct";
 import {ModuleEnabledConfigure} from "../Impl/ModuleEnabledConfigure";
+import {defaultSearch, ISearchBase, options} from "../ISearchBase";
+import {AutocompleteInteraction} from "discord.js";
+import Fuse from "fuse.js";
+import {ShanaFuse} from "../Impl/ShanaFuse";
 
 
 class DropBoxProxy extends Dropbox {
@@ -14,8 +18,10 @@ class DropBoxProxy extends Dropbox {
 }
 
 @singleton()
-export class VicDropbox extends ModuleEnabledConfigure {
-    private imageCache: files.FolderMetadataReference[];
+export class VicDropbox extends ModuleEnabledConfigure implements ISearchBase<files.FolderMetadataReference> {
+    private _imageCache: files.FolderMetadataReference[];
+
+    private _fuseCache: ShanaFuse<files.FolderMetadataReference>;
 
     @Property("dropboxToken", false)
     private readonly dropboxToken: string;
@@ -24,37 +30,48 @@ export class VicDropbox extends ModuleEnabledConfigure {
 
     public constructor() {
         super("dropboxToken");
-        this.imageCache = [];
+        this._imageCache = [];
+        this._fuseCache = null;
     }
 
     /**
      * Get all Images from Dropbox
      */
     public get allImages(): files.FolderMetadataReference[] {
-        return this.imageCache;
+        return this._imageCache;
     }
 
     /**
      * Return a random image from Dropbox
      */
     public get randomImage(): files.FolderMetadataReference {
-        return this.imageCache[Math.floor(Math.random() * this.imageCache.length)];
+        return this._imageCache[Math.floor(Math.random() * this._imageCache.length)];
+    }
+
+    public getImageFromFileName(fileName: string): files.FolderMetadataReference | null {
+        return this._imageCache.find(image => image.name === fileName) ?? null;
     }
 
     public async index(): Promise<void> {
         console.log("Indexing images...");
-        this.imageCache = ((await this._dropbox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
-        console.log(`Indexed ${this.imageCache.length} images`);
+        this._imageCache = ((await this._dropbox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
+        this._fuseCache = new ShanaFuse(this._imageCache, options);
+        console.log(`Indexed ${this._imageCache.length} images`);
     }
 
     async filesDownload(param: { path: string }): Promise<DropboxResponse<files.FileMetadata>> {
         return this._dropbox.filesDownload(param);
     }
 
+    public search(interaction: AutocompleteInteraction): Fuse.FuseResult<files.FolderMetadataReference>[] {
+        return defaultSearch(interaction, this._fuseCache);
+    }
+
     @PostConstruct
     private init(): void {
         if (this.enabled) {
             this._dropbox = new DropBoxProxy(this.dropboxToken);
+            this.index();
         }
     }
 }
