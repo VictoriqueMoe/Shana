@@ -3,7 +3,7 @@ import {singleton} from "tsyringe";
 import {Property} from "../decorators/Property";
 import {PostConstruct} from "../decorators/PostConstruct";
 import {ModuleEnabledConfigure} from "../Impl/ModuleEnabledConfigure";
-import {defaultSearch, ISearchBase, options} from "../ISearchBase";
+import {defaultSearch, fuseOptions, ISearchBase} from "../ISearchBase";
 import {AutocompleteInteraction} from "discord.js";
 import Fuse from "fuse.js";
 import {ShanaFuse} from "../Impl/ShanaFuse";
@@ -55,7 +55,7 @@ export class VicDropbox extends ModuleEnabledConfigure implements ISearchBase<fi
     public async index(): Promise<void> {
         console.log("Indexing images...");
         this._imageCache = ((await this._dropbox.filesListFolder({path: ''})).result.entries) as files.FolderMetadataReference[];
-        this._fuseCache = new ShanaFuse(this._imageCache, options);
+        this._fuseCache = new ShanaFuse(this._imageCache, fuseOptions);
         console.log(`Indexed ${this._imageCache.length} images`);
     }
 

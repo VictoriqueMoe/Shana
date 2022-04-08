@@ -11,7 +11,7 @@ export type SearchBase = {
 /**
  * Fuse default options to comply with ISearchBase
  */
-export const options = {
+export const fuseOptions = {
     keys: ['name'],
     minMatchCharLength: 0,
     threshold: 0.3,

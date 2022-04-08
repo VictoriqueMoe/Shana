@@ -4,7 +4,7 @@ import {NotesModel} from "../../DB/guild/Notes.model";
 import {AutocompleteInteraction, GuildMember} from "discord.js";
 import {getRepository} from "typeorm";
 import {ObjectUtil} from "../../../utils/Utils";
-import {defaultSearch, ISearchBase, options} from "../../ISearchBase";
+import {defaultSearch, fuseOptions, ISearchBase} from "../../ISearchBase";
 import Fuse from "fuse.js";
 import {PostConstruct} from "../../decorators/PostConstruct";
 import {ShanaFuse} from "../../Impl/ShanaFuse";
@@ -17,7 +17,7 @@ export class NotesManager extends BaseDAO<NotesModel> implements ISearchBase<Not
     private async init(): Promise<void> {
         const repo = getRepository(NotesModel);
         const allModels = await repo.find();
-        this._fuseCache = new ShanaFuse(allModels, options);
+        this._fuseCache = new ShanaFuse(allModels, fuseOptions);
     }
 
     public async getNotes(member: GuildMember, title?: string): Promise<NotesModel[]> {

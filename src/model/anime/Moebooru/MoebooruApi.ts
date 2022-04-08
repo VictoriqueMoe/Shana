@@ -1,7 +1,7 @@
 import {Typeings} from "../../types/Typeings";
 import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 import Fuse from "fuse.js";
-import {defaultSearch, ISearchBase, options} from "../../ISearchBase";
+import {defaultSearch, fuseOptions, ISearchBase} from "../../ISearchBase";
 import {AutocompleteInteraction} from "discord.js";
 import {ShanaFuse} from "../../Impl/ShanaFuse";
 import axios from "axios";
@@ -65,8 +65,8 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
             json = json.filter(filter);
         }
         json = json.filter(tag => !this.blackList.some(v => tag.name.includes(v)));
-        const index = Fuse.createIndex(options.keys, json);
-        this.fuseCache = new ShanaFuse(json, options, index);
+        const index = Fuse.createIndex(fuseOptions.keys, json);
+        this.fuseCache = new ShanaFuse(json, fuseOptions, index);
         console.log(`Indexed: ${json.length} tags from ${this.name}`);
     }
 

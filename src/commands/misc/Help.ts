@@ -25,7 +25,7 @@ import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Uti
 import {container, delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
 import {SettingsManager} from "../../model/settings/SettingsManager";
-import {defaultSearch, ISearchBase, options, SearchBase} from "../../model/ISearchBase";
+import {defaultSearch, fuseOptions, ISearchBase, SearchBase} from "../../model/ISearchBase";
 import Fuse from "fuse.js";
 import {PostConstructDependsOn} from "../../model/decorators/PostConstruct";
 import {ShanaFuse} from "../../model/Impl/ShanaFuse";
@@ -81,7 +81,7 @@ export class Help extends AbstractCommand implements ISearchBase<SearchBase> {
     private init(): void {
         const allCommandNames = this._commandSecurityManager.getAllCommandNames(true);
         const obj = allCommandNames.map(command => ({name: command}));
-        this._fuseCache = new ShanaFuse(obj, options);
+        this._fuseCache = new ShanaFuse(obj, fuseOptions);
     }
 
     @Slash("help", {
