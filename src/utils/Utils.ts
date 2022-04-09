@@ -27,12 +27,12 @@ import {
 } from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
-import {CloseOptionModel} from "../model/DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../model/DB/entities/autoMod/impl/CloseOption.model";
 import {glob} from "glob";
 import * as path from "path";
-import {ChannelManager} from "../model/guild/manager/ChannelManager";
-import {GuildManager} from "../model/guild/manager/GuildManager";
-import {SettingsManager} from "../model/settings/SettingsManager";
+import {ChannelManager} from "../model/framework/manager/ChannelManager";
+import {GuildManager} from "../model/framework/manager/GuildManager";
+import {SettingsManager} from "../model/framework/manager/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 import {StatusCodes} from "http-status-codes";
 import {Typeings} from "../model/types/Typeings";

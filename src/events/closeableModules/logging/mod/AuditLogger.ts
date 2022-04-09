@@ -1,4 +1,4 @@
-import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../../../../model/DB/entities/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
 import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";

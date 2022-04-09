@@ -1,9 +1,9 @@
 import {ArgsOf, Client} from "discordx";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
-import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
+import {BannedAttachmentsModel} from "../../model/DB/entities/guild/BannedAttachments.model";
 import {Main} from "../../Main";
 import {DMChannel, GuildMember, Message, Role, Sticker, User} from "discord.js";
-import {GuildManager} from "../../model/guild/manager/GuildManager";
+import {GuildManager} from "../../model/framework/manager/GuildManager";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
 import {notBot} from "../../guards/NotABot";
 import {container, singleton} from "tsyringe";

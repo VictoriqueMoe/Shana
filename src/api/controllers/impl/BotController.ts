@@ -5,12 +5,12 @@ import {DiscordUtils, EnumEx, ObjectUtil} from "../../../utils/Utils";
 import {Channel, Guild, GuildBasedChannel, GuildChannel, GuildMember} from "discord.js";
 import {StatusCodes} from "http-status-codes";
 import {SETTINGS} from "../../../enums/SETTINGS";
-import {SettingsManager} from "../../../model/settings/SettingsManager";
+import {SettingsManager} from "../../../model/framework/manager/SettingsManager";
 import {ModuleController} from "./modules/impl/ModuleController";
-import {AllCommands, CommandSecurityManager} from "../../../model/guild/manager/CommandSecurityManager";
+import {AllCommands, CommandSecurityManager} from "../../../model/framework/manager/CommandSecurityManager";
 import {container, singleton} from "tsyringe";
 import {Client} from "discordx";
-import {MuteManager} from "../../../model/guild/manager/MuteManager";
+import {MuteManager} from "../../../model/framework/manager/MuteManager";
 
 @singleton()
 @Controller("api/bot")

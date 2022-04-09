@@ -2,8 +2,8 @@ import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {MessageEmbed, Role, User} from "discord.js";
-import {MemberRoleChange} from "../../../../modules/automod/MemberRoleChange";
-import {GuildManager} from "../../../../model/guild/manager/GuildManager";
+import {MemberRoleChange} from "../../../../model/Impl/MemberRoleChange";
+import {GuildManager} from "../../../../model/framework/manager/GuildManager";
 import {container} from "tsyringe";
 
 

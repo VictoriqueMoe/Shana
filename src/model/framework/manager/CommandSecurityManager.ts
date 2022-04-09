@@ -1,5 +1,5 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
-import {CommandSecurityModel} from "../../DB/guild/CommandSecurity.model";
+import {CommandSecurityModel} from "../../DB/entities/guild/CommandSecurity.model";
 import {ApplicationCommandPermissions, Guild, GuildMember, Permissions} from "discord.js";
 import {Client, DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
 import {ArrayUtils, GuildUtils} from "../../../utils/Utils";

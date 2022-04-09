@@ -1,5 +1,5 @@
 import {AbstractCommand} from "../AbstractCommand";
-import {RoleJoinerModel} from "../../model/DB/guild/RoleJoiner.model";
+import {RoleJoinerModel} from "../../model/DB/entities/guild/RoleJoiner.model";
 import {DefaultPermissionResolver, Discord, Permission, SelectMenuComponent, Slash, SlashGroup} from "discordx";
 import {
     CommandInteraction,

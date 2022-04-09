@@ -1,6 +1,6 @@
 import {singleton} from "tsyringe";
 import {BaseDAO, UniqueViolationError} from "../../../DAO/BaseDAO";
-import {MessageScheduleModel} from "../../DB/guild/MessageSchedule.model";
+import {MessageScheduleModel} from "../../DB/entities/guild/MessageSchedule.model";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
 import {PostConstruct} from "../../decorators/PostConstruct";
 import {GuildManager} from "./GuildManager";

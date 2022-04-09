@@ -1,6 +1,6 @@
 import {CloseableModule} from "./CloseableModule";
 import {ITriggerConstraint} from "../ITriggerConstraint";
-import {IEventSecurityConstraint} from "../../DB/IEventSecurityConstraint";
+import {IEventSecurityConstraint} from "../../DB/entities/IEventSecurityConstraint";
 import {GuildChannel, Message} from "discord.js";
 import {ArrayUtils} from "../../../utils/Utils";
 import {ModuleSettings} from "../ModuleSettings";

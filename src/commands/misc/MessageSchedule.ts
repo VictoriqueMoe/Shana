@@ -1,7 +1,7 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {injectable} from "tsyringe";
 import {AbstractCommand} from "../AbstractCommand";
-import {MessageScheduleManager} from "../../model/guild/manager/MessageScheduleManager";
+import {MessageScheduleManager} from "../../model/framework/manager/MessageScheduleManager";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {BaseGuildTextChannel, Channel, CommandInteraction, MessageEmbed} from "discord.js";

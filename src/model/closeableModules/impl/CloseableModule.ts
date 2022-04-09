@@ -1,5 +1,5 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
-import {ICloseOption} from "../../DB/autoMod/ICloseOption";
+import {ICloseOption} from "../../DB/entities/autoMod/ICloseOption";
 import {ICloseableModule} from "../ICloseableModule";
 import {ISubModule} from "../subModules/ISubModule";
 import * as Immutable from "immutable";
@@ -8,7 +8,7 @@ import {ModuleSettings} from "../ModuleSettings";
 import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
 import {GuildMember, TextBasedChannel} from "discord.js";
 import {Roles} from "../../../enums/Roles";
-import {CloseOptionModel} from "../../DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../../DB/entities/autoMod/impl/CloseOption.model";
 import {container, delay} from "tsyringe";
 import {getRepository} from "typeorm";
 import RolesEnum = Roles.RolesEnum;

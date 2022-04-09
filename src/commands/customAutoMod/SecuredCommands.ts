@@ -4,10 +4,10 @@ import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction} from "discord.js";
 import {delay, inject, injectable} from "tsyringe";
-import {MuteManager} from "../../model/guild/manager/MuteManager";
+import {MuteManager} from "../../model/framework/manager/MuteManager";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Category} from "../../modules/category";
-import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+import {CommandSecurityManager} from "../../model/framework/manager/CommandSecurityManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()

@@ -16,7 +16,7 @@ import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
-import {BookmarkManager} from "../../model/guild/manager/BookmarkManager";
+import {BookmarkManager} from "../../model/framework/manager/BookmarkManager";
 import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
 import {Category} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;

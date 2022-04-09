@@ -4,9 +4,9 @@ import {JobCallback} from 'node-schedule';
 import {BaseGuildTextChannel} from "discord.js";
 import {ScheduledMessageJob} from "./ScheduledJob/impl/ScheduledMessageJob";
 import {singleton} from "tsyringe";
-import {IMessageScheduler} from "../MessageScheduler";
 import {Scheduler} from "./Scheduler";
 import {ObjectUtil} from "../../../utils/Utils";
+import {IMessageScheduler} from "../IMessageScheduler";
 
 @singleton()
 export class MessageScheduler extends Scheduler implements IMessageScheduler {

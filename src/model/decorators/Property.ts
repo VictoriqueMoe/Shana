@@ -1,7 +1,7 @@
 import {Typeings} from "../types/Typeings";
 import {container} from "tsyringe";
-import {PropertyResolutionFactory} from "../factory/PropertyResolutionFactory";
-import {Property} from "../engine/IPropertyResolutionEngine";
+import {PropertyResolutionFactory} from "../framework/factory/PropertyResolutionFactory";
+import {Property} from "../framework/engine/IPropertyResolutionEngine";
 
 
 const factory = container.resolve(PropertyResolutionFactory);

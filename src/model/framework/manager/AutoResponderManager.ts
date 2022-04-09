@@ -1,5 +1,5 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
-import {AutoResponderModel} from "../../DB/autoMod/impl/AutoResponder.model";
+import {AutoResponderModel} from "../../DB/entities/autoMod/impl/AutoResponder.model";
 import {singleton} from "tsyringe";
 import {getManager, getRepository, Repository, Transaction, TransactionRepository} from "typeorm";
 

@@ -1,7 +1,7 @@
 import {AbstractCommand} from "../AbstractCommand";
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {container, injectable} from "tsyringe";
-import {NotesManager} from "../../model/guild/manager/NotesManager";
+import {NotesManager} from "../../model/framework/manager/NotesManager";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AutocompleteInteraction, CommandInteraction, MessageEmbed} from "discord.js";

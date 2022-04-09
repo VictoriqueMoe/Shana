@@ -1,8 +1,8 @@
 import {singleton} from "tsyringe";
 import {IPropertyResolutionEngine, Property} from "../IPropertyResolutionEngine";
 import fs from "fs";
-import {PostConstruct} from "../../decorators/PostConstruct";
-import {ObjectUtil} from "../../../utils/Utils";
+import {PostConstruct} from "../../../decorators/PostConstruct";
+import {ObjectUtil} from "../../../../utils/Utils";
 
 @singleton()
 export class PackageJsonResolutionEngine implements IPropertyResolutionEngine {

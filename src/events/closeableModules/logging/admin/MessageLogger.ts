@@ -3,7 +3,7 @@ import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../
 import {MessageEmbed} from "discord.js";
 import {Main} from "../../../../Main";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
-import {Imgur} from "../../../../model/Imgur";
+import {Imgur} from "../../../../model/Impl/Imgur";
 import {injectable} from "tsyringe";
 
 const isImageFast = require('is-image-fast');

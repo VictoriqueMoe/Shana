@@ -5,8 +5,8 @@ import {StatusCodes} from "http-status-codes";
 import {AbstractModuleController} from "../AbstractModuleController";
 import {EventSecurityConstraintTypeValidator} from "../../../middleWare/EventSecurityConstraintTypeValidator";
 import {AutoResponderPayload} from "../../../../../model/types/Typeings";
-import {AutoResponderModel} from "../../../../../model/DB/autoMod/impl/AutoResponder.model";
-import {AutoResponderManager} from "../../../../../model/guild/manager/AutoResponderManager";
+import {AutoResponderModel} from "../../../../../model/DB/entities/autoMod/impl/AutoResponder.model";
+import {AutoResponderManager} from "../../../../../model/framework/manager/AutoResponderManager";
 import {container} from "tsyringe";
 import {BaseDAO} from "../../../../../DAO/BaseDAO";
 

@@ -1,11 +1,11 @@
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model";
 import * as schedule from "node-schedule";
 import {Guild, GuildMember} from "discord.js";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
+import {RolePersistenceModel} from "../../../model/DB/entities/autoMod/impl/RolePersistence.model";
 import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
-import {GuildManager} from "../../../model/guild/manager/GuildManager";
+import {GuildManager} from "../../../model/framework/manager/GuildManager";
 import {UniqueViolationError} from "../../../DAO/BaseDAO";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
 import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings";
@@ -13,8 +13,8 @@ import {container, injectable} from "tsyringe";
 import {RoleApplier} from "../../customAutoMod/RoleApplier/RoleApplier";
 import {getRepository} from "typeorm";
 import {PostConstruct} from "../../../model/decorators/PostConstruct";
-import {GuildableModel} from "../../../model/DB/guild/Guildable.model";
-import {CloseableModuleManager} from "../../../model/guild/manager/CloseableModuleManager";
+import {GuildableModel} from "../../../model/DB/entities/guild/Guildable.model";
+import {CloseableModuleManager} from "../../../model/framework/manager/CloseableModuleManager";
 import {TimedSet} from "@discordx/utilities";
 
 class JoinEntry {

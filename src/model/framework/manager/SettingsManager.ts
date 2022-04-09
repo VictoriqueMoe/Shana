@@ -1,7 +1,7 @@
-import {BaseDAO} from "../../DAO/BaseDAO";
-import {SettingsModel} from "../DB/guild/Settings.model";
-import {SETTINGS} from "../../enums/SETTINGS";
-import {ArrayUtils, ObjectUtil} from "../../utils/Utils";
+import {BaseDAO} from "../../../DAO/BaseDAO";
+import {SettingsModel} from "../../DB/entities/guild/Settings.model";
+import {SETTINGS} from "../../../enums/SETTINGS";
+import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 import {singleton} from "tsyringe";
 import {EntityManager, getRepository} from "typeorm";
 

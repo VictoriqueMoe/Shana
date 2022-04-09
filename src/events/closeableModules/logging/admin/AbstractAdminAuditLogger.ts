@@ -1,5 +1,5 @@
 import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
-import {CloseOptionModel} from "../../../../model/DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../../../../model/DB/entities/autoMod/impl/CloseOption.model";
 import {Message, MessageEmbed} from "discord.js";
 import {DiscordUtils} from "../../../../utils/Utils";
 

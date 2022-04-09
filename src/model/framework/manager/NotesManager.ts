@@ -1,6 +1,6 @@
 import {singleton} from "tsyringe";
 import {BaseDAO} from "../../../DAO/BaseDAO";
-import {NotesModel} from "../../DB/guild/Notes.model";
+import {NotesModel} from "../../DB/entities/guild/Notes.model";
 import {AutocompleteInteraction, GuildMember} from "discord.js";
 import {getRepository} from "typeorm";
 import {ObjectUtil} from "../../../utils/Utils";

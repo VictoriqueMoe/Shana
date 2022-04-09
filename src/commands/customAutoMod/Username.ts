@@ -1,10 +1,10 @@
-import {UsernameModel} from "../../model/DB/autoMod/impl/Username.model";
+import {UsernameModel} from "../../model/DB/entities/autoMod/impl/Username.model";
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {DiscordUtils} from "../../utils/Utils";
 import {CommandInteraction, GuildMember, User} from "discord.js";
-import {GuildManager} from "../../model/guild/manager/GuildManager";
+import {GuildManager} from "../../model/framework/manager/GuildManager";
 import {AbstractCommand} from "../AbstractCommand";
 import {container} from "tsyringe";
 import {Category} from "../../modules/category";

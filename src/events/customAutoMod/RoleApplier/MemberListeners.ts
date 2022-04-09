@@ -1,10 +1,10 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {GuildUtils} from "../../../utils/Utils";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
-import {RolePersistenceModel} from "../../../model/DB/autoMod/impl/RolePersistence.model";
+import {RolePersistenceModel} from "../../../model/DB/entities/autoMod/impl/RolePersistence.model";
 import {BaseDAO} from "../../../DAO/BaseDAO";
-import {MemberRoleChange} from "../../../modules/automod/MemberRoleChange";
-import {MuteManager} from "../../../model/guild/manager/MuteManager";
+import {MemberRoleChange} from "../../../model/Impl/MemberRoleChange";
+import {MuteManager} from "../../../model/framework/manager/MuteManager";
 import {injectable} from "tsyringe";
 import {RoleApplier} from "./RoleApplier";
 import {SubModuleManager} from "../../../model/closeableModules/manager/SubModuleManager";

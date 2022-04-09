@@ -1,7 +1,7 @@
 import {ArgsOf, Client} from "discordx";
 import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {Collection, MessageEmbed} from "discord.js";
-import {BannedAttachmentsModel} from "../../model/DB/guild/BannedAttachments.model";
+import {BannedAttachmentsModel} from "../../model/DB/entities/guild/BannedAttachments.model";
 import fs from "fs";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
 import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner";

@@ -13,16 +13,16 @@ import {
     SlashGroup,
     SlashOption
 } from "discordx";
-import {BirthdayManager} from "../../model/guild/manager/BirthdayManager";
+import {BirthdayManager} from "../../model/framework/manager/BirthdayManager";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {CommandInteraction, MessageEmbed} from "discord.js";
 import {DiscordUtils} from "../../utils/Utils";
 import {UniqueViolationError} from "../../DAO/BaseDAO";
-import {BirthdaysModel} from "../../model/DB/guild/Birthdays.model";
+import {BirthdaysModel} from "../../model/DB/entities/guild/Birthdays.model";
 import {DateTime} from "luxon";
 import {Channels} from "../../enums/Channels";
-import {ChannelManager} from "../../model/guild/manager/ChannelManager";
+import {ChannelManager} from "../../model/framework/manager/ChannelManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 

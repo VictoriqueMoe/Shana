@@ -1,7 +1,7 @@
-import {Property} from "./decorators/Property";
+import {Property} from "../decorators/Property";
 import {singleton} from "tsyringe";
-import {ModuleEnabledConfigure} from "./Impl/ModuleEnabledConfigure";
-import {PostConstruct} from "./decorators/PostConstruct";
+import {ModuleEnabledConfigure} from "./ModuleEnabledConfigure";
+import {PostConstruct} from "../decorators/PostConstruct";
 
 const imgur = require('imgur');
 const isImageFast = require('is-image-fast');

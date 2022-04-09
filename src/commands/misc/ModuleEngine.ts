@@ -5,7 +5,7 @@ import {AbstractCommand} from "../AbstractCommand";
 import {CommandInteraction} from "discord.js";
 import {Category} from "../../modules/category";
 import {container} from "tsyringe";
-import {CloseableModuleManager} from "../../model/guild/manager/CloseableModuleManager";
+import {CloseableModuleManager} from "../../model/framework/manager/CloseableModuleManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()

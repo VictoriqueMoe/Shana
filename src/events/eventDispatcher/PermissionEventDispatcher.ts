@@ -1,7 +1,7 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {delay, injectable, injectAll, registry} from "tsyringe";
 import {Beans} from "../../DI/Beans";
-import {CommandSecurityManager} from "../../model/guild/manager/CommandSecurityManager";
+import {CommandSecurityManager} from "../../model/framework/manager/CommandSecurityManager";
 import {IPermissionEventListener, RoleTypes, RoleUpdateTrigger} from "./Listeners/IPermissionEventListener";
 
 @registry([

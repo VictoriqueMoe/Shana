@@ -1,11 +1,11 @@
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
-import {CloseOptionModel} from "../../../model/DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model";
 import {ArgsOf, Client} from "discordx";
 import {AbstractFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
 import {ACTION} from "../../../enums/ACTION";
 import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
-import {MuteManager} from "../../../model/guild/manager/MuteManager";
+import {MuteManager} from "../../../model/framework/manager/MuteManager";
 import {Main} from "../../../Main";
 import {DiscordUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import * as Immutable from "immutable";

@@ -1,5 +1,5 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
-import {BirthdaysModel} from "../../DB/guild/Birthdays.model";
+import {BirthdaysModel} from "../../DB/entities/guild/Birthdays.model";
 import {singleton} from "tsyringe";
 import {Guild, GuildMember, MessageEmbed} from "discord.js";
 import {DateTime} from "luxon";

@@ -1,6 +1,6 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {BaseDAO} from "../DAO/BaseDAO";
-import {GuildableModel} from "../model/DB/guild/Guildable.model";
+import {GuildableModel} from "../model/DB/entities/guild/Guildable.model";
 import {OnReady} from "./OnReady";
 import {container} from "tsyringe";
 import {getRepository} from "typeorm";

@@ -20,7 +20,7 @@ import constructor from "tsyringe/dist/typings/types/constructor";
 import {PostConstruct} from "../../decorators/PostConstruct";
 import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {AbstractFilter} from "../subModules/dynoAutoMod/AbstractFilter";
-import {CloseableModuleManager} from "../../guild/manager/CloseableModuleManager";
+import {CloseableModuleManager} from "../../framework/manager/CloseableModuleManager";
 
 @registry([
     {token: Beans.ISubModuleToken, useToken: ZalgoTextFilter},

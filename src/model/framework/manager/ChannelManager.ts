@@ -1,5 +1,5 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
-import {PostableChannelModel} from "../../DB/guild/PostableChannel.model";
+import {PostableChannelModel} from "../../DB/entities/guild/PostableChannel.model";
 import {BaseGuildTextChannel} from "discord.js";
 import {ObjectUtil} from "../../../utils/Utils";
 import {GuildManager} from "./GuildManager";

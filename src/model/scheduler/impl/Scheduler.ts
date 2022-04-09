@@ -5,7 +5,7 @@ import {CronException, ObjectUtil} from '../../../utils/Utils';
 import {IScheduledJob} from "./ScheduledJob/IScheduledJob";
 import {ScheduledJob} from "./ScheduledJob/impl/ScheduledJob";
 import {singleton} from "tsyringe";
-import {IScheduler} from "../Scheduler";
+import {IScheduler} from "../IScheduler";
 
 @singleton()
 export class Scheduler implements IScheduler {

@@ -4,12 +4,12 @@ import {AutoResponderController} from "./AutoResponderController";
 import {Request, Response} from "express";
 import {Guild} from "discord.js";
 import {StatusCodes} from "http-status-codes";
-import {CloseOptionModel} from "../../../../../model/DB/autoMod/impl/CloseOption.model";
+import {CloseOptionModel} from "../../../../../model/DB/entities/autoMod/impl/CloseOption.model";
 import {ArrayUtils, ObjectUtil} from "../../../../../utils/Utils";
 import {AutoRoleController} from "./AutoRoleController";
 import {getRepository} from "typeorm";
 import {container} from "tsyringe";
-import {CloseableModuleManager} from "../../../../../model/guild/manager/CloseableModuleManager";
+import {CloseableModuleManager} from "../../../../../model/framework/manager/CloseableModuleManager";
 
 
 @Controller("module")
