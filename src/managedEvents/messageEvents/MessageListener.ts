@@ -34,7 +34,7 @@ export class MessageListener {
         }
     }*/
 
-    private _timer = new TimedSet<string>(30000);
+    private _autoReplyTimer = new TimedSet<string>(60000);
 
     @Property("cleverBotKey", false)
     private readonly cleverBotKey: string;
@@ -181,10 +181,14 @@ export class MessageListener {
                 return;
             }
         }
-        if (!shouldReply || this._timer.has(userId)) {
+        const inTimer = this._autoReplyTimer.rawSet.find(id => id === userId) ?? null;
+        if (ObjectUtil.validString(inTimer)) {
+            this._autoReplyTimer.refresh(userId);
+        }
+        if (!shouldReply || ObjectUtil.validString(inTimer)) {
             return;
         }
-        this._timer.add(userId);
+        this._autoReplyTimer.add(userId);
         let messageContent = message.content;
         messageContent = DiscordUtils.sanitiseTextForApiConsumption(messageContent);
         if (!ObjectUtil.validString(messageContent)) {
