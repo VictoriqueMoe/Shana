@@ -5,7 +5,7 @@ export abstract class AbstractFactory<T> implements IDiFactory<T> {
 
     private readonly _engines: Immutable.Set<T>;
 
-    public static factories: AbstractFactory<unknown>[];
+    public static factories: AbstractFactory<unknown>[] = [];
 
     public constructor() {
         this._engines = this.populateEngines();

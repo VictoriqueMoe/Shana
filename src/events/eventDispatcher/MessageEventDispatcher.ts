@@ -53,7 +53,7 @@ export class MessageEventDispatcher {
     private getContextInstance(context: constructor<any>): any {
         for (const factory of AbstractFactory.factories) {
             for (const engine of factory.engines) {
-                if (engine === context) {
+                if (engine.constructor === context) {
                     return engine;
                 }
             }
