@@ -2,11 +2,14 @@ import {ArgsOf, Client, Discord, On} from "discordx";
 import {BaseDAO} from "../DAO/BaseDAO";
 import {GuildableModel} from "../model/DB/entities/guild/Guildable.model";
 import {OnReady} from "./OnReady";
-import {container} from "tsyringe";
 import {getRepository} from "typeorm";
 
 @Discord()
 export class BotGuildUpdater extends BaseDAO<GuildableModel> {
+
+    public constructor(private _onReady: OnReady) {
+        super();
+    }
 
     @On("guildCreate")
     private async botJoins([guild]: ArgsOf<"guildCreate">, client: Client): Promise<void> {
@@ -14,8 +17,7 @@ export class BotGuildUpdater extends BaseDAO<GuildableModel> {
             guildId: guild.id
         });
         await super.commitToDatabase(getRepository(GuildableModel), [model]);
-        const onReadyClass: OnReady = container.resolve(OnReady);
-        return onReadyClass.init().then(() => {
+        return this._onReady.init().then(() => {
             console.log(`Joined server "${guild.name}"`);
         }).catch(e => {
             console.error(e);
