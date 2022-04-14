@@ -1,17 +1,18 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {delay, injectable, injectAll, registry} from "tsyringe";
-import {Beans} from "../../DI/Beans";
-import {CommandSecurityManager} from "../../model/framework/manager/CommandSecurityManager";
+import {injectable} from "tsyringe";
 import {IPermissionEventListener, RoleTypes, RoleUpdateTrigger} from "./Listeners/IPermissionEventListener";
+import {PermissionEventFactory} from "../../model/framework/factory/PermissionEventFactory";
+import Immutable from "immutable";
 
-@registry([
-    {token: Beans.IPermissionEventListener, useToken: delay(() => CommandSecurityManager)},
-])
+
 @Discord()
 @injectable()
 export class PermissionEventDispatcher {
 
-    public constructor(@injectAll(Beans.IPermissionEventListener) private _listeners: IPermissionEventListener[]) {
+    private _listeners: Immutable.Set<IPermissionEventListener>;
+
+    public constructor(permissionEventFactory: PermissionEventFactory) {
+        this._listeners = permissionEventFactory.engines;
     }
 
     @On("roleUpdate")
