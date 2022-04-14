@@ -3,8 +3,10 @@ import {BaseDAO} from "../DAO/BaseDAO";
 import {GuildableModel} from "../model/DB/entities/guild/Guildable.model";
 import {OnReady} from "./OnReady";
 import {getRepository} from "typeorm";
+import {injectable} from "tsyringe";
 
 @Discord()
+@injectable()
 export class BotGuildUpdater extends BaseDAO<GuildableModel> {
 
     public constructor(private _onReady: OnReady) {
