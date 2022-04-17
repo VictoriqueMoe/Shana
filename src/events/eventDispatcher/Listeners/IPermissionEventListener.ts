@@ -4,7 +4,7 @@ export type RoleUpdateTrigger = ArgsOf<"roleUpdate"> | ArgsOf<"roleCreate"> | Ar
 export type RoleTypes = "roleUpdate" | "roleCreate" | "roleDelete";
 
 /**
- * If you implement this interface, you will be able to Role delete, modification and creation
+ * If you implement this interface, you will receive Role delete, modification and creation events
  */
 export interface IPermissionEventListener {
     /**
