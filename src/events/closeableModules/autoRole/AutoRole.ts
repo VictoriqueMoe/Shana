@@ -49,7 +49,8 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             return;
         }
         const filter: BannedWordFilter = this._subModuleManager.getSubModule(BannedWordFilter);
-        if (filter.isActive && await filter.checkUsername(member)) {
+        if (filter.isActive && filter.isWordBanned(member.displayName)) {
+            await GuildUtils.sendToJail(member, "You have been placed here because your display name violates our rules, Please change it");
             return;
         }
 

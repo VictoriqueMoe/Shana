@@ -1,9 +1,8 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
-import {GuildMember, Message} from "discord.js";
+import {Message} from "discord.js";
 import {BannedWordEntries, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {GuildUtils} from "../../../../../utils/Utils";
 import {singleton} from "tsyringe";
 
 @singleton()
@@ -37,44 +36,37 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
     }
 
     /**
-     * return true if user was sent to jail
-     * @param member
+     * return true if the word is banned
+     * @param word
      */
-    public async checkUsername(member: GuildMember): Promise<boolean> {
-        if (!this.doesNotFailValidation(member.displayName)) {
-            await GuildUtils.sendToJail(member, "You have been placed here because your display name violates our rules, Please change it");
-            return true;
-        }
-        return false;
-    }
-
-    public async doFilter(content: Message): Promise<boolean> {
-        return this.doesNotFailValidation(content.content);
-    }
-
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Banned words", message);
-    }
-
-    private doesNotFailValidation(content: string): boolean {
+    public isWordBanned(word: string): boolean {
         const badWordObj = this.bannedWords;
-        const exactArry = badWordObj.exactWord;
+        const exactArray = badWordObj.exactWord;
         const inStringArray = badWordObj.WildCardWords;
-        const messageContent = content.trim().toLowerCase();
+        const messageContent = word.trim().toLowerCase();
         const splitMessage = messageContent.split(" ");
-        for (const exactWord of exactArry) {
+        for (const exactWord of exactArray) {
             const volutesExactWord = splitMessage.indexOf(exactWord.toLowerCase()) > -1;
             if (volutesExactWord) {
-                return false;
+                return true;
             }
         }
         for (const wildCardString of inStringArray) {
             const localString = messageContent.replace(/\s/gim, "");
             const violatesExactWord = localString.includes(wildCardString.toLowerCase());
             if (violatesExactWord) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
+
+    public async doFilter(content: Message): Promise<boolean> {
+        return !this.isWordBanned(content.content);
+    }
+
+    public async postProcess(message: Message): Promise<void> {
+        await super.postToLog("Banned words", message);
+    }
+
 }
