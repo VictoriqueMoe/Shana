@@ -4,9 +4,6 @@ import {ISubModule} from "../subModules/ISubModule";
 import {ModuleSettings} from "../ModuleSettings";
 import {delay, inject, singleton} from "tsyringe";
 import constructor from "tsyringe/dist/typings/types/constructor";
-import {PostConstruct} from "../../decorators/PostConstruct";
-import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
-import {AbstractFilter} from "../subModules/dynoAutoMod/AbstractFilter";
 import {CloseableModuleManager} from "../../framework/manager/CloseableModuleManager";
 import {SubModuleFactory} from "../../framework/factory/SubModuleFactory";
 
@@ -38,16 +35,5 @@ export class SubModuleManager {
 
     public getSubModule<T extends ISubModule>(subModule: constructor<T>): T {
         return this.subModules.find(value => value.constructor === subModule) as T;
-    }
-
-    @PostConstruct
-    private init(): void {
-        const dynoAutoMod = this._closeableModuleManager.getModule("DynoAutoMod");
-        for (const subModule of this._subModules) {
-            if (subModule instanceof AbstractFilter) {
-                console.log(`Registering submodule ${subModule.id} with parent module ${dynoAutoMod.constructor.name}`);
-                subModule.parentModule = dynoAutoMod;
-            }
-        }
     }
 }
