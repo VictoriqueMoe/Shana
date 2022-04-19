@@ -32,7 +32,10 @@ export class MemberListeners extends BaseDAO<RolePersistenceModel> {
             return;
         }
         if (oldUser.nickname !== newUser.nickname) {
-            await filter.checkUsername(newUser);
+            if (filter.isWordBanned(newUser.nickname)) {
+                await GuildUtils.sendToJail(newUser, "You have been placed here because your display name violates our rules, Please change it");
+                return;
+            }
         }
     }
 }

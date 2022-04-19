@@ -22,7 +22,7 @@ export function Property(prop: keyof Typeings.propTypes, required: boolean = tru
                 for (const resolutionEngine of engines) {
                     const resolvedProp = resolutionEngine.getProperty(prop);
                     if (resolvedProp !== null) {
-                        propValue = resolvedProp;
+                        propValue = resolvedProp ?? null;
                         break;
                     }
                 }
