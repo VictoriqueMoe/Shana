@@ -9,7 +9,12 @@ import {
     PermissionString
 } from "discord.js";
 
-export function Permission(permissions: PermissionString[], messageIfNotAllowed: string = "No permissions"): GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> {
+/**
+ * Set an array of permissions that this command is allowed to use, this is useful for global commands that can not use the `@Permission` decorator, until Permissions 2v is out
+ * @param permissions - an array of Permissions or a function to resolve the permissions
+ * @param messageIfNotAllowed - message to post when the member using this command does not have the correct permissions, defaults to "No permissions"
+ */
+export function Permission(permissions: PermissionString[] | (() => Promise<PermissionString[]>), messageIfNotAllowed: string = "No permissions"): GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> {
 
     async function replyOrFollowUp(
         interaction: BaseCommandInteraction | MessageComponentInteraction,
@@ -46,7 +51,7 @@ export function Permission(permissions: PermissionString[], messageIfNotAllowed:
         }
     }
 
-    return function (arg: CommandInteraction | SimpleCommandMessage | ContextMenuInteraction, client: Client, next: Next) {
+    return async function (arg: CommandInteraction | SimpleCommandMessage | ContextMenuInteraction, client: Client, next: Next) {
         let guild: Guild | null = null;
         let callee: GuildMember | null = null;
         if (arg instanceof SimpleCommandMessage) {
@@ -66,9 +71,13 @@ export function Permission(permissions: PermissionString[], messageIfNotAllowed:
         if (!guild || !callee) {
             return next();
         }
-
-
-        const isAllowed = callee.permissions.has(permissions, true);
+        let perms: PermissionString[];
+        if (typeof permissions === "function") {
+            perms = await permissions();
+        } else {
+            perms = permissions;
+        }
+        const isAllowed = callee.permissions.has(perms, true);
         if (isAllowed) {
             return next();
         }
