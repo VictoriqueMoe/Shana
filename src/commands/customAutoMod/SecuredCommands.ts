@@ -18,6 +18,12 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
         "type": "SLASH",
         "description": "Get a list of all mutes",
         options: []
+    },
+    {
+        "name": "no_roles",
+        "type": "SLASH",
+        "description": "Get a list of all members with no roles",
+        options: []
     }
 ])
 @Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
@@ -36,6 +42,16 @@ export class SecuredCommands extends AbstractCommand {
         private _client: Client
     ) {
         super();
+    }
+
+    @Slash("no_roles", {
+        description: "Get a list of all members with no roles"
+    })
+    @Guard(NotBot, CommandEnabled())
+    private async noRoles(interaction: CommandInteraction): Promise<void> {
+        const members = await DiscordUtils.getMembersWithNoRoles(interaction.guildId);
+        const replyStr = ArrayUtils.isValidArray(members) ? members.join(", ") : "Everyone has a role";
+        InteractionUtils.replyOrFollowUp(interaction, replyStr, true);
     }
 
     @Slash("mutes", {

@@ -198,18 +198,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             const enabled = await autoRoleModule.isEnabled(guildId);
             if (enabled) {
                 const membersApplied: string[] = [];
-                const members = await guild.members.fetch({
-                    force: true
-                });
-                const noRoles = [...members.values()].filter(member => {
-                    const roles = [...member.roles.cache.values()];
-                    for (const role of roles) {
-                        if (role.name !== "@everyone") {
-                            return false;
-                        }
-                    }
-                    return true;
-                });
+                const noRoles = await DiscordUtils.getMembersWithNoRoles(guildId);
                 for (const noRole of noRoles) {
                     console.log(`setting roles for ${noRole.user.tag} as they have no roles`);
                     membersApplied.push(noRole.user.tag);

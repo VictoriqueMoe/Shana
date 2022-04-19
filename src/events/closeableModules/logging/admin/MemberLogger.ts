@@ -191,7 +191,7 @@ export class MemberLogger extends AbstractAdminAuditLogger {
                 }
             }
         }
-        const rolesArr = roles.filter(r => r.name !== "@everyone").map(role => `<@&${role.id}>`);
+        const rolesArr = roles.filter(r => r.id !== guild.roles.everyone.id).map(role => `<@&${role.id}>`);
         if (wasKicked) {
             userJoinEmbed = new MessageEmbed()
                 .setColor('#FF470F')

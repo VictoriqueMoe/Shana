@@ -179,7 +179,7 @@ export class BotController extends baseController {
         }
         let roleArray = [...guild.roles.cache.values()];
         roleArray = roleArray.filter(role => {
-            return !role.managed && role.name !== "@everyone";
+            return !role.managed && role.id !== guild.roles.everyone.id;
         }).sort((a, b) => {
             return b.position - a.position;
         });

@@ -67,22 +67,6 @@ export namespace GuildUtils {
 
     export namespace RoleUtils {
 
-        export async function isValidRole(guildId: string, role: string | Role): Promise<boolean> {
-            const guildManager = container.resolve(GuildManager);
-            const guild = await guildManager.getGuild(guildId);
-            const roleId = typeof role === "string" ? role : role.id;
-            const guildRoles = [...guild.roles.cache.values()];
-            for (const guildRole of guildRoles) {
-                if (guildRole.id === roleId) {
-                    if (guildRole.managed) {
-                        return false;
-                    }
-                    return guildRole.name !== "@everyone";
-                }
-            }
-            return false;
-        }
-
         export function getJailRole(guildId: string): Promise<Role | null> {
             return getRole(guildId, SETTINGS.JAIL_ROLE);
         }
@@ -383,6 +367,22 @@ export namespace DiscordUtils {
     };
 
     export type StickerInfo = EmojiInfo;
+
+    export async function getMembersWithNoRoles(guildId: string): Promise<GuildMember[]> {
+        const guildManager = container.resolve(GuildManager);
+        const guild = await guildManager.getGuild(guildId);
+        const members = await guild.members.fetch({
+            force: true
+        });
+        return [...members.values()].filter(member => {
+            for (const [roleId] of member.roles.cache) {
+                if (roleId !== guild.roles.everyone.id) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }
 
 
     export async function getBot(guildId: string): Promise<GuildMember> {
