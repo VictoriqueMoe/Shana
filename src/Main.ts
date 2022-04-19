@@ -20,7 +20,7 @@ import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 export class Main {
 
     @Property("test_mode", false)
-    public static testMode = false;
+    public static testMode = true;
 
     @Property("token")
     private readonly token: string;
