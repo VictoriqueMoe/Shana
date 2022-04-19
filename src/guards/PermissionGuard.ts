@@ -14,7 +14,7 @@ import {
  * @param permissions - an array of Permissions or a function to resolve the permissions
  * @param messageIfNotAllowed - message to post when the member using this command does not have the correct permissions, defaults to "No permissions"
  */
-export function Permission(permissions: PermissionString[] | (() => Promise<PermissionString[]>), messageIfNotAllowed: string = "No permissions"): GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> {
+export function PermissionGuard(permissions: PermissionString[] | (() => Promise<PermissionString[]>), messageIfNotAllowed: string = "No permissions"): GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> {
 
     async function replyOrFollowUp(
         interaction: BaseCommandInteraction | MessageComponentInteraction,
