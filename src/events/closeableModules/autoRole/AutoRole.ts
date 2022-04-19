@@ -117,7 +117,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                 const entry = new JoinEntry(1);
                 AutoRole.joinTimedSet.add(entry);
             } else {
-                const entry: JoinEntry = AutoRole.joinTimedSet.rawSet.keys().next().value;
+                const entry: JoinEntry = AutoRole.joinTimedSet.rawSet.values().next().value;
                 AutoRole.joinTimedSet.refresh(entry);
                 entry.increment();
                 if (entry.joinCount > settings.massJoinProtection) {
