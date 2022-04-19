@@ -3,8 +3,6 @@ import {Message, MessageEmbed} from "discord.js";
 import {ACTION} from "../../../../enums/ACTION";
 import {ICloseableModule} from "../../ICloseableModule";
 import {DiscordUtils, TimeUtils} from "../../../../utils/Utils";
-import {container} from "tsyringe";
-import {DynoAutoMod} from "../../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 
 export abstract class AbstractFilter implements IDynoAutoModFilter {
 
@@ -13,9 +11,15 @@ export abstract class AbstractFilter implements IDynoAutoModFilter {
     abstract readonly isActive: boolean;
     abstract readonly warnMessage: string;
     abstract readonly priority: number;
+    private _parentModule: ICloseableModule<null>;
+
+
+    public set parentModule(parentModule: ICloseableModule<null>) {
+        this._parentModule = parentModule;
+    }
 
     public get parentModule(): ICloseableModule<null> {
-        return container.resolve(DynoAutoMod);
+        return this._parentModule;
     }
 
     public get autoTerminalViolationCount(): number {
