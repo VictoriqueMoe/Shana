@@ -6,7 +6,6 @@ import {ACTION} from "../../../enums/ACTION";
 import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
 import {MuteManager} from "../../../model/framework/manager/MuteManager";
-import {Main} from "../../../Main";
 import {DiscordUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
 import * as Immutable from "immutable";
 import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
@@ -44,9 +43,6 @@ export class DynoAutoMod extends CloseableModule<null> {
         }
         const member = message.member;
         const userId = member.id;
-        if (Main.testMode && userId !== "697417252320051291") {
-            return;
-        }
         for (const filter of filters) {
             if (!filter.isActive) {
                 continue;

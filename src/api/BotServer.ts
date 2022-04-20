@@ -1,5 +1,4 @@
 import {Server} from "@overnightjs/core";
-import {Main} from "../Main";
 import * as bodyParser from 'body-parser';
 import * as path from "path";
 import {glob} from "glob";
@@ -16,7 +15,7 @@ export class BotServer extends Server {
     private _server: http.Server = null;
 
     constructor(initRouter: BotController) {
-        super(Main.testMode);
+        super();
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({extended: true}));
         super.addControllers(initRouter);

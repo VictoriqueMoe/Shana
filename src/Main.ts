@@ -22,7 +22,7 @@ class Main {
     }
 
     @Property("test_mode", false)
-    public static testMode = false;
+    private static testMode = false;
 
     @Property("token")
     private static readonly token: string;

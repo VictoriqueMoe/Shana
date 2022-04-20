@@ -1,7 +1,6 @@
 import {ArgsOf, Client} from "discordx";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/entities/guild/BannedAttachments.model";
-import {Main} from "../../Main";
 import {DMChannel, GuildMember, Message, Role, Sticker, User} from "discord.js";
 import {GuildManager} from "../../model/framework/manager/GuildManager";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
@@ -215,7 +214,7 @@ export class MessageListener {
         if (!member) {
             return;
         }
-        if (GuildUtils.isMemberAdmin(message.member) && Main.testMode === false) {
+        if (GuildUtils.isMemberAdmin(message.member)) {
             return;
         }
         const stickers = message.stickers;
@@ -226,9 +225,6 @@ export class MessageListener {
     private async scanEmoji([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         const member = message.member;
         if (!member) {
-            return;
-        }
-        if (GuildUtils.isMemberAdmin(message.member) && Main.testMode === false) {
             return;
         }
         const emojis = DiscordUtils.getEmojiFromMessage(message, false);

@@ -1,7 +1,6 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
 import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils";
 import {MessageEmbed} from "discord.js";
-import {Main} from "../../../../Main";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {Imgur} from "../../../../model/Impl/Imgur";
 import {injectable} from "tsyringe";
@@ -65,7 +64,7 @@ export class MessageLogger extends AbstractAdminAuditLogger {
 
     @On("messageDelete")
     private async messageDeleted([message]: ArgsOf<"messageDelete">, client: Client): Promise<void> {
-        if (!Main.testMode && message?.member?.id === client.user.id) {
+        if (message?.member?.id === client.user.id) {
             return;
         }
         const dateNow = Date.now();

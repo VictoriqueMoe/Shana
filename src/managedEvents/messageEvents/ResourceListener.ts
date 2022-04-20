@@ -5,7 +5,6 @@ import {BannedAttachmentsModel} from "../../model/DB/entities/guild/BannedAttach
 import fs from "fs";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
 import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner";
-import {Main} from "../../Main";
 import {DirResult} from "tmp";
 import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
@@ -94,9 +93,6 @@ export class ResourceListener {
     //TODO: disabled
     // @MessageListenerDecorator(true, notBot)
     private async discordMessageCrash([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
-        if (Main.testMode && message.member.id !== "697417252320051291") {
-            return;
-        }
         const messageContent = message.content;
         let urlsInMessage: Set<string> = new Set();
         if (ObjectUtil.validString(messageContent)) {
@@ -144,7 +140,7 @@ export class ResourceListener {
                         guildId: message.guild.id
                     }
                 }) === 1;
-                if (exists && !Main.testMode) {
+                if (exists) {
                     continue;
                 }
                 const size = Buffer.byteLength(attachment);
@@ -191,7 +187,7 @@ export class ResourceListener {
                     console.error(`possible not an error ${fileName} \n ${e}`);
                     fail = true;
                 }
-                if (fail && !Main.testMode) {
+                if (fail) {
                     await ResourceBanner.doBanAttachment(attachment, "Discord crash video", urlToAttachment, message.guild.id);
                     try {
                         await message.delete();
@@ -204,7 +200,7 @@ export class ResourceListener {
         } finally {
             this._cleanup(vidTemp);
         }
-        if (didBan || Main.testMode) {
+        if (didBan) {
             const messageToRespond = `This item is a Discord crash video and has been deleted`;
             message.reply(messageToRespond);
             const messageMember = message.member;

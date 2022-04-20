@@ -1,4 +1,3 @@
-import {Main} from "../Main";
 import {ArrayUtils, DiscordUtils, EnumEx, loadClasses, ObjectUtil} from "../utils/Utils";
 import {BaseDAO, UniqueViolationError} from "../DAO/BaseDAO";
 import {BotServer} from "../api/BotServer";
@@ -31,9 +30,6 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private static async startServer(): Promise<void> {
-        if (Main.testMode) {
-            return;
-        }
         container.resolve(BotServer);
     }
 
@@ -71,14 +67,7 @@ export class OnReady extends BaseDAO<any> {
 
     @On("ready")
     private async initialise([client]: ArgsOf<"ready">): Promise<void> {
-        if (Main.testMode) {
-            await this._client.user.setActivity("Under development", {type: "LISTENING"});
-            await this._client.user.setPresence({
-                status: "idle"
-            });
-        } else {
-            await this._client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
-        }
+        await this._client.user.setActivity('Half-Life 3', {type: 'PLAYING'});
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
         pArr.push(this.initUsernames());
