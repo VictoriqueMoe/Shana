@@ -1,4 +1,3 @@
-
 /**
  * interface for close options. aka a model that can carry info about what module is closed
  */
