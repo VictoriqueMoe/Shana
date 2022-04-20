@@ -54,7 +54,7 @@ export class VicImage extends AbstractCommand {
     private async vicImage(
         @SlashOption("file_name", {
             description: "Know the filename? put it here",
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(VicDropbox)),
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, VicDropbox),
             type: "STRING",
             required: false,
         })

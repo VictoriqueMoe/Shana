@@ -22,7 +22,7 @@ import {
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {container, delay, inject, injectable} from "tsyringe";
+import {delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/framework/manager/CommandSecurityManager";
 import {SettingsManager} from "../../model/framework/manager/SettingsManager";
 import {defaultSearch, fuseOptions, ISearchBase, SearchBase} from "../../model/ISearchBase";
@@ -91,7 +91,7 @@ export class Help extends AbstractCommand implements ISearchBase<SearchBase> {
     private async help(
         @SlashOption("commandname", {
             description: "Command name to drill into",
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(Help)),
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, Help),
             type: "STRING",
             required: false,
         })

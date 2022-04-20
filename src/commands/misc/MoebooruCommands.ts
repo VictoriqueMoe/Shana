@@ -1,7 +1,7 @@
 import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {Category} from "../../modules/category";
 import {AbstractCommand} from "../AbstractCommand";
-import {container, injectable} from "tsyringe";
+import {injectable} from "tsyringe";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AutocompleteInteraction, CommandInteraction, MessageEmbed, TextChannel} from "discord.js";
@@ -66,7 +66,7 @@ export class MoebooruCommands extends AbstractCommand {
         @SlashOption("tags", {
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
             type: 'STRING',
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(LolibooruApi))
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, LolibooruApi)
         })
             tags: string,
         interaction: CommandInteraction
@@ -84,7 +84,7 @@ export class MoebooruCommands extends AbstractCommand {
         @SlashOption("tags", {
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
             type: 'STRING',
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(KonachanApi))
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, KonachanApi)
         })
             tags: string,
         interaction: CommandInteraction

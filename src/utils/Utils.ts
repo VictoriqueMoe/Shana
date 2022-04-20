@@ -42,6 +42,7 @@ import {getRepository} from "typeorm";
 import {ISearchBase, SearchBase} from "../model/ISearchBase";
 import {Channels} from "../enums/Channels";
 import axios from "axios";
+import {constructor} from "tsyringe/dist/typings/types";
 
 const emojiRegex = require('emoji-regex');
 const isImageFast = require('is-image-fast');
@@ -1039,8 +1040,9 @@ export class ObjectUtil {
         return new Promise(res => setTimeout(res, ms));
     }
 
-    public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, contextHandler: T): Promise<void> {
-        const result = await contextHandler.search(interaction);
+    public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, contextHandler: constructor<T>): Promise<void> {
+        const handler = container.resolve(contextHandler);
+        const result = await handler.search(interaction);
         if (ArrayUtils.isValidArray(result)) {
             const responseMap = result.map(result => {
                 return {

@@ -1,6 +1,6 @@
 import {AbstractCommand} from "../AbstractCommand";
 import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
-import {container, injectable} from "tsyringe";
+import {injectable} from "tsyringe";
 import {NotesManager} from "../../model/framework/manager/NotesManager";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
@@ -125,7 +125,7 @@ export class Notes extends AbstractCommand {
         @SlashOption("title", {
             description: "The note to modify",
             type: "STRING",
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(NotesManager)),
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, NotesManager),
         })
             title: string,
         @SlashOption("value", {
@@ -154,7 +154,7 @@ export class Notes extends AbstractCommand {
         @SlashOption("title", {
             description: "title of the note to get",
             type: "STRING",
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(NotesManager)),
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, NotesManager),
             required: false,
         })
             title: string,
@@ -199,7 +199,7 @@ export class Notes extends AbstractCommand {
         @SlashOption("title", {
             description: "title of the note to delete",
             type: "STRING",
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, container.resolve(NotesManager)),
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, NotesManager),
             required: false,
         })
             title: string,
