@@ -4,7 +4,7 @@ import {ObjectUtil} from "./utils/Utils";
 import * as v8 from "v8";
 import {Client, DIService, SimpleCommandMessage} from "discordx";
 import {Intents, Message} from "discord.js";
-import {container, instanceCachingFactory, singleton} from "tsyringe";
+import {container, instanceCachingFactory} from "tsyringe";
 import {GuildManager} from "./model/framework/manager/GuildManager";
 import {SettingsManager} from "./model/framework/manager/SettingsManager";
 import {ConnectionManager, createConnection, useContainer} from "typeorm";
@@ -16,22 +16,24 @@ import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 // const https = require('http-debug').https;
 // https.debug = 1;
 
-@singleton()
 export class Main {
+
+    private constructor() {
+    }
 
     @Property("test_mode", false)
     public static testMode = false;
 
     @Property("token")
-    private readonly token: string;
+    private static readonly token: string;
 
     @Property("name")
-    private readonly botName: string;
+    private static readonly botName: string;
 
     @Property("test_token", Main.testMode)
-    private readonly testToken: string;
+    private static readonly testToken: string;
 
-    public async start(): Promise<void> {
+    public static async start(): Promise<void> {
         console.log(`starting ${this.botName}`);
         Settings.defaultZone = "utc";
         Settings.defaultLocale = "en-gb";
@@ -94,5 +96,5 @@ export class Main {
     });
     dotenv.config({path: __dirname + '/../.env'});
     DIService.container = container;
-    await container.resolve(Main).start();
+    await Main.start();
 })());
