@@ -197,7 +197,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         const command = await this.getCommandModel(guildId, commandName, "allowedRoles");
         let {allowedRoles} = command;
         if (allowedRoles.length === 1 && allowedRoles[0] === "*") {
-            // everyone access
+            // everyone accesses
             return [];
         }
         const roles = guild.roles.cache;
