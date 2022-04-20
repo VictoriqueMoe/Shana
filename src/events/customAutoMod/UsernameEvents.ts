@@ -24,9 +24,6 @@ export abstract class UsernameEvents {
             if (modelObj) {
                 const roleLog = await DiscordUtils.getAuditLogEntry("MEMBER_UPDATE", newUser.guild);
                 const executor = roleLog.executor;
-                if (executor.id === "806288433323966514") {
-                    return;
-                }
                 const guild = await client.guilds.fetch(guildId);
                 const member = await guild.members.fetch(executor.id);
                 const isMemberStaff = Roles.isMemberStaff(member);
