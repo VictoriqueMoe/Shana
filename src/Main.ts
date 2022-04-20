@@ -16,7 +16,7 @@ import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
 // const https = require('http-debug').https;
 // https.debug = 1;
 
-export class Main {
+class Main {
 
     private constructor() {
     }
