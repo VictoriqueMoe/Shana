@@ -4,7 +4,6 @@ import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoA
 import {RolePersistenceModel} from "../../../model/DB/entities/autoMod/impl/RolePersistence.model";
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {MemberRoleChange} from "../../../model/Impl/MemberRoleChange";
-import {MuteManager} from "../../../model/framework/manager/MuteManager";
 import {injectable} from "tsyringe";
 import {RoleApplier} from "./RoleApplier";
 import {SubModuleManager} from "../../../model/closeableModules/manager/SubModuleManager";
@@ -13,7 +12,7 @@ import {SubModuleManager} from "../../../model/closeableModules/manager/SubModul
 @injectable()
 export class MemberListeners extends BaseDAO<RolePersistenceModel> {
 
-    public constructor(private _roleApplier: RoleApplier, private _muteManager: MuteManager, private _subModuleManager: SubModuleManager) {
+    public constructor(private _roleApplier: RoleApplier, private _subModuleManager: SubModuleManager) {
         super();
     }
 
