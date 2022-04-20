@@ -5,6 +5,8 @@ import {CommandInteraction, ContextMenuInteraction} from "discord.js";
 import {container} from "tsyringe";
 import {ModuleEnabledConfigure} from "../model/Impl/ModuleEnabledConfigure";
 
+const securityManager = container.resolve(CommandSecurityManager);
+
 export function CommandEnabled(manager?: ModuleEnabledConfigure): GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> {
 
     return async function (arg: CommandInteraction | SimpleCommandMessage | ContextMenuInteraction, client: Client, next: Next) {
@@ -19,7 +21,7 @@ export function CommandEnabled(manager?: ModuleEnabledConfigure): GuardFunction<
                 guildId = arg.guildId;
             }
         }
-        const securityManager = container.resolve(CommandSecurityManager);
+
         const commandEnabled = manager ? manager.enabled : true;
         if (commandEnabled && await securityManager.isEnabled(commandName, guildId)) {
             return next();
