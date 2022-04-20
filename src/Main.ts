@@ -45,7 +45,7 @@ export class Main {
         const connection = await createConnection({
             type: "better-sqlite3",
             database: dbName,
-            synchronize: true,
+            synchronize: Main.testMode,
             entities: [__dirname + '/model/DB/**/*.model.{ts,js}']
         });
         const client = new Client({
