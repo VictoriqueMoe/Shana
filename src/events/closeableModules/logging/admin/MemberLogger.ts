@@ -1,4 +1,5 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {MessageEmbed, User} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
 import {Roles} from "../../../../enums/Roles";

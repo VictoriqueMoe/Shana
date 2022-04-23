@@ -1,6 +1,6 @@
-import {NextFunction, Request, Response} from 'express';
+import type {NextFunction, Request, Response} from 'express';
 import {ArrayUtils} from "../../../utils/Utils";
-import {AutoResponderPayload} from "../../../model/types/Typeings";
+import type {AutoResponderPayload} from "../../../model/types/Typeings";
 
 export function EventSecurityConstraintTypeValidator(req: Request, res: Response, next: NextFunction): void {
 

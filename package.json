@@ -6,6 +6,7 @@
   "main": "./build/Main.js",
   "scripts": {
     "start": "ts-node src/Main.ts",
+    "lint-check": "eslint . --ext .ts",
     "lint": "eslint . --ext .ts --fix",
     "build": "tsc",
     "prod": "node build/Main.js",

@@ -1,8 +1,9 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
-import {MessageEntry} from "./MessageEntry";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
+import type {MessageEntry} from "./MessageEntry";
 import {Message} from "discord.js";
 import {container, injectable} from "tsyringe";
-import constructor from "tsyringe/dist/typings/types/constructor";
+import type constructor from "tsyringe/dist/typings/types/constructor";
 import {AbstractFactory} from "../../model/framework/factory/AbstractFactory";
 
 @Discord()

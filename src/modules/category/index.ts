@@ -1,4 +1,4 @@
-import {ClassMethodDecorator, SlashOptionType} from "discordx";
+import type {ClassMethodDecorator, SlashOptionType} from "discordx";
 
 export type CategoryItemTypes =
     | "SLASH"

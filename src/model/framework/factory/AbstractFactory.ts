@@ -1,4 +1,4 @@
-import {IDiFactory} from "./IDiFactory";
+import type {IDiFactory} from "./IDiFactory";
 import Immutable from "immutable";
 
 export abstract class AbstractFactory<T> implements IDiFactory<T> {

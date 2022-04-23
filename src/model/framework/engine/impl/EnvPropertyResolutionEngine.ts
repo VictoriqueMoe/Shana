@@ -1,4 +1,4 @@
-import {IPropertyResolutionEngine, Property} from "../IPropertyResolutionEngine";
+import type {IPropertyResolutionEngine, Property} from "../IPropertyResolutionEngine";
 import {singleton} from "tsyringe";
 
 @singleton()

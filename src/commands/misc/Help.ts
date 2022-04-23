@@ -1,43 +1,32 @@
 import {AbstractCommand} from "../AbstractCommand";
-import {
-    Client,
-    DefaultPermissionResolver,
-    Discord,
-    Guard,
-    Permission,
-    SelectMenuComponent,
-    Slash,
-    SlashOption
-} from "discordx";
-import {
+import type {Client} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, SelectMenuComponent, Slash, SlashOption} from "discordx";
+import type {
     AutocompleteInteraction,
     CommandInteraction,
-    GuildMember,
-    MessageActionRow,
-    MessageEmbed,
-    MessageSelectMenu,
     MessageSelectOptionData,
     SelectMenuInteraction
 } from "discord.js";
+import {GuildMember, MessageActionRow, MessageEmbed, MessageSelectMenu} from "discord.js";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {ArrayUtils, DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {delay, inject, injectable} from "tsyringe";
 import {CommandSecurityManager} from "../../model/framework/manager/CommandSecurityManager";
-import {SettingsManager} from "../../model/framework/manager/SettingsManager";
-import {defaultSearch, fuseOptions, ISearchBase, SearchBase} from "../../model/ISearchBase";
-import Fuse from "fuse.js";
+import type {SettingsManager} from "../../model/framework/manager/SettingsManager";
+import type {ISearchBase, SearchBase} from "../../model/ISearchBase";
+import {defaultSearch, fuseOptions} from "../../model/ISearchBase";
+import type Fuse from "fuse.js";
 import {PostConstructDependsOn} from "../../model/decorators/PostConstruct";
 import {ShanaFuse} from "../../model/Impl/ShanaFuse";
-import {
-    Category,
-    CategoryMetaData,
+import type {
     ICategory,
     ICategoryAttachment,
     ICategoryItem,
     ICategoryItemCommand,
     ICategoryItemOption
 } from "../../modules/category";
+import {Category, CategoryMetaData} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()

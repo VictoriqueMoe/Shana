@@ -1,6 +1,7 @@
 import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
 import {CloseOptionModel} from "../../../../model/DB/entities/autoMod/impl/CloseOption.model";
-import {Message, MessageEmbed} from "discord.js";
+import type {Message} from "discord.js";
+import {MessageEmbed} from "discord.js";
 import {DiscordUtils} from "../../../../utils/Utils";
 
 export abstract class AbstractAdminAuditLogger extends CloseableModule<null> {

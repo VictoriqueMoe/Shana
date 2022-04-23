@@ -1,8 +1,8 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {GuildableModel} from "../../DB/entities/guild/Guildable.model";
-import {Guild} from "discord.js";
+import type {Guild} from "discord.js";
 import {singleton} from "tsyringe";
-import {Client} from "discordx";
+import type {Client} from "discordx";
 import {getRepository} from "typeorm";
 
 @singleton()

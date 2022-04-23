@@ -1,4 +1,4 @@
-import {GuildChannel, Role} from "discord.js";
+import type {GuildChannel, Role} from "discord.js";
 
 /**
  * Any model implementing this interface will enable the event that fires this module to be constrained to channels and roles

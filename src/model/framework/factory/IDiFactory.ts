@@ -1,4 +1,4 @@
-import * as Immutable from "immutable";
+import type * as Immutable from "immutable";
 
 /**
  * Any factory annotated with @registry must implement this interface to facilitate the resolution of engines

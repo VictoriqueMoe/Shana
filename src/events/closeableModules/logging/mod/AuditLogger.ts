@@ -1,8 +1,10 @@
 import {CloseOptionModel} from "../../../../model/DB/entities/autoMod/impl/CloseOption.model";
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {CloseableModule} from "../../../../model/closeableModules/impl/CloseableModule";
 import {DiscordUtils, ObjectUtil} from "../../../../utils/Utils";
-import {Message, MessageEmbed, User} from "discord.js";
+import type {Message} from "discord.js";
+import {MessageEmbed, User} from "discord.js";
 
 /**
  * Non admin audit Logger for quick logs. this will log:<br/>

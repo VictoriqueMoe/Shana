@@ -1,4 +1,4 @@
-import {IPermissionEventListener} from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
+import type {IPermissionEventListener} from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
 import Immutable from "immutable";
 import {AbstractFactory} from "./AbstractFactory";
 import {container, delay, registry, singleton} from "tsyringe";

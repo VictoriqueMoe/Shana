@@ -1,15 +1,18 @@
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule";
 import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model";
-import {ArgsOf, Client} from "discordx";
+import type {ArgsOf, Client} from "discordx";
 import {AbstractFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/AbstractFilter";
 import {ACTION} from "../../../enums/ACTION";
-import {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
-import {BaseGuildTextChannel, GuildMember} from "discord.js";
+import type {IDynoAutoModFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/IDynoAutoModFilter";
+import type {GuildMember} from "discord.js";
+import {BaseGuildTextChannel} from "discord.js";
 import {MuteManager} from "../../../model/framework/manager/MuteManager";
 import {DiscordUtils, ObjectUtil, TimeUtils} from "../../../utils/Utils";
-import * as Immutable from "immutable";
+import type * as Immutable from "immutable";
 import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
-import {FastMessageSpamFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
+import type {
+    FastMessageSpamFilter
+} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/FastMessageSpamFilter";
 import {notBot} from "../../../guards/NotABot";
 import {container, singleton} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";

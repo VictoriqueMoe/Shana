@@ -1,6 +1,7 @@
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {MessageEmbed, Role, User} from "discord.js";
 import {MemberRoleChange} from "../../../../model/Impl/MemberRoleChange";
 import {GuildManager} from "../../../../model/framework/manager/GuildManager";

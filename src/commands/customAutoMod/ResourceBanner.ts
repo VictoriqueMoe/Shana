@@ -1,7 +1,8 @@
-import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
+import type {SimpleCommandMessage} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand} from "discordx";
 import {DiscordUtils, ObjectUtil, StringUtils} from "../../utils/Utils";
 import {BannedAttachmentsModel} from "../../model/DB/entities/guild/BannedAttachments.model";
-import {Collection, Message, Snowflake, Sticker} from "discord.js";
+import type {Collection, Message, Snowflake, Sticker} from "discord.js";
 import {AbstractCommand} from "../AbstractCommand";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";

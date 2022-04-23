@@ -1,11 +1,11 @@
-import {ArgsOf, Client} from "discordx";
+import type {ArgsOf, Client} from "discordx";
 import {ArrayUtils, DiscordUtils, Ffmpeg, GuildUtils, ObjectUtil} from "../../utils/Utils";
 import {Collection, MessageEmbed} from "discord.js";
 import {BannedAttachmentsModel} from "../../model/DB/entities/guild/BannedAttachments.model";
 import fs from "fs";
 import {MessageListenerDecorator} from "../../model/decorators/messageListenerDecorator";
 import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner";
-import {DirResult} from "tmp";
+import type {DirResult} from "tmp";
 import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
 import ffmpeg = require("ffmpeg");

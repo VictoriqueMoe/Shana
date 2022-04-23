@@ -1,8 +1,7 @@
-import Fuse from "fuse.js";
-import {AutocompleteInteraction} from "discord.js";
+import type Fuse from "fuse.js";
+import type {AutocompleteInteraction} from "discord.js";
 import {ObjectUtil} from "../utils/Utils";
-import {ShanaFuse} from "./Impl/ShanaFuse";
-import FuseResult = Fuse.FuseResult;
+import type {ShanaFuse} from "./Impl/ShanaFuse";
 
 export type SearchBase = {
     name: string
@@ -25,7 +24,7 @@ export interface ISearchBase<T extends SearchBase> {
      * Preform a search on the Fuse container
      * @param interaction
      */
-    search(interaction: AutocompleteInteraction): FuseResult<T>[] | Promise<FuseResult<T>[]>;
+    search(interaction: AutocompleteInteraction): Fuse.FuseResult<T>[] | Promise<Fuse.FuseResult<T>[]>;
 }
 
 /**

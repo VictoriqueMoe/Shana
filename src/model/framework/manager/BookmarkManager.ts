@@ -1,7 +1,8 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {BookmarkModel} from "../../DB/entities/guild/Bookmark.model";
 import {singleton} from "tsyringe";
-import {BaseGuildTextChannel, GuildMember, Message} from "discord.js";
+import type {GuildMember, Message} from "discord.js";
+import {BaseGuildTextChannel} from "discord.js";
 import {ArrayUtils} from "../../../utils/Utils";
 import {getRepository} from "typeorm";
 

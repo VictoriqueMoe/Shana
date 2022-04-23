@@ -1,8 +1,8 @@
 import {AbstractModuleController} from "../AbstractModuleController";
 import {ChildControllers, Controller, Get, Post} from "@overnightjs/core";
 import {AutoResponderController} from "./AutoResponderController";
-import {Request, Response} from "express";
-import {Guild} from "discord.js";
+import type {Request, Response} from "express";
+import type {Guild} from "discord.js";
 import {StatusCodes} from "http-status-codes";
 import {CloseOptionModel} from "../../../../../model/DB/entities/autoMod/impl/CloseOption.model";
 import {ArrayUtils, ObjectUtil} from "../../../../../utils/Utils";

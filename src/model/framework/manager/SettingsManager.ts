@@ -3,7 +3,8 @@ import {SettingsModel} from "../../DB/entities/guild/Settings.model";
 import {SETTINGS} from "../../../enums/SETTINGS";
 import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 import {singleton} from "tsyringe";
-import {EntityManager, getRepository} from "typeorm";
+import type {EntityManager} from "typeorm";
+import {getRepository} from "typeorm";
 
 export type ALL_SETTINGS_TYPE = {
     [key in keyof typeof SETTINGS]?: string

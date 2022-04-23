@@ -1,36 +1,34 @@
+import type {Client, SimpleCommandMessage} from "discordx";
 import {
-    Client,
     ContextMenu,
     DefaultPermissionResolver,
     Discord,
     Guard,
     Permission,
     SimpleCommand,
-    SimpleCommandMessage,
     Slash,
     SlashGroup,
     SlashOption
 } from "discordx";
 import {NotBot, TimedSet} from "@discordx/utilities";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
-import {
+import type {
     ColorResolvable,
     CommandInteraction,
     ContextMenuInteraction,
     GuildMember,
     ImageURLOptions,
-    MessageAttachment,
-    MessageEmbed,
     User
 } from "discord.js";
-import {AnimeTractApi} from "../../model/anime/AnimeTractApi";
-import {Response} from "../../model/anime/AnimeTypings";
+import {MessageAttachment, MessageEmbed} from "discord.js";
+import type {AnimeTractApi} from "../../model/anime/AnimeTractApi";
+import type {Response} from "../../model/anime/AnimeTypings";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommand} from "../AbstractCommand";
 import {injectable} from "tsyringe";
 import * as locale from 'locale-codes';
 import {Category} from "../../modules/category";
-import Anilist from "anilist-node";
+import type Anilist from "anilist-node";
 import {Property} from "../../model/decorators/Property";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 

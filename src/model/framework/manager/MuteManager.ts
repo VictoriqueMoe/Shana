@@ -1,7 +1,9 @@
-import {GuildAuditLogsEntry, GuildMember, User} from "discord.js";
-import {DiscordUtils, TimeUtils} from "../../../utils/Utils";
+import type {GuildAuditLogsEntry, GuildMember} from "discord.js";
+import {User} from "discord.js";
+import type {TimeUtils} from "../../../utils/Utils";
+import {DiscordUtils} from "../../../utils/Utils";
 import {singleton} from "tsyringe";
-import {GuildManager} from "./GuildManager";
+import type {GuildManager} from "./GuildManager";
 
 
 @singleton()

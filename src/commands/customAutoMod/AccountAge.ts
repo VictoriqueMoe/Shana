@@ -1,8 +1,10 @@
-import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
+import type {Client} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
-import {Channel, CommandInteraction, GuildMember, User} from "discord.js";
+import type {Channel, CommandInteraction, User} from "discord.js";
+import {GuildMember} from "discord.js";
 import {AbstractCommand} from "../AbstractCommand";
 import {injectable} from "tsyringe";
 import {Category} from "../../modules/category";

@@ -1,4 +1,4 @@
-import {IDynoAutoModFilter} from "./IDynoAutoModFilter";
+import type {IDynoAutoModFilter} from "./IDynoAutoModFilter";
 
 /**
  * This filter is backed by a value

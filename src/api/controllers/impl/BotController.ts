@@ -1,15 +1,17 @@
 import {ChildControllers, Controller, Get, Post} from "@overnightjs/core";
-import {Request, Response} from 'express';
+import type {Request, Response} from 'express';
 import {baseController} from "../BaseController";
 import {DiscordUtils, EnumEx, ObjectUtil} from "../../../utils/Utils";
-import {Channel, Guild, GuildBasedChannel, GuildChannel, GuildMember} from "discord.js";
+import type {Channel, Guild, GuildBasedChannel, GuildMember} from "discord.js";
+import {GuildChannel} from "discord.js";
 import {StatusCodes} from "http-status-codes";
 import {SETTINGS} from "../../../enums/SETTINGS";
 import {SettingsManager} from "../../../model/framework/manager/SettingsManager";
 import {ModuleController} from "./modules/impl/ModuleController";
-import {AllCommands, CommandSecurityManager} from "../../../model/framework/manager/CommandSecurityManager";
+import type {AllCommands} from "../../../model/framework/manager/CommandSecurityManager";
+import {CommandSecurityManager} from "../../../model/framework/manager/CommandSecurityManager";
 import {container, singleton} from "tsyringe";
-import {Client} from "discordx";
+import type {Client} from "discordx";
 import {MuteManager} from "../../../model/framework/manager/MuteManager";
 
 @singleton()

@@ -1,8 +1,9 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {ArrayUtils, DiscordUtils, GuildUtils, ObjectUtil, StringUtils} from "../../../../utils/Utils";
 import {MessageEmbed} from "discord.js";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
-import {Imgur} from "../../../../model/Impl/Imgur";
+import type {Imgur} from "../../../../model/Impl/Imgur";
 import {injectable} from "tsyringe";
 
 const isImageFast = require('is-image-fast');

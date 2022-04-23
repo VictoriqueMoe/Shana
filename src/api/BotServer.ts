@@ -2,10 +2,10 @@ import {Server} from "@overnightjs/core";
 import * as bodyParser from 'body-parser';
 import * as path from "path";
 import {glob} from "glob";
-import * as http from "http";
+import type * as http from "http";
 import Logger from "jet-logger";
 import {singleton} from "tsyringe";
-import {BotController} from "./controllers/impl/BotController";
+import type {BotController} from "./controllers/impl/BotController";
 import {PostConstruct} from "../model/decorators/PostConstruct";
 
 @singleton()

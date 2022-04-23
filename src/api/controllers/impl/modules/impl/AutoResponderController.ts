@@ -1,10 +1,10 @@
 import {Controller, Delete, Get, Middleware, Post} from "@overnightjs/core";
-import {Request, Response} from "express";
-import {Guild} from "discord.js";
+import type {Request, Response} from "express";
+import type {Guild} from "discord.js";
 import {StatusCodes} from "http-status-codes";
 import {AbstractModuleController} from "../AbstractModuleController";
 import {EventSecurityConstraintTypeValidator} from "../../../middleWare/EventSecurityConstraintTypeValidator";
-import {AutoResponderPayload} from "../../../../../model/types/Typeings";
+import type {AutoResponderPayload} from "../../../../../model/types/Typeings";
 import {AutoResponderModel} from "../../../../../model/DB/entities/autoMod/impl/AutoResponder.model";
 import {AutoResponderManager} from "../../../../../model/framework/manager/AutoResponderManager";
 import {container} from "tsyringe";

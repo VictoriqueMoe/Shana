@@ -1,15 +1,8 @@
 import {AbstractCommand} from "../AbstractCommand";
 import {RoleJoinerModel} from "../../model/DB/entities/guild/RoleJoiner.model";
 import {DefaultPermissionResolver, Discord, Permission, SelectMenuComponent, Slash, SlashGroup} from "discordx";
-import {
-    CommandInteraction,
-    GuildMember,
-    MessageActionRow,
-    MessageEmbed,
-    MessageSelectMenu,
-    MessageSelectOptionData,
-    SelectMenuInteraction
-} from "discord.js";
+import type {CommandInteraction, MessageSelectOptionData, SelectMenuInteraction} from "discord.js";
+import {GuildMember, MessageActionRow, MessageEmbed, MessageSelectMenu} from "discord.js";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Category} from "../../modules/category";
 import {getRepository} from "typeorm";

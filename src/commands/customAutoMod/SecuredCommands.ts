@@ -1,10 +1,11 @@
-import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
+import type {Client} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup} from "discordx";
 import {AbstractCommand} from "../AbstractCommand";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {CommandInteraction} from "discord.js";
+import type {CommandInteraction} from "discord.js";
 import {delay, inject, injectable} from "tsyringe";
-import {MuteManager} from "../../model/framework/manager/MuteManager";
+import type {MuteManager} from "../../model/framework/manager/MuteManager";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Category} from "../../modules/category";
 import {CommandSecurityManager} from "../../model/framework/manager/CommandSecurityManager";

@@ -1,11 +1,13 @@
-import {Dropbox, DropboxResponse, files} from "dropbox";
+import type {DropboxResponse, files} from "dropbox";
+import {Dropbox} from "dropbox";
 import {singleton} from "tsyringe";
 import {Property} from "../decorators/Property";
 import {PostConstruct} from "../decorators/PostConstruct";
 import {ModuleEnabledConfigure} from "../Impl/ModuleEnabledConfigure";
-import {defaultSearch, fuseOptions, ISearchBase} from "../ISearchBase";
-import {AutocompleteInteraction} from "discord.js";
-import Fuse from "fuse.js";
+import type {ISearchBase} from "../ISearchBase";
+import {defaultSearch, fuseOptions} from "../ISearchBase";
+import type {AutocompleteInteraction} from "discord.js";
+import type Fuse from "fuse.js";
 import {ShanaFuse} from "../Impl/ShanaFuse";
 
 

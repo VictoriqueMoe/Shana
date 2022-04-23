@@ -1,9 +1,10 @@
 import {DiscordUtils} from "../utils/Utils";
-import {Client, GuardFunction, Next, SimpleCommandMessage} from "discordx";
+import type {Client, GuardFunction, Next} from "discordx";
+import {SimpleCommandMessage} from "discordx";
 import {CommandSecurityManager} from "../model/framework/manager/CommandSecurityManager";
-import {CommandInteraction, ContextMenuInteraction} from "discord.js";
+import type {CommandInteraction, ContextMenuInteraction} from "discord.js";
 import {container} from "tsyringe";
-import {ModuleEnabledConfigure} from "../model/Impl/ModuleEnabledConfigure";
+import type {ModuleEnabledConfigure} from "../model/Impl/ModuleEnabledConfigure";
 
 const securityManager = container.resolve(CommandSecurityManager);
 

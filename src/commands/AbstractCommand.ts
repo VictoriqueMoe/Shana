@@ -1,7 +1,8 @@
-import {ApplicationCommandPermissions, Guild} from "discord.js";
+import type {ApplicationCommandPermissions, Guild} from "discord.js";
 import {container} from "tsyringe";
 import {CommandSecurityManager} from "../model/framework/manager/CommandSecurityManager";
-import {ApplicationCommandMixin, ApplicationGuildMixin, SimpleCommandMessage} from "discordx";
+import type {ApplicationCommandMixin, ApplicationGuildMixin} from "discordx";
+import {SimpleCommandMessage} from "discordx";
 
 export abstract class AbstractCommand {
     protected static async getPermissions(guild: Guild, command: ApplicationCommandMixin | SimpleCommandMessage): Promise<ApplicationCommandPermissions[]> {

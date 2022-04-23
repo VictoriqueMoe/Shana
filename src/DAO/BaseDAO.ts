@@ -1,6 +1,7 @@
 import {ObjectUtil} from "../utils/Utils";
-import {EntityManager, getManager, QueryFailedError, Repository} from "typeorm";
-import {EntityTarget} from "typeorm/common/EntityTarget";
+import type {Repository} from "typeorm";
+import {EntityManager, getManager, QueryFailedError} from "typeorm";
+import type {EntityTarget} from "typeorm/common/EntityTarget";
 
 export abstract class BaseDAO<T> {
 

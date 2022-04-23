@@ -1,4 +1,4 @@
-import {ICloseableModule} from "../ICloseableModule";
+import type {ICloseableModule} from "../ICloseableModule";
 
 /**
  * A sub module is  something that belongs to the parent module

@@ -1,5 +1,5 @@
-import {ArgsOf, Client} from "discordx";
-import {Message} from "discord.js";
+import type {ArgsOf, Client} from "discordx";
+import type {Message} from "discord.js";
 import {SETTINGS} from "../../enums/SETTINGS";
 
 export namespace Typeings {

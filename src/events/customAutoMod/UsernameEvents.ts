@@ -1,4 +1,5 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {UsernameModel} from "../../model/DB/entities/autoMod/impl/Username.model";
 import {DiscordUtils} from "../../utils/Utils";
 import {Roles} from "../../enums/Roles";

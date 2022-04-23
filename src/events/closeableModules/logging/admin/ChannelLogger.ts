@@ -1,5 +1,6 @@
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../../../utils/Utils";
 import {BaseGuildTextChannel, Channel, GuildChannel, MessageEmbed, ThreadChannel} from "discord.js";
 import ChannelUpdate = DiscordUtils.ChannelUpdate;

@@ -1,8 +1,9 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {injectable} from "tsyringe";
-import {IPermissionEventListener, RoleTypes, RoleUpdateTrigger} from "./Listeners/IPermissionEventListener";
-import {PermissionEventFactory} from "../../model/framework/factory/PermissionEventFactory";
-import Immutable from "immutable";
+import type {IPermissionEventListener, RoleTypes, RoleUpdateTrigger} from "./Listeners/IPermissionEventListener";
+import type {PermissionEventFactory} from "../../model/framework/factory/PermissionEventFactory";
+import type Immutable from "immutable";
 
 
 @Discord()

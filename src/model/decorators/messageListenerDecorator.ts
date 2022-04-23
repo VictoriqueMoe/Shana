@@ -1,7 +1,7 @@
-import {EditType, EventTriggerCondition} from "../types/Typeings";
+import type {EditType, EventTriggerCondition} from "../types/Typeings";
 import {MessageEventDispatcher} from "../../events/eventDispatcher/MessageEventDispatcher";
 import {MessageEntry} from "../../events/eventDispatcher/MessageEntry";
-import constructor from "tsyringe/dist/typings/types/constructor";
+import type constructor from "tsyringe/dist/typings/types/constructor";
 
 /**
  * signals this method to be triggered on a message event.

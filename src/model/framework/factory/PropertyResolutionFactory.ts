@@ -1,7 +1,7 @@
 import {container, registry, singleton} from "tsyringe";
 import {Beans} from "../../../DI/Beans";
 import {EnvPropertyResolutionEngine} from "../engine/impl/EnvPropertyResolutionEngine";
-import {IPropertyResolutionEngine} from "../engine/IPropertyResolutionEngine";
+import type {IPropertyResolutionEngine} from "../engine/IPropertyResolutionEngine";
 import {PackageJsonResolutionEngine} from "../engine/impl/PackageJsonResolutionEngine";
 import Immutable from 'immutable';
 import {AbstractFactory} from "./AbstractFactory";

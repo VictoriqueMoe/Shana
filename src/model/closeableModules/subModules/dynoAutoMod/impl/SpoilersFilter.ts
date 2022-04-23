@@ -1,6 +1,6 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
-import {Message} from "discord.js";
+import type {Message} from "discord.js";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {singleton} from "tsyringe";
 

@@ -1,7 +1,7 @@
 import {GuildableModel} from "../../guild/Guildable.model";
 import {Column, Entity, Index, JoinColumn, ManyToOne, OneToMany} from "typeorm";
 import {AbstractModel} from "../../AbstractModel";
-import {ICloseOption} from "../ICloseOption";
+import type {ICloseOption} from "../ICloseOption";
 import {SubModuleModel} from "./EventModules/subModules/impl/SubModule.model";
 
 @Entity()

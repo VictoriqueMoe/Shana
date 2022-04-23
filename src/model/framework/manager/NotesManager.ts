@@ -1,11 +1,12 @@
 import {singleton} from "tsyringe";
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {NotesModel} from "../../DB/entities/guild/Notes.model";
-import {AutocompleteInteraction, GuildMember} from "discord.js";
+import type {AutocompleteInteraction, GuildMember} from "discord.js";
 import {getRepository} from "typeorm";
 import {ObjectUtil} from "../../../utils/Utils";
-import {defaultSearch, fuseOptions, ISearchBase} from "../../ISearchBase";
-import Fuse from "fuse.js";
+import type {ISearchBase} from "../../ISearchBase";
+import {defaultSearch, fuseOptions} from "../../ISearchBase";
+import type Fuse from "fuse.js";
 import {PostConstruct} from "../../decorators/PostConstruct";
 import {ShanaFuse} from "../../Impl/ShanaFuse";
 

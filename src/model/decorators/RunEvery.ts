@@ -1,4 +1,4 @@
-import {TimeUtils} from "../../utils/Utils";
+import type {TimeUtils} from "../../utils/Utils";
 import {container} from "tsyringe";
 import {AsyncTask, SimpleIntervalJob, ToadScheduler} from "toad-scheduler";
 

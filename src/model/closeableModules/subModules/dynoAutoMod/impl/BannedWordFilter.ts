@@ -1,7 +1,7 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
-import {Message} from "discord.js";
-import {BannedWordEntries, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
+import type {Message} from "discord.js";
+import type {BannedWordEntries, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {singleton} from "tsyringe";
 

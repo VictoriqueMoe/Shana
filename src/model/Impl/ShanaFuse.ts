@@ -1,6 +1,6 @@
 import Fuse from "fuse.js";
 import {ArrayUtils, ObjectUtil} from "../../utils/Utils";
-import {SearchBase} from "../ISearchBase";
+import type {SearchBase} from "../ISearchBase";
 
 export class ShanaFuse<T extends SearchBase> extends Fuse<T> {
     public getFirstNItems(amount: number): Fuse.FuseResult<T>[] {

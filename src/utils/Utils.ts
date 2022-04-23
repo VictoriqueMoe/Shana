@@ -1,7 +1,6 @@
-import {
+import type {
     AutocompleteInteraction,
     BaseCommandInteraction,
-    BaseGuildTextChannel,
     CategoryChannel,
     ContextMenuInteraction,
     Guild,
@@ -10,21 +9,19 @@ import {
     GuildAuditLogsEntry,
     GuildAuditLogsFetchOptions,
     GuildChannel,
-    GuildMember,
     HexColorString,
     Message,
     MessageComponentInteraction,
     MessageEmbed,
     PartialGuildMember,
-    Permissions,
     Role,
     StaticImageURLOptions,
     Sticker,
-    TextChannel,
     ThreadAutoArchiveDuration,
     ThreadChannel,
     User
 } from "discord.js";
+import {BaseGuildTextChannel, GuildMember, Permissions, TextChannel} from "discord.js";
 import cronstrue from 'cronstrue';
 import {isValidCron} from 'cron-validator';
 import {CloseOptionModel} from "../model/DB/entities/autoMod/impl/CloseOption.model";
@@ -35,14 +32,14 @@ import {GuildManager} from "../model/framework/manager/GuildManager";
 import {SettingsManager} from "../model/framework/manager/SettingsManager";
 import {SETTINGS} from "../enums/SETTINGS";
 import {StatusCodes} from "http-status-codes";
-import {Typeings} from "../model/types/Typeings";
 import {container} from "tsyringe";
 import {Client} from "discordx";
 import {getRepository} from "typeorm";
-import {ISearchBase, SearchBase} from "../model/ISearchBase";
+import type {ISearchBase, SearchBase} from "../model/ISearchBase";
 import {Channels} from "../enums/Channels";
 import axios from "axios";
-import {constructor} from "tsyringe/dist/typings/types";
+import type {constructor} from "tsyringe/dist/typings/types";
+import type {Typeings} from "../model/types/Typeings";
 
 const emojiRegex = require('emoji-regex');
 const isImageFast = require('is-image-fast');
@@ -319,7 +316,6 @@ export namespace CronUtils {
 
 export namespace DiscordUtils {
 
-    import ObjectChange = Typeings.ObjectChange;
     export namespace InteractionUtils {
 
         export function getUserFromUserContextInteraction(interaction: ContextMenuInteraction): GuildMember | undefined {
@@ -535,46 +531,46 @@ export namespace DiscordUtils {
 
 
     export type RoleChange = {
-        permissions?: ObjectChange<Array<string>>
-        nameChange?: ObjectChange<string>,
-        colourChange?: ObjectChange<HexColorString>,
-        iconChange?: ObjectChange<string>,
-        hoist?: ObjectChange<boolean>
+        permissions?: Typeings.ObjectChange<Array<string>>
+        nameChange?: Typeings.ObjectChange<string>,
+        colourChange?: Typeings.ObjectChange<HexColorString>,
+        iconChange?: Typeings.ObjectChange<string>,
+        hoist?: Typeings.ObjectChange<boolean>
     };
 
     export type ChannelUpdate = {
-        name?: ObjectChange<string>,
-        topic?: ObjectChange<string>,
-        slowMode?: ObjectChange<number>,
-        nsfw?: ObjectChange<boolean>,
-        parent?: ObjectChange<CategoryChannel>
+        name?: Typeings.ObjectChange<string>,
+        topic?: Typeings.ObjectChange<string>,
+        slowMode?: Typeings.ObjectChange<number>,
+        nsfw?: Typeings.ObjectChange<boolean>,
+        parent?: Typeings.ObjectChange<CategoryChannel>
     };
 
 
     export type GuildUpdate = {
-        banner?: ObjectChange<string>,
-        rulesChannel?: ObjectChange<TextChannel>,
-        splash?: ObjectChange<string>,
-        description?: ObjectChange<string>,
-        discoverySplash?: ObjectChange<string>,
-        icon?: ObjectChange<string>,
-        vanityURLCode?: ObjectChange<string>,
-        name?: ObjectChange<string>,
+        banner?: Typeings.ObjectChange<string>,
+        rulesChannel?: Typeings.ObjectChange<TextChannel>,
+        splash?: Typeings.ObjectChange<string>,
+        description?: Typeings.ObjectChange<string>,
+        discoverySplash?: Typeings.ObjectChange<string>,
+        icon?: Typeings.ObjectChange<string>,
+        vanityURLCode?: Typeings.ObjectChange<string>,
+        name?: Typeings.ObjectChange<string>,
 
     };
 
     export type ThreadUpdate = {
-        archived?: ObjectChange<boolean>,
-        type?: ObjectChange<"Public" | "Private" | null>
-        locked?: ObjectChange<boolean>,
-        name?: ObjectChange<string>,
-        slowMode?: ObjectChange<number>,
-        archiveDuration?: ObjectChange<ThreadAutoArchiveDuration | null>
+        archived?: Typeings.ObjectChange<boolean>,
+        type?: Typeings.ObjectChange<"Public" | "Private" | null>
+        locked?: Typeings.ObjectChange<boolean>,
+        name?: Typeings.ObjectChange<string>,
+        slowMode?: Typeings.ObjectChange<number>,
+        archiveDuration?: Typeings.ObjectChange<ThreadAutoArchiveDuration | null>
     };
 
     export type MemberUpdate = {
-        nickName?: ObjectChange<string>,
-        timeout?: ObjectChange<number>
+        nickName?: Typeings.ObjectChange<string>,
+        timeout?: Typeings.ObjectChange<number>
     }
 
     export function getMemberChanges(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember): MemberUpdate {

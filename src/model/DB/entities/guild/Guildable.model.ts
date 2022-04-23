@@ -1,4 +1,4 @@
-import {IGuildAware} from "../IGuildAware";
+import type {IGuildAware} from "../IGuildAware";
 import {RolePersistenceModel} from "../autoMod/impl/RolePersistence.model";
 import {UsernameModel} from "../autoMod/impl/Username.model";
 import {CloseOptionModel} from "../autoMod/impl/CloseOption.model";

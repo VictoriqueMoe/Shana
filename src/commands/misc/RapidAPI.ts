@@ -1,7 +1,7 @@
 import {DefaultPermissionResolver, Discord, Permission, SlashGroup} from "discordx";
 import {injectable} from "tsyringe";
 import {AbstractCommand} from "../AbstractCommand";
-import {D7SMSManager} from "../../model/rapidApi/D7SMSManager";
+import type {D7SMSManager} from "../../model/rapidApi/D7SMSManager";
 import {Category} from "../../modules/category";
 
 @Discord()

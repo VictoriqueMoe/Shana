@@ -1,5 +1,7 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
-import {Message, User} from "discord.js";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
+import type {Message} from "discord.js";
+import {User} from "discord.js";
 import {MessageListener} from "../managedEvents/messageEvents/MessageListener";
 import {DiscordUtils} from "../utils/Utils";
 

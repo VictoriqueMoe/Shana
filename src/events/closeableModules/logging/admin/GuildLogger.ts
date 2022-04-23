@@ -1,7 +1,9 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
 import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
-import {Guild, MessageEmbed} from "discord.js";
+import type {Guild} from "discord.js";
+import {MessageEmbed} from "discord.js";
 
 /**
  * Will log: <br />

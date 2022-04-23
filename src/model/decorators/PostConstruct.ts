@@ -1,5 +1,5 @@
 import {container} from "tsyringe";
-import InjectionToken from "tsyringe/dist/typings/providers/injection-token";
+import type InjectionToken from "tsyringe/dist/typings/providers/injection-token";
 
 /**
  * Spring-like post construction executor, this will fire after a dependency is resolved and constructed

@@ -1,20 +1,22 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {CommandSecurityModel} from "../../DB/entities/guild/CommandSecurity.model";
-import {ApplicationCommandPermissions, Guild, GuildMember, Permissions} from "discord.js";
-import {Client, DApplicationCommand, DIService, DOn, DSimpleCommand, MetadataStorage} from "discordx";
+import type {ApplicationCommandPermissions, Guild, GuildMember} from "discord.js";
+import {Permissions} from "discord.js";
+import type {Client, DApplicationCommand, DOn} from "discordx";
+import {DIService, DSimpleCommand, MetadataStorage} from "discordx";
 import {ArrayUtils, GuildUtils} from "../../../utils/Utils";
-import {Typeings} from "../../types/Typeings";
 import {container, singleton} from "tsyringe";
-import constructor from "tsyringe/dist/typings/types/constructor";
+import type constructor from "tsyringe/dist/typings/types/constructor";
 import {PostConstruct} from "../../decorators/PostConstruct";
-import {
+import type {
     IPermissionEventListener,
     RoleTypes,
     RoleUpdateTrigger
 } from "../../../events/eventDispatcher/Listeners/IPermissionEventListener";
-import {CategoryMetaData, ICategory, ICategoryItem, ICategoryItemCommand} from "../../../modules/category";
+import type {ICategory, ICategoryItem, ICategoryItemCommand} from "../../../modules/category";
+import {CategoryMetaData} from "../../../modules/category";
 import {getRepository} from "typeorm";
-import UpdateCommandSettings = Typeings.UpdateCommandSettings;
+import type {Typeings} from "../../types/Typeings";
 
 export type AllCommands = (DSimpleCommand | DApplicationCommand)[];
 
@@ -222,7 +224,7 @@ export class CommandSecurityManager extends BaseDAO<CommandSecurityModel> implem
         });
     }
 
-    public async updateCommand(commandName: string, guildId: string, settings: UpdateCommandSettings): Promise<boolean> {
+    public async updateCommand(commandName: string, guildId: string, settings: Typeings.UpdateCommandSettings): Promise<boolean> {
         const result = await getRepository(CommandSecurityModel).update({
             guildId,
             commandName

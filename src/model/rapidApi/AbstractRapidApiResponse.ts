@@ -1,4 +1,4 @@
-import {Method} from "axios";
+import type {Method} from "axios";
 import {Property} from "../decorators/Property";
 import {ModuleEnabledConfigure} from "../Impl/ModuleEnabledConfigure";
 import {ObjectUtil} from "../../utils/Utils";

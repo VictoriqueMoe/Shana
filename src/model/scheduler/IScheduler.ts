@@ -1,4 +1,4 @@
-import {IScheduledJob} from "./impl/ScheduledJob/IScheduledJob";
+import type {IScheduledJob} from "./impl/ScheduledJob/IScheduledJob";
 
 export interface IScheduler {
 

@@ -1,13 +1,15 @@
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {BirthdaysModel} from "../../DB/entities/guild/Birthdays.model";
 import {singleton} from "tsyringe";
-import {Guild, GuildMember, MessageEmbed} from "discord.js";
+import type {Guild, GuildMember} from "discord.js";
+import {MessageEmbed} from "discord.js";
 import {DateTime} from "luxon";
 import {getRepository} from "typeorm";
 import {PostConstruct} from "../../decorators/PostConstruct";
-import {GuildManager} from "./GuildManager";
-import schedule, {Job, RecurrenceSpecObjLit} from "node-schedule";
-import {ChannelManager} from "./ChannelManager";
+import type {GuildManager} from "./GuildManager";
+import type {Job, RecurrenceSpecObjLit} from "node-schedule";
+import schedule from "node-schedule";
+import type {ChannelManager} from "./ChannelManager";
 import {Channels} from "../../../enums/Channels";
 import {ObjectUtil} from "../../../utils/Utils";
 

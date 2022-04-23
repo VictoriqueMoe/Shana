@@ -2,7 +2,8 @@ import {singleton} from "tsyringe";
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {Message, Permissions} from "discord.js";
+import type {Message} from "discord.js";
+import {Permissions} from "discord.js";
 
 @singleton()
 export class EveryoneMentionsFilter extends AbstractFilter {

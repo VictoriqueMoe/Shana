@@ -1,7 +1,7 @@
-import {BaseGuildTextChannel} from "discord.js";
-import {IScheduledMessageJob} from "./impl/ScheduledJob/IScheduledMessageJob";
-import {JobCallback} from "node-schedule";
-import {IScheduler} from "./IScheduler";
+import type {BaseGuildTextChannel} from "discord.js";
+import type {IScheduledMessageJob} from "./impl/ScheduledJob/IScheduledMessageJob";
+import type {JobCallback} from "node-schedule";
+import type {IScheduler} from "./IScheduler";
 
 export interface IMessageScheduler extends IScheduler {
 

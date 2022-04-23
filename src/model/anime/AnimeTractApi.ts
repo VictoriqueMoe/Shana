@@ -1,4 +1,4 @@
-import {Response} from "./AnimeTypings";
+import type {Response} from "./AnimeTypings";
 import {singleton} from "tsyringe";
 import axios from "axios";
 

@@ -2,7 +2,7 @@ import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashOptio
 import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {AbstractCommand} from "../AbstractCommand";
-import {CommandInteraction} from "discord.js";
+import type {CommandInteraction} from "discord.js";
 import {Category} from "../../modules/category";
 import {container} from "tsyringe";
 import {CloseableModuleManager} from "../../model/framework/manager/CloseableModuleManager";

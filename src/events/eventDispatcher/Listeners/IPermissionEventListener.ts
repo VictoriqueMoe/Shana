@@ -1,4 +1,4 @@
-import {ArgsOf} from "discordx";
+import type {ArgsOf} from "discordx";
 
 export type RoleUpdateTrigger = ArgsOf<"roleUpdate"> | ArgsOf<"roleCreate"> | ArgsOf<"roleDelete">
 export type RoleTypes = "roleUpdate" | "roleCreate" | "roleDelete";

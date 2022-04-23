@@ -1,5 +1,5 @@
 import {AbstractFactory} from "./AbstractFactory";
-import {ISubModule} from "../../closeableModules/subModules/ISubModule";
+import type {ISubModule} from "../../closeableModules/subModules/ISubModule";
 import {container, registry, singleton} from "tsyringe";
 import {Beans} from "../../../DI/Beans";
 import {ZalgoTextFilter} from "../../closeableModules/subModules/dynoAutoMod/impl/ZalgoTextFilter";

@@ -1,7 +1,7 @@
-import {IEventSecurityConstraint} from "./IEventSecurityConstraint";
+import type {IEventSecurityConstraint} from "./IEventSecurityConstraint";
 import {AbstractModel} from "./AbstractModel";
 import {AfterLoad, Column} from "typeorm";
-import {Guild, GuildChannel, Role} from "discord.js";
+import type {Guild, GuildChannel, Role} from "discord.js";
 import {ArrayUtils} from "../../../utils/Utils";
 import {container} from "tsyringe";
 import {Client} from "discordx";

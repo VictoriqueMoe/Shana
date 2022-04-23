@@ -1,8 +1,8 @@
 import {AbstractFilter} from "../AbstractFilter";
 import {ACTION} from "../../../../../enums/ACTION";
-import {Message} from "discord.js";
+import type {Message} from "discord.js";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
-import {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
+import type {IValueBackedDynoAutoModFilter} from "../IValueBackedDynoAutoModFilter";
 import {singleton} from "tsyringe";
 import {ObjectUtil} from "../../../../../utils/Utils";
 import {TimedSet} from "@discordx/utilities";

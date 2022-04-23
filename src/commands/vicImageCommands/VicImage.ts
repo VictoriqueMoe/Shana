@@ -2,7 +2,7 @@ import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup
 import {VicDropbox} from "../../model/dropbox/VicDropbox";
 import {NotBot} from "@discordx/utilities";
 import {AbstractCommand} from "../AbstractCommand";
-import {AutocompleteInteraction, CommandInteraction} from "discord.js";
+import type {AutocompleteInteraction, CommandInteraction} from "discord.js";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {container, injectable} from "tsyringe";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";

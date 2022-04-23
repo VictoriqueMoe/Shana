@@ -1,4 +1,4 @@
-import * as schedule from "node-schedule";
+import type * as schedule from "node-schedule";
 
 export interface IScheduledJob {
     readonly name: string;

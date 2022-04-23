@@ -1,7 +1,8 @@
-import {IDynoAutoModFilter} from "./IDynoAutoModFilter";
-import {Message, MessageEmbed} from "discord.js";
+import type {IDynoAutoModFilter} from "./IDynoAutoModFilter";
+import type {Message} from "discord.js";
+import {MessageEmbed} from "discord.js";
 import {ACTION} from "../../../../enums/ACTION";
-import {ICloseableModule} from "../../ICloseableModule";
+import type {ICloseableModule} from "../../ICloseableModule";
 import {DiscordUtils, TimeUtils} from "../../../../utils/Utils";
 
 export abstract class AbstractFilter implements IDynoAutoModFilter {

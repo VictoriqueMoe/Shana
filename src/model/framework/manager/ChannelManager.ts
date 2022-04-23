@@ -2,10 +2,10 @@ import {BaseDAO} from "../../../DAO/BaseDAO";
 import {PostableChannelModel} from "../../DB/entities/guild/PostableChannel.model";
 import {BaseGuildTextChannel} from "discord.js";
 import {ObjectUtil} from "../../../utils/Utils";
-import {GuildManager} from "./GuildManager";
+import type {GuildManager} from "./GuildManager";
 import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
-import {Channels} from "../../../enums/Channels";
+import type {Channels} from "../../../enums/Channels";
 
 @singleton()
 export class ChannelManager extends BaseDAO<PostableChannelModel> {

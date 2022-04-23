@@ -1,4 +1,4 @@
-import {IIdentifiable} from "./IIdentifiable";
+import type {IIdentifiable} from "./IIdentifiable";
 import {Column} from "typeorm";
 import {AbstractModel} from "./AbstractModel";
 

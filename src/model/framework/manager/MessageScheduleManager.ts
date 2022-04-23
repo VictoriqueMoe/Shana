@@ -1,13 +1,14 @@
 import {singleton} from "tsyringe";
 import {BaseDAO, UniqueViolationError} from "../../../DAO/BaseDAO";
 import {MessageScheduleModel} from "../../DB/entities/guild/MessageSchedule.model";
-import {BaseGuildTextChannel, GuildMember} from "discord.js";
+import type {BaseGuildTextChannel, GuildMember} from "discord.js";
 import {PostConstruct} from "../../decorators/PostConstruct";
-import {GuildManager} from "./GuildManager";
-import {MessageScheduler} from "../../scheduler/impl/MessageScheduler";
-import {IScheduledMessageJob} from "../../scheduler/impl/ScheduledJob/IScheduledMessageJob";
+import type {GuildManager} from "./GuildManager";
+import type {MessageScheduler} from "../../scheduler/impl/MessageScheduler";
+import type {IScheduledMessageJob} from "../../scheduler/impl/ScheduledJob/IScheduledMessageJob";
 import {ObjectUtil} from "../../../utils/Utils";
-import {getRepository, Repository, Transaction, TransactionRepository} from "typeorm";
+import type {Repository} from "typeorm";
+import {getRepository, Transaction, TransactionRepository} from "typeorm";
 
 @singleton()
 export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {

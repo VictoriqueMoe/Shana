@@ -1,11 +1,11 @@
+import type {JobCallback} from 'node-schedule';
 import * as schedule from 'node-schedule';
-import {JobCallback} from 'node-schedule';
 import {isValidCron} from 'cron-validator';
 import {CronException, ObjectUtil} from '../../../utils/Utils';
-import {IScheduledJob} from "./ScheduledJob/IScheduledJob";
+import type {IScheduledJob} from "./ScheduledJob/IScheduledJob";
 import {ScheduledJob} from "./ScheduledJob/impl/ScheduledJob";
 import {singleton} from "tsyringe";
-import {IScheduler} from "../IScheduler";
+import type {IScheduler} from "../IScheduler";
 
 @singleton()
 export class Scheduler implements IScheduler {

@@ -1,16 +1,16 @@
-import {ArgsOf, Client} from "discordx";
+import type {ArgsOf, Client} from "discordx";
 import {ArrayUtils, DiscordUtils, ObjectUtil} from "../../../utils/Utils";
 import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint";
-import {Message} from "discord.js";
+import type {Message} from "discord.js";
 import {MessageListenerDecorator} from "../../../model/decorators/messageListenerDecorator";
-import {AutoResponderManager} from "../../../model/framework/manager/AutoResponderManager";
+import type {AutoResponderManager} from "../../../model/framework/manager/AutoResponderManager";
 import {notBot} from "../../../guards/NotABot";
 import {singleton} from "tsyringe";
-import {AutoResponderModel} from "../../../model/DB/entities/autoMod/impl/AutoResponder.model";
+import type {AutoResponderModel} from "../../../model/DB/entities/autoMod/impl/AutoResponder.model";
 import path from 'path';
 import isImageFast from 'is-image-fast';
-import {OcrManager} from "../../../model/Impl/OcrManager";
+import type {OcrManager} from "../../../model/Impl/OcrManager";
 
 @singleton()
 export class AutoResponder extends TriggerConstraint<null> {

@@ -1,14 +1,14 @@
 import * as Immutable from 'immutable';
-import {ICloseableModule} from "../ICloseableModule";
-import {ISubModule} from "../subModules/ISubModule";
-import {ModuleSettings} from "../ModuleSettings";
+import type {ICloseableModule} from "../ICloseableModule";
+import type {ISubModule} from "../subModules/ISubModule";
+import type {ModuleSettings} from "../ModuleSettings";
 import {delay, inject, singleton} from "tsyringe";
-import constructor from "tsyringe/dist/typings/types/constructor";
+import type constructor from "tsyringe/dist/typings/types/constructor";
 import {PostConstruct} from "../../decorators/PostConstruct";
 import {DynoAutoMod} from "../../../managedEvents/messageEvents/closeableModules/DynoAutoMod";
 import {AbstractFilter} from "../subModules/dynoAutoMod/AbstractFilter";
 import {CloseableModuleManager} from "../../framework/manager/CloseableModuleManager";
-import {SubModuleFactory} from "../../framework/factory/SubModuleFactory";
+import type {SubModuleFactory} from "../../framework/factory/SubModuleFactory";
 
 @singleton()
 export class SubModuleManager {

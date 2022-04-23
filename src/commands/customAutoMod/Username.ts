@@ -3,7 +3,8 @@ import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {DiscordUtils} from "../../utils/Utils";
-import {CommandInteraction, GuildMember, User} from "discord.js";
+import type {CommandInteraction, User} from "discord.js";
+import {GuildMember} from "discord.js";
 import {GuildManager} from "../../model/framework/manager/GuildManager";
 import {AbstractCommand} from "../AbstractCommand";
 import {container} from "tsyringe";

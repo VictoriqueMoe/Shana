@@ -1,14 +1,15 @@
 import {ImageFun} from "../../model/Impl/ImageFun/ImageFun";
 import {DiscordUtils, EnumEx, ObjectUtil, StringUtils} from "../../utils/Utils";
-import {
+import type {
     additionalGenGetArgs,
-    GENERATE_ENDPOINT,
     GenerateEndPointRequest,
     GenerateEndPointResponse
 } from "../../model/Impl/ImageFun/Typeings";
+import {GENERATE_ENDPOINT} from "../../model/Impl/ImageFun/Typeings";
 import {AssertionError} from "assert";
 import {AbstractCommand} from "../AbstractCommand";
-import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand, SimpleCommandMessage} from "discordx";
+import type {SimpleCommandMessage} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, SimpleCommand} from "discordx";
 import {CommandEnabled} from "../../guards/CommandEnabled";
 import {container, injectable} from "tsyringe";
 import {Category} from "../../modules/category";

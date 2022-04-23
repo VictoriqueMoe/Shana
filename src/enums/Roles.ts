@@ -1,4 +1,4 @@
-import {GuildMember} from "discord.js";
+import type {GuildMember} from "discord.js";
 
 export namespace Roles {
     export enum RolesEnum {

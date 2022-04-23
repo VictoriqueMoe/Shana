@@ -1,22 +1,19 @@
-import {Typeings} from "../../types/Typeings";
+import type {Typeings} from "../../types/Typeings";
 import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
 import Fuse from "fuse.js";
-import {defaultSearch, fuseOptions, ISearchBase} from "../../ISearchBase";
-import {AutocompleteInteraction} from "discord.js";
+import type {ISearchBase} from "../../ISearchBase";
+import {defaultSearch, fuseOptions} from "../../ISearchBase";
+import type {AutocompleteInteraction} from "discord.js";
 import {ShanaFuse} from "../../Impl/ShanaFuse";
 import axios from "axios";
-import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
-import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
-import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
-import MoebooruImage = Typeings.MoebooruTypes.MoebooruImage;
 
 export type RandomImageResponse = {
-    image: MoebooruImage,
+    image: Typeings.MoebooruTypes.MoebooruImage,
     maxPossible: number,
     of: number
 }[];
 
-export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<T> {
+export abstract class MoebooruApi<T extends Typeings.MoebooruTypes.MoebooruTag> implements ISearchBase<T> {
     private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "bottomless"];
 
     protected abstract baseUrl: string;
@@ -28,7 +25,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
     public abstract enabled: Promise<boolean>;
 
 
-    public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<RandomImageResponse> {
+    public async getRandomPosts(tags: string[], explictRating: Typeings.MoebooruTypes.EXPLICIT_RATING[], returnSize: number = 1): Promise<RandomImageResponse> {
         const results = await this.getPosts(tags, explictRating);
 
         if (!ArrayUtils.isValidArray(results)) {
@@ -51,7 +48,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         return retArr;
     }
 
-    protected async tagUpdater(filter?: (value: T, index: number, array: MoebooruTag[]) => boolean, limit: number = 0): Promise<void> {
+    protected async tagUpdater(filter?: (value: T, index: number, array: Typeings.MoebooruTypes.MoebooruTag[]) => boolean, limit: number = 0): Promise<void> {
         if (!await this.enabled) {
             return;
         }
@@ -70,14 +67,14 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         console.log(`Indexed: ${json.length} tags from ${this.name}`);
     }
 
-    private async doCall(url: string, returnSize: number, explictRating: EXPLICIT_RATING[]): Promise<MoebooruResponse> {
+    private async doCall(url: string, returnSize: number, explictRating: Typeings.MoebooruTypes.EXPLICIT_RATING[]): Promise<Typeings.MoebooruTypes.MoebooruResponse> {
         if (returnSize < 100 && returnSize > 0) {
             url += `&limit=${returnSize}`;
         }
         if (returnSize === -1) {
             returnSize = 500;
         }
-        const retJson: MoebooruResponse = [];
+        const retJson: Typeings.MoebooruTypes.MoebooruResponse = [];
         let currentPage = 0;
         while (retJson.length !== returnSize) {
             if (currentPage === 0) {
@@ -88,7 +85,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
             if (result.status !== 200) {
                 throw new Error(result.statusText);
             }
-            const responseArray: MoebooruResponse = result.data;
+            const responseArray: Typeings.MoebooruTypes.MoebooruResponse = result.data;
             if (!ArrayUtils.isValidArray(responseArray)) {
                 break;
             }
@@ -107,7 +104,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         return retJson;
     }
 
-    public async getPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = -1): Promise<MoebooruResponse> {
+    public async getPosts(tags: string[], explictRating: Typeings.MoebooruTypes.EXPLICIT_RATING[], returnSize: number = -1): Promise<Typeings.MoebooruTypes.MoebooruResponse> {
         if (!await this.enabled) {
             return [];
         }

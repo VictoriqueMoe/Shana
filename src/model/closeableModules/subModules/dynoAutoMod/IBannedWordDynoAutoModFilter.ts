@@ -1,4 +1,4 @@
-import {IDynoAutoModFilter} from "./IDynoAutoModFilter";
+import type {IDynoAutoModFilter} from "./IDynoAutoModFilter";
 
 export type BannedWordEntries = {
     "exactWord"?: string[],

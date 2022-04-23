@@ -1,10 +1,12 @@
-import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
+import type {Client} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
 import {injectable} from "tsyringe";
 import {AbstractCommand} from "../AbstractCommand";
-import {MessageScheduleManager} from "../../model/framework/manager/MessageScheduleManager";
+import type {MessageScheduleManager} from "../../model/framework/manager/MessageScheduleManager";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {BaseGuildTextChannel, Channel, CommandInteraction, MessageEmbed} from "discord.js";
+import type {Channel, CommandInteraction} from "discord.js";
+import {BaseGuildTextChannel, MessageEmbed} from "discord.js";
 import {ArrayUtils, CronUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
 import {Category} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;

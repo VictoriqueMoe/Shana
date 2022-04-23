@@ -1,8 +1,8 @@
 import {singleton} from "tsyringe";
-import {ICloseableModule} from "../../closeableModules/ICloseableModule";
-import Immutable from "immutable";
-import {constructor} from "tsyringe/dist/typings/types";
-import {CloseableModuleFactory} from "../factory/CloseableModuleFactory";
+import type {ICloseableModule} from "../../closeableModules/ICloseableModule";
+import type Immutable from "immutable";
+import type {constructor} from "tsyringe/dist/typings/types";
+import type {CloseableModuleFactory} from "../factory/CloseableModuleFactory";
 
 @singleton()
 export class CloseableModuleManager {

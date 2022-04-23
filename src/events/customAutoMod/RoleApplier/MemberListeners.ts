@@ -1,12 +1,13 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {GuildUtils} from "../../../utils/Utils";
 import {BannedWordFilter} from "../../../model/closeableModules/subModules/dynoAutoMod/impl/BannedWordFilter";
 import {RolePersistenceModel} from "../../../model/DB/entities/autoMod/impl/RolePersistence.model";
 import {BaseDAO} from "../../../DAO/BaseDAO";
 import {MemberRoleChange} from "../../../model/Impl/MemberRoleChange";
 import {injectable} from "tsyringe";
-import {RoleApplier} from "./RoleApplier";
-import {SubModuleManager} from "../../../model/closeableModules/manager/SubModuleManager";
+import type {RoleApplier} from "./RoleApplier";
+import type {SubModuleManager} from "../../../model/closeableModules/manager/SubModuleManager";
 
 @Discord()
 @injectable()

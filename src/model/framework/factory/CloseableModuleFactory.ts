@@ -1,5 +1,5 @@
 import {AbstractFactory} from "./AbstractFactory";
-import {ICloseableModule} from "../../closeableModules/ICloseableModule";
+import type {ICloseableModule} from "../../closeableModules/ICloseableModule";
 import Immutable from "immutable";
 import {container, registry, singleton} from "tsyringe";
 import {Beans} from "../../../DI/Beans";

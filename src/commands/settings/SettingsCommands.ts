@@ -9,17 +9,18 @@ import {
     SlashOption
 } from "discordx";
 import {DiscordUtils, GuildUtils, ObjectUtil, TimeUtils} from "../../utils/Utils";
-import {SettingsManager} from "../../model/framework/manager/SettingsManager";
+import type {SettingsManager} from "../../model/framework/manager/SettingsManager";
 import {SETTINGS} from "../../enums/SETTINGS";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
+import type {AutoRoleSettings} from "../../model/closeableModules/AutoRoleSettings";
 import {AutoRole} from "../../events/closeableModules/autoRole/AutoRole";
 import {AbstractCommand} from "../AbstractCommand";
-import {CommandInteraction, MessageEmbed} from "discord.js";
+import type {CommandInteraction} from "discord.js";
+import {MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
 import {Typeings} from "../../model/types/Typeings";
 import {Category} from "../../modules/category";
-import {CloseableModuleManager} from "../../model/framework/manager/CloseableModuleManager";
+import type {CloseableModuleManager} from "../../model/framework/manager/CloseableModuleManager";
 import {NotBot} from "@discordx/utilities";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 import AutoRoleSettingsEnum = Typeings.SETTINGS_RESOLVER.AutoRoleSettingsEnum;

@@ -1,28 +1,19 @@
 import {Category} from "../../modules/category";
 import {AbstractCommand} from "../AbstractCommand";
 import {injectable} from "tsyringe";
-import {
-    ArgsOf,
-    Client,
-    DefaultPermissionResolver,
-    Discord,
-    Guard,
-    On,
-    Permission,
-    Slash,
-    SlashGroup,
-    SlashOption
-} from "discordx";
-import {BirthdayManager} from "../../model/framework/manager/BirthdayManager";
+import type {ArgsOf, Client} from "discordx";
+import {DefaultPermissionResolver, Discord, Guard, On, Permission, Slash, SlashGroup, SlashOption} from "discordx";
+import type {BirthdayManager} from "../../model/framework/manager/BirthdayManager";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {CommandInteraction, MessageEmbed} from "discord.js";
+import type {CommandInteraction} from "discord.js";
+import {MessageEmbed} from "discord.js";
 import {DiscordUtils} from "../../utils/Utils";
 import {UniqueViolationError} from "../../DAO/BaseDAO";
-import {BirthdaysModel} from "../../model/DB/entities/guild/Birthdays.model";
+import type {BirthdaysModel} from "../../model/DB/entities/guild/Birthdays.model";
 import {DateTime} from "luxon";
 import {Channels} from "../../enums/Channels";
-import {ChannelManager} from "../../model/framework/manager/ChannelManager";
+import type {ChannelManager} from "../../model/framework/manager/ChannelManager";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 

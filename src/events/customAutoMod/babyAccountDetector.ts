@@ -1,4 +1,5 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf, Client} from "discordx";
+import {Discord, On} from "discordx";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils";
 
 @Discord()

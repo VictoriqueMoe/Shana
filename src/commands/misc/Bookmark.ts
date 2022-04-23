@@ -1,6 +1,5 @@
+import type {ArgsOf, Client} from "discordx";
 import {
-    ArgsOf,
-    Client,
     ContextMenu,
     DefaultPermissionResolver,
     Discord,
@@ -14,9 +13,10 @@ import {
 import {AbstractCommand} from "../AbstractCommand";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {CommandInteraction, ContextMenuInteraction, Message, MessageEmbed} from "discord.js";
+import type {CommandInteraction, ContextMenuInteraction} from "discord.js";
+import {Message, MessageEmbed} from "discord.js";
 import {injectable} from "tsyringe";
-import {BookmarkManager} from "../../model/framework/manager/BookmarkManager";
+import type {BookmarkManager} from "../../model/framework/manager/BookmarkManager";
 import {ArrayUtils, DiscordUtils} from "../../utils/Utils";
 import {Category} from "../../modules/category";
 import InteractionUtils = DiscordUtils.InteractionUtils;

@@ -1,6 +1,6 @@
-import {EditType, EventTriggerCondition} from "../../model/types/Typeings";
-import {Message} from "discord.js";
-import {Client} from "discordx";
+import type {EditType, EventTriggerCondition} from "../../model/types/Typeings";
+import type {Message} from "discord.js";
+import type {Client} from "discordx";
 import {ArrayUtils} from "../../utils/Utils";
 
 export class MessageEntry {

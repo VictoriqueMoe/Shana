@@ -1,24 +1,23 @@
 import {MoebooruApi} from "../MoebooruApi";
 import {singleton} from "tsyringe";
-import {Typeings} from "../../../types/Typeings";
 import {RunEvery} from "../../../decorators/RunEvery";
 import {TimeUtils} from "../../../../utils/Utils";
-import {ShanaFuse} from "../../../Impl/ShanaFuse";
-import KonachanTag = Typeings.MoebooruTypes.KonachanTag;
+import type {ShanaFuse} from "../../../Impl/ShanaFuse";
+import type {Typeings} from "../../../types/Typeings";
 
 @singleton()
-export class KonachanApi extends MoebooruApi<KonachanTag> {
-    private _tagCache: ShanaFuse<KonachanTag>;
+export class KonachanApi extends MoebooruApi<Typeings.MoebooruTypes.KonachanTag> {
+    private _tagCache: ShanaFuse<Typeings.MoebooruTypes.KonachanTag>;
 
     protected get baseUrl(): string {
         return "https://konachan.net";
     }
 
-    protected get fuseCache(): ShanaFuse<KonachanTag> {
+    protected get fuseCache(): ShanaFuse<Typeings.MoebooruTypes.KonachanTag> {
         return this._tagCache;
     }
 
-    protected set fuseCache(cache: ShanaFuse<KonachanTag>) {
+    protected set fuseCache(cache: ShanaFuse<Typeings.MoebooruTypes.KonachanTag>) {
         this._tagCache = cache;
     }
 

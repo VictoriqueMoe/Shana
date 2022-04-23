@@ -1,9 +1,10 @@
 import {CloseableModule} from "./CloseableModule";
-import {ITriggerConstraint} from "../ITriggerConstraint";
-import {IEventSecurityConstraint} from "../../DB/entities/IEventSecurityConstraint";
-import {GuildChannel, Message} from "discord.js";
+import type {ITriggerConstraint} from "../ITriggerConstraint";
+import type {IEventSecurityConstraint} from "../../DB/entities/IEventSecurityConstraint";
+import type {Message} from "discord.js";
+import {GuildChannel} from "discord.js";
 import {ArrayUtils} from "../../../utils/Utils";
-import {ModuleSettings} from "../ModuleSettings";
+import type {ModuleSettings} from "../ModuleSettings";
 
 export abstract class TriggerConstraint<T extends ModuleSettings> extends CloseableModule<T> implements ITriggerConstraint {
 

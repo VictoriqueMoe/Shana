@@ -3,7 +3,7 @@ import {DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup
 import {Category} from "../../modules/category";
 import {NotBot} from "@discordx/utilities";
 import {CommandEnabled} from "../../guards/CommandEnabled";
-import {CommandInteraction} from "discord.js";
+import type {CommandInteraction} from "discord.js";
 import {DiscordUtils} from "../../utils/Utils";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
