@@ -4,6 +4,7 @@ import {Message} from "discord.js";
 import {BannedWordEntries, IBannedWordDynoAutoModFilter} from "../IBannedWordDynoAutoModFilter";
 import {PRIORITY} from "../../../../../enums/PRIORITY";
 import {singleton} from "tsyringe";
+import {ObjectUtil} from "../../../../../utils/Utils";
 
 @singleton()
 export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoAutoModFilter {
@@ -40,6 +41,9 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordDynoA
      * @param word
      */
     public isWordBanned(word: string): boolean {
+        if (!ObjectUtil.validString(word)) {
+            return false;
+        }
         const badWordObj = this.bannedWords;
         const exactArray = badWordObj.exactWord;
         const inStringArray = badWordObj.WildCardWords;

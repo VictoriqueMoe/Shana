@@ -174,7 +174,7 @@ export class RoleLogger extends AbstractAdminAuditLogger {
     @On("roleCreate")
     private async roleCreated([role]: ArgsOf<"roleCreate">, client: Client): Promise<void> {
         const roleAuditLogEntry = await DiscordUtils.getAuditLogEntry("ROLE_CREATE", role.guild);
-        const {executor, target} = roleAuditLogEntry;
+        const {target} = roleAuditLogEntry;
         const guildId = role.guild.id;
         const embed = new MessageEmbed()
             .setColor(role.hexColor)
@@ -182,7 +182,8 @@ export class RoleLogger extends AbstractAdminAuditLogger {
             .setDescription(`Role Created: ${role.name}`)
             .setTimestamp()
             .setFooter(`${role.id}`);
-        if (target instanceof Role) {
+        const executor = roleAuditLogEntry.executor;
+        if (executor && target instanceof Role) {
             if (target.id === role.id) {
                 if (role.createdAt <= roleAuditLogEntry.createdAt) {
                     embed.addField("Role created by", executor.tag);

@@ -138,8 +138,8 @@ export class OnReady extends BaseDAO<any> {
     }
 
     private async initAppCommands(): Promise<void> {
-        await this._client.initApplicationCommands();
-        return this._client.initApplicationPermissions();
+        return this._client.initApplicationCommands();
+        // return this._client.initApplicationPermissions();
     }
 
     private async initUsernames(): Promise<void> {

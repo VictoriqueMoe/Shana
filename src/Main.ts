@@ -78,8 +78,8 @@ class Main {
                 return guilds.map(guild => guild.id);
             }]
         });
-        await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
         registerInstance(connection, client);
+        await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
         await client.login(Main.testMode ? this.testToken : this.token);
     }
 }
