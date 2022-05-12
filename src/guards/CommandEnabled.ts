@@ -5,11 +5,10 @@ import {CommandInteraction, ContextMenuInteraction} from "discord.js";
 import {container} from "tsyringe";
 import {ModuleEnabledConfigure} from "../model/Impl/ModuleEnabledConfigure";
 
-const securityManager = container.resolve(CommandSecurityManager);
 
 export function CommandEnabled(manager?: ModuleEnabledConfigure): GuardFunction<CommandInteraction | SimpleCommandMessage | ContextMenuInteraction> {
-
     return async function (arg: CommandInteraction | SimpleCommandMessage | ContextMenuInteraction, client: Client, next: Next) {
+        const securityManager = container.resolve(CommandSecurityManager);
         let commandName = "";
         let guildId = "";
         if (arg instanceof SimpleCommandMessage) {
