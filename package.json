@@ -54,7 +54,7 @@
     "form-data": "^4.0.0",
     "funcster": "0.0.5",
     "fuse.js": "^6.5.3",
-    "glob": "^8.0.1",
+    "glob": "^8.0.2",
     "http-debug": "^0.1.2",
     "http-status-codes": "^2.2.0",
     "imgur": "1.0.2",
