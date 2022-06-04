@@ -1,4 +1,4 @@
-import {ClassMethodDecorator, SlashOptionType} from "discordx";
+import {ClassMethodDecorator} from "discordx";
 
 export type CategoryItemTypes =
     | "SLASH"
@@ -22,7 +22,7 @@ export interface ICategoryItemOption {
     description?: string;
     name: string;
     optional?: boolean;
-    type: SlashOptionType;
+    type: string;
 }
 
 export interface ICategoryAttachment {

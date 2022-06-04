@@ -105,7 +105,7 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         const guildId = guild.id;
         const architectTime = thread.autoArchiveDuration;
         let timeToDisplay: string;
-        if (architectTime !== "MAX") {
+        if (architectTime) {
             const millis = TimeUtils.convertToMilli(thread.autoArchiveDuration as number, TimeUtils.TIME_UNIT.minutes);
             timeToDisplay = ObjectUtil.timeToHuman(millis);
         } else {

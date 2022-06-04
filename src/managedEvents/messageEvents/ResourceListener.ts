@@ -8,6 +8,7 @@ import {ResourceBanner} from "../../commands/customAutoMod/ResourceBanner";
 import {DirResult} from "tmp";
 import {singleton} from "tsyringe";
 import {getRepository} from "typeorm";
+import {notBot} from "../../guards/NotABot";
 import ffmpeg = require("ffmpeg");
 
 const isVideo = require('is-video');
@@ -90,8 +91,7 @@ export class ResourceListener {
         }
     }
 
-    //TODO: disabled
-    // @MessageListenerDecorator(true, notBot)
+    @MessageListenerDecorator(true, notBot)
     private async discordMessageCrash([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         const messageContent = message.content;
         let urlsInMessage: Set<string> = new Set();
