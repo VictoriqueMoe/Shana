@@ -21,6 +21,7 @@ import {ISearchBase, SearchBase} from "../model/ISearchBase.js";
 import {Typeings} from "../model/Typeings.js";
 import axios from "axios";
 import {StatusCodes} from "http-status-codes";
+import {DataSource} from "typeorm";
 
 export class Utils {
     public static sleep(ms: number): Promise<void> {
@@ -179,6 +180,23 @@ export class ObjectUtil {
         const stringLength = valueCheck.length;
         const amountOfCaps = valueCheck.split("").filter(char => isUpper(char)).length;
         return Math.floor((amountOfCaps * 100) / stringLength);
+    }
+}
+
+export class DbUtils {
+
+    private static _ds: DataSource;
+
+    /**
+     * Build an entity by injecting props as an object
+     * @param instance
+     * @param data
+     */
+    public static build<T extends new (...args: any) => any>(instance: T, data: Record<string, any>): InstanceType<T> {
+        if (!DbUtils._ds) {
+            DbUtils._ds = container.resolve(DataSource);
+        }
+        return DbUtils._ds.manager.create(instance, data);
     }
 }
 
