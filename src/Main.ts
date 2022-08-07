@@ -1,100 +1,60 @@
 import "reflect-metadata";
-import * as dotenv from "dotenv";
-import {ObjectUtil} from "./utils/Utils";
-import * as v8 from "v8";
-import {Client, DIService, SimpleCommandMessage} from "discordx";
-import {Intents, Message} from "discord.js";
-import {container, instanceCachingFactory} from "tsyringe";
-import {GuildManager} from "./model/framework/manager/GuildManager";
-import {SettingsManager} from "./model/framework/manager/SettingsManager";
-import {ConnectionManager, createConnection, useContainer} from "typeorm";
-import io from "@pm2/io";
-import {importx} from "@discordx/importer";
-import {Settings} from "luxon";
-import {Property} from "./model/decorators/Property";
-import {moduleRegistrar, registerInstance} from "./DI/moduleRegistrar";
-// const https = require('http-debug').https;
-// https.debug = 1;
+import dotenv from "dotenv";
+import {Property} from "./model/framework/decorators/Property.js";
+import {Client, ClientOptions, DIService, tsyringeDependencyRegistryEngine} from "discordx";
+import {container} from "tsyringe";
+import {dirname, importx} from "@discordx/importer";
+import {DataSource} from "typeorm";
+import {registerInstance} from "./model/framework/DI/moduleRegistrar.js";
+import {Typeings} from "./model/Typeings.js";
+import {IntentsBitField} from "discord.js";
+import propTypes = Typeings.propTypes;
 
-class Main {
-
-    private constructor() {
-    }
-
-    @Property("test_mode", false)
-    private static testMode = false;
-
+export class Main {
     @Property("token")
     private static readonly token: string;
 
-    @Property("name")
-    private static readonly botName: string;
+    @Property("node_env")
+    private static readonly envMode: propTypes["node_env"];
 
-    @Property("test_token", Main.testMode)
+    @Property("test_token", Main.envMode === "development")
     private static readonly testToken: string;
 
     public static async start(): Promise<void> {
-        console.log(`starting ${this.botName}`);
-        Settings.defaultZone = "utc";
-        Settings.defaultLocale = "en-gb";
-        console.log(process.execArgv);
-        console.log(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
-        await moduleRegistrar();
-        const dbName = Main.testMode ? "database_test.sqlite" : "database.sqlite";
-        useContainer(
-            {get: someClass => container.resolve(someClass as any)},
-        );
-        const connection = await createConnection({
+        DIService.engine = tsyringeDependencyRegistryEngine.setInjector(container);
+        dotenv.config();
+        const testMode = Main.envMode === "development";
+        const dbName = testMode ? "database_test.sqlite" : "database.sqlite";
+
+        const datasource = new DataSource({
             type: "better-sqlite3",
             database: dbName,
-            synchronize: Main.testMode,
-            entities: [__dirname + '/model/DB/**/*.model.{ts,js}']
+            synchronize: testMode,
+            entities: [`${dirname(import.meta.url)}/model/DB/**/*.model.{ts,js}`]
         });
-        const client = new Client({
-            botId: `ShanaBot_${ObjectUtil.guid()}`,
-            simpleCommand: {
-                prefix: async (message: Message): Promise<string> => container.resolve(SettingsManager).getPrefix(message?.guildId),
-                responses: {
-                    unauthorized: (command: SimpleCommandMessage): void => {
-                        console.warn(command);
-                    }
-                }
-            },
+
+        const connectedDs = await datasource.initialize();
+        const clientOps: ClientOptions = {
             intents: [
-                Intents.FLAGS.GUILDS,
-                Intents.FLAGS.GUILD_MESSAGES,
-                Intents.FLAGS.GUILD_MEMBERS,
-                Intents.FLAGS.GUILD_BANS,
-                Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-                Intents.FLAGS.GUILD_PRESENCES,
-                Intents.FLAGS.DIRECT_MESSAGES,
-                Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
-                Intents.FLAGS.GUILD_VOICE_STATES
+                IntentsBitField.Flags.Guilds,
+                IntentsBitField.Flags.GuildMessages,
+                IntentsBitField.Flags.GuildMembers,
+                IntentsBitField.Flags.GuildBans,
+                IntentsBitField.Flags.GuildMessageReactions,
+                IntentsBitField.Flags.GuildPresences,
+                IntentsBitField.Flags.DirectMessages,
+                IntentsBitField.Flags.GuildVoiceStates
             ],
-            silent: false,
-            botGuilds: [async (): Promise<string[]> => {
-                const guildManager = container.resolve(GuildManager);
-                const guilds = await guildManager.getGuilds();
-                return guilds.map(guild => guild.id);
-            }]
-        });
-        registerInstance(connection, client);
-        await importx(`${__dirname}/{commands,events}/**/*.{ts,js}`);
-        await client.login(Main.testMode ? this.testToken : this.token);
+            silent: Main.envMode !== "development",
+        };
+        if (this.envMode === "development") {
+            clientOps["botGuilds"] = [(client: Client): string[] => client.guilds.cache.map((guild) => guild.id)];
+        }
+        const client = new Client(clientOps);
+        registerInstance(connectedDs, client);
+        await importx(`${dirname(import.meta.url)}/{events,commands}/**/*.{ts,js}`);
+        await client.login(testMode ? this.testToken : this.token);
     }
 }
 
-((async (): Promise<void> => {
-    io.init({
-        tracing: true,
-        metrics: {
-            http: true
-        }
-    });
-    container.register<ConnectionManager>(ConnectionManager, {
-        useFactory: instanceCachingFactory(() => new ConnectionManager())
-    });
-    dotenv.config({path: __dirname + '/../.env'});
-    DIService.container = container;
-    await Main.start();
-})());
+await Main.start();

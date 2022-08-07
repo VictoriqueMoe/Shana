@@ -1,12 +1,13 @@
 import Fuse from "fuse.js";
-import {AutocompleteInteraction} from "discord.js";
 import {ObjectUtil} from "../utils/Utils";
-import {ShanaFuse} from "./Impl/ShanaFuse";
+import type {ShanaFuse} from "./impl/ShanaFuse.js";
+import type {AutocompleteInteraction} from "discord.js";
 import FuseResult = Fuse.FuseResult;
 
 export type SearchBase = {
-    name: string
-}
+    name: string;
+    value: string;
+};
 
 /**
  * Fuse default options to comply with ISearchBase
