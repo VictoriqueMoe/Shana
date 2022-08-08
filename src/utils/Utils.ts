@@ -6,6 +6,7 @@ import type {
 } from "discord.js";
 import {
     CommandInteraction,
+    Guild,
     GuildMember,
     Message,
     MessageContextMenuCommandInteraction,
@@ -22,6 +23,12 @@ import {Typeings} from "../model/Typeings.js";
 import axios from "axios";
 import {StatusCodes} from "http-status-codes";
 import {DataSource} from "typeorm";
+import isImageFast from "is-image-fast";
+import {Client} from "discordx";
+import {PermissionFlagsBits} from "discord-api-types/payloads/common.js";
+import {RoleManager} from "../model/framework/manager/RoleManager.js";
+import {Channels} from "../enums/Channels.js";
+import {ChannelManager} from "../model/framework/manager/ChannelManager.js";
 
 export class Utils {
     public static sleep(ms: number): Promise<void> {
@@ -259,6 +266,139 @@ export namespace DiscordUtils {
             }
             return interaction.respond([]);
         }
+    }
+
+    export function getGuild(guildId: string): Promise<Guild | null> {
+        const client = container.resolve(Client);
+        return client.guilds.fetch(guildId);
+    }
+
+    export function isMemberAdmin(member: GuildMember): boolean {
+        return member.permissions.has(PermissionFlagsBits.Administrator);
+    }
+
+    export async function sendToJail(member: GuildMember, reason: string): Promise<void> {
+        if (isMemberAdmin(member)) {
+            return;
+        }
+        const roleManager = container.resolve(RoleManager);
+        const guildId = member.guild.id;
+        const jailRole = await roleManager.getJailRole(guildId);
+        if (!jailRole) {
+            return;
+        }
+        const isAlreadyInJail = member.roles.cache.has(jailRole.id);
+        if (isAlreadyInJail) {
+            return;
+        }
+        for (const [roleId] of member.roles.cache) {
+            try {
+                if (roleId === jailRole.id) {
+                    continue;
+                }
+                await member.roles.remove(roleId);
+            } catch {
+            }
+        }
+        await member.roles.add(jailRole);
+        const channelManager = container.resolve(ChannelManager);
+        const jailChannel = await channelManager.getChannel(guildId, Channels.JAIL_CHANNEL);
+        if (!jailChannel) {
+            return;
+        }
+        jailChannel.send(`<@${member.id}>`);
+        setTimeout(() => {
+            jailChannel.send(`<@${member.id}>, ${reason}`);
+        }, 6000);
+    }
+
+    /**
+     * Obtains image URL for a message on this order:
+     * message Attachments
+     * message URL
+     * reference message
+     * @param message
+     * @param ignore -  supply true to each prop you want to ignore
+     */
+    export async function getImageUrlsFromMessageOrReference(message: Message, ignore: { attachments?: boolean, url?: boolean, ref?: boolean } = {
+        url: false,
+        attachments: false,
+        ref: false
+    }): Promise<Set<string>> {
+        const messageAttachments = message.attachments;
+        if (!ignore.attachments && messageAttachments && messageAttachments.size > 0) {
+            const attachmentUrls: string[] = messageAttachments.map(value => value.attachment).filter(attachment => ObjectUtil.validString(attachment)) as string[];
+            const urlMessageSet = new Set<string>();
+            if (ObjectUtil.isValidArray(attachmentUrls)) {
+                for (const attachmentUrl of attachmentUrls) {
+                    if (await isImageFast(attachmentUrl)) {
+                        urlMessageSet.add(attachmentUrl);
+                    }
+                }
+            }
+            if (urlMessageSet.size > 0) {
+                return urlMessageSet;
+            }
+        }
+
+        // message URL
+        const messageContent = message.content;
+        if (!ignore.url && ObjectUtil.validString(messageContent)) {
+            const urlsInMessage = ObjectUtil.getUrls(messageContent);
+            if (urlsInMessage && urlsInMessage.size > 0) {
+                const urlMessageSet = new Set<string>();
+                for (const url of urlsInMessage) {
+                    if (await isImageFast(url)) {
+                        urlMessageSet.add(url);
+                    }
+                }
+                if (urlMessageSet.size > 0) {
+                    return urlMessageSet;
+                }
+            }
+        }
+        // replied attachment
+        if (!ignore.ref) {
+            const repliedMessageRef = message.reference;
+            const urlMessageSet = new Set<string>();
+            if (repliedMessageRef) {
+                const repliedMessageID = repliedMessageRef.messageId;
+                const repliedMessageObj = await message.channel.messages.fetch(repliedMessageID);
+                const repliedMessageContent = repliedMessageObj.content;
+                const repliedMessageAttach = (repliedMessageObj.attachments && repliedMessageObj.attachments.size > 0) ? repliedMessageObj.attachments : null;
+                if (repliedMessageAttach) {
+                    const repliedMessageAttach = repliedMessageObj.attachments;
+                    const attachmentUrls: string[] = repliedMessageAttach.map(value => value.attachment).filter(attachment => ObjectUtil.validString(attachment)) as string[];
+                    if (ObjectUtil.isValidArray(attachmentUrls)) {
+                        for (const attachmentUrl of attachmentUrls) {
+                            if (await isImageFast(attachmentUrl)) {
+                                urlMessageSet.add(attachmentUrl);
+                            }
+                        }
+                    }
+                    if (urlMessageSet.size > 0) {
+                        return urlMessageSet;
+                    }
+                }
+
+                if (ObjectUtil.validString(repliedMessageContent)) {
+                    const urlsInMessage = ObjectUtil.getUrls(repliedMessageObj.content);
+                    if (urlsInMessage && urlsInMessage.size > 0) {
+                        for (const urlInMessage of urlsInMessage) {
+                            if (await isImageFast(urlInMessage)) {
+                                urlMessageSet.add(urlInMessage);
+                            }
+                        }
+
+                    }
+                }
+                if (urlMessageSet.size > 0) {
+                    return urlMessageSet;
+                }
+            }
+            return new Set();
+        }
+        return new Set();
     }
 
     export async function loadResourceFromURL(url: string): Promise<Buffer> {

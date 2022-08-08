@@ -1,10 +1,10 @@
-import type winston from "winston";
+import type {Logger} from "winston";
 import {createLogger, format, transports} from "winston";
 import type * as Transport from "winston-transport";
 
 class LoggerFactory {
 
-    private readonly _logger: winston.Logger;
+    private readonly _logger: Logger;
 
     public constructor() {
         const {combine, splat, timestamp, printf} = format;
@@ -35,7 +35,7 @@ class LoggerFactory {
         });
     }
 
-    public get logger(): winston.Logger {
+    public get logger(): Logger {
         return this._logger;
     }
 }

@@ -1,5 +1,5 @@
 import SETTINGS from "../enums/SETTINGS.js";
-import type {ArgsOf, Client} from "discordx";
+import type {ArgsOf, Awaitable, Client} from "discordx";
 import type {CategoryChannel, HexColorString, Message, TextChannel} from "discord.js";
 import {ThreadAutoArchiveDuration} from "discord.js";
 
@@ -141,7 +141,7 @@ export namespace Typeings {
     }
 
     export type EditType = ([message]: ArgsOf<"messageCreate">, client: Client, guardPayload: any, isUpdate: boolean) => Promise<void>;
-    export type EventTriggerCondition = (message: Message) => Promise<boolean>;
+    export type EventTriggerCondition = (message: Message) => Awaitable<boolean>;
 
     export type EmojiInfo = {
         "buffer"?: Buffer,
