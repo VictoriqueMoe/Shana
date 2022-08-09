@@ -12,6 +12,22 @@ import {Client} from "discordx";
 })
 export class MessageScheduleModel extends IdentifiableModel {
 
+    @Column({unique: false, nullable: false})
+    public cron: string;
+    @Column({
+        unique: false,
+        nullable: false,
+        type: "text"
+    })
+    public channel: BaseGuildTextChannel;
+    @Column({unique: false, nullable: false})
+    public message: string;
+    @Column({nullable: false})
+    public name: string;
+    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.messageScheduleModel, AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
+    public guildableModel: GuildableModel;
+
     @BeforeInsert()
     private marshalTransformer(): void {
         if (!(this.channel instanceof BaseGuildTextChannel)) {
@@ -28,24 +44,4 @@ export class MessageScheduleModel extends IdentifiableModel {
         const guild = client.guilds.cache.get(this.guildId);
         this.channel = guild.channels.cache.get(value) as BaseGuildTextChannel;
     }
-
-    @Column({unique: false, nullable: false})
-    public cron: string;
-
-    @Column({
-        unique: false,
-        nullable: false,
-        type: "text"
-    })
-    public channel: BaseGuildTextChannel;
-
-    @Column({unique: false, nullable: false})
-    public message: string;
-
-    @Column({nullable: false})
-    public name: string;
-
-    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.messageScheduleModel, AbstractModel.cascadeOps)
-    @JoinColumn({name: AbstractModel.joinCol})
-    public guildableModel: GuildableModel;
 }

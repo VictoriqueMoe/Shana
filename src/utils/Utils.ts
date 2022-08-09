@@ -27,8 +27,9 @@ import isImageFast from "is-image-fast";
 import {Client} from "discordx";
 import {PermissionFlagsBits} from "discord-api-types/payloads/common.js";
 import {RoleManager} from "../model/framework/manager/RoleManager.js";
-import {Channels} from "../enums/Channels.js";
 import {ChannelManager} from "../model/framework/manager/ChannelManager.js";
+import Channels from "../enums/Channels.js";
+import {EmojiManager} from "../model/framework/manager/EmojiManager.js";
 
 export class Utils {
     public static sleep(ms: number): Promise<void> {
@@ -61,6 +62,16 @@ export class ObjectUtil {
             }
         }
         return true;
+    }
+
+    public static singleFieldBuilder(name: string, value: string, inline = false): [APIEmbedField] {
+        return [
+            {
+                name,
+                value,
+                inline
+            }
+        ];
     }
 
     public static delayFor(ms: number): Promise<void> {
@@ -134,16 +145,6 @@ export class ObjectUtil {
             returnText += ` ${levels[i][0]} ${levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]}`;
         }
         return returnText.trim();
-    }
-
-    public static singleFieldBuilder(name: string, value: string, inline = false): [APIEmbedField] {
-        return [
-            {
-                name,
-                value,
-                inline
-            }
-        ];
     }
 
     public static removeObjectFromArray(itemToRemove: any, arr: any[]): void {
@@ -271,6 +272,37 @@ export namespace DiscordUtils {
     export function getGuild(guildId: string): Promise<Guild | null> {
         const client = container.resolve(Client);
         return client.guilds.fetch(guildId);
+    }
+
+    export function stripUrls(message: Message | string): string {
+        const regexp = /(http(s)?:\/\/.)(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/gm;
+        let retStr = typeof message === "string" ? message : message.content;
+        retStr = `${retStr}`;
+        if (!ObjectUtil.validString(retStr)) {
+            return retStr;
+        }
+        const matches = retStr.match(regexp);
+        if (!matches) {
+            return retStr;
+        }
+        for (const match of matches) {
+            retStr = retStr.replace(match, "");
+        }
+        return retStr.trim();
+    }
+
+    export function removeMentions(str: string): string {
+        return str.replace(/<@.?[0-9]*?>/gm, "");
+    }
+
+    export function sanitiseTextForApiConsumption(message: Message | string): string {
+        const emojiManager = container.resolve(EmojiManager);
+        let retStr = typeof message === "string" ? message : message.content;
+        retStr = `${retStr}`;
+        retStr = emojiManager.stripAllEmojiFromText(retStr);
+        retStr = stripUrls(retStr);
+        retStr = removeMentions(retStr);
+        return retStr.trim();
     }
 
     export function isMemberAdmin(member: GuildMember): boolean {

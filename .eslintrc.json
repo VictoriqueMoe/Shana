@@ -17,7 +17,7 @@
     "no-unsafe-optional-chaining": "error",
     "no-useless-backreference": "error",
     "require-atomic-updates": "error",
-    "require-await": "error",
+    "require-await": "off",
     "no-await-in-loop": "off",
     "spaced-comment": "error",
     "no-unused-vars": "off",

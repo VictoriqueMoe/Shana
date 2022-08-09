@@ -17,12 +17,6 @@ export class OnReady extends DataSourceAware {
         super();
     }
 
-    @On("ready")
-    private async initialise([client]: [Client]): Promise<void> {
-
-    }
-
-
     public async init(): Promise<void> {
         await this._ds.transaction(async (transactionalEntityManager: EntityManager) => {
             await this.populateClosableEvents(transactionalEntityManager);
@@ -32,6 +26,11 @@ export class OnReady extends DataSourceAware {
         });
         await this.initAppCommands();
         await this.joinThreads();
+    }
+
+    @On("ready")
+    private async initialise([client]: [Client]): Promise<void> {
+
     }
 
     private async populateClosableEvents(transactionManager: EntityManager): Promise<void> {

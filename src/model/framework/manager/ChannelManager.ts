@@ -3,21 +3,13 @@ import {BaseGuildTextChannel, GuildManager} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../utils/Utils";
 import {singleton} from "tsyringe";
 import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
-import {Channels} from "../../../enums/Channels.js";
+import Channels from "../../../enums/Channels.js";
 
 @singleton()
 export class ChannelManager extends DataSourceAware {
 
     public constructor(private _guildManager: GuildManager) {
         super();
-    }
-
-    private getModel(guildId: string): Promise<PostableChannelModel> {
-        return this._ds.getRepository(PostableChannelModel).findOne({
-            where: {
-                guildId
-            }
-        });
     }
 
     public async setChannel(guildId: string, channelType: Channels, value: string): Promise<PostableChannelModel[] | null> {
@@ -44,5 +36,13 @@ export class ChannelManager extends DataSourceAware {
             return channel;
         }
         throw new Error(`"${channel.name}" is NOT text channel`);
+    }
+
+    private getModel(guildId: string): Promise<PostableChannelModel> {
+        return this._ds.getRepository(PostableChannelModel).findOne({
+            where: {
+                guildId
+            }
+        });
     }
 }

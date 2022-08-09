@@ -17,6 +17,7 @@ import {LogChannelManager} from "../../../model/framework/manager/LogChannelMana
 import {RoleManager} from "../../../model/framework/manager/RoleManager.js";
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule.js";
 import TIME_UNIT from "../../../enums/TIME_UNIT.js";
+import {BannedWordFilter} from "../../../model/closeableModules/subModules/autoMod/impl/BannedWordFilter.js";
 
 class JoinEntry {
     public constructor(public joinCount: number) {
@@ -51,7 +52,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (await this.doPanic(member, settings)) {
             return;
         }
-        const filter: BannedWordFilter = this._subModuleManager.getSubModule(BannedWordFilter);
+        const filter = this._subModuleManager.getSubModule(BannedWordFilter);
         if (filter.isActive && filter.isWordBanned(member.displayName)) {
             await DiscordUtils.sendToJail(member, "You have been placed here because your display name violates our rules, Please change it");
             return;
@@ -94,6 +95,31 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
                 }
             }
         }
+    }
+
+    @PostConstruct
+    public async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
+        const retMap: Map<Guild, string[]> = new Map();
+        const guildModels = await this._ds.getRepository(GuildableModel).find({
+            relations: ["commandSecurityModel"]
+        });
+        for (const guildModel of guildModels) {
+            const guildId = guildModel.guildId;
+            const guild = await DiscordUtils.getGuild(guildId);
+            const autoRoleModule = container.resolve(CloseableModuleManager).getCloseableModule(AutoRole);
+            const enabled = await autoRoleModule.isEnabled(guildId);
+            if (enabled) {
+                const membersApplied: string[] = [];
+                const noRoles = await this._roleManager.getMembersWithNoRoles(guildId);
+                for (const noRole of noRoles) {
+                    logger.info(`setting roles for ${noRole.user.tag} as they have no roles`);
+                    membersApplied.push(noRole.user.tag);
+                    await autoRoleModule.applyRole(noRole, guildId);
+                }
+                retMap.set(guild, membersApplied);
+            }
+        }
+        return retMap;
     }
 
     private async doPanic(member: GuildMember, settings: AutoRoleSettings): Promise<boolean> {
@@ -174,31 +200,5 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (model) {
             await this._ds.getRepository(RolePersistenceModel).save(model);
         }
-    }
-
-
-    @PostConstruct
-    public async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
-        const retMap: Map<Guild, string[]> = new Map();
-        const guildModels = await this._ds.getRepository(GuildableModel).find({
-            relations: ["commandSecurityModel"]
-        });
-        for (const guildModel of guildModels) {
-            const guildId = guildModel.guildId;
-            const guild = await DiscordUtils.getGuild(guildId);
-            const autoRoleModule = container.resolve(CloseableModuleManager).getCloseableModule(AutoRole);
-            const enabled = await autoRoleModule.isEnabled(guildId);
-            if (enabled) {
-                const membersApplied: string[] = [];
-                const noRoles = await this._roleManager.getMembersWithNoRoles(guildId);
-                for (const noRole of noRoles) {
-                    logger.info(`setting roles for ${noRole.user.tag} as they have no roles`);
-                    membersApplied.push(noRole.user.tag);
-                    await autoRoleModule.applyRole(noRole, guildId);
-                }
-                retMap.set(guild, membersApplied);
-            }
-        }
-        return retMap;
     }
 }

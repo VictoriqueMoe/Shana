@@ -4,6 +4,7 @@ import {Beans} from "../../DI/Beans.js";
 import {injectAll, registry} from "tsyringe";
 import {AutoResponder} from "../../../../events/managed/closeableModules/AutoResponder.js";
 import {AutoRole} from "../../../../events/managed/closeableModules/AutoRole.js";
+import {AutoMod} from "../../../../events/managed/closeableModules/AutoMod.js";
 
 
 @registry([

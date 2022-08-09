@@ -8,6 +8,31 @@ import {ObjectUtil} from "../../../utils/Utils.js";
 
 export abstract class AbstractEventSecurityConstraint extends AbstractModel implements IEventSecurityConstraint {
 
+    @Column({
+        type: "simple-array",
+        nullable: false,
+        default: ""
+    })
+    public allowedChannels: GuildChannel[];
+    @Column({
+        type: "simple-array",
+        nullable: false,
+        default: ""
+    })
+    public allowedRoles: Role[];
+    @Column({
+        type: "simple-array",
+        nullable: false,
+        default: ""
+    })
+    public ignoredChannels: GuildChannel[];
+    @Column({
+        type: "simple-array",
+        nullable: false,
+        default: ""
+    })
+    public ignoredRoles: Role[];
+
     private getRoles(prop: string): void {
         const value: string | null = this[prop];
         if (!ObjectUtil.isValidArray(value)) {
@@ -33,7 +58,6 @@ export abstract class AbstractEventSecurityConstraint extends AbstractModel impl
         return client.guilds.cache.get(this.guildId);
     }
 
-
     /**
      * Transform string arrays into channel and role objects after queried from the DB
      */
@@ -45,33 +69,4 @@ export abstract class AbstractEventSecurityConstraint extends AbstractModel impl
         this.getRoles("allowedRoles");
         this.getRoles("ignoredRoles");
     }
-
-    @Column({
-        type: "simple-array",
-        nullable: false,
-        default: ""
-    })
-    public allowedChannels: GuildChannel[];
-
-    @Column({
-        type: "simple-array",
-        nullable: false,
-        default: ""
-    })
-    public allowedRoles: Role[];
-
-
-    @Column({
-        type: "simple-array",
-        nullable: false,
-        default: ""
-    })
-    public ignoredChannels: GuildChannel[];
-
-    @Column({
-        type: "simple-array",
-        nullable: false,
-        default: ""
-    })
-    public ignoredRoles: Role[];
 }

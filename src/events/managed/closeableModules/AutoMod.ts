@@ -1,6 +1,6 @@
 import {container, singleton} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";
-import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
+import {ObjectUtil} from "../../../utils/Utils.js";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
 import {MessageListenerDecorator} from "../../../model/framework/decorators/messageListenerDecorator.js";
 import {notBot} from "../../../guards/managedGuards/NotABot.js";
@@ -11,6 +11,15 @@ import TIME_OUT from "../../../enums/TIME_OUT.js";
 import {Enabled} from "../../../guards/managedGuards/Enabled.js";
 import Immutable from "immutable";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint.js";
+import {AbstractFilter} from "../../../model/closeableModules/subModules/autoMod/AbstractFilter.js";
+import type {IAutoModFilter} from "../../../model/closeableModules/subModules/autoMod/IAutoModFilter.js";
+import type {
+    FastMessageSpamFilter
+} from "../../../model/closeableModules/subModules/autoMod/impl/FastMessageSpamFilter.js";
+import {EventDeletedListener} from "../eventDispatcher/EventDeletedListener.js";
+import {MuteManager} from "../../../model/framework/manager/MuteManager.js";
+import {LogChannelManager} from "../../../model/framework/manager/LogChannelManager.js";
+import TIME_UNIT from "../../../enums/TIME_UNIT.js";
 
 @singleton()
 export class AutoMod extends TriggerConstraint<null> {
@@ -18,28 +27,30 @@ export class AutoMod extends TriggerConstraint<null> {
     private _muteTimeoutArray: TimedSet<TerminalViolation> = new TimedSet(AbstractFilter.terminalViolationTimeout * 1000);
     private readonly _client: Client;
     private readonly _muteManager: MuteManager;
+    private readonly _logManager: LogChannelManager;
 
     public constructor() {
         super(CloseOptionModel);
         this._client = container.resolve(Client);
         this._muteManager = container.resolve(MuteManager);
+        this._logManager = container.resolve(LogChannelManager);
     }
 
     public get moduleId(): string {
         return "AutoMod";
     }
 
-    public override get submodules(): Immutable.Set<IDynoAutoModFilter> {
-        return super.submodules as Immutable.Set<IDynoAutoModFilter>;
+    public override get submodules(): Immutable.Set<IAutoModFilter> {
+        return super.submodules as Immutable.Set<IAutoModFilter>;
     }
 
     @MessageListenerDecorator(true, [notBot, Enabled(AutoMod)])
     private async process([message]: ArgsOf<"messageCreate">): Promise<void> {
-        if (!this.canTrigger(message.guild.id, message.member, message.channel)) {
-            return;
-        }
+        // if (!this.canTrigger(message.guild.id)) {
+        //     return;
+        // }
         const filters = this.submodules;
-        const violatedFilters: IDynoAutoModFilter[] = [];
+        const violatedFilters: IAutoModFilter[] = [];
         if (!message.member) {
             return;
         }
@@ -49,6 +60,7 @@ export class AutoMod extends TriggerConstraint<null> {
             if (!filter.isActive) {
                 continue;
             }
+            // check if can trigger here based on filter options
             const didPassFilter = await filter.doFilter(message);
             if (!didPassFilter) {
                 violatedFilters.push(filter);
@@ -86,7 +98,7 @@ export class AutoMod extends TriggerConstraint<null> {
                                         case ACTION.BAN:
                                             await member.ban({
                                                 reason: `Auto mod violation limit reached \`${fromArray.filter.id}\``,
-                                                days: 1
+                                                deleteMessageDays: 1
                                             });
                                             break;
                                         case ACTION.MUTE: {
@@ -125,16 +137,18 @@ export class AutoMod extends TriggerConstraint<null> {
                                 const messageSpamEntry = (filter as FastMessageSpamFilter).getFromArray(userId, guildid);
                                 if (messageSpamEntry) {
                                     for (const messageEntryM of messageSpamEntry.messages) {
-                                        if (!messageEntryM.deleted) {
+                                        if (!EventDeletedListener.isMessageDeleted(messageEntryM)) {
                                             messageEntryM.delete().catch(() => {
+                                                return false;
                                             });
                                         }
                                     }
                                 }
                             }
                             try {
-                                if (!message.deleted) {
+                                if (!EventDeletedListener.isMessageDeleted(message)) {
                                     message.delete().catch(() => {
+                                        return false;
                                     });
                                 }
                             } catch {
@@ -159,12 +173,11 @@ export class AutoMod extends TriggerConstraint<null> {
         if (!time) {
             time = TIME_OUT["1 hour"];
         }
-        const muteSingleton = container.resolve(MuteManager);
-        const model = await muteSingleton.muteUser(user, reason, time * 1000);
+        const model = await this._muteManager.muteUser(user, reason, time * 1000);
         this._muteTimeoutArray.delete(violationObj);
         if (model) {
-            const humanMuted = ObjectUtil.timeToHuman(time, TimeUtils.TIME_UNIT.seconds);
-            await DiscordUtils.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: \`"${violationObj.filter.id}"\` for ${humanMuted}`, user.guild.id);
+            const humanMuted = ObjectUtil.timeToHuman(time, TIME_UNIT.seconds);
+            await this._logManager.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: \`"${violationObj.filter.id}"\` for ${humanMuted}`, user.guild.id);
             if (channel) {
                 await channel.send(`<@${user.id}>, you have been muted for ${humanMuted} due to the violation of the \`${violationObj.filter.id}\``);
             }
@@ -182,7 +195,7 @@ export class AutoMod extends TriggerConstraint<null> {
 class TerminalViolation {
     public violations: number;
 
-    constructor(public userId: string, public filter: IDynoAutoModFilter, public _guildId: string) {
+    public constructor(public userId: string, public filter: IAutoModFilter, public _guildId: string) {
         this.violations = 1;
     }
 

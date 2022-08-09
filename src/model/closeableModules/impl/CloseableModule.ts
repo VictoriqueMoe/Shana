@@ -12,9 +12,9 @@ import logger from "../../../utils/LoggerFactory.js";
 
 export abstract class CloseableModule<T extends ModuleSettings> extends DataSourceAware implements ICloseableModule<T> {
 
+    protected readonly _subModuleManager: SubModuleManager;
     private _isEnabled: Map<string, boolean | null>;
     private _settings: Map<string, T | null>;
-    protected readonly _subModuleManager: SubModuleManager;
 
     protected constructor(private _model: typeof CloseOptionModel) {
         super();
