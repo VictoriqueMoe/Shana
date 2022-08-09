@@ -3,9 +3,9 @@ import type {Guild, GuildMember, Role} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
 import SETTINGS from "../../../enums/SETTINGS.js";
 import {SettingsManager} from "./SettingsManager.js";
-import {Channels} from "../../../enums/Channels.js";
 import {LogChannelManager} from "./LogChannelManager.js";
 import {ChannelManager} from "./ChannelManager.js";
+import Channels from "../../../enums/Channels.js";
 
 @singleton()
 export class RoleManager {

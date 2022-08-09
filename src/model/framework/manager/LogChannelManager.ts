@@ -1,9 +1,9 @@
 import {singleton} from "tsyringe";
 import {BaseGuildTextChannel, EmbedBuilder, Message} from "discord.js";
 import {ObjectUtil} from "../../../utils/Utils.js";
-import {Channels} from "../../../enums/Channels.js";
 import {ChannelManager} from "./ChannelManager.js";
 import logger from "../../../utils/LoggerFactory.js";
+import Channels from "../../../enums/Channels.js";
 
 @singleton()
 export class LogChannelManager {
