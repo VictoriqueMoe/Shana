@@ -1,6 +1,6 @@
-import {PostableChannelModel} from "../../DB/entities/guild/PostableChannel.model";
+import {PostableChannelModel} from "../../DB/entities/guild/PostableChannel.model.js";
 import {BaseGuildTextChannel, GuildManager} from "discord.js";
-import {DiscordUtils, ObjectUtil} from "../../../utils/Utils";
+import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
 import {singleton} from "tsyringe";
 import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
 import Channels from "../../../enums/Channels.js";

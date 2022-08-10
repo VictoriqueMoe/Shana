@@ -5,13 +5,13 @@ import {EnvPropertyResolutionEngine} from "../../engine/impl/EnvPropertyResoluti
 import type {IPropertyResolutionEngine} from "../../engine/IPropertyResolutionEngine.js";
 import {AbstractFactory} from "../AbstractFactory.js";
 
+@singleton()
 @registry([
     {
         token: Beans.IPropertyResolutionEngine,
         useToken: EnvPropertyResolutionEngine
     }
 ])
-@singleton()
 export class PropertyResolutionFactory extends AbstractFactory<IPropertyResolutionEngine> {
     public constructor(@injectAll(Beans.IPropertyResolutionEngine) beans: IPropertyResolutionEngine[]) {
         super(beans);

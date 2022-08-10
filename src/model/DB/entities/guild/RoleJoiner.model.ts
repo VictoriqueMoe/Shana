@@ -1,6 +1,6 @@
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
-import {GuildableModel} from "./Guildable.model";
-import {AbstractModel} from "../AbstractModel";
+import type {GuildableModel} from "./Guildable.model.js";
+import {AbstractModel} from "../AbstractModel.js";
 
 @Entity()
 export class RoleJoinerModel extends AbstractModel {
@@ -12,7 +12,7 @@ export class RoleJoinerModel extends AbstractModel {
     })
     public rolesToJoin: string[];
 
-    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.roleJoinerModel, AbstractModel.cascadeOps)
+    @ManyToOne("GuildableModel", "roleJoinerModel", AbstractModel.cascadeOps)
     @JoinColumn({name: AbstractModel.joinCol})
     public guildableModel: GuildableModel;
 }

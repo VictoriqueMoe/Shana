@@ -25,7 +25,6 @@ import {StatusCodes} from "http-status-codes";
 import {DataSource} from "typeorm";
 import isImageFast from "is-image-fast";
 import {Client} from "discordx";
-import {PermissionFlagsBits} from "discord-api-types/payloads/common.js";
 import {RoleManager} from "../model/framework/manager/RoleManager.js";
 import {ChannelManager} from "../model/framework/manager/ChannelManager.js";
 import Channels from "../enums/Channels.js";
@@ -306,7 +305,7 @@ export namespace DiscordUtils {
     }
 
     export function isMemberAdmin(member: GuildMember): boolean {
-        return member.permissions.has(PermissionFlagsBits.Administrator);
+        return member.permissions.has("Administrator");
     }
 
     export async function sendToJail(member: GuildMember, reason: string): Promise<void> {

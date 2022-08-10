@@ -1,8 +1,8 @@
 import {AfterLoad, BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne} from "typeorm";
-import {GuildableModel} from "./Guildable.model";
+import type {GuildableModel} from "./Guildable.model.js";
 import {BaseGuildTextChannel} from "discord.js";
-import {IdentifiableModel} from "../IdentifiableModel";
-import {AbstractModel} from "../AbstractModel";
+import {IdentifiableModel} from "../IdentifiableModel.js";
+import {AbstractModel} from "../AbstractModel.js";
 import {container} from "tsyringe";
 import {Client} from "discordx";
 
@@ -20,11 +20,14 @@ export class MessageScheduleModel extends IdentifiableModel {
         type: "text"
     })
     public channel: BaseGuildTextChannel;
+
     @Column({unique: false, nullable: false})
     public message: string;
+
     @Column({nullable: false})
     public name: string;
-    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.messageScheduleModel, AbstractModel.cascadeOps)
+
+    @ManyToOne("GuildableModel", "messageScheduleModel", AbstractModel.cascadeOps)
     @JoinColumn({name: AbstractModel.joinCol})
     public guildableModel: GuildableModel;
 

@@ -16,6 +16,7 @@ import {ZalgoTextFilter} from "../../../closeableModules/subModules/autoMod/impl
 import {EveryoneMentionsFilter} from "../../../closeableModules/subModules/autoMod/impl/EveryoneMentionsFilter.js";
 
 
+@singleton()
 @registry([
     {token: Beans.ISubModuleToken, useToken: ZalgoTextFilter},
     {token: Beans.ISubModuleToken, useToken: ImageSpamFilter},
@@ -30,7 +31,6 @@ import {EveryoneMentionsFilter} from "../../../closeableModules/subModules/autoM
     {token: Beans.ISubModuleToken, useToken: EveryoneMentionsFilter},
     {token: Beans.ISubModuleToken, useToken: SpamFilter}
 ])
-@singleton()
 export class SubModuleFactory extends AbstractFactory<ISubModule> {
     public constructor(@injectAll(Beans.ISubModuleToken) beans: ISubModule[]) {
         super(beans);

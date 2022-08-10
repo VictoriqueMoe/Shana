@@ -1,4 +1,4 @@
-import {IdentifiableModel} from "../IdentifiableModel";
+import {IdentifiableModel} from "../IdentifiableModel.js";
 import {Column, Entity, Unique} from "typeorm";
 
 @Entity()

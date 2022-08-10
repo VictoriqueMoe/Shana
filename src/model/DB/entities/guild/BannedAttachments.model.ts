@@ -1,6 +1,6 @@
-import {GuildableModel} from "./Guildable.model";
+import type {GuildableModel} from "./Guildable.model.js";
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
-import {AbstractModel} from "../AbstractModel";
+import {AbstractModel} from "../AbstractModel.js";
 
 @Entity()
 export class BannedAttachmentsModel extends AbstractModel {
@@ -21,7 +21,7 @@ export class BannedAttachmentsModel extends AbstractModel {
     public isSticker: boolean;
 
 
-    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.bannedAttachmentsModel, AbstractModel.cascadeOps)
+    @ManyToOne("GuildableModel", "bannedAttachmentsModel", AbstractModel.cascadeOps)
     @JoinColumn({name: AbstractModel.joinCol})
     public guildableModel: GuildableModel;
 }

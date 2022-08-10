@@ -1,5 +1,5 @@
-import {IEventSecurityConstraint} from "./IEventSecurityConstraint";
-import {AbstractModel} from "./AbstractModel";
+import {IEventSecurityConstraint} from "./IEventSecurityConstraint.js";
+import {AbstractModel} from "./AbstractModel.js";
 import {AfterLoad, Column} from "typeorm";
 import {Guild, GuildChannel, Role} from "discord.js";
 import {container} from "tsyringe";
@@ -14,18 +14,21 @@ export abstract class AbstractEventSecurityConstraint extends AbstractModel impl
         default: ""
     })
     public allowedChannels: GuildChannel[];
+
     @Column({
         type: "simple-array",
         nullable: false,
         default: ""
     })
     public allowedRoles: Role[];
+
     @Column({
         type: "simple-array",
         nullable: false,
         default: ""
     })
     public ignoredChannels: GuildChannel[];
+
     @Column({
         type: "simple-array",
         nullable: false,

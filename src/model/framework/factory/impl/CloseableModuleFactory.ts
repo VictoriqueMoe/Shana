@@ -1,12 +1,13 @@
 import {AbstractFactory} from "../AbstractFactory.js";
 import {ICloseableModule} from "../../../closeableModules/ICloseableModule.js";
 import {Beans} from "../../DI/Beans.js";
-import {injectAll, registry} from "tsyringe";
+import {injectAll, registry, singleton} from "tsyringe";
 import {AutoResponder} from "../../../../events/managed/closeableModules/AutoResponder.js";
 import {AutoRole} from "../../../../events/managed/closeableModules/AutoRole.js";
 import {AutoMod} from "../../../../events/managed/closeableModules/AutoMod.js";
 
 
+@singleton()
 @registry([
     {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
     {token: Beans.ICloseableModuleToken, useToken: AutoMod},

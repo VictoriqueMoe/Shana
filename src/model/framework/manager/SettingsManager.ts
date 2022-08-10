@@ -1,4 +1,4 @@
-import {SettingsModel} from "../../DB/entities/guild/Settings.model";
+import {SettingsModel} from "../../DB/entities/guild/Settings.model.js";
 import {singleton} from "tsyringe";
 import {EntityManager} from "typeorm";
 import {DbUtils, ObjectUtil} from "../../../utils/Utils.js";

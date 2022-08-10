@@ -5,10 +5,12 @@ import {Client, ClientOptions, DIService, tsyringeDependencyRegistryEngine} from
 import {container} from "tsyringe";
 import {dirname, importx} from "@discordx/importer";
 import {DataSource} from "typeorm";
-import {registerInstance} from "./model/framework/DI/moduleRegistrar.js";
 import {Typeings} from "./model/Typeings.js";
 import {IntentsBitField} from "discord.js";
+import {registerInstance} from "./model/framework/DI/moduleRegistrar.js";
 import propTypes = Typeings.propTypes;
+
+dotenv.config();
 
 export class Main {
     @Property("token")
@@ -22,7 +24,6 @@ export class Main {
 
     public static async start(): Promise<void> {
         DIService.engine = tsyringeDependencyRegistryEngine.setInjector(container);
-        dotenv.config();
         const testMode = Main.envMode === "development";
         const dbName = testMode ? "database_test.sqlite" : "database.sqlite";
 
@@ -56,5 +57,4 @@ export class Main {
         await client.login(testMode ? this.testToken : this.token);
     }
 }
-
 await Main.start();
