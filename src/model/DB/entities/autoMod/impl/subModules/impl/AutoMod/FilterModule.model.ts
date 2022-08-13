@@ -40,6 +40,12 @@ export class FilterModuleModel extends AbstractEventSecurityConstraint {
 
     @Column({
         nullable: false,
+        default: 15
+    })
+    public terminalViolationTimeout: number;
+
+    @Column({
+        nullable: false,
         default: TIME_OUT["1 hour"] / 1000
     })
     public autoMuteTimeout: number;

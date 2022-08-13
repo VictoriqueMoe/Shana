@@ -4,7 +4,7 @@ import {DataSource} from "typeorm";
 export abstract class DataSourceAware {
     protected _ds: DataSource;
 
-    protected constructor() {
+    public constructor() {
         this._ds = container.resolve(DataSource);
     }
 }

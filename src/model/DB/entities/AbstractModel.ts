@@ -1,4 +1,4 @@
-import {Column, CreateDateColumn, UpdateDateColumn} from "typeorm";
+import {Column, CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
 import {RelationOptions} from "typeorm/decorator/options/RelationOptions.js";
 import {IGuildAware} from "./IGuildAware.js";
 
@@ -11,10 +11,7 @@ export abstract class AbstractModel implements IGuildAware {
         onUpdate: "CASCADE"
     };
 
-    @Column({
-        generated: "increment",
-        primary: true
-    })
+    @PrimaryGeneratedColumn("increment")
     public id: number;
 
     @Column()

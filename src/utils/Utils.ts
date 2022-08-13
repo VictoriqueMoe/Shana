@@ -29,6 +29,8 @@ import {RoleManager} from "../model/framework/manager/RoleManager.js";
 import {ChannelManager} from "../model/framework/manager/ChannelManager.js";
 import Channels from "../enums/Channels.js";
 import {EmojiManager} from "../model/framework/manager/EmojiManager.js";
+import {DeepPartial} from "typeorm/common/DeepPartial.js";
+import {EntityTarget} from "typeorm/common/EntityTarget.js";
 
 export class Utils {
     public static sleep(ms: number): Promise<void> {
@@ -199,7 +201,7 @@ export class DbUtils {
      * @param instance
      * @param data
      */
-    public static build<T extends new (...args: any) => any>(instance: T, data: Record<string, any>): InstanceType<T> {
+    public static build<T>(instance: EntityTarget<T>, data: DeepPartial<T>): T {
         if (!DbUtils._ds) {
             DbUtils._ds = container.resolve(DataSource);
         }

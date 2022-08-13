@@ -6,10 +6,6 @@ import {EntityManager, Repository} from "typeorm";
 @singleton()
 export class AutoResponderManager extends DataSourceAware {
 
-    public constructor() {
-        super();
-    }
-
     public async editAutoResponder(obj: AutoResponderModel, currentTitle: string): Promise<AutoResponderModel> {
         try {
             return await this._ds.transaction(async entityManager => {
