@@ -1,6 +1,6 @@
-import {AbstractFilter} from "../AbstractFilter";
+import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
-import {ObjectUtil} from "../../../../../utils/Utils";
+import {ObjectUtil} from "../../../../../utils/Utils.js";
 import * as Immutable from "immutable";
 import {singleton} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";

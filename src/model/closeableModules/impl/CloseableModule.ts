@@ -1,10 +1,10 @@
-import {ICloseOption} from "../../DB/entities/autoMod/ICloseOption";
-import {ICloseableModule} from "../ICloseableModule";
-import {ISubModule} from "../subModules/ISubModule";
+import {ICloseOption} from "../../DB/entities/autoMod/ICloseOption.js";
+import {ICloseableModule} from "../ICloseableModule.js";
+import {ISubModule} from "../subModules/ISubModule.js";
 import * as Immutable from "immutable";
-import {ModuleSettings} from "../ModuleSettings";
-import {ObjectUtil} from "../../../utils/Utils";
-import {CloseOptionModel} from "../../DB/entities/autoMod/impl/CloseOption.model";
+import {ModuleSettings} from "../ModuleSettings.js";
+import {ObjectUtil} from "../../../utils/Utils.js";
+import {CloseOptionModel} from "../../DB/entities/autoMod/impl/CloseOption.model.js";
 import {container, delay} from "tsyringe";
 import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
 import {SubModuleManager} from "../../framework/manager/SubModuleManager.js";

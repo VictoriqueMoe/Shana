@@ -1,12 +1,10 @@
-import {ArgsOf, Discord, On} from "discordx";
-import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model";
+import {ArgsOf, Client, Discord, On} from "discordx";
+import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model.js";
 import * as schedule from "node-schedule";
 import {Guild, GuildMember} from "discord.js";
-import {RolePersistenceModel} from "../../../model/DB/entities/autoMod/impl/RolePersistence.model";
-import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings";
-import {container, injectable} from "tsyringe";
-import {GuildableModel} from "../../../model/DB/entities/guild/Guildable.model";
-import {CloseableModuleManager} from "../../../model/framework/manager/CloseableModuleManager";
+import {RolePersistenceModel} from "../../../model/DB/entities/autoMod/impl/RolePersistence.model.js";
+import {AutoRoleSettings} from "../../../model/closeableModules/AutoRoleSettings.js";
+import {injectable} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";
 import logger from "../../../utils/LoggerFactory.js";
 import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
@@ -98,23 +96,17 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
     }
 
     @PostConstruct
-    public async applyEmptyRoles(): Promise<Map<Guild, string[]>> {
+    public async applyEmptyRoles(clinet: Client): Promise<Map<Guild, string[]>> {
         const retMap: Map<Guild, string[]> = new Map();
-        const guildModels = await this._ds.getRepository(GuildableModel).find({
-            relations: ["commandSecurityModel"]
-        });
-        for (const guildModel of guildModels) {
-            const guildId = guildModel.guildId;
-            const guild = await DiscordUtils.getGuild(guildId);
-            const autoRoleModule = container.resolve(CloseableModuleManager).getCloseableModule(AutoRole);
-            const enabled = await autoRoleModule.isEnabled(guildId);
+        for (const [guildId, guild] of clinet.guilds.cache) {
+            const enabled = await this.isEnabled(guildId);
             if (enabled) {
                 const membersApplied: string[] = [];
                 const noRoles = await this._roleManager.getMembersWithNoRoles(guildId);
                 for (const noRole of noRoles) {
                     logger.info(`setting roles for ${noRole.user.tag} as they have no roles`);
                     membersApplied.push(noRole.user.tag);
-                    await autoRoleModule.applyRole(noRole, guildId);
+                    await this.applyRole(noRole, guildId);
                 }
                 retMap.set(guild, membersApplied);
             }

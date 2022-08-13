@@ -1,4 +1,4 @@
-import {AbstractFilter} from "../AbstractFilter";
+import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {singleton} from "tsyringe";
 import {SpamMeta} from "discord-spams";

@@ -1,6 +1,6 @@
 import {singleton} from "tsyringe";
 import fs from "fs";
-import {ObjectUtil} from "../../../../utils/Utils";
+import {ObjectUtil} from "../../../../utils/Utils.js";
 import type {IPropertyResolutionEngine, Property} from "../IPropertyResolutionEngine.js";
 import {PostConstruct} from "../../decorators/PostConstruct.js";
 

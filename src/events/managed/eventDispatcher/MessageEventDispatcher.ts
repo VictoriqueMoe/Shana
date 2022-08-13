@@ -1,4 +1,5 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
+import type {ArgsOf} from "discordx";
+import {Client, Discord, On} from "discordx";
 import {Message} from "discord.js";
 import {container, injectable} from "tsyringe";
 import type constructor from "tsyringe/dist/typings/types/constructor";

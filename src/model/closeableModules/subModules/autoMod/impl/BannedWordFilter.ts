@@ -1,7 +1,7 @@
-import {AbstractFilter} from "../AbstractFilter";
+import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {singleton} from "tsyringe";
-import {ObjectUtil} from "../../../../../utils/Utils";
+import {ObjectUtil} from "../../../../../utils/Utils.js";
 import ACTION from "../../../../../enums/ACTION.js";
 import PRIORITY from "../../../../../enums/PRIORITY.js";
 import {BannedWordEntries, IBannedWordAutoModFilter} from "../IBannedWordAutoModFilter.js";

@@ -1,4 +1,4 @@
-import {AutoResponderModel} from "../../DB/entities/autoMod/impl/AutoResponder.model";
+import {AutoResponderModel} from "../../DB/entities/autoMod/impl/AutoResponder.model.js";
 import {singleton} from "tsyringe";
 import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
 import {EntityManager, Repository} from "typeorm";

@@ -9,12 +9,12 @@ import {AutoMod} from "../../../../events/managed/closeableModules/AutoMod.js";
 
 @singleton()
 @registry([
-    {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
+  //  {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
     {token: Beans.ICloseableModuleToken, useToken: AutoMod},
-    {token: Beans.ICloseableModuleToken, useToken: RoleLogger},
-    {token: Beans.ICloseableModuleToken, useToken: MemberLogger},
-    {token: Beans.ICloseableModuleToken, useToken: ChannelLogger},
-    {token: Beans.ICloseableModuleToken, useToken: MessageLogger},
+    /*  {token: Beans.ICloseableModuleToken, useToken: RoleLogger},
+     {token: Beans.ICloseableModuleToken, useToken: MemberLogger},
+     {token: Beans.ICloseableModuleToken, useToken: ChannelLogger},
+     {token: Beans.ICloseableModuleToken, useToken: MessageLogger}, */
     {token: Beans.ICloseableModuleToken, useToken: AutoRole},
     {token: Beans.ICloseableModuleToken, useToken: AutoResponder}
 ])

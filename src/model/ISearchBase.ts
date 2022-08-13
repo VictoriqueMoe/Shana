@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import {ObjectUtil} from "../utils/Utils";
+import {ObjectUtil} from "../utils/Utils.js";
 import type {ShanaFuse} from "./impl/ShanaFuse.js";
 import type {AutocompleteInteraction} from "discord.js";
 import FuseResult = Fuse.FuseResult;

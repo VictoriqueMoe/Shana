@@ -1,7 +1,7 @@
 import {singleton} from "tsyringe";
 import axios from "axios";
 import FormData from "form-data";
-import {Property} from "../decorators/Property";
+import {Property} from "../decorators/Property.js";
 
 @singleton()
 export class OcrManager {

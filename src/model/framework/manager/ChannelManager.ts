@@ -1,5 +1,5 @@
 import {PostableChannelModel} from "../../DB/entities/guild/PostableChannel.model.js";
-import {BaseGuildTextChannel, GuildManager} from "discord.js";
+import {BaseGuildTextChannel} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
 import {singleton} from "tsyringe";
 import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
@@ -8,7 +8,7 @@ import Channels from "../../../enums/Channels.js";
 @singleton()
 export class ChannelManager extends DataSourceAware {
 
-    public constructor(private _guildManager: GuildManager) {
+    public constructor() {
         super();
     }
 

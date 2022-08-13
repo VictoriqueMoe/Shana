@@ -1,10 +1,10 @@
 import {ArgsOf, Client} from "discordx";
-import {DiscordUtils, ObjectUtil} from "../../../utils/Utils";
-import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model";
-import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint";
+import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
+import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model.js";
+import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint.js";
 import {Message} from "discord.js";
 import {container, singleton} from "tsyringe";
-import {AutoResponderModel} from "../../../model/DB/entities/autoMod/impl/AutoResponder.model";
+import {AutoResponderModel} from "../../../model/DB/entities/autoMod/impl/AutoResponder.model.js";
 import path from 'path';
 import isImageFast from 'is-image-fast';
 import {MessageListenerDecorator} from "../../../model/framework/decorators/messageListenerDecorator.js";

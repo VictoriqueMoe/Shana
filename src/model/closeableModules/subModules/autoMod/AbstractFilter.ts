@@ -6,6 +6,7 @@ import {ObjectUtil} from "../../../../utils/Utils.js";
 import TIME_OUT from "../../../../enums/TIME_OUT.js";
 import {LogChannelManager} from "../../../framework/manager/LogChannelManager.js";
 import {container} from "tsyringe";
+import {AutoMod} from "../../../../events/managed/closeableModules/AutoMod.js";
 
 export abstract class AbstractFilter implements IAutoModFilter {
 
@@ -30,14 +31,8 @@ export abstract class AbstractFilter implements IAutoModFilter {
         return 15; //  hard-coded for now
     }
 
-    private _parentModule: ICloseableModule<null>;
-
     public get parentModule(): ICloseableModule<null> {
-        return this._parentModule;
-    }
-
-    public set parentModule(parentModule: ICloseableModule<null>) {
-        this._parentModule = parentModule;
+        return container.resolve(AutoMod);
     }
 
     public get autoTerminalViolationCount(): number {

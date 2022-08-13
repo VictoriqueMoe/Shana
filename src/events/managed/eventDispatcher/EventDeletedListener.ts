@@ -1,6 +1,6 @@
 import {GuildMember, Message} from "discord.js";
-import {ArgsOf, On} from "discordx/build/esm/index.js";
-import {Discord} from "discordx";
+import type {ArgsOf} from "discordx";
+import {Discord, On} from "discordx";
 
 @Discord()
 export class EventDeletedListener {

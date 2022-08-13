@@ -1,4 +1,4 @@
-import type {ICloseableModule} from "../ICloseableModule";
+import type {ICloseableModule} from "../ICloseableModule.js";
 
 /**
  * A sub module is  something that belongs to the parent module

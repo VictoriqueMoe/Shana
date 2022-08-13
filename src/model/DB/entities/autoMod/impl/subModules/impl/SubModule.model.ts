@@ -4,7 +4,7 @@ import type {CloseOptionModel} from "../../CloseOption.model.js";
 import type {FilterModuleModel} from "./AutoMod/FilterModule.model.js";
 
 @Entity()
-@Index("subModuleConstraint", ["pModuleId", "guildId", "subModuleId"], {
+@Index("subModuleConstraint", ["guildId", "subModuleId"], {
     unique: true
 })
 export class SubModuleModel extends AbstractModel {

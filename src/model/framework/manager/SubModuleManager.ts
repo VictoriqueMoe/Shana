@@ -5,7 +5,6 @@ import {ICloseableModule} from "../../closeableModules/ICloseableModule.js";
 import {ISubModule} from "../../closeableModules/subModules/ISubModule.js";
 import type constructor from "tsyringe/dist/typings/types/constructor";
 import {SubModuleFactory} from "../factory/impl/SubModuleFactory.js";
-import {PostConstruct} from "../decorators/PostConstruct.js";
 import {Client} from "discordx";
 import {DbUtils, ObjectUtil} from "../../../utils/Utils.js";
 import {SubModuleModel} from "../../DB/entities/autoMod/impl/subModules/impl/SubModule.model.js";
@@ -50,7 +49,6 @@ export class SubModuleManager extends DataSourceAware {
         });
     }
 
-    @PostConstruct
     public async initDefaults(client: Client): Promise<void> {
         const guilds = client.guilds;
         const cache = guilds.cache;
