@@ -4,4 +4,10 @@ enum SETTINGS {
     BIRTHDAY_POST_HOUR = "BIRTHDAY_POST_HOUR"
 }
 
+export enum DEFAULT_SETTINGS {
+    JAIL_ROLE = "",
+    YOUNG_ACCOUNT_ROLE = "",
+    BIRTHDAY_POST_HOUR = "0"
+}
+
 export default SETTINGS;

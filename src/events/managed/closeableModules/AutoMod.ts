@@ -19,6 +19,7 @@ import {MuteManager} from "../../../model/framework/manager/MuteManager.js";
 import {LogChannelManager} from "../../../model/framework/manager/LogChannelManager.js";
 import TIME_UNIT from "../../../enums/TIME_UNIT.js";
 import {FilterModuleManager} from "../../../model/framework/manager/FilterModuleManager.js";
+import logger from "../../../utils/LoggerFactory.js";
 
 @singleton()
 export class AutoMod extends TriggerConstraint<null> {
@@ -143,7 +144,7 @@ export class AutoMod extends TriggerConstraint<null> {
                                     }
                                     didPreformTerminaloperation = true;
                                 } catch (e) {
-                                    console.error(e);
+                                    logger.error(e);
                                     continue;
                                 }
                             }
@@ -191,7 +192,7 @@ export class AutoMod extends TriggerConstraint<null> {
                     }
                 }
                 const enabled = await this.isEnabled(guildid);
-                console.log(`message from server ${member.guild.name} (${guildid}) violated filter ${filter.id}. Filter status is ${enabled}`);
+                logger.info(`message from server ${member.guild.name} (${guildid}) violated filter ${filter.id}. Filter status is ${enabled}`);
                 filter.postProcess(message);
             }
     }

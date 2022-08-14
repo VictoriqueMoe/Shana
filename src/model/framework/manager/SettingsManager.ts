@@ -4,6 +4,7 @@ import {EntityManager} from "typeorm";
 import {DbUtils, ObjectUtil} from "../../../utils/Utils.js";
 import SETTINGS from "../../../enums/SETTINGS.js";
 import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
+import logger from "../../../utils/LoggerFactory.js";
 
 export type ALL_SETTINGS_TYPE = {
     [key in keyof typeof SETTINGS]?: string
@@ -112,7 +113,7 @@ export class SettingsManager extends DataSourceAware {
             textPrefix = "Saved";
         }
         if (retRow > 0) {
-            console.log(`${textPrefix} setting: "${setting}" with value: "${value}" on guildId: ${guildId}`);
+            logger.info(`${textPrefix} setting: "${setting}" with value: "${value}" on guildId: ${guildId}`);
         }
         return retRow;
     }

@@ -497,3 +497,41 @@ export namespace DiscordUtils {
 
 }
 
+export class EnumEx {
+
+    public static getNamesAndValues<T extends number>(e: any): Array<unknown> {
+        return EnumEx.getNames(e).map(n => ({name: n, value: e[n] as T}));
+    }
+
+    /**
+     * get the numValue associated with it's own key. if you want to get a TypeScript Enum based on an index you can use this
+     * @param e
+     * @param aName
+     * @param asValue
+     * @returns {string|null}
+     */
+    public static loopBack<T>(e: any, aName: any, asValue = false): T {
+        const keyValuePair: Array<{ name: T, value: any }> = EnumEx.getNamesAndValues(e) as Array<{ name: T, value: any }>;
+        for (let i = 0; i < keyValuePair.length; i++) {
+            const obj: { name: T, value: any } = keyValuePair[i];
+            if (asValue) {
+                if (obj.value === aName) {
+                    return obj.value;
+                }
+            } else if (obj.name === aName) {
+                return obj.name;
+            }
+
+        }
+        return null;
+    }
+
+    public static getNames(e: any): Array<string> {
+        return Object.keys(e);
+    }
+
+    private static getObjValues(e: any): Array<number | string> {
+
+        return Object.keys(e).map(k => e[k]);
+    }
+}

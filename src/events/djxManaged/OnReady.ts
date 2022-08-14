@@ -1,8 +1,9 @@
-import {ArgsOf, Client, Discord, On} from "discordx";
+import {ArgsOf, Client, Discord, DIService, On} from "discordx";
 import {container, delay, inject, injectable} from "tsyringe";
 import type {EntityManager} from "typeorm";
+import {InsertResult} from "typeorm";
 import Immutable from "immutable";
-import {DbUtils, ObjectUtil} from "../../utils/Utils.js";
+import {DbUtils, EnumEx, ObjectUtil} from "../../utils/Utils.js";
 import {CloseOptionModel} from "../../model/DB/entities/autoMod/impl/CloseOption.model.js";
 import {ICloseableModule} from "../../model/closeableModules/ICloseableModule.js";
 import {CloseableModuleManager} from "../../model/framework/manager/CloseableModuleManager.js";
@@ -12,6 +13,10 @@ import {SubModuleManager} from "../../model/framework/manager/SubModuleManager.j
 import {FilterModuleManager} from "../../model/framework/manager/FilterModuleManager.js";
 import {GuildableModel} from "../../model/DB/entities/guild/Guildable.model.js";
 import {ActivityType} from "discord-api-types/v10";
+import {SettingsManager} from "../../model/framework/manager/SettingsManager.js";
+import SETTINGS, {DEFAULT_SETTINGS} from "../../enums/SETTINGS.js";
+import {PostableChannelModel} from "../../model/DB/entities/guild/PostableChannel.model.js";
+import {LogChannelManager} from "../../model/framework/manager/LogChannelManager.js";
 
 @Discord()
 @injectable()
@@ -19,6 +24,7 @@ export class OnReady extends DataSourceAware {
 
     public constructor(private _client: Client,
                        @inject(delay(() => SubModuleManager)) private _subModuleManager: SubModuleManager,
+                       private _logManager: LogChannelManager,
                        private _filterModuleManager: FilterModuleManager) {
         super();
     }
@@ -26,16 +32,97 @@ export class OnReady extends DataSourceAware {
     public async init(): Promise<void> {
         await this._ds.transaction(async (transactionalEntityManager: EntityManager) => {
             await this.populateClosableEvents(transactionalEntityManager);
+            await this.setDefaultSettings(transactionalEntityManager);
+            await this.populatePostableChannels(transactionalEntityManager);
+            await this.cleanUpGuilds(transactionalEntityManager);
+            await this.initAppCommands();
+            await this.joinThreads();
         });
         await this.populateDefaultsSubModules();
+    }
+
+    public async setDefaultSettings(manager: EntityManager): Promise<void> {
+        const guilds = this._client.guilds;
+        const cache = guilds.cache;
+        const nameValue = EnumEx.getNamesAndValues(DEFAULT_SETTINGS) as any;
+        const settingsManager = container.resolve(SettingsManager);
+        for (const [guildId] of cache) {
+            for (const keyValuesObj of nameValue) {
+                const setting: SETTINGS = keyValuesObj.name;
+                let value = keyValuesObj.value;
+                if (!ObjectUtil.validString(value)) {
+                    value = null;
+                }
+                await settingsManager.saveOrUpdateSetting(setting, value, guildId, true, manager);
+            }
+        }
+    }
+
+    private async joinThreads(): Promise<void> {
+        const guilds = [...this._client.guilds.cache.values()];
+        for (const guild of guilds) {
+            const threads = await guild.channels.fetchActiveThreads(true);
+            for (const [, thread] of threads.threads) {
+                if (thread.joinable && !thread.joined) {
+                    await thread.join();
+                    await this._logManager.postToLog(`joined thread: "${thread.name}"`, thread.guildId);
+                }
+            }
+        }
+    }
+
+    private async initAppCommands(): Promise<void> {
+        return this._client.initApplicationCommands();
+    }
+
+    private async cleanUpGuilds(transactionManager: EntityManager): Promise<void> {
+        const guildsJoined = [...this._client.guilds.cache.keys()];
+        for (const guildsJoinedId of guildsJoined) {
+            const guildModels = await transactionManager.find(GuildableModel, {
+                where: {
+                    "guildId": guildsJoinedId
+                }
+            });
+            if (!guildModels) {
+                await transactionManager.delete(GuildableModel, {
+                    guildId: guildsJoinedId,
+                });
+            }
+        }
+    }
+
+    private async populatePostableChannels(manager: EntityManager): Promise<InsertResult | any[]> {
+        const guildModels = await manager.getRepository(GuildableModel).find({
+            relations: ["commandSecurityModel"]
+        });
+        const currentModels = await manager.find(PostableChannelModel);
+        const models: {
+            guildId: string
+        }[] = [];
+        for (const guildModel of guildModels) {
+            const guildId = guildModel.guildId;
+            if (currentModels.some(m => m.guildId === guildId)) {
+                continue;
+            }
+            models.push({
+                guildId
+            });
+        }
+        return manager.save(models);
     }
 
     @On("ready")
     private async initialise([client]: ArgsOf<"ready">): Promise<void> {
         client.user.setActivity('Half-Life 3', {type: ActivityType.Playing});
+        const pArr: Promise<any>[] = [];
         await this.populateGuilds();
+        pArr.push(this.initUsernames());
         await this.init();
         logger.info("Bot logged in!");
+    }
+
+    private async initDi(): Promise<void> {
+        DIService.allServices;
     }
 
     private async populateGuilds(): Promise<void> {
