@@ -95,7 +95,7 @@ export class FilterModuleManager extends DataSourceAware {
     }
 
     public async getSetting(guildId: string, filter: IAutoModFilter): Promise<UnionSettings> {
-        let res: FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel = null;
+        let res: FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel;
         const opts: FindOneOptions<FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel> = {
             relations: ["subModule"],
             where: {
