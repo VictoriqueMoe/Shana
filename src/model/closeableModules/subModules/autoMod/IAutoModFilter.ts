@@ -9,8 +9,7 @@ export type FilterSettings = SubModuleSettings & {
     priority?: number,
     terminalViolationTimeout?: number,
     autoTerminalViolationCount?: number,
-    autoMuteTimeout?: number,
-    isActive?: boolean
+    autoMuteTimeout?: number
 };
 
 /**
@@ -61,10 +60,5 @@ export interface IAutoModFilter extends ISubModule {
      * @param member
      */
     postProcess(member: Message): Promise<void>;
-
-    /**
-     * Is this filter active
-     */
-    isActive(guildId: string): Promise<boolean>;
 
 }

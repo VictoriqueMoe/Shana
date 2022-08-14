@@ -22,6 +22,9 @@ import type {
 import {SubModuleManager} from "./SubModuleManager.js";
 import {AbstractFilter} from "../../closeableModules/subModules/autoMod/AbstractFilter.js";
 import {AutoMod} from "../../../events/managed/closeableModules/AutoMod.js";
+import {FindOneOptions} from "typeorm/find-options/FindOneOptions.js";
+import {RunEvery} from "../decorators/RunEvery.js";
+import logger from "../../../utils/LoggerFactory.js";
 
 export type UnionSettings = FilterSettings | BannedWordFilterSettings | ValueBackedFilterSettings;
 
@@ -77,7 +80,13 @@ export class FilterModuleManager extends DataSourceAware {
         const filterRepo = this._ds.getRepository(FilterModuleModel);
         const valueRepo = this._ds.getRepository(ValueBackedFilterModuleModel);
         const repoArr = [bannedWordRepo, filterRepo, valueRepo];
-        return Promise.all(repoArr.map(repo => repo.find({where: {guildId}}))).then(values => values.flat());
+        return Promise.all(repoArr.map(repo => repo.find({
+            cache: {
+                id: `${repo.metadata.name}_settings`,
+                milliseconds: 30000
+            },
+            where: {guildId}
+        }))).then(values => values.flat());
     }
 
     public async getModel(guildId: string, filter: IAutoModFilter): Promise<FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel | null> {
@@ -87,27 +96,31 @@ export class FilterModuleManager extends DataSourceAware {
 
     public async getSetting(guildId: string, filter: IAutoModFilter): Promise<UnionSettings> {
         let res: FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel = null;
+        const opts: FindOneOptions<FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel> = {
+            relations: ["subModule"],
+            where: {
+                guildId,
+                pSubModuleId: filter.id
+            }
+        };
         if (this.isBannedWordAutoModFilter(filter)) {
-            res = await this._ds.manager.findOne(BannedWordFilterModuleModel, {
-                where: {
-                    guildId,
-                    pSubModuleId: filter.id
-                }
-            });
+            opts["cache"] = {
+                id: "bannedWordSetting_query",
+                milliseconds: 30000
+            };
+            res = await this._ds.manager.findOne(BannedWordFilterModuleModel, opts);
         } else if (this.isValueBackedAutoModFilter(filter)) {
-            res = await this._ds.manager.findOne(ValueBackedFilterModuleModel, {
-                where: {
-                    guildId,
-                    pSubModuleId: filter.id
-                }
-            });
+            opts["cache"] = {
+                id: "valueBackedSetting_query",
+                milliseconds: 30000
+            };
+            res = await this._ds.manager.findOne(ValueBackedFilterModuleModel, opts);
         } else {
-            res = await this._ds.manager.findOne(FilterModuleModel, {
-                where: {
-                    guildId,
-                    pSubModuleId: filter.id
-                }
-            });
+            opts["cache"] = {
+                id: "FilterSetting_query",
+                milliseconds: 30000
+            };
+            res = await this._ds.manager.findOne(FilterModuleModel, opts);
         }
         return res?.getSettings();
     }
@@ -115,6 +128,18 @@ export class FilterModuleManager extends DataSourceAware {
 
     public isBannedWordAutoModFilter(filter: IAutoModFilter): filter is IBannedWordAutoModFilter {
         return 'bannedWords' in filter;
+    }
+
+    @RunEvery(1, "hours", true)
+    private update(): Promise<void> {
+        logger.info("Clearning cache for 'settings_query' and 'filter_query'");
+        return this._ds.queryResultCache.remove([
+            "BannedWordFilterModuleModel_settings",
+            "FilterModuleModel_settings",
+            "ValueBackedFilterModuleModel_settings",
+            "bannedWordSetting_query",
+            "FilterSetting_query",
+            "valueBackedSetting_query"]);
     }
 
     public isValueBackedAutoModFilter(filter: IAutoModFilter): filter is IValueBackedAutoModFilter<unknown> {

@@ -31,10 +31,14 @@ export class Main {
             type: "better-sqlite3",
             database: dbName,
             synchronize: testMode,
+            cache: {
+                duration: 1000
+            },
             entities: [`${dirname(import.meta.url)}/model/DB/**/*.model.{ts,js}`]
         });
 
         const connectedDs = await datasource.initialize();
+        await connectedDs.queryResultCache.clear();
         const clientOps: ClientOptions = {
             intents: [
                 IntentsBitField.Flags.Guilds,

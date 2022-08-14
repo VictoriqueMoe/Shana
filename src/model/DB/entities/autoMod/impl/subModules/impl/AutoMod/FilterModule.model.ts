@@ -18,12 +18,6 @@ export class FilterModuleModel extends AbstractEventSecurityConstraint {
     public pSubModuleId: string;
 
     @Column({
-        nullable: false,
-        default: false
-    })
-    public status: boolean;
-
-    @Column({
         type: "simple-array",
         default: [ACTION.NONE],
         nullable: false
@@ -81,7 +75,7 @@ export class FilterModuleModel extends AbstractEventSecurityConstraint {
             id: this.pSubModuleId,
             priority: this.priority,
             autoTerminalViolationCount: this.autoTerminalViolationCount,
-            isActive: this.status,
+            isActive: this.subModule.isActive ?? false,
             terminalViolationTimeout: this.terminalViolationTimeout,
             warnMessage: this.warnMessage
         };
