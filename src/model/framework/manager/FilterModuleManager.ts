@@ -30,33 +30,70 @@ export class FilterModuleManager extends DataSourceAware {
         const guilds = client.guilds;
         const cache = guilds.cache;
         const newModels: (FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel)[] = [];
-        for (const [guildId] of cache) {
-            for (const filter of this._filters) {
-                const pSubModuleId = filter.id;
-                const data = {
-                    pSubModuleId,
-                    guildId
-                };
-                if (filter) {
-                    if (this.isBannedWordAutoModFilter(filter)) {
-                        if (await this._ds.manager.count(BannedWordFilterModuleModel, {where: data}) === 0) {
-                            newModels.push(DbUtils.build(BannedWordFilterModuleModel, {...data}));
-                        }
-                    } else if (this.isValueBackedAutoModFilter(filter)) {
-                        if (await this._ds.manager.count(ValueBackedFilterModuleModel, {where: data}) === 0) {
-                            newModels.push(DbUtils.build(ValueBackedFilterModuleModel, {...data}));
-                        }
-                    } else {
-                        if (await this._ds.manager.count(FilterModuleModel, {where: data}) === 0) {
-                            newModels.push(DbUtils.build(FilterModuleModel, {...data}));
+        await this._ds.transaction(async entityManager => {
+            for (const [guildId] of cache) {
+                for (const filter of this._filters) {
+                    const pSubModuleId = filter.id;
+                    const data = {
+                        pSubModuleId,
+                        guildId
+                    };
+                    if (filter) {
+                        if (this.isBannedWordAutoModFilter(filter)) {
+                            if (await entityManager.count(BannedWordFilterModuleModel, {where: data}) === 0) {
+                                newModels.push(DbUtils.build(BannedWordFilterModuleModel, {...data}));
+                            }
+                        } else if (this.isValueBackedAutoModFilter(filter)) {
+                            if (await entityManager.count(ValueBackedFilterModuleModel, {where: data}) === 0) {
+                                newModels.push(DbUtils.build(ValueBackedFilterModuleModel, {...data}));
+                            }
+                        } else {
+                            if (await entityManager.count(FilterModuleModel, {where: data}) === 0) {
+                                newModels.push(DbUtils.build(FilterModuleModel, {...data}));
+                            }
                         }
                     }
                 }
             }
+            if (ObjectUtil.isValidArray(newModels)) {
+                await entityManager.save(newModels);
+            }
+        });
+    }
+
+    public async getAllSettings(guildId: string): Promise<(FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel)[]> {
+        const bannedWordRepo = this._ds.getRepository(BannedWordFilterModuleModel);
+        const filterRepo = this._ds.getRepository(FilterModuleModel);
+        const valueRepo = this._ds.getRepository(ValueBackedFilterModuleModel);
+        const repoArr = [bannedWordRepo, filterRepo, valueRepo];
+        return Promise.all(repoArr.map(repo => repo.find({where: {guildId}}))).then(values => values.flat());
+    }
+
+    public async getSetting(guildId: string, filter: IAutoModFilter): Promise<FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel> {
+        let res: FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel = null;
+        if (this.isBannedWordAutoModFilter(filter)) {
+            res = await this._ds.manager.findOne(BannedWordFilterModuleModel, {
+                where: {
+                    guildId,
+                    pSubModuleId: filter.id
+                }
+            });
+        } else if (this.isValueBackedAutoModFilter(filter)) {
+            res = await this._ds.manager.findOne(ValueBackedFilterModuleModel, {
+                where: {
+                    guildId,
+                    pSubModuleId: filter.id
+                }
+            });
+        } else {
+            res = await this._ds.manager.findOne(FilterModuleModel, {
+                where: {
+                    guildId,
+                    pSubModuleId: filter.id
+                }
+            });
         }
-        if (ObjectUtil.isValidArray(newModels)) {
-            await this._ds.manager.save(newModels);
-        }
+        return res;
     }
 
     public isBannedWordAutoModFilter(filter: IAutoModFilter): filter is IBannedWordAutoModFilter {

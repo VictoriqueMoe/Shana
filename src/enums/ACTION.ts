@@ -3,7 +3,8 @@ enum ACTION {
     DELETE,
     MUTE,
     BAN,
-    KICK
+    KICK,
+    NONE
 }
 
 export default ACTION;

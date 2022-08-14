@@ -10,5 +10,5 @@ export interface IBannedWordAutoModFilter extends IAutoModFilter {
     /**
      * Return an object containing the banned words
      */
-    readonly bannedWords: BannedWordEntries;
+    bannedWords(guildId: string): Promise<BannedWordEntries>;
 }

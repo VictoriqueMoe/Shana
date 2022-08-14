@@ -1,50 +1,44 @@
-import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {singleton} from "tsyringe";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
 import {TimedSet} from "@discordx/utilities";
-import ACTION from "../../../../../enums/ACTION.js";
-import PRIORITY from "../../../../../enums/PRIORITY.js";
-import {IValueBackedAutoModFilter} from "../IValueBackedAutoModFilter.js";
+import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
+import {PostConstruct} from "../../../../framework/decorators/PostConstruct.js";
+import {Client} from "discordx";
 
 @singleton()
-export class LinkCooldownFilter extends AbstractFilter implements IValueBackedAutoModFilter<number> {
-    private readonly _cooldownArray: TimedSet<LinkCooldownEntry>;
+export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number> {
+    private readonly _cooldownArray: Map<string, TimedSet<LinkCooldownEntry>> = new Map();
 
     public constructor() {
         super();
-        this._cooldownArray = new TimedSet(this.value * 1000);
     }
 
-    public get actions(): ACTION[] {
-        return [ACTION.DELETE, ACTION.WARN];
+    @PostConstruct
+    public async init(clinet: Client): Promise<void> {
+        for (const [guildId] of clinet.guilds.cache) {
+            const value = await this.value(guildId) * 1000;
+            this._cooldownArray.set(guildId, new TimedSet(value));
+        }
     }
 
-    public get isActive(): boolean {
-        return false;
-    }
-
-    public get cooldownArray(): TimedSet<LinkCooldownEntry> {
-        return this._cooldownArray;
+    public get defaultValue(): number {
+        return 5;
     }
 
     /**
      * The time between links
      */
-    public get value(): number {
-        return 5; // hard coded for now
+    public unMarshalData(data: string): number {
+        return Number.parseInt(data);
+    }
+
+    public get cooldownArray(): Map<string, TimedSet<LinkCooldownEntry>> {
+        return this._cooldownArray;
     }
 
     public get id(): string {
         return "Link Cooldown Filter";
-    }
-
-    public get warnMessage(): string {
-        return `Stop sending so many links! wait ${this.value} seconds`;
-    }
-
-    public get priority(): number {
-        return PRIORITY.LAST;
     }
 
     public async doFilter(content: Message): Promise<boolean> {
@@ -57,18 +51,18 @@ export class LinkCooldownFilter extends AbstractFilter implements IValueBackedAu
             if (!fromArray) {
                 fromArray = new LinkCooldownEntry(memberId, guildId);
                 fromArray.messageArray.push(content);
-                this._cooldownArray.add(fromArray);
+                this._cooldownArray.get(guildId).add(fromArray);
                 return true;
             }
             fromArray.messageArray.push(content);
-            this._cooldownArray.refresh(fromArray);
+            this._cooldownArray.get(guildId).refresh(fromArray);
             return false;
         }
         return true;
     }
 
     public getFromArray(userId: string, guildId: string): LinkCooldownEntry {
-        const arr = this._cooldownArray.rawSet;
+        const arr = this._cooldownArray.get(guildId).rawSet;
         return arr.find(value => value.userId === userId && value.guildId === guildId);
     }
 

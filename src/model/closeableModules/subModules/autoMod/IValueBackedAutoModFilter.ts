@@ -8,5 +8,5 @@ export interface IValueBackedAutoModFilter<T> extends IAutoModFilter {
     /**
      * Some filters have additional values for settings, this will return the unique setting for this filter
      */
-    readonly value: T;
+    value(guildId: string): Promise<T>;
 }

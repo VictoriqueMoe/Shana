@@ -3,52 +3,62 @@ import {ICloseableModule} from "../../ICloseableModule";
 import ACTION from "../../../../enums/ACTION.js";
 import {EmbedBuilder, Message} from "discord.js";
 import {ObjectUtil} from "../../../../utils/Utils.js";
-import TIME_OUT from "../../../../enums/TIME_OUT.js";
 import {LogChannelManager} from "../../../framework/manager/LogChannelManager.js";
 import {container} from "tsyringe";
 import {AutoMod} from "../../../../events/managed/closeableModules/AutoMod.js";
+import {FilterModuleManager} from "../../../framework/manager/FilterModuleManager.js";
 
 export abstract class AbstractFilter implements IAutoModFilter {
 
-    public abstract readonly actions: ACTION[];
     public abstract readonly id: string;
-    public abstract readonly isActive: boolean;
-    public abstract readonly warnMessage: string;
-    public abstract readonly priority: number;
+
     private readonly _logManager: LogChannelManager;
+    protected readonly _filterManager: FilterModuleManager;
 
     public constructor() {
         this._logManager = container.resolve(LogChannelManager);
-    }
-
-    /**
-     * How long to wait (in seconds) to cooldown the autoMuteViolationCount value
-     * <br/><br/>
-     * if autoTerminalViolationCount is set to 2 and this is set to 30 then each member will have 30 seconds to violate 2 terminal filters starting from the first violation. If a member violates ONE terminal filter and not another within 30 seconds, then the counter is reset to 0
-     *
-     */
-    public static get terminalViolationTimeout(): number {
-        return 15; //  hard-coded for now
+        this._filterManager = container.resolve(FilterModuleManager);
     }
 
     public get parentModule(): ICloseableModule<null> {
         return container.resolve(AutoMod);
     }
 
-    public get autoTerminalViolationCount(): number {
-        return 3; //  hard-coded for now
+    public actions(guildId: string): Promise<ACTION[]> {
+        return this._filterManager.getSetting(guildId, this).then(setting => setting.actions);
     }
 
-    public get autoMuteTimeout(): number {
-        return TIME_OUT["1 hour"] / 1000; //  hard-coded for now
+    public warnMessage(guildId: string): Promise<string> {
+        return this._filterManager.getSetting(guildId, this).then(setting => setting.warnMessage);
+    }
+
+    public priority(guildId: string): Promise<number> {
+        return this._filterManager.getSetting(guildId, this).then(setting => setting.priority);
+    }
+
+    public terminalViolationTimeout(guildId: string): Promise<number> {
+        return this._filterManager.getSetting(guildId, this).then(setting => setting.terminalViolationTimeout);
+    }
+
+    public autoTerminalViolationCount(guildId: string): Promise<number> {
+        return this._filterManager.getSetting(guildId, this).then(setting => setting.autoTerminalViolationCount);
+    }
+
+    public autoMuteTimeout(guildId: string): Promise<number> {
+        return this._filterManager.getSetting(guildId, this).then(setting => setting.autoMuteTimeout);
+    }
+
+    public isActive(guildId: string): Promise<boolean> {
+        return this._filterManager.getSetting(guildId, this).then(setting => setting.status);
     }
 
     public abstract postProcess(member: Message): Promise<void>;
 
     public abstract doFilter(content: Message): Promise<boolean>;
 
-    protected postToLog(reason: string, message: Message): Promise<Message | null> {
-        if (!this.actions.includes(ACTION.DELETE) || !message.member.user) {
+    protected async postToLog(reason: string, message: Message): Promise<Message | null> {
+        const guildId = message.guild.id;
+        if (!(await this.actions(guildId)).includes(ACTION.DELETE) || !message.member.user) {
             return null;
         }
         const {member} = message;
@@ -66,6 +76,6 @@ export abstract class AbstractFilter implements IAutoModFilter {
             .setFooter({
                 text: `${member.user.id}`
             });
-        return this._logManager.postToLog([embed], message.guild.id, false);
+        return this._logManager.postToLog([embed], guildId, false);
     }
 }

@@ -1,13 +1,10 @@
-import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {singleton} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";
-import ACTION from "../../../../../enums/ACTION.js";
-import PRIORITY from "../../../../../enums/PRIORITY.js";
-import {IValueBackedAutoModFilter} from "../IValueBackedAutoModFilter.js";
+import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
 
 @singleton()
-export class ImageSpamFilter extends AbstractFilter implements IValueBackedAutoModFilter<number> {
+export class ImageSpamFilter extends AbstractValueBackedAutoModFilter<number> {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
 
@@ -16,31 +13,19 @@ export class ImageSpamFilter extends AbstractFilter implements IValueBackedAutoM
         this._cooldownArray = new TimedSet(10000);
     }
 
+    public get defaultValue(): number {
+        return 4;
+    }
+
     /**
      * How many images are allowed at once in the space of 10 seconds
      */
-    public get value(): number {
-        return 4; // hard coded for now
-    }
-
-    public get actions(): ACTION[] {
-        return [ACTION.DELETE, ACTION.WARN, ACTION.MUTE];
+    public unMarshalData(data: string): number {
+        return Number.parseInt(data);
     }
 
     public get id(): string {
         return "Image Spam Filter";
-    }
-
-    public get isActive(): boolean {
-        return true;
-    }
-
-    public get priority(): number {
-        return PRIORITY.LAST;
-    }
-
-    public get warnMessage(): string {
-        return "You are posting too many images, slow down!";
     }
 
     public async doFilter(content: Message): Promise<boolean> {
@@ -58,7 +43,7 @@ export class ImageSpamFilter extends AbstractFilter implements IValueBackedAutoM
             fromArray = new MessageSpamEntry(memberId, this, guildId);
             this._cooldownArray.add(fromArray);
         }
-        return !fromArray.hasViolationLimitReached;
+        return !(await fromArray.hasViolationLimitReached(guildId));
 
     }
 
@@ -79,7 +64,8 @@ class MessageSpamEntry {
         this.count = 1;
     }
 
-    public get hasViolationLimitReached(): boolean {
-        return this.count > this._instance.value;
+    public async hasViolationLimitReached(guildId: string): Promise<boolean> {
+        const value = await this._instance.value(guildId);
+        return this.count > value;
     }
 }

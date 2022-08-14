@@ -2,49 +2,28 @@ import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {singleton} from "tsyringe";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
-import ACTION from "../../../../../enums/ACTION.js";
-import PRIORITY from "../../../../../enums/PRIORITY.js";
 import {BannedWordEntries, IBannedWordAutoModFilter} from "../IBannedWordAutoModFilter.js";
+import {
+    BannedWordFilterModuleModel
+} from "../../../../DB/entities/autoMod/impl/subModules/impl/AutoMod/BannedWordFilterModule.model.js";
 
 @singleton()
 export class BannedWordFilter extends AbstractFilter implements IBannedWordAutoModFilter {
-
-    public get actions(): ACTION[] {
-        return [ACTION.DELETE, ACTION.WARN, ACTION.MUTE];
-    }
-
-    public get bannedWords(): BannedWordEntries {
-        return {
-            "exactWord": ["retard", "retarded", "tard", "tards", "retards", "fag", "fags", "faggot", "faggots", "nigger"],
-            "WildCardWords": ["nigger", "cunt", "nigga", "lambda.it.cx", "taciturasa", "gljfizd8xKgsSrU7dafuw", "fmqdWC-eVqc", "chng.it"]
-        };
-    }
 
     public get id(): string {
         return "Banned Word Filter";
     }
 
-    public get isActive(): boolean {
-        return true;
-    }
-
-    public get priority(): number {
-        return PRIORITY.FIRST;
-    }
-
-    public get warnMessage(): string {
-        return "Watch your language!";
-    }
-
     /**
      * return true if the word is banned
      * @param word
+     * @param guildId
      */
-    public isWordBanned(word: string): boolean {
+    public async isWordBanned(word: string, guildId: string): Promise<boolean> {
         if (!ObjectUtil.validString(word)) {
             return false;
         }
-        const badWordObj = this.bannedWords;
+        const badWordObj = await this.bannedWords(guildId);
         const exactArray = badWordObj.exactWord;
         const inStringArray = badWordObj.WildCardWords;
         const messageContent = word.trim().toLowerCase();
@@ -65,12 +44,16 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordAutoM
         return false;
     }
 
-    public doFilter(content: Message): Promise<boolean> {
-        return Promise.resolve(!this.isWordBanned(content.content));
+    public async doFilter(content: Message): Promise<boolean> {
+        return !(await this.isWordBanned(content.content, content.guildId));
     }
 
     public async postProcess(message: Message): Promise<void> {
         await super.postToLog("Banned words", message);
+    }
+
+    public bannedWords(guildId: string): Promise<BannedWordEntries> {
+        return this._filterManager.getSetting(guildId, this).then((setting: BannedWordFilterModuleModel) => setting.bannedWords);
     }
 
 }

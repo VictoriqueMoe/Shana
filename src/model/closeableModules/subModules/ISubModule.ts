@@ -13,7 +13,7 @@ export interface ISubModule {
     /**
      * Is this filter active
      */
-    readonly isActive: boolean;
+    isActive(guildId: string): Promise<boolean>;
 
     /**
      * Get the parent module this belongs to

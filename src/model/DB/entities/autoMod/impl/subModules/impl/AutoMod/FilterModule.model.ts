@@ -17,8 +17,15 @@ export class FilterModuleModel extends AbstractEventSecurityConstraint {
     public pSubModuleId: string;
 
     @Column({
+        nullable: false,
+        default: false
+    })
+    public status: boolean;
+
+    @Column({
+        enum: ACTION,
         type: "simple-array",
-        default: "",
+        default: ACTION.NONE,
         nullable: false
     })
     public actions: ACTION[];

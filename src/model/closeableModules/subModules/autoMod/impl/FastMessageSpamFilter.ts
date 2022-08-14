@@ -1,15 +1,12 @@
-import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
 import * as Immutable from "immutable";
 import {singleton} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";
-import {IValueBackedAutoModFilter} from "../IValueBackedAutoModFilter.js";
-import ACTION from "../../../../../enums/ACTION.js";
-import PRIORITY from "../../../../../enums/PRIORITY.js";
+import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
 
 @singleton()
-export class FastMessageSpamFilter extends AbstractFilter implements IValueBackedAutoModFilter<number> {
+export class FastMessageSpamFilter extends AbstractValueBackedAutoModFilter<number> {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
 
@@ -18,31 +15,19 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
         this._cooldownArray = new TimedSet(5000);
     }
 
+    public get defaultValue(): number {
+        return 5;
+    }
+
     /**
      * How many messages they are allowed to send in 5 seconds
      */
-    public get value(): number {
-        return 5; // hard coded for now
-    }
-
-    public get actions(): ACTION[] {
-        return [ACTION.WARN, ACTION.DELETE, ACTION.MUTE];
+    public unMarshalData(data: string): number {
+        return Number.parseInt(data);
     }
 
     public get id(): string {
         return "Fast Message Spam Filter";
-    }
-
-    public get isActive(): boolean {
-        return true;
-    }
-
-    public get priority(): number {
-        return PRIORITY.LAST;
-    }
-
-    public get warnMessage(): string {
-        return "You are posting too fast, slow down!";
     }
 
     public async doFilter(content: Message): Promise<boolean> {
@@ -50,16 +35,16 @@ export class FastMessageSpamFilter extends AbstractFilter implements IValueBacke
             return true;
         }
         const memberId = content.member.id;
-        let fromArray = this.getFromArray(memberId, content.member.guild.id);
+        let fromArray = this.getFromArray(memberId, content.guildId);
         if (fromArray) {
             fromArray.addMessage(content);
             fromArray.count++;
             this._cooldownArray.refresh(fromArray);
         } else {
-            fromArray = new MessageSpamEntry(memberId, this, content.member.guild.id, content);
+            fromArray = new MessageSpamEntry(memberId, this, content.guildId, content);
             this._cooldownArray.add(fromArray);
         }
-        return !fromArray.hasViolationLimitReached;
+        return !(await fromArray.hasViolationLimitReached(content.guildId));
 
     }
 
@@ -83,8 +68,9 @@ class MessageSpamEntry {
 
     private _messages: Message[] = [];
 
-    public get hasViolationLimitReached(): boolean {
-        return this.count > this._instance.value;
+    public async hasViolationLimitReached(guildId: string): Promise<boolean> {
+        const value = await this._instance.value(guildId);
+        return this.count > value;
     }
 
     public get messages(): Immutable.List<Message> {
