@@ -5,12 +5,11 @@ import {ObjectUtil} from "../../../../../utils/Utils.js";
 
 export abstract class AbstractValueBackedAutoModFilter<T> extends AbstractFilter implements IValueBackedAutoModFilter<T> {
     public abstract override readonly id: string;
+    public abstract readonly defaultValue: T;
 
     public abstract override postProcess(member: Message): Promise<void>;
 
     public abstract override doFilter(content: Message): Promise<boolean>;
-
-    public abstract readonly defaultValue: T;
 
     public abstract unMarshalData(data: string): T;
 

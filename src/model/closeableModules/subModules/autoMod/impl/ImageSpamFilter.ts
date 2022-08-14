@@ -17,15 +17,15 @@ export class ImageSpamFilter extends AbstractValueBackedAutoModFilter<number> {
         return 4;
     }
 
+    public get id(): string {
+        return "Image Spam Filter";
+    }
+
     /**
      * How many images are allowed at once in the space of 10 seconds
      */
     public unMarshalData(data: string): number {
         return Number.parseInt(data);
-    }
-
-    public get id(): string {
-        return "Image Spam Filter";
     }
 
     public async doFilter(content: Message): Promise<boolean> {

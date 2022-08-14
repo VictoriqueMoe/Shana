@@ -14,6 +14,10 @@ export class EmojiSpamFilter extends AbstractValueBackedAutoModFilter<number> {
         return "Emoji Spam Filter";
     }
 
+    public get defaultValue(): number {
+        return 6;
+    }
+
     public async doFilter(content: Message): Promise<boolean> {
         const value = await this.value(content.guildId);
         return this._emojiManager.getEmojiFromMessage(content).length <= value;
@@ -21,10 +25,6 @@ export class EmojiSpamFilter extends AbstractValueBackedAutoModFilter<number> {
 
     public async postProcess(message: Message): Promise<void> {
         await super.postToLog("Too many emojis", message);
-    }
-
-    public get defaultValue(): number {
-        return 6;
     }
 
     /**

@@ -9,7 +9,7 @@ import {AutoMod} from "../../../../events/managed/closeableModules/AutoMod.js";
 
 @singleton()
 @registry([
-  //  {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
+    //  {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
     {token: Beans.ICloseableModuleToken, useToken: AutoMod},
     /*  {token: Beans.ICloseableModuleToken, useToken: RoleLogger},
      {token: Beans.ICloseableModuleToken, useToken: MemberLogger},

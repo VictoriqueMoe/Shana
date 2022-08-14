@@ -19,15 +19,15 @@ export class FastMessageSpamFilter extends AbstractValueBackedAutoModFilter<numb
         return 5;
     }
 
+    public get id(): string {
+        return "Fast Message Spam Filter";
+    }
+
     /**
      * How many messages they are allowed to send in 5 seconds
      */
     public unMarshalData(data: string): number {
         return Number.parseInt(data);
-    }
-
-    public get id(): string {
-        return "Fast Message Spam Filter";
     }
 
     public async doFilter(content: Message): Promise<boolean> {
@@ -68,13 +68,13 @@ class MessageSpamEntry {
 
     private _messages: Message[] = [];
 
+    public get messages(): Immutable.List<Message> {
+        return Immutable.List.of(...this._messages);
+    }
+
     public async hasViolationLimitReached(guildId: string): Promise<boolean> {
         const value = await this._instance.value(guildId);
         return this.count > value;
-    }
-
-    public get messages(): Immutable.List<Message> {
-        return Immutable.List.of(...this._messages);
     }
 
     public addMessage(message: Message): void {

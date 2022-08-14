@@ -32,6 +32,14 @@ export class AutoMod extends TriggerConstraint<null> {
         super();
     }
 
+    public get moduleId(): string {
+        return "AutoMod";
+    }
+
+    public override get submodules(): Immutable.Set<IAutoModFilter> {
+        return super.submodules as Immutable.Set<IAutoModFilter>;
+    }
+
     public async init(client: Client): Promise<void> {
         for (const [guildId] of client.guilds.cache) {
             for (const filter of this.submodules) {
@@ -49,14 +57,6 @@ export class AutoMod extends TriggerConstraint<null> {
                 }
             }
         }
-    }
-
-    public get moduleId(): string {
-        return "AutoMod";
-    }
-
-    public override get submodules(): Immutable.Set<IAutoModFilter> {
-        return super.submodules as Immutable.Set<IAutoModFilter>;
     }
 
     @MessageListenerDecorator(true, [notBot, Enabled(AutoMod)])

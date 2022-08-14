@@ -11,9 +11,8 @@ import {FilterModuleManager} from "../../../framework/manager/FilterModuleManage
 export abstract class AbstractFilter implements IAutoModFilter {
 
     public abstract readonly id: string;
-
-    private readonly _logManager: LogChannelManager;
     protected readonly _filterManager: FilterModuleManager;
+    private readonly _logManager: LogChannelManager;
 
     public constructor() {
         this._logManager = container.resolve(LogChannelManager);

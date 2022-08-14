@@ -14,23 +14,8 @@ export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number>
         super();
     }
 
-    @PostConstruct
-    public async init(clinet: Client): Promise<void> {
-        for (const [guildId] of clinet.guilds.cache) {
-            const value = await this.value(guildId) * 1000;
-            this._cooldownArray.set(guildId, new TimedSet(value));
-        }
-    }
-
     public get defaultValue(): number {
         return 5;
-    }
-
-    /**
-     * The time between links
-     */
-    public unMarshalData(data: string): number {
-        return Number.parseInt(data);
     }
 
     public get cooldownArray(): Map<string, TimedSet<LinkCooldownEntry>> {
@@ -39,6 +24,21 @@ export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number>
 
     public get id(): string {
         return "Link Cooldown Filter";
+    }
+
+    @PostConstruct
+    public async init(clinet: Client): Promise<void> {
+        for (const [guildId] of clinet.guilds.cache) {
+            const value = await this.value(guildId) * 1000;
+            this._cooldownArray.set(guildId, new TimedSet(value));
+        }
+    }
+
+    /**
+     * The time between links
+     */
+    public unMarshalData(data: string): number {
+        return Number.parseInt(data);
     }
 
     public async doFilter(content: Message): Promise<boolean> {

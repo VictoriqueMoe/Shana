@@ -16,14 +16,13 @@ export interface ISubModule {
      * sub-module ID
      */
     readonly id: string;
+    /**
+     * Get the parent module this belongs to
+     */
+    readonly parentModule: ICloseableModule<any>;
 
     /**
      * Is this filter active
      */
     isActive(guildId: string): Promise<boolean>;
-
-    /**
-     * Get the parent module this belongs to
-     */
-    readonly parentModule: ICloseableModule<any>;
 }

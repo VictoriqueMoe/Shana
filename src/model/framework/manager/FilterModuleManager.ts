@@ -38,6 +38,9 @@ export class FilterModuleManager extends DataSourceAware {
         this._subModuleManager = container.resolve(delay(() => SubModuleManager));
     }
 
+    public get filters(): Immutable.Set<IAutoModFilter> {
+        return this._subModuleManager.subModules.filter(subModule => subModule instanceof AbstractFilter) as Immutable.Set<IAutoModFilter>;
+    }
 
     public async initDefaults(client: Client): Promise<void> {
         const guilds = client.guilds;
@@ -125,9 +128,12 @@ export class FilterModuleManager extends DataSourceAware {
         return res?.getSettings();
     }
 
-
     public isBannedWordAutoModFilter(filter: IAutoModFilter): filter is IBannedWordAutoModFilter {
         return 'bannedWords' in filter;
+    }
+
+    public isValueBackedAutoModFilter(filter: IAutoModFilter): filter is IValueBackedAutoModFilter<unknown> {
+        return 'value' in filter;
     }
 
     @RunEvery(1, "hours", true)
@@ -140,13 +146,5 @@ export class FilterModuleManager extends DataSourceAware {
             "bannedWordSetting_query",
             "FilterSetting_query",
             "valueBackedSetting_query"]);
-    }
-
-    public isValueBackedAutoModFilter(filter: IAutoModFilter): filter is IValueBackedAutoModFilter<unknown> {
-        return 'value' in filter;
-    }
-
-    public get filters(): Immutable.Set<IAutoModFilter> {
-        return this._subModuleManager.subModules.filter(subModule => subModule instanceof AbstractFilter) as Immutable.Set<IAutoModFilter>;
     }
 }
