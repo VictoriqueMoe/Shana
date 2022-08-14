@@ -1,5 +1,4 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model.js";
 import * as schedule from "node-schedule";
 import {Guild, GuildMember} from "discord.js";
 import {RolePersistenceModel} from "../../../model/DB/entities/autoMod/impl/RolePersistence.model.js";
@@ -35,7 +34,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
     public constructor(private _roleApplier: RoleApplier,
                        private _logManager: LogChannelManager,
                        private _roleManager: RoleManager) {
-        super(CloseOptionModel);
+        super();
     }
 
     public get moduleId(): string {
@@ -51,7 +50,8 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             return;
         }
         const filter = this._subModuleManager.getSubModule(BannedWordFilter);
-        if (filter.isActive && filter.isWordBanned(member.displayName)) {
+        const isWordBanned = await filter.isWordBanned(guildId, member.displayName);
+        if (filter.isActive && isWordBanned) {
             await DiscordUtils.sendToJail(member, "You have been placed here because your display name violates our rules, Please change it");
             return;
         }

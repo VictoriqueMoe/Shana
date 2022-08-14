@@ -1,5 +1,5 @@
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {container, injectable} from "tsyringe";
+import {container, delay, inject, injectable} from "tsyringe";
 import type {EntityManager} from "typeorm";
 import Immutable from "immutable";
 import {DbUtils, ObjectUtil} from "../../utils/Utils.js";
@@ -11,13 +11,14 @@ import logger from "../../utils/LoggerFactory.js";
 import {SubModuleManager} from "../../model/framework/manager/SubModuleManager.js";
 import {FilterModuleManager} from "../../model/framework/manager/FilterModuleManager.js";
 import {GuildableModel} from "../../model/DB/entities/guild/Guildable.model.js";
+import {ActivityType} from "discord-api-types/v10";
 
 @Discord()
 @injectable()
 export class OnReady extends DataSourceAware {
 
     public constructor(private _client: Client,
-                       private _subModuleManager: SubModuleManager,
+                       @inject(delay(() => SubModuleManager)) private _subModuleManager: SubModuleManager,
                        private _filterModuleManager: FilterModuleManager) {
         super();
     }
@@ -31,7 +32,7 @@ export class OnReady extends DataSourceAware {
 
     @On("ready")
     private async initialise([client]: ArgsOf<"ready">): Promise<void> {
-        await client.user.setActivity('Half-Life 3', {type: 0});
+        client.user.setActivity('Half-Life 3', {type: ActivityType.Playing});
         await this.populateGuilds();
         await this.init();
         logger.info("Bot logged in!");

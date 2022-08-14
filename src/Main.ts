@@ -40,6 +40,7 @@ export class Main {
                 IntentsBitField.Flags.Guilds,
                 IntentsBitField.Flags.GuildMessages,
                 IntentsBitField.Flags.GuildMembers,
+                IntentsBitField.Flags.MessageContent,
                 IntentsBitField.Flags.GuildBans,
                 IntentsBitField.Flags.GuildMessageReactions,
                 IntentsBitField.Flags.GuildPresences,
@@ -57,4 +58,5 @@ export class Main {
         await client.login(testMode ? this.testToken : this.token);
     }
 }
+
 await Main.start();

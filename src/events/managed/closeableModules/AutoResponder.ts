@@ -1,6 +1,5 @@
 import {ArgsOf, Client} from "discordx";
 import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
-import {CloseOptionModel} from "../../../model/DB/entities/autoMod/impl/CloseOption.model.js";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint.js";
 import {Message} from "discord.js";
 import {container, singleton} from "tsyringe";
@@ -22,7 +21,7 @@ export class AutoResponder extends TriggerConstraint<null> {
     private readonly _ocrManager?: OcrManager;
 
     public constructor() {
-        super(CloseOptionModel);
+        super();
         this._ocrManager = container.resolve(OcrManager);
         this._autoResponderManager = container.resolve(AutoResponderManager);
     }

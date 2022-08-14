@@ -1,10 +1,8 @@
-import {singleton} from "tsyringe";
+import {container, delay, singleton} from "tsyringe";
 import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
 import {Client} from "discordx";
-import {SubModuleManager} from "./SubModuleManager.js";
 import * as Immutable from "immutable";
-import {IAutoModFilter} from "../../closeableModules/subModules/autoMod/IAutoModFilter.js";
-import {AbstractFilter} from "../../closeableModules/subModules/autoMod/AbstractFilter.js";
+import type {FilterSettings, IAutoModFilter} from "../../closeableModules/subModules/autoMod/IAutoModFilter.js";
 import {FilterModuleModel} from "../../DB/entities/autoMod/impl/subModules/impl/AutoMod/FilterModule.model.js";
 import {DbUtils, ObjectUtil} from "../../../utils/Utils.js";
 import {
@@ -13,18 +11,30 @@ import {
 import {
     BannedWordFilterModuleModel
 } from "../../DB/entities/autoMod/impl/subModules/impl/AutoMod/BannedWordFilterModule.model.js";
-import {IBannedWordAutoModFilter} from "../../closeableModules/subModules/autoMod/IBannedWordAutoModFilter.js";
-import {IValueBackedAutoModFilter} from "../../closeableModules/subModules/autoMod/IValueBackedAutoModFilter.js";
+import type {
+    BannedWordFilterSettings,
+    IBannedWordAutoModFilter
+} from "../../closeableModules/subModules/autoMod/IBannedWordAutoModFilter.js";
+import type {
+    IValueBackedAutoModFilter,
+    ValueBackedFilterSettings
+} from "../../closeableModules/subModules/autoMod/IValueBackedAutoModFilter.js";
+import {SubModuleManager} from "./SubModuleManager.js";
+import {AbstractFilter} from "../../closeableModules/subModules/autoMod/AbstractFilter.js";
+import {AutoMod} from "../../../events/managed/closeableModules/AutoMod.js";
+
+export type UnionSettings = FilterSettings | BannedWordFilterSettings | ValueBackedFilterSettings;
 
 @singleton()
 export class FilterModuleManager extends DataSourceAware {
 
-    private readonly _filters: Immutable.Set<IAutoModFilter>;
+    private readonly _subModuleManager: SubModuleManager;
 
-    public constructor(private _subModuleManager: SubModuleManager) {
+    public constructor() {
         super();
-        this._filters = _subModuleManager.subModules.filter(subModule => subModule instanceof AbstractFilter) as Immutable.Set<IAutoModFilter>;
+        this._subModuleManager = container.resolve(delay(() => SubModuleManager));
     }
+
 
     public async initDefaults(client: Client): Promise<void> {
         const guilds = client.guilds;
@@ -32,7 +42,7 @@ export class FilterModuleManager extends DataSourceAware {
         const newModels: (FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel)[] = [];
         await this._ds.transaction(async entityManager => {
             for (const [guildId] of cache) {
-                for (const filter of this._filters) {
+                for (const filter of this.filters) {
                     const pSubModuleId = filter.id;
                     const data = {
                         pSubModuleId,
@@ -59,6 +69,7 @@ export class FilterModuleManager extends DataSourceAware {
                 await entityManager.save(newModels);
             }
         });
+        await container.resolve(AutoMod).init(client);
     }
 
     public async getAllSettings(guildId: string): Promise<(FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel)[]> {
@@ -69,7 +80,12 @@ export class FilterModuleManager extends DataSourceAware {
         return Promise.all(repoArr.map(repo => repo.find({where: {guildId}}))).then(values => values.flat());
     }
 
-    public async getSetting(guildId: string, filter: IAutoModFilter): Promise<FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel> {
+    public async getModel(guildId: string, filter: IAutoModFilter): Promise<FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel | null> {
+        const allModels = await this.getAllSettings(guildId);
+        return allModels.filter(model => model.pSubModuleId === filter.id)?.[0];
+    }
+
+    public async getSetting(guildId: string, filter: IAutoModFilter): Promise<UnionSettings> {
         let res: FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel = null;
         if (this.isBannedWordAutoModFilter(filter)) {
             res = await this._ds.manager.findOne(BannedWordFilterModuleModel, {
@@ -93,8 +109,9 @@ export class FilterModuleManager extends DataSourceAware {
                 }
             });
         }
-        return res;
+        return res?.getSettings();
     }
+
 
     public isBannedWordAutoModFilter(filter: IAutoModFilter): filter is IBannedWordAutoModFilter {
         return 'bannedWords' in filter;
@@ -105,6 +122,6 @@ export class FilterModuleManager extends DataSourceAware {
     }
 
     public get filters(): Immutable.Set<IAutoModFilter> {
-        return this._filters;
+        return this._subModuleManager.subModules.filter(subModule => subModule instanceof AbstractFilter) as Immutable.Set<IAutoModFilter>;
     }
 }

@@ -1,7 +1,8 @@
 import {FilterModuleModel} from "./FilterModule.model.js";
 import {Column, Entity} from "typeorm";
 import type {
-    BannedWordEntries
+    BannedWordEntries,
+    BannedWordFilterSettings
 } from "../../../../../../../closeableModules/subModules/autoMod/IBannedWordAutoModFilter.js";
 
 
@@ -10,9 +11,20 @@ export class BannedWordFilterModuleModel extends FilterModuleModel {
 
     @Column({
         type: "simple-json",
-        default: null,
+        default: JSON.stringify({
+            "exactWord": [],
+            "wildCardWords": []
+        }),
         nullable: true
     })
     public bannedWords: BannedWordEntries;
+
+    public override getSettings(): BannedWordFilterSettings {
+        const filterSettings = super.getSettings();
+        return {
+            bannedWords: this.bannedWords,
+            ...filterSettings
+        };
+    }
 
 }

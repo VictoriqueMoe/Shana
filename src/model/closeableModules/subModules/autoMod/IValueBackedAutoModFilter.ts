@@ -1,4 +1,8 @@
-import type {IAutoModFilter} from "./IAutoModFilter.js";
+import type {FilterSettings, IAutoModFilter} from "./IAutoModFilter.js";
+
+export type ValueBackedFilterSettings = FilterSettings & {
+    value?: unknown
+};
 
 /**
  * This filter is backed by a value

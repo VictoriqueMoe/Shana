@@ -4,7 +4,7 @@ import ACTION from "../../../../enums/ACTION.js";
 import {EmbedBuilder, Message} from "discord.js";
 import {ObjectUtil} from "../../../../utils/Utils.js";
 import {LogChannelManager} from "../../../framework/manager/LogChannelManager.js";
-import {container} from "tsyringe";
+import {container, delay} from "tsyringe";
 import {AutoMod} from "../../../../events/managed/closeableModules/AutoMod.js";
 import {FilterModuleManager} from "../../../framework/manager/FilterModuleManager.js";
 
@@ -17,7 +17,7 @@ export abstract class AbstractFilter implements IAutoModFilter {
 
     public constructor() {
         this._logManager = container.resolve(LogChannelManager);
-        this._filterManager = container.resolve(FilterModuleManager);
+        this._filterManager = container.resolve(delay(() => FilterModuleManager));
     }
 
     public get parentModule(): ICloseableModule<null> {
@@ -49,7 +49,7 @@ export abstract class AbstractFilter implements IAutoModFilter {
     }
 
     public isActive(guildId: string): Promise<boolean> {
-        return this._filterManager.getSetting(guildId, this).then(setting => setting.status);
+        return this._filterManager.getSetting(guildId, this).then(setting => setting.isActive);
     }
 
     public abstract postProcess(member: Message): Promise<void>;

@@ -31,6 +31,7 @@ import Channels from "../enums/Channels.js";
 import {EmojiManager} from "../model/framework/manager/EmojiManager.js";
 import {DeepPartial} from "typeorm/common/DeepPartial.js";
 import {EntityTarget} from "typeorm/common/EntityTarget.js";
+import {PermissionFlagsBits} from "discord-api-types/v10";
 
 export class Utils {
     public static sleep(ms: number): Promise<void> {
@@ -307,7 +308,7 @@ export namespace DiscordUtils {
     }
 
     export function isMemberAdmin(member: GuildMember): boolean {
-        return member.permissions.has("Administrator");
+        return member.permissions.has(PermissionFlagsBits.Administrator);
     }
 
     export async function sendToJail(member: GuildMember, reason: string): Promise<void> {

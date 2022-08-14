@@ -1,5 +1,8 @@
 import {FilterModuleModel} from "./FilterModule.model.js";
 import {Column, Entity} from "typeorm";
+import type {
+    ValueBackedFilterSettings
+} from "../../../../../../../closeableModules/subModules/autoMod/IValueBackedAutoModFilter.js";
 
 @Entity()
 export class ValueBackedFilterModuleModel extends FilterModuleModel {
@@ -11,5 +14,13 @@ export class ValueBackedFilterModuleModel extends FilterModuleModel {
         nullable: true
     })
     public value: string;
+
+    public override getSettings(): ValueBackedFilterSettings {
+        const filterSettings = super.getSettings();
+        return {
+            value: this.value,
+            ...filterSettings
+        };
+    }
 
 }

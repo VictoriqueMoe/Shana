@@ -4,6 +4,7 @@ import ACTION from "../../../../../../../../enums/ACTION.js";
 import TIME_OUT from "../../../../../../../../enums/TIME_OUT.js";
 import {SubModuleModel} from "../SubModule.model.js";
 import {AbstractModel} from "../../../../../AbstractModel.js";
+import type {FilterSettings} from "../../../../../../../closeableModules/subModules/autoMod/IAutoModFilter.js";
 
 @Entity()
 @Index(["guildId", "pSubModuleId"], {
@@ -23,9 +24,8 @@ export class FilterModuleModel extends AbstractEventSecurityConstraint {
     public status: boolean;
 
     @Column({
-        enum: ACTION,
         type: "simple-array",
-        default: ACTION.NONE,
+        default: [ACTION.NONE],
         nullable: false
     })
     public actions: ACTION[];
@@ -73,4 +73,17 @@ export class FilterModuleModel extends AbstractEventSecurityConstraint {
         ]
     )
     public subModule: SubModuleModel;
+
+    public getSettings(): FilterSettings {
+        return {
+            actions: this.actions,
+            autoMuteTimeout: this.autoMuteTimeout,
+            id: this.pSubModuleId,
+            priority: this.priority,
+            autoTerminalViolationCount: this.autoTerminalViolationCount,
+            isActive: this.status,
+            terminalViolationTimeout: this.terminalViolationTimeout,
+            warnMessage: this.warnMessage
+        };
+    }
 }

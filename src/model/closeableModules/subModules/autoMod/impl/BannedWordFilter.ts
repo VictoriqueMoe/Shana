@@ -2,10 +2,7 @@ import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {singleton} from "tsyringe";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
-import {BannedWordEntries, IBannedWordAutoModFilter} from "../IBannedWordAutoModFilter.js";
-import {
-    BannedWordFilterModuleModel
-} from "../../../../DB/entities/autoMod/impl/subModules/impl/AutoMod/BannedWordFilterModule.model.js";
+import {BannedWordEntries, BannedWordFilterSettings, IBannedWordAutoModFilter} from "../IBannedWordAutoModFilter.js";
 
 @singleton()
 export class BannedWordFilter extends AbstractFilter implements IBannedWordAutoModFilter {
@@ -25,7 +22,7 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordAutoM
         }
         const badWordObj = await this.bannedWords(guildId);
         const exactArray = badWordObj.exactWord;
-        const inStringArray = badWordObj.WildCardWords;
+        const inStringArray = badWordObj.wildCardWords;
         const messageContent = word.trim().toLowerCase();
         const splitMessage = messageContent.split(" ");
         for (const exactWord of exactArray) {
@@ -53,7 +50,7 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordAutoM
     }
 
     public bannedWords(guildId: string): Promise<BannedWordEntries> {
-        return this._filterManager.getSetting(guildId, this).then((setting: BannedWordFilterModuleModel) => setting.bannedWords);
+        return this._filterManager.getSetting(guildId, this).then((setting: BannedWordFilterSettings) => setting.bannedWords);
     }
 
 }

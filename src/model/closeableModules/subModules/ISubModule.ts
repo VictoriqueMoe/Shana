@@ -1,5 +1,12 @@
 import type {ICloseableModule} from "../ICloseableModule.js";
 
+
+export type SubModuleSettings = {
+    id?: string,
+    isActive?: boolean
+};
+
+
 /**
  * A sub module is  something that belongs to the parent module
  */

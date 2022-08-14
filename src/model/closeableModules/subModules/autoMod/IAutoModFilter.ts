@@ -1,6 +1,17 @@
 import type {Message} from "discord.js";
-import type {ISubModule} from "../ISubModule";
+import type {ISubModule, SubModuleSettings} from "../ISubModule";
 import type ACTION from "../../../../enums/ACTION.js";
+
+
+export type FilterSettings = SubModuleSettings & {
+    actions?: ACTION[],
+    warnMessage?: string,
+    priority?: number,
+    terminalViolationTimeout?: number,
+    autoTerminalViolationCount?: number,
+    autoMuteTimeout?: number,
+    isActive?: boolean
+};
 
 /**
  * all values hard coded for now, but will be persisted in the future

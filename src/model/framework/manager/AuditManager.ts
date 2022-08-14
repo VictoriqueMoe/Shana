@@ -6,7 +6,7 @@ import {
     GuildAuditLogsFetchOptions,
     GuildAuditLogsResolvable
 } from "discord.js";
-import {AuditLogEvent} from "discord-api-types/v10.js";
+import {AuditLogEvent} from "discord-api-types/v10";
 
 @singleton()
 export class AuditManager {
