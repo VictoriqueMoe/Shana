@@ -6,16 +6,21 @@ import {ThreadAutoArchiveDuration} from "discord.js";
 export namespace Typeings {
     export type propTypes = envTypes & packageJsonTypes
     export type envTypes = {
-        token: string;
-        test_token: string;
-        dropbox_token: string;
-        cleverBotKey: string;
-        deepapi: string;
-        deepl: string;
-        danbooru: string;
-        ocr_loc: string;
-        rapid_api_code: string;
-        node_env: "production" | "development"
+        TOKEN: string;
+        TEST_TOKEN: string;
+        DROPBOX_TOKEN: string;
+        CLEVERBOT_KEY: string;
+        DEEPAPI: string;
+        DEEPL: string;
+        DANBOORU: string;
+        OCR_LOC: string;
+        RAPID_API_CODE: string;
+        NODE_ENV: "production" | "development",
+        IMGUR_CLIENT_ID: string,
+        IMGUR_CLIENT_SECRET: string,
+        IMGUR_EMAIL: string,
+        IMGUR_PASSWORD: string,
+        IMGUR_ALBUM_ID: string,
     };
 
     type packageJsonTypes = {

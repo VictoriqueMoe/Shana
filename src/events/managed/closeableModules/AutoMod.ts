@@ -14,7 +14,7 @@ import type {IAutoModFilter} from "../../../model/closeableModules/subModules/au
 import type {
     FastMessageSpamFilter
 } from "../../../model/closeableModules/subModules/autoMod/impl/FastMessageSpamFilter.js";
-import {EventDeletedListener} from "../eventDispatcher/EventDeletedListener.js";
+import {EventDeletedListener} from "../../djxManaged/eventDispatcher/EventDeletedListener.js";
 import {MuteManager} from "../../../model/framework/manager/MuteManager.js";
 import {LogChannelManager} from "../../../model/framework/manager/LogChannelManager.js";
 import TIME_UNIT from "../../../enums/TIME_UNIT.js";

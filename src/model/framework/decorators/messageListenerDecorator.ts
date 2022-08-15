@@ -1,6 +1,9 @@
 import type constructor from "tsyringe/dist/typings/types/constructor";
 import {Typeings} from "../../Typeings.js";
-import {MessageEntry, MessageEventDispatcher} from "../../../events/managed/eventDispatcher/MessageEventDispatcher.js";
+import {
+    MessageEntry,
+    MessageEventDispatcher
+} from "../../../events/djxManaged/eventDispatcher/MessageEventDispatcher.js";
 import logger from "../../../utils/LoggerFactory.js";
 import EditType = Typeings.EditType;
 import EventTriggerCondition = Typeings.EventTriggerCondition;

@@ -11,7 +11,8 @@ import {
     Message,
     MessageContextMenuCommandInteraction,
     Sticker,
-    StickerFormatType
+    StickerFormatType,
+    User
 } from "discord.js";
 import {container} from "tsyringe";
 import type constructor from "tsyringe/dist/typings/types/constructor";
@@ -218,8 +219,8 @@ export namespace DiscordUtils {
 
     export class InteractionUtils {
 
-        @Property("node_env")
-        private static readonly environment: envTypes["node_env"];
+        @Property("NODE_ENV")
+        private static readonly environment: envTypes["NODE_ENV"];
 
         public static getMessageFromContextInteraction(interaction: MessageContextMenuCommandInteraction): Promise<Message | undefined> {
             const messageId = interaction.targetId;
@@ -274,6 +275,23 @@ export namespace DiscordUtils {
     export function getGuild(guildId: string): Promise<Guild | null> {
         const client = container.resolve(Client);
         return client.guilds.fetch(guildId);
+    }
+
+    export function sanitiseString(str: string): string {
+        return str ?? "None";
+    }
+
+    export function getAccountAge(user: User | GuildMember, format = false): number | string {
+        if (user instanceof GuildMember) {
+            user = user.user;
+        }
+        const createdDate = user.createdAt.getTime();
+        const accountAge = Date.now() - createdDate;
+        if (format) {
+            return ObjectUtil.timeToHuman(accountAge);
+        } else {
+            return accountAge;
+        }
     }
 
     export function stripUrls(message: Message | string): string {

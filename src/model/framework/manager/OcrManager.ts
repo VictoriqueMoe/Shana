@@ -6,7 +6,7 @@ import {Property} from "../decorators/Property.js";
 @singleton()
 export class OcrManager {
 
-    @Property("ocr_loc", false)
+    @Property("OCR_LOC", false)
     private readonly baseUrl;
 
     public async getText(image: Buffer): Promise<string> {

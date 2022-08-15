@@ -12,7 +12,7 @@ import {notBot} from "../../../guards/managedGuards/NotABot.js";
 import {Enabled} from "../../../guards/managedGuards/Enabled.js";
 import {AutoResponderManager} from "../../../model/framework/manager/AutoResponderManager.js";
 import {OcrManager} from "../../../model/framework/manager/OcrManager.js";
-import {EventDeletedListener} from "../eventDispatcher/EventDeletedListener.js";
+import {EventDeletedListener} from "../../djxManaged/eventDispatcher/EventDeletedListener.js";
 
 @singleton()
 export class AutoResponder extends TriggerConstraint<null> {

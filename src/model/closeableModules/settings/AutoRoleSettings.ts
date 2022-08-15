@@ -1,4 +1,4 @@
-import type {ModuleSettings} from "./ModuleSettings";
+import type {ModuleSettings} from "./ModuleSettings.js";
 
 export interface AutoRoleSettings extends ModuleSettings {
 

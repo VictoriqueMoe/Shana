@@ -13,13 +13,13 @@ import propTypes = Typeings.propTypes;
 dotenv.config();
 
 export class Main {
-    @Property("token")
+    @Property("TOKEN")
     private static readonly token: string;
 
-    @Property("node_env")
-    private static readonly envMode: propTypes["node_env"];
+    @Property("NODE_ENV")
+    private static readonly envMode: propTypes["NODE_ENV"];
 
-    @Property("test_token", Main.envMode === "development")
+    @Property("TEST_TOKEN", Main.envMode === "development")
     private static readonly testToken: string;
 
     public static async start(): Promise<void> {

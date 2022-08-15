@@ -1,5 +1,5 @@
 import type * as Immutable from "immutable";
-import type {ModuleSettings} from "./ModuleSettings.js";
+import type {ModuleSettings} from "./settings/ModuleSettings.js";
 import type {ISubModule} from "./subModules/ISubModule.js";
 
 /**

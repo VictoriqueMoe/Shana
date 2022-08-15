@@ -1,18 +1,20 @@
 import {singleton} from "tsyringe";
-import {
+import type {
+    AuditLogEvent,
     Guild,
     GuildAuditLogs,
     GuildAuditLogsEntry,
     GuildAuditLogsFetchOptions,
     GuildAuditLogsResolvable
 } from "discord.js";
-import {AuditLogEvent} from "discord-api-types/v10";
 
 @singleton()
 export class AuditManager {
 
     public async getAuditLogEntry(type: GuildAuditLogsResolvable, guild: Guild): Promise<GuildAuditLogsEntry<AuditLogEvent>> {
-        const fetchedAuditLog = await this.getAuditLogEntries(type, guild);
+        const fetchedAuditLog = await guild.fetchAuditLogs({
+            type
+        });
         if (!fetchedAuditLog) {
             return null;
         }

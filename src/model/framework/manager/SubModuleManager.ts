@@ -1,6 +1,6 @@
 import * as Immutable from 'immutable';
 import {singleton} from "tsyringe";
-import {ModuleSettings} from "../../closeableModules/ModuleSettings.js";
+import {ModuleSettings} from "../../closeableModules/settings/ModuleSettings.js";
 import {ICloseableModule} from "../../closeableModules/ICloseableModule.js";
 import {ISubModule} from "../../closeableModules/subModules/ISubModule.js";
 import type constructor from "tsyringe/dist/typings/types/constructor";

@@ -2,7 +2,7 @@ import type {ICloseOption} from "../../DB/entities/autoMod/ICloseOption.js";
 import type {ICloseableModule} from "../ICloseableModule.js";
 import type {ISubModule} from "../subModules/ISubModule.js";
 import * as Immutable from "immutable";
-import type {ModuleSettings} from "../ModuleSettings.js";
+import type {ModuleSettings} from "../settings/ModuleSettings.js";
 import {ObjectUtil} from "../../../utils/Utils.js";
 import {CloseOptionModel} from "../../DB/entities/autoMod/impl/CloseOption.model.js";
 import {container, delay} from "tsyringe";
@@ -53,7 +53,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
         this._settings.set(guildId, obj);
     }
 
-    public async getSettings(guildId: string, force = false): Promise<T | Record<string, never>> {
+    public async getSettings(guildId: string, force = false): Promise<T> {
         if (!force && this._settings.has(guildId)) {
             return this._settings.get(guildId);
         }
@@ -65,7 +65,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
             }
         });
         if (!model || !ObjectUtil.isValidObject(model.settings)) {
-            return {};
+            return {} as T;
         }
         this._settings.set(guildId, model.settings as T);
         return this._settings.get(guildId);
