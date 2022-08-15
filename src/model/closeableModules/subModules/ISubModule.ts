@@ -1,6 +1,3 @@
-import type {ICloseableModule} from "../ICloseableModule.js";
-
-
 export type SubModuleSettings = {
     id?: string,
     isActive?: boolean
@@ -16,10 +13,11 @@ export interface ISubModule {
      * sub-module ID
      */
     readonly id: string;
+
     /**
-     * Get the parent module this belongs to
+     * Get the parent module ID this belongs to
      */
-    readonly parentModule: ICloseableModule<any>;
+    readonly parentModuleId: string;
 
     /**
      * Is this filter active

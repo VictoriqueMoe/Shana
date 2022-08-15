@@ -17,6 +17,7 @@ import {SettingsManager} from "../../model/framework/manager/SettingsManager.js"
 import SETTINGS, {DEFAULT_SETTINGS} from "../../enums/SETTINGS.js";
 import {PostableChannelModel} from "../../model/DB/entities/guild/PostableChannel.model.js";
 import {LogChannelManager} from "../../model/framework/manager/LogChannelManager.js";
+import {UsernameManager} from "../../model/framework/manager/UsernameManager.js";
 
 @Discord()
 @injectable()
@@ -25,10 +26,14 @@ export class OnReady extends DataSourceAware {
     public constructor(private _client: Client,
                        @inject(delay(() => SubModuleManager)) private _subModuleManager: SubModuleManager,
                        private _logManager: LogChannelManager,
-                       private _filterModuleManager: FilterModuleManager) {
+                       private _filterModuleManager: FilterModuleManager,
+                       private _usernameManager: UsernameManager) {
         super();
     }
 
+    /**
+     * Commands that are run on application start AND on join new guild
+     */
     public async init(): Promise<void> {
         await this._ds.transaction(async (transactionalEntityManager: EntityManager) => {
             await this.populateClosableEvents(transactionalEntityManager);
@@ -92,21 +97,15 @@ export class OnReady extends DataSourceAware {
     }
 
     private async populatePostableChannels(manager: EntityManager): Promise<InsertResult | any[]> {
-        const guildModels = await manager.getRepository(GuildableModel).find({
-            relations: ["commandSecurityModel"]
-        });
         const currentModels = await manager.find(PostableChannelModel);
-        const models: {
-            guildId: string
-        }[] = [];
-        for (const guildModel of guildModels) {
-            const guildId = guildModel.guildId;
+        const models: PostableChannelModel[] = [];
+        for (const [guildId] of this._client.guilds.cache) {
             if (currentModels.some(m => m.guildId === guildId)) {
                 continue;
             }
-            models.push({
+            models.push(DbUtils.build(PostableChannelModel, {
                 guildId
-            });
+            }));
         }
         return manager.save(models);
     }
@@ -118,10 +117,16 @@ export class OnReady extends DataSourceAware {
         await this.populateGuilds();
         pArr.push(this.initUsernames());
         await this.init();
-        logger.info("Bot logged in!");
+        this.initDi();
+        return Promise.all(pArr).then(() => {
+            logger.info("Bot logged in!");
+            if (process.send) {
+                process.send('ready');
+            }
+        });
     }
 
-    private async initDi(): Promise<void> {
+    private initDi(): void {
         DIService.allServices;
     }
 
@@ -173,5 +178,9 @@ export class OnReady extends DataSourceAware {
     private async populateDefaultsSubModules(): Promise<void> {
         await this._subModuleManager.initDefaults(this._client);
         await this._filterModuleManager.initDefaults(this._client);
+    }
+
+    private initUsernames(): Promise<any> {
+        return this._usernameManager.init(this._client);
     }
 }

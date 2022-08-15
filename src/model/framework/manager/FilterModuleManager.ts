@@ -20,11 +20,10 @@ import type {
     ValueBackedFilterSettings
 } from "../../closeableModules/subModules/autoMod/IValueBackedAutoModFilter.js";
 import {SubModuleManager} from "./SubModuleManager.js";
-import {AbstractFilter} from "../../closeableModules/subModules/autoMod/AbstractFilter.js";
-import {AutoMod} from "../../../events/managed/closeableModules/AutoMod.js";
 import {FindOneOptions} from "typeorm/find-options/FindOneOptions.js";
 import {RunEvery} from "../decorators/RunEvery.js";
 import logger from "../../../utils/LoggerFactory.js";
+import {AbstractFilter} from "../../closeableModules/subModules/autoMod/AbstractFilter.js";
 
 export type UnionSettings = FilterSettings | BannedWordFilterSettings | ValueBackedFilterSettings;
 
@@ -75,7 +74,6 @@ export class FilterModuleManager extends DataSourceAware {
                 await entityManager.save(newModels);
             }
         });
-        await container.resolve(AutoMod).init(client);
     }
 
     public async getAllSettings(guildId: string): Promise<(FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel)[]> {

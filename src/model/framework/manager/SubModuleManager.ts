@@ -27,8 +27,8 @@ export class SubModuleManager extends DataSourceAware {
     public getSubModulesFromParent(parent: ICloseableModule<ModuleSettings>): Immutable.Set<ISubModule> {
         const returnSet: Set<ISubModule> = new Set();
         for (const subModule of this._subModules) {
-            const subModuleParent = subModule.parentModule;
-            if (subModuleParent === parent) {
+            const subModuleParentId = subModule.parentModuleId;
+            if (subModuleParentId === parent.moduleId) {
                 returnSet.add(subModule);
             }
         }
@@ -63,7 +63,7 @@ export class SubModuleManager extends DataSourceAware {
                         guildId
                     }
                 }) === 0) {
-                    const pModuleId = subModule.parentModule.moduleId;
+                    const pModuleId = subModule.parentModuleId;
                     newModels.push(DbUtils.build(SubModuleModel, {
                         subModuleId,
                         pModuleId,

@@ -1,12 +1,10 @@
-import {IAutoModFilter} from "./IAutoModFilter.js";
-import {ICloseableModule} from "../../ICloseableModule";
 import ACTION from "../../../../enums/ACTION.js";
 import {EmbedBuilder, Message} from "discord.js";
 import {ObjectUtil} from "../../../../utils/Utils.js";
 import {LogChannelManager} from "../../../framework/manager/LogChannelManager.js";
 import {container, delay} from "tsyringe";
-import {AutoMod} from "../../../../events/managed/closeableModules/AutoMod.js";
 import {FilterModuleManager} from "../../../framework/manager/FilterModuleManager.js";
+import type {IAutoModFilter} from "./IAutoModFilter.js";
 
 export abstract class AbstractFilter implements IAutoModFilter {
 
@@ -19,8 +17,8 @@ export abstract class AbstractFilter implements IAutoModFilter {
         this._filterManager = container.resolve(delay(() => FilterModuleManager));
     }
 
-    public get parentModule(): ICloseableModule<null> {
-        return container.resolve(AutoMod);
+    public get parentModuleId(): string {
+        return "AutoMod";
     }
 
     public actions(guildId: string): Promise<ACTION[]> {
