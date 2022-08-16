@@ -3,7 +3,6 @@ import {singleton} from "tsyringe";
 import {ModuleSettings} from "../../closeableModules/settings/ModuleSettings.js";
 import {ICloseableModule} from "../../closeableModules/ICloseableModule.js";
 import {ISubModule} from "../../closeableModules/subModules/ISubModule.js";
-import type constructor from "tsyringe/dist/typings/types/constructor";
 import {SubModuleFactory} from "../factory/impl/SubModuleFactory.js";
 import {Client} from "discordx";
 import {DbUtils, ObjectUtil} from "../../../utils/Utils.js";
@@ -35,8 +34,8 @@ export class SubModuleManager extends DataSourceAware {
         return Immutable.Set(returnSet);
     }
 
-    public getSubModule<T extends ISubModule>(subModule: constructor<T>): T {
-        return this.subModules.find(value => value.constructor === subModule) as T;
+    public getSubModule<T extends ISubModule>(subModuleId: string): T {
+        return this.subModules.find(value => value.id === subModuleId) as T;
     }
 
     public async setActive(guildId: string, subModuleId: string, isActive: boolean): Promise<void> {

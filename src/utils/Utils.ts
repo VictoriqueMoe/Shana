@@ -526,7 +526,7 @@ export class EnumEx {
     }
 
     /**
-     * get the numValue associated with it's own key. if you want to get a TypeScript Enum based on an index you can use this
+     * get the numValue associated with its own key. if you want to get a TypeScript Enum based on an index you can use this
      * @param e
      * @param aName
      * @param asValue

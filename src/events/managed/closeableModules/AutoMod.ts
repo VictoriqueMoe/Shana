@@ -2,7 +2,7 @@ import {delay, inject, singleton} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";
 import {ObjectUtil} from "../../../utils/Utils.js";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
-import {MessageListenerDecorator} from "../../../model/framework/decorators/messageListenerDecorator.js";
+import {MessageListenerDecorator} from "../../../model/framework/decorators/MessageListenerDecorator.js";
 import {notBot} from "../../../guards/managedGuards/NotABot.js";
 import {ArgsOf, Client} from "discordx";
 import ACTION from "../../../enums/ACTION.js";

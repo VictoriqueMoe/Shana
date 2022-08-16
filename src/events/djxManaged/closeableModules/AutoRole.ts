@@ -14,7 +14,7 @@ import {LogChannelManager} from "../../../model/framework/manager/LogChannelMana
 import {RoleManager} from "../../../model/framework/manager/RoleManager.js";
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule.js";
 import TIME_UNIT from "../../../enums/TIME_UNIT.js";
-import {BannedWordFilter} from "../../../model/closeableModules/subModules/autoMod/impl/BannedWordFilter.js";
+import type {BannedWordFilter} from "../../../model/closeableModules/subModules/autoMod/impl/BannedWordFilter.js";
 
 class JoinEntry {
     public constructor(public joinCount: number) {
@@ -49,7 +49,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (await this.doPanic(member, settings)) {
             return;
         }
-        const filter = this._subModuleManager.getSubModule(BannedWordFilter);
+        const filter = this._subModuleManager.getSubModule<BannedWordFilter>("BannedWordFilter");
         const isWordBanned = await filter.isWordBanned(guildId, member.displayName);
         if (filter.isActive && isWordBanned) {
             await DiscordUtils.sendToJail(member, "You have been placed here because your display name violates our rules, Please change it");

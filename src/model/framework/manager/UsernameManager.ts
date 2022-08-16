@@ -7,6 +7,7 @@ import {singleton} from "tsyringe";
 import type {GuildMember} from "discord.js";
 import {UsernameModel} from "../../DB/entities/autoMod/impl/Username.model.js";
 import {DbUtils} from "../../../utils/Utils.js";
+import {DeleteResult} from "typeorm";
 
 @singleton()
 export class UsernameManager extends DataSourceAware {
@@ -21,7 +22,14 @@ export class UsernameManager extends DataSourceAware {
         });
     }
 
-    public async setUsername(member: GuildMember, username: string, force = false): Promise<UsernameModel> {
+    public async removeNickname(member: GuildMember): Promise<DeleteResult> {
+        return this.ds.getRepository(UsernameModel).delete({
+            userId: member.id,
+            guildId: member.guild.id
+        });
+    }
+
+    public async setUsername(member: GuildMember, username: string, force): Promise<UsernameModel> {
         const guildId = member.guild.id;
         const userId = member.id;
         const repo = this.ds.getRepository(UsernameModel);

@@ -57,6 +57,10 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
         }
         const model: ICloseOption = await this.ds.getRepository(CloseOptionModel).findOne({
             select: ["settings"],
+            cache: {
+                id: `${this.moduleId}_settings`,
+                milliseconds: 30000
+            },
             where: {
                 moduleId: this.moduleId,
                 guildId

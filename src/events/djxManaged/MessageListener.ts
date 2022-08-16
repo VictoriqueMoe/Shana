@@ -2,7 +2,7 @@ import {singleton} from "tsyringe";
 import {Message} from "discord.js";
 import {TimedSet} from "@discordx/utilities";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
-import {MessageListenerDecorator} from "../../model/framework/decorators/messageListenerDecorator.js";
+import {MessageListenerDecorator} from "../../model/framework/decorators/MessageListenerDecorator.js";
 import {notBot} from "../../guards/managedGuards/NotABot.js";
 import {ArgsOf} from "discordx";
 import axios from "axios";

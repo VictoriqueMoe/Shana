@@ -6,7 +6,7 @@ import {container, singleton} from "tsyringe";
 import {AutoResponderModel} from "../../../model/DB/entities/autoMod/impl/AutoResponder.model.js";
 import path from 'path';
 import isImageFast from 'is-image-fast';
-import {MessageListenerDecorator} from "../../../model/framework/decorators/messageListenerDecorator.js";
+import {MessageListenerDecorator} from "../../../model/framework/decorators/MessageListenerDecorator.js";
 import logger from "../../../utils/LoggerFactory.js";
 import {notBot} from "../../../guards/managedGuards/NotABot.js";
 import {Enabled} from "../../../guards/managedGuards/Enabled.js";
