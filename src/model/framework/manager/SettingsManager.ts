@@ -35,7 +35,7 @@ export class SettingsManager extends DataSourceAware {
         if (this._cache.has(guildId)) {
             return this._cache.get(guildId);
         }
-        const models = await this._ds.getRepository(SettingsModel).find({
+        const models = await this.ds.getRepository(SettingsModel).find({
             where: {
                 guildId
             }
@@ -58,7 +58,7 @@ export class SettingsManager extends DataSourceAware {
         if (this.getFromCache(setting, guildId)) {
             return this.getFromCache(setting, guildId);
         }
-        const model = await this._ds.getRepository(SettingsModel).findOne({
+        const model = await this.ds.getRepository(SettingsModel).findOne({
             where: {
                 setting,
                 guildId
@@ -87,7 +87,7 @@ export class SettingsManager extends DataSourceAware {
         });
         let retRow = -1;
         let textPrefix = "";
-        const repo = transactionManager ? transactionManager.getRepository(SettingsModel) : this._ds.getRepository(SettingsModel);
+        const repo = transactionManager ? transactionManager.getRepository(SettingsModel) : this.ds.getRepository(SettingsModel);
         if (await repo.count({
             where: {
                 guildId,

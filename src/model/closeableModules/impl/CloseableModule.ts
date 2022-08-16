@@ -30,34 +30,32 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
     }
 
     public async saveSettings(guildId: string, setting: T, merge = false): Promise<void> {
-        let obj = setting;
+        const model: ICloseOption = await this.ds.getRepository(CloseOptionModel).findOne({
+            where: {
+                moduleId: this.moduleId,
+                guildId
+            }
+        });
         if (merge) {
-            const percistedSettings = await this.getSettings(guildId);
-            obj = {...percistedSettings, ...setting};
+            model.settings = {...model.settings, ...setting};
+        } else {
+            model.settings = setting as Record<string, unknown>;
         }
         try {
-            await this._ds.getRepository(CloseOptionModel).update(
-                {
-                    moduleId: this.moduleId,
-                    guildId
-                },
-                {
-                    settings: obj
-                }
-            );
+            await this.ds.getRepository(CloseOptionModel).save(model);
         } catch (e) {
             logger.error(e);
             throw e;
         }
 
-        this._settings.set(guildId, obj);
+        this._settings.set(guildId, model.settings as T);
     }
 
     public async getSettings(guildId: string, force = false): Promise<T> {
         if (!force && this._settings.has(guildId)) {
             return this._settings.get(guildId);
         }
-        const model: ICloseOption = await this._ds.getRepository(CloseOptionModel).findOne({
+        const model: ICloseOption = await this.ds.getRepository(CloseOptionModel).findOne({
             select: ["settings"],
             where: {
                 moduleId: this.moduleId,
@@ -75,7 +73,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
      * Close this module, this prevents all events from being fired. events are NOT queued
      */
     public async close(guildId: string): Promise<boolean> {
-        const m = await this._ds.getRepository(CloseOptionModel).update(
+        const m = await this.ds.getRepository(CloseOptionModel).update(
             {
                 moduleId: this.moduleId,
                 guildId
@@ -93,7 +91,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
      * Opens this module, allowing events to be fired.
      */
     public async open(guildId: string): Promise<boolean> {
-        const m = await this._ds.getRepository(CloseOptionModel).update(
+        const m = await this.ds.getRepository(CloseOptionModel).update(
             {
                 moduleId: this.moduleId,
                 guildId
@@ -109,7 +107,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
 
     public async isEnabled(guildId: string): Promise<boolean> {
         if (!this._isEnabled.has(guildId)) {
-            const model: ICloseOption = await this._ds.getRepository(CloseOptionModel).findOne({
+            const model: ICloseOption = await this.ds.getRepository(CloseOptionModel).findOne({
                 select: ["status"],
                 where: {
                     moduleId: this.moduleId,
@@ -123,4 +121,6 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
         }
         return this._isEnabled.get(guildId);
     }
+
+    public abstract setDefaults(guildId: string): Promise<void>;
 }

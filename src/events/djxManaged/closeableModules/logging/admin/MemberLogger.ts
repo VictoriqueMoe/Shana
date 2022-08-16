@@ -1,7 +1,8 @@
 import {ArgsOf, Discord, On} from "discordx";
-import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
+import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger.js";
 import {AuditLogEvent, EmbedBuilder, User} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../../../utils/Utils.js";
+import {MemberLoggerSettings} from "../../../../../model/closeableModules/settings/AdminLogger/MemberLoggerSettings.js";
 
 
 /**
@@ -15,9 +16,26 @@ import {DiscordUtils, ObjectUtil} from "../../../../../utils/Utils.js";
  * Member joins/leaves VC<br/>
  */
 @Discord()
-export class MemberLogger extends AbstractAdminAuditLogger {
+export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings> {
 
-    @On("voiceStateUpdate")
+    public get moduleId(): string {
+        return "MemberLogger";
+    }
+
+    public setDefaults(guildId: string): Promise<void> {
+        return super.saveSettings(guildId, {
+            banRemoved: false,
+            memberBanned: false,
+            memberDetailsChanged: false,
+            memberJoins: false,
+            memberLeaves: false,
+            voiceChannelChanged: false
+        });
+    }
+
+    @On({
+        event: "voiceStateUpdate"
+    })
     private async voiceChannelChanged([oldState, newState]: ArgsOf<"voiceStateUpdate">): Promise<void> {
         const {member} = newState;
         const {user} = member;
@@ -59,7 +77,9 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         super.postToLog(embed, guildId);
     }
 
-    @On("guildMemberUpdate")
+    @On({
+        event: "guildMemberUpdate"
+    })
     private async memberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">): Promise<void> {
         const memberUpdate = this._guildInfoChangeManager.getMemberChanges(oldUser, newUser);
         if (!ObjectUtil.isValidObject(memberUpdate)) {
@@ -126,7 +146,9 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         return Math.abs(today - timeout);
     }
 
-    @On("guildBanRemove")
+    @On({
+        event: "guildBanRemove"
+    })
     private async banRemoved([ban]: ArgsOf<"guildBanRemove">): Promise<void> {
         const {guild, user} = ban;
         const memberBannedId = user.id;
@@ -152,7 +174,9 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         super.postToLog(embed, guild.id);
     }
 
-    @On("guildMemberAdd")
+    @On({
+        event: "guildMemberAdd"
+    })
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">): Promise<void> {
         const memberJoinedId = member.id;
         const memberJoinedTag = member.user.tag;
@@ -177,7 +201,9 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         super.postToLog(userJoinEmbed, member.guild.id);
     }
 
-    @On("guildMemberRemove")
+    @On({
+        event: "guildMemberRemove"
+    })
     private async memberLeaves([member]: ArgsOf<"guildMemberRemove">): Promise<void> {
         const guild = member.guild;
         const banLog = await this._auditManager.getAuditLogEntry(AuditLogEvent.MemberBanAdd, guild);
@@ -259,7 +285,9 @@ export class MemberLogger extends AbstractAdminAuditLogger {
         super.postToLog(userJoinEmbed, member.guild.id);
     }
 
-    @On("guildBanAdd")
+    @On({
+        event: "guildBanAdd"
+    })
     private async memberBanned([ban]: ArgsOf<"guildBanAdd">): Promise<void> {
         if (ban.partial) {
             ban = await ban.fetch(true);

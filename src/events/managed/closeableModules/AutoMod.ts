@@ -225,6 +225,10 @@ export class AutoMod extends TriggerConstraint<null> {
         return arr.find(value => value.userId === userId && value._guildId === guildId);
     }
 
+    public setDefaults(guildId: string): Promise<void> {
+        return Promise.resolve(undefined);
+    }
+
 }
 
 class TerminalViolation {

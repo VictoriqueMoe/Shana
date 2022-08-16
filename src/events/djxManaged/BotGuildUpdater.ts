@@ -14,12 +14,14 @@ export class BotGuildUpdater extends DataSourceAware {
         super();
     }
 
-    @On("guildCreate")
+    @On({
+        event: "guildCreate"
+    })
     private async botJoins([guild]: ArgsOf<"guildCreate">): Promise<void> {
         const model = DbUtils.build(GuildableModel, {
             guildId: guild.id
         });
-        await this._ds.manager.save(GuildableModel, [model]);
+        await this.ds.manager.save(GuildableModel, [model]);
         return this._onReady.init().then(() => {
             logger.info(`Joined server "${guild.name}"`);
         }).catch(e => {
@@ -27,10 +29,12 @@ export class BotGuildUpdater extends DataSourceAware {
         });
     }
 
-    @On("guildDelete")
+    @On({
+        event: "guildDelete"
+    })
     private async botLeaves([guild]: ArgsOf<"guildDelete">): Promise<void> {
         logger.info(`Bot left guild: "${guild.name}" deleting all related data...`);
-        await this._ds.getRepository(GuildableModel).delete({
+        await this.ds.getRepository(GuildableModel).delete({
             guildId: guild.id
         });
     }

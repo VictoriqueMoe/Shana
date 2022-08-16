@@ -67,6 +67,10 @@ export class ObjectUtil {
         return true;
     }
 
+    public static truncate(str: string, limit: number): string {
+        return str.length > limit ? `${str.substring(0, limit - 3)}...` : str;
+    }
+
     public static singleFieldBuilder(name: string, value: string, inline = false): [APIEmbedField] {
         return [
             {

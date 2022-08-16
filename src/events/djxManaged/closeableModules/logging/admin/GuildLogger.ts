@@ -1,7 +1,8 @@
 import {ArgsOf, Discord, On} from "discordx";
-import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
+import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger.js";
 import {AuditLogEvent, EmbedBuilder, Guild} from "discord.js";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
+import {GuildLoggerSettings} from "../../../../../model/closeableModules/settings/AdminLogger/GuildLoggerSettings.js";
 
 /**
  * Will log: <br />
@@ -9,9 +10,21 @@ import {ObjectUtil} from "../../../../../utils/Utils.js";
  * Event created <br />
  */
 @Discord()
-export class GuildLogger extends AbstractAdminAuditLogger {
+export class GuildLogger extends AbstractAdminAuditLogger<GuildLoggerSettings> {
 
-    @On("guildUpdate")
+    public get moduleId(): string {
+        return "GuildLogger";
+    }
+
+    public setDefaults(guildId: string): Promise<void> {
+        return super.saveSettings(guildId, {
+            guildUpdate: false
+        });
+    }
+
+    @On({
+        event: "guildUpdate"
+    })
     private async guildUpdate([oldGuild, newGuild]: ArgsOf<"guildUpdate">): Promise<void> {
         const guildUpdate = this._guildInfoChangeManager.getGuildUpdate(oldGuild, newGuild);
         if (!ObjectUtil.isValidObject(guildUpdate)) {

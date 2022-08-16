@@ -37,7 +37,7 @@ export class RoleApplier extends DataSourceAware {
         const userId = change.newUser.id;
         const roleId = role.id;
         if (isRoleRemoved) {
-            const repo = this._ds.getRepository(model);
+            const repo = this.ds.getRepository(model);
             const rowCount = await repo.delete({
                 userId,
                 roleId,
@@ -57,7 +57,7 @@ export class RoleApplier extends DataSourceAware {
      */
     public async roleJoins(role: Role, member: GuildMember, model: typeof RolePersistenceModel): Promise<boolean> {
         const userId = member.user.id;
-        const repo = this._ds.getRepository(model);
+        const repo = this.ds.getRepository(model);
         const res = await repo.findOne({
             where: {
                 userId,

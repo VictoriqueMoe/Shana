@@ -14,7 +14,7 @@ import EventTriggerCondition = Typeings.EventTriggerCondition;
  * @param conditions
  * @constructor
  */
-export function MessageListenerDecorator(triggerOnEdit = false, conditions: EventTriggerCondition[]) {
+export function MessageListenerDecorator(triggerOnEdit = false, conditions: EventTriggerCondition[] = []) {
     return function (target: any, propertyKey: string): void {
         logger.info(`Adding: "${target.constructor.name}.${propertyKey}" to listeners for messages`);
         const targetConstructor = target.constructor;

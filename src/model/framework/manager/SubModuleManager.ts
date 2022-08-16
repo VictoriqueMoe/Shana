@@ -40,7 +40,7 @@ export class SubModuleManager extends DataSourceAware {
     }
 
     public async setActive(guildId: string, subModuleId: string, isActive: boolean): Promise<void> {
-        const repo = this._ds.getRepository(SubModuleModel);
+        const repo = this.ds.getRepository(SubModuleModel);
         await repo.update({
             guildId,
             subModuleId
@@ -52,7 +52,7 @@ export class SubModuleManager extends DataSourceAware {
     public async initDefaults(client: Client): Promise<void> {
         const guilds = client.guilds;
         const cache = guilds.cache;
-        const repo = this._ds.getRepository(SubModuleModel);
+        const repo = this.ds.getRepository(SubModuleModel);
         const newModels: SubModuleModel[] = [];
         for (const [guildId] of cache) {
             for (const subModule of this._subModules) {

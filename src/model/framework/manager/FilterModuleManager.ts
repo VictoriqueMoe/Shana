@@ -45,7 +45,7 @@ export class FilterModuleManager extends DataSourceAware {
         const guilds = client.guilds;
         const cache = guilds.cache;
         const newModels: (FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel)[] = [];
-        await this._ds.transaction(async entityManager => {
+        await this.ds.transaction(async entityManager => {
             for (const [guildId] of cache) {
                 for (const filter of this.filters) {
                     const pSubModuleId = filter.id;
@@ -77,9 +77,9 @@ export class FilterModuleManager extends DataSourceAware {
     }
 
     public async getAllSettings(guildId: string): Promise<(FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel)[]> {
-        const bannedWordRepo = this._ds.getRepository(BannedWordFilterModuleModel);
-        const filterRepo = this._ds.getRepository(FilterModuleModel);
-        const valueRepo = this._ds.getRepository(ValueBackedFilterModuleModel);
+        const bannedWordRepo = this.ds.getRepository(BannedWordFilterModuleModel);
+        const filterRepo = this.ds.getRepository(FilterModuleModel);
+        const valueRepo = this.ds.getRepository(ValueBackedFilterModuleModel);
         const repoArr = [bannedWordRepo, filterRepo, valueRepo];
         return Promise.all(repoArr.map(repo => repo.find({
             cache: {
@@ -109,19 +109,19 @@ export class FilterModuleManager extends DataSourceAware {
                 id: "bannedWordSetting_query",
                 milliseconds: 30000
             };
-            res = await this._ds.manager.findOne(BannedWordFilterModuleModel, opts);
+            res = await this.ds.manager.findOne(BannedWordFilterModuleModel, opts);
         } else if (this.isValueBackedAutoModFilter(filter)) {
             opts["cache"] = {
                 id: "valueBackedSetting_query",
                 milliseconds: 30000
             };
-            res = await this._ds.manager.findOne(ValueBackedFilterModuleModel, opts);
+            res = await this.ds.manager.findOne(ValueBackedFilterModuleModel, opts);
         } else {
             opts["cache"] = {
                 id: "FilterSetting_query",
                 milliseconds: 30000
             };
-            res = await this._ds.manager.findOne(FilterModuleModel, opts);
+            res = await this.ds.manager.findOne(FilterModuleModel, opts);
         }
         return res?.getSettings();
     }
@@ -137,7 +137,7 @@ export class FilterModuleManager extends DataSourceAware {
     @RunEvery(1, "hours", true)
     private update(): Promise<void> {
         logger.info("Clearning cache for 'settings_query' and 'filter_query'");
-        return this._ds.queryResultCache.remove([
+        return this.ds.queryResultCache.remove([
             "BannedWordFilterModuleModel_settings",
             "FilterModuleModel_settings",
             "ValueBackedFilterModuleModel_settings",

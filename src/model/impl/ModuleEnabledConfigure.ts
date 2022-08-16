@@ -1,4 +1,4 @@
-import {ObjectUtil} from "../../utils/Utils";
+import {ObjectUtil} from "../../utils/Utils.js";
 
 /**
  * Sometimes components can not function without props retrieved from `@Property`. this class defines if a service, manager or singleton as "enabled" by checking a list of required props

@@ -48,4 +48,11 @@ export interface ICloseableModule<T extends ModuleSettings> {
      */
     isEnabled(guildId: string): Promise<boolean>;
 
+    /**
+     * Called when the application starts up and when a new guild is joined to set the defaults settings*
+     * @param {string} guildId
+     * @returns {Promise<void>}
+     */
+    setDefaults(guildId: string): Promise<void>;
+
 }

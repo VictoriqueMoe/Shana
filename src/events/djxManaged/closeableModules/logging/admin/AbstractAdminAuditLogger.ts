@@ -2,12 +2,12 @@ import {EmbedBuilder, Message} from "discord.js";
 import {CloseableModule} from "../../../../../model/closeableModules/impl/CloseableModule.js";
 import {LogChannelManager} from "../../../../../model/framework/manager/LogChannelManager.js";
 import {container} from "tsyringe";
-import type {AdminAuditLogSettings} from "../../../../../model/closeableModules/settings/AdminAuditLogSettings.js";
 import {AuditManager} from "../../../../../model/framework/manager/AuditManager.js";
 import {Client} from "discordx";
 import {GuildInfoChangeManager} from "../../../../../model/framework/manager/GuildInfoChangeManager.js";
+import type {LoggerSettings} from "../../../../../model/closeableModules/settings/AdminLogger/LoggerSettings.js";
 
-export abstract class AbstractAdminAuditLogger extends CloseableModule<AdminAuditLogSettings> {
+export abstract class AbstractAdminAuditLogger<T extends LoggerSettings> extends CloseableModule<T> {
     protected readonly _auditManager: AuditManager;
     protected readonly _guildInfoChangeManager: GuildInfoChangeManager;
     private readonly _logManager: LogChannelManager;
@@ -17,10 +17,6 @@ export abstract class AbstractAdminAuditLogger extends CloseableModule<AdminAudi
         this._logManager = container.resolve(LogChannelManager);
         this._auditManager = container.resolve(AuditManager);
         this._guildInfoChangeManager = container.resolve(GuildInfoChangeManager);
-    }
-
-    public get moduleId(): string {
-        return "AdminLog";
     }
 
     protected postToLog(content: EmbedBuilder | string, guildId: string): Promise<Message> {

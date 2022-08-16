@@ -1,4 +1,4 @@
-import {CloseableModule} from "../../../../../model/closeableModules/impl/CloseableModule";
+import {CloseableModule} from "../../../../../model/closeableModules/impl/CloseableModule.js";
 import {AuditLogEvent, EmbedBuilder, Message, User} from "discord.js";
 import {ArgsOf, Discord, On} from "discordx";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
@@ -6,6 +6,7 @@ import {AuditManager} from "../../../../../model/framework/manager/AuditManager.
 import {GuildInfoChangeManager} from "../../../../../model/framework/manager/GuildInfoChangeManager.js";
 import {LogChannelManager} from "../../../../../model/framework/manager/LogChannelManager.js";
 import {ModAuditLogSettings} from "../../../../../model/closeableModules/settings/ModAuditLogSettings.js";
+import {injectable} from "tsyringe";
 
 /**
  * Non admin audit Logger for quick logs. this will log:<br/>
@@ -17,6 +18,7 @@ import {ModAuditLogSettings} from "../../../../../model/closeableModules/setting
  * Member un-muted<br/>
  */
 @Discord()
+@injectable()
 export class AuditLogger extends CloseableModule<ModAuditLogSettings> {
 
     public constructor(private _auditManager: AuditManager,
@@ -38,7 +40,19 @@ export class AuditLogger extends CloseableModule<ModAuditLogSettings> {
         return settings[logger] ?? false;
     }
 
-    @On("guildMemberAdd")
+    public setDefaults(guildId: string): Promise<void> {
+        return super.saveSettings(guildId, {
+            memberBanned: false,
+            memberJoined: false,
+            memberKicked: false,
+            memberLeaves: false,
+            memberMuted: false
+        });
+    }
+
+    @On({
+        event: "guildMemberAdd"
+    })
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">): Promise<void> {
         const enabled = await this.isEnabledInternal(member.guild.id, "memberJoined");
         if (!enabled) {
@@ -51,7 +65,14 @@ export class AuditLogger extends CloseableModule<ModAuditLogSettings> {
         this.postToLog(`<@${memberJoined}> has joined the server`, member.guild.id);
     }
 
-    @On("guildMemberUpdate")
+    private getTimeoutLeft(timeout: number): number {
+        const today = Date.now();
+        return Math.abs(today - timeout);
+    }
+
+    @On({
+        event: "guildMemberUpdate"
+    })
     private async memberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">): Promise<void> {
         const enabled = await this.isEnabledInternal(newUser.guild.id, "memberMuted");
         if (!enabled) {
@@ -72,12 +93,9 @@ export class AuditLogger extends CloseableModule<ModAuditLogSettings> {
         }
     }
 
-    private getTimeoutLeft(timeout: number): number {
-        const today = Date.now();
-        return Math.abs(today - timeout);
-    }
-
-    @On("guildMemberRemove")
+    @On({
+        event: "guildMemberRemove"
+    })
     private async memberLeaves([member]: ArgsOf<"guildMemberRemove">): Promise<void> {
         const memberLeft = member.id;
         const memberUsername = member.user.username;
@@ -127,7 +145,16 @@ export class AuditLogger extends CloseableModule<ModAuditLogSettings> {
         this.postToLog(`${memeberTag} has left the server`, guild.id);
     }
 
-    @On("guildBanAdd")
+    private async postToLog(content: EmbedBuilder | string, guildId: string): Promise<Message> {
+        if (content instanceof EmbedBuilder) {
+            return this._logManager.postToLog([content], guildId);
+        }
+        return this._logManager.postToLog(content, guildId);
+    }
+
+    @On({
+        event: "guildBanAdd"
+    })
     private async memberBanned([ban]: ArgsOf<"guildBanAdd">): Promise<void> {
         const enabled = await this.isEnabledInternal(ban.guild.id, "memberBanned");
         if (!enabled) {
@@ -151,12 +178,5 @@ export class AuditLogger extends CloseableModule<ModAuditLogSettings> {
             const personWhoDidBan = res.executor;
             this.postToLog(`<@${memberBanned}> (${user.tag}) has been BANNED by ${personWhoDidBan.tag} ${postFix}`, guild.id);
         }
-    }
-
-    private async postToLog(content: EmbedBuilder | string, guildId: string): Promise<Message> {
-        if (content instanceof EmbedBuilder) {
-            return this._logManager.postToLog([content], guildId);
-        }
-        return this._logManager.postToLog(content, guildId);
     }
 }

@@ -1,11 +1,9 @@
-import {DiscordUtils, GuildUtils, ObjectUtil} from "../../../../utils/Utils";
-import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
-import {ArgsOf, Client, Discord, On} from "discordx";
-import {MessageEmbed, Role, User} from "discord.js";
-import {MemberRoleChange} from "../../../../model/Impl/MemberRoleChange";
-import {GuildManager} from "../../../../model/framework/manager/GuildManager";
-import {container} from "tsyringe";
-
+import {AuditLogEvent, EmbedBuilder, Role, User} from "discord.js";
+import {DiscordUtils, ObjectUtil} from "../../../../../utils/Utils.js";
+import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger.js";
+import {ArgsOf, Discord, On} from "discordx";
+import {MemberRoleChange} from "../../../../../model/impl/MemberRoleChange.js";
+import {RoleLoggerSettings} from "../../../../../model/closeableModules/settings/AdminLogger/RoleLoggerSettings.js";
 
 /**
  * Role Created<br/>
@@ -15,29 +13,48 @@ import {container} from "tsyringe";
  * Role Removed<br/>
  */
 @Discord()
-export class RoleLogger extends AbstractAdminAuditLogger {
+export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
 
-    @On("guildMemberUpdate")
-    private async roleGiven([oldMember, newMember]: ArgsOf<"guildMemberUpdate">, client: Client): Promise<void> {
+    public get moduleId(): string {
+        return "RoleLogger";
+    }
+
+    public setDefaults(guildId: string): Promise<void> {
+        return super.saveSettings(guildId, {
+            roleCreated: false,
+            roleDeleted: false,
+            roleGiven: false,
+            roleUpdated: false
+        });
+    }
+
+    @On({
+        event: "guildMemberUpdate"
+    })
+    private async roleGiven([oldMember, newMember]: ArgsOf<"guildMemberUpdate">): Promise<void> {
         const oldRolesMan = oldMember.roles;
         const newRolesMan = newMember.roles;
         const wasChange = oldRolesMan.cache.size !== newRolesMan.cache.size;
         if (!wasChange) {
             return;
         }
-        const avatarUrl = newMember.user.displayAvatarURL({dynamic: true});
-        const embed = new MessageEmbed()
-            .setAuthor(newMember.user.tag, avatarUrl)
+        const avatarUrl = newMember.user.displayAvatarURL();
+        const embed = new EmbedBuilder()
+            .setAuthor({
+                name: newMember.user.tag,
+                iconURL: avatarUrl
+            })
             .setTitle(`Role changed`)
             .setDescription(`<@${newMember.id}> has had their roles changed`)
             .setTimestamp()
-            .setFooter(`${newMember.user.id}`);
+            .setFooter({
+                text: `${newMember.id}`
+            });
 
         const change = new MemberRoleChange(oldMember, newMember);
         const roleChanges = change.roleChanges;
         const added = roleChanges.add;
-        const guildManager = container.resolve(GuildManager);
-        const guild = await guildManager.getGuild(oldMember.guild.id);
+        const guild = await DiscordUtils.getGuild(oldMember.guild.id);
         if (added.length > 0) {
             const arr = [];
             for (const roleId of added) {
@@ -46,7 +63,7 @@ export class RoleLogger extends AbstractAdminAuditLogger {
                 arr.push(`\`${roleObj.name}\``);
             }
             const str = arr.join(", ");
-            embed.addField("Added role(s)", str);
+            embed.addFields(ObjectUtil.singleFieldBuilder("Added role(s)", str));
         }
         const removed = roleChanges.remove;
         if (removed.length > 0) {
@@ -57,43 +74,54 @@ export class RoleLogger extends AbstractAdminAuditLogger {
                 arr.push(`\`${roleObj.name}\``);
             }
             const str = arr.join(", ");
-            embed.addField("Removed role(s)", str);
+            embed.addFields(ObjectUtil.singleFieldBuilder("Removed role(s)", str));
         }
 
-        const auditEntry = await DiscordUtils.getAuditLogEntry("MEMBER_ROLE_UPDATE", oldMember.guild);
+        const auditEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.MemberRoleUpdate, oldMember.guild);
         if (auditEntry) {
             const {executor, target} = auditEntry;
             if (target instanceof User) {
                 if (target.id === newMember.id) {
-                    embed.addField("Modified by", executor.tag);
+                    embed.addFields(ObjectUtil.singleFieldBuilder("Modified by", executor.tag));
                 }
             }
         }
         super.postToLog(embed, newMember.guild.id);
     }
 
-    @On("roleUpdate")
-    private async roleUpdated([oldRole, newRole]: ArgsOf<"roleUpdate">, client: Client): Promise<void> {
-        const roleChange = DiscordUtils.getRoleChanges(oldRole, newRole);
+    @On({
+        event: "roleUpdate"
+    })
+    private async roleUpdated([oldRole, newRole]: ArgsOf<"roleUpdate">): Promise<void> {
+        const roleChange = this._guildInfoChangeManager.getRoleChanges(oldRole, newRole);
         const guildId = newRole.guild.id;
         if (!ObjectUtil.isValidObject(roleChange)) {
             return;
         }
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setColor('#43B581')
-            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
+            .setAuthor({
+                name: this.getGuildName(guildId),
+                iconURL: this.getGuildIconUrl(guildId)
+            })
             .setTitle(`Role "${oldRole.name}" Changed`)
             .setTimestamp()
-            .setFooter(`${newRole.id}`);
-        const auditEntry = await DiscordUtils.getAuditLogEntry("ROLE_UPDATE", newRole.guild);
+            .setFooter({
+                text: `${newRole.id}`
+            });
+        const auditEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.RoleUpdate, newRole.guild);
         if (auditEntry) {
             const target = auditEntry.target as Role;
             if (target.id === newRole.id) {
                 if (newRole.createdAt <= auditEntry.createdAt) {
                     const executor = auditEntry.executor;
-                    const avatarUrl = executor.displayAvatarURL({dynamic: true});
-                    embed.setAuthor(executor.tag, avatarUrl);
-                    embed.addField("Changed by", executor.tag);
+                    const avatarUrl = executor.displayAvatarURL();
+                    embed.setAuthor({
+                        name: executor.tag,
+                        iconURL: avatarUrl
+
+                    });
+                    embed.addFields(ObjectUtil.singleFieldBuilder("Changed by", executor.tag));
                 }
             }
         }
@@ -101,11 +129,11 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         if (ObjectUtil.isValidObject(permsChanges)) {
             const addedStr = permsChanges.after.join(", ");
             if (ObjectUtil.validString(addedStr)) {
-                embed.addField("Added Permission(s)", addedStr);
+                embed.addFields(ObjectUtil.singleFieldBuilder("Added Permission(s)", addedStr));
             }
             const removedStr = permsChanges.before.join(", ");
             if (ObjectUtil.validString(removedStr)) {
-                embed.addField("Removed Permission(s)", removedStr);
+                embed.addFields(ObjectUtil.singleFieldBuilder("Removed Permission(s)", removedStr));
             }
         }
 
@@ -171,44 +199,58 @@ export class RoleLogger extends AbstractAdminAuditLogger {
         super.postToLog(embed, guildId);
     }
 
-    @On("roleCreate")
-    private async roleCreated([role]: ArgsOf<"roleCreate">, client: Client): Promise<void> {
-        const roleAuditLogEntry = await DiscordUtils.getAuditLogEntry("ROLE_CREATE", role.guild);
+    @On({
+        event: "roleCreate"
+    })
+    private async roleCreated([role]: ArgsOf<"roleCreate">): Promise<void> {
+        const roleAuditLogEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.RoleCreate, role.guild);
         const {target} = roleAuditLogEntry;
         const guildId = role.guild.id;
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setColor(role.hexColor)
-            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
+            .setAuthor({
+                name: this.getGuildName(guildId),
+                iconURL: this.getGuildIconUrl(guildId)
+            })
             .setDescription(`Role Created: ${role.name}`)
             .setTimestamp()
-            .setFooter(`${role.id}`);
+            .setFooter({
+                text: `${role.id}`
+            });
         const executor = roleAuditLogEntry.executor;
         if (executor && target instanceof Role) {
             if (target.id === role.id) {
                 if (role.createdAt <= roleAuditLogEntry.createdAt) {
-                    embed.addField("Role created by", executor.tag);
+                    embed.addFields(ObjectUtil.singleFieldBuilder("Role created by", executor.tag));
                 }
             }
         }
         super.postToLog(embed, guildId);
     }
 
-    @On("roleDelete")
-    private async roleDeleted([role]: ArgsOf<"roleDelete">, client: Client): Promise<void> {
+    @On({
+        event: "roleDelete"
+    })
+    private async roleDeleted([role]: ArgsOf<"roleDelete">): Promise<void> {
         const guildId = role.guild.id;
-        const roleAuditLogEntry = await DiscordUtils.getAuditLogEntry("ROLE_DELETE", role.guild);
+        const roleAuditLogEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.RoleDelete, role.guild);
         const {executor, target} = roleAuditLogEntry;
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setColor(role.hexColor)
-            .setAuthor(GuildUtils.getGuildName(guildId), GuildUtils.getGuildIconUrl(guildId))
+            .setAuthor({
+                name: this.getGuildName(guildId),
+                iconURL: this.getGuildIconUrl(guildId)
+            })
             .setDescription(`Role Deleted: "${role.name}"`)
             .setTimestamp()
-            .setFooter(`${role.id}`);
+            .setFooter({
+                text: `${role.id}`
+            });
         if (ObjectUtil.isValidObject(target)) {
             const targetRoleId = (target as { id: string }).id;
             if (targetRoleId === role.id) {
                 if (role.createdAt <= roleAuditLogEntry.createdAt) {
-                    embed.addField("Role deleted by", executor.tag);
+                    embed.addFields(ObjectUtil.singleFieldBuilder("Role deleted by", executor.tag));
                 }
             }
         }

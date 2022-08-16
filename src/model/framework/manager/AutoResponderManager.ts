@@ -8,7 +8,7 @@ export class AutoResponderManager extends DataSourceAware {
 
     public async editAutoResponder(obj: AutoResponderModel, currentTitle: string): Promise<AutoResponderModel> {
         try {
-            return await this._ds.transaction(async entityManager => {
+            return await this.ds.transaction(async entityManager => {
                 await this.deleteAutoResponse(obj.guildId, currentTitle, entityManager);
                 return this.addAutoResponder(obj, entityManager);
             });
@@ -18,13 +18,13 @@ export class AutoResponderManager extends DataSourceAware {
     }
 
     public async addAutoResponder(obj: AutoResponderModel, transaction?: EntityManager): Promise<AutoResponderModel> {
-        const repo: Repository<AutoResponderModel> = transaction ? transaction.getRepository(AutoResponderModel) : this._ds.getRepository(AutoResponderModel);
+        const repo: Repository<AutoResponderModel> = transaction ? transaction.getRepository(AutoResponderModel) : this.ds.getRepository(AutoResponderModel);
         const commitResult = await repo.save([obj]);
         return commitResult[0];
     }
 
     public getAllAutoResponders(guildId: string): Promise<AutoResponderModel[]> {
-        return this._ds.getRepository(AutoResponderModel).find({
+        return this.ds.getRepository(AutoResponderModel).find({
             where: {
                 guildId
             }
@@ -39,7 +39,7 @@ export class AutoResponderManager extends DataSourceAware {
             });
             return deleteResponse.affected === 1;
         } else {
-            const transactionDelete = await this._ds.getRepository(AutoResponderModel).delete({
+            const transactionDelete = await this.ds.getRepository(AutoResponderModel).delete({
                 guildId,
                 title
             });
@@ -48,7 +48,7 @@ export class AutoResponderManager extends DataSourceAware {
     }
 
     public async getAutoResponderFromTitle(title: string, guildId: string): Promise<AutoResponderModel | null> {
-        const fromDb = await this._ds.getRepository(AutoResponderModel).findOne({
+        const fromDb = await this.ds.getRepository(AutoResponderModel).findOne({
             where: {
                 title,
                 guildId

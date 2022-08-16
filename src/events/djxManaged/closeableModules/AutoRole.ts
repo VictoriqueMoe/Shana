@@ -9,7 +9,7 @@ import logger from "../../../utils/LoggerFactory.js";
 import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
 import {RoleApplier} from "../../../model/impl/RoleApplier.js";
 import {PostConstruct} from "../../../model/framework/decorators/PostConstruct.js";
-import {EventDeletedListener} from "../../djxManaged/eventDispatcher/EventDeletedListener.js";
+import {EventDeletedListener} from "../eventDispatcher/EventDeletedListener.js";
 import {LogChannelManager} from "../../../model/framework/manager/LogChannelManager.js";
 import {RoleManager} from "../../../model/framework/manager/RoleManager.js";
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule.js";
@@ -56,7 +56,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             return;
         }
 
-        const persistedRole = await this._ds.getRepository(RolePersistenceModel).findOne({
+        const persistedRole = await this.ds.getRepository(RolePersistenceModel).findOne({
             where: {
                 userId: member.id,
                 guildId
@@ -125,7 +125,13 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         }
     }
 
-    @On("guildMemberAdd")
+    public setDefaults(guildId?: string): Promise<void> {
+        return Promise.resolve(undefined);
+    }
+
+    @On({
+        event: "guildMemberAdd"
+    })
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">): Promise<void> {
         const guildId = member.guild.id;
         if (!await this.isEnabled(guildId)) {
@@ -179,7 +185,9 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         }
     }
 
-    @On("guildMemberRemove")
+    @On({
+        event: "guildMemberRemove"
+    })
     private async jailRoleLeaves([member]: ArgsOf<"guildMemberRemove">): Promise<void> {
         if (!await this.isEnabled(member.guild.id)) {
             return;
@@ -190,7 +198,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         }
         const model = await this._roleApplier.roleLeaves(jailRole, member as GuildMember, RolePersistenceModel);
         if (model) {
-            await this._ds.getRepository(RolePersistenceModel).save(model);
+            await this.ds.getRepository(RolePersistenceModel).save(model);
         }
     }
 }

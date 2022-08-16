@@ -2,7 +2,6 @@ import {IGuildAware} from "../IGuildAware.js";
 import {RolePersistenceModel} from "../autoMod/impl/RolePersistence.model.js";
 import {UsernameModel} from "../autoMod/impl/Username.model.js";
 import {CloseOptionModel} from "../autoMod/impl/CloseOption.model.js";
-import {BannedAttachmentsModel} from "./BannedAttachments.model.js";
 import {SettingsModel} from "./Settings.model.js";
 import {PostableChannelModel} from "./PostableChannel.model.js";
 import {AutoResponderModel} from "../autoMod/impl/AutoResponder.model.js";
@@ -27,9 +26,6 @@ export class GuildableModel implements IGuildAware {
 
     @OneToMany(() => CloseOptionModel, closeOptionModel => closeOptionModel.guildableModel)
     public closeOptionModel: CloseOptionModel[];
-
-    @OneToMany(() => BannedAttachmentsModel, bannedAttachmentsModel => bannedAttachmentsModel.guildableModel)
-    public bannedAttachmentsModel: BannedAttachmentsModel[];
 
     @OneToMany(() => SettingsModel, settingsModel => settingsModel.guildableModel)
     public settingsModel: SettingsModel[];

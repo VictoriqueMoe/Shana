@@ -35,15 +35,15 @@ export class OnReady extends DataSourceAware {
      * Commands that are run on application start AND on join new guild
      */
     public async init(): Promise<void> {
-        await this._ds.transaction(async (transactionalEntityManager: EntityManager) => {
-            await this.populateClosableEvents(transactionalEntityManager);
+        await this.populateClosableEvents();
+        await this.ds.transaction(async (transactionalEntityManager: EntityManager) => {
             await this.setDefaultSettings(transactionalEntityManager);
             await this.populatePostableChannels(transactionalEntityManager);
             await this.cleanUpGuilds(transactionalEntityManager);
             await this.initAppCommands();
             await this.joinThreads();
         });
-        await this.populateDefaultsSubModules();
+        await this.initModuleSettings();
     }
 
     public async setDefaultSettings(manager: EntityManager): Promise<void> {
@@ -110,7 +110,9 @@ export class OnReady extends DataSourceAware {
         return manager.save(models);
     }
 
-    @On("ready")
+    @On({
+        event: "ready"
+    })
     private async initialise([client]: ArgsOf<"ready">): Promise<void> {
         client.user.setActivity('Half-Life 3', {type: ActivityType.Playing});
         const pArr: Promise<any>[] = [];
@@ -132,7 +134,7 @@ export class OnReady extends DataSourceAware {
 
     private async populateGuilds(): Promise<void> {
         const guilds = this._client.guilds.cache;
-        return this._ds.transaction(async transactionManager => {
+        return this.ds.transaction(async transactionManager => {
             for (const [guildId] of guilds) {
                 if (await transactionManager.count(GuildableModel, {
                     where: {
@@ -148,8 +150,9 @@ export class OnReady extends DataSourceAware {
         });
     }
 
-    private async populateClosableEvents(transactionManager: EntityManager): Promise<void> {
+    private async populateClosableEvents(): Promise<void> {
         const allModules: Immutable.Set<ICloseableModule<unknown>> = container.resolve(CloseableModuleManager).closeableModules;
+        const transactionManager = this.ds.manager;
         for (const module of allModules) {
             for (const [guildId, guild] of this._client.guilds.cache) {
                 const moduleId = module.moduleId;
@@ -170,12 +173,13 @@ export class OnReady extends DataSourceAware {
                         guildId
                     });
                     await transactionManager.save(CloseOptionModel, m);
+                    await module.setDefaults(guildId);
                 }
             }
         }
     }
 
-    private async populateDefaultsSubModules(): Promise<void> {
+    private async initModuleSettings(): Promise<void> {
         await this._subModuleManager.initDefaults(this._client);
         await this._filterModuleManager.initDefaults(this._client);
     }

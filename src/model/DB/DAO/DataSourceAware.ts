@@ -2,9 +2,13 @@ import {container} from "tsyringe";
 import {DataSource} from "typeorm";
 
 export abstract class DataSourceAware {
-    protected _ds: DataSource;
-
     public constructor() {
-        this._ds = container.resolve(DataSource);
+        DataSourceAware._ds = container.resolve(DataSource);
+    }
+
+    private static _ds: DataSource;
+
+    public get ds(): DataSource {
+        return DataSourceAware._ds;
     }
 }

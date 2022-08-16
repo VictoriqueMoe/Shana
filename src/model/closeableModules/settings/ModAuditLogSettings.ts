@@ -5,26 +5,26 @@ export interface ModAuditLogSettings extends ModuleSettings {
     /**
      * Log a member when they joins
      */
-    memberJoined?: boolean,
+    memberJoined: boolean,
 
     /**
      * Log when the member is muted*
      */
-    memberMuted?: boolean,
+    memberMuted: boolean,
 
     /**
      * Log a member when they leave
      */
-    memberLeaves?: boolean,
+    memberLeaves: boolean,
 
     /**
      * Log a member when they are banned
      */
-    memberBanned?: boolean,
+    memberBanned: boolean,
 
 
     /**
      * Log a member when they are kicked
      */
-    memberKicked?: boolean,
+    memberKicked: boolean,
 }

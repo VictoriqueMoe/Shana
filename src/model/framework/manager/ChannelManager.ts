@@ -13,7 +13,7 @@ export class ChannelManager extends DataSourceAware {
     }
 
     public async setChannel(guildId: string, channelType: Channels, value: string): Promise<PostableChannelModel[] | null> {
-        const result = await this._ds.getRepository(PostableChannelModel).update({
+        const result = await this.ds.getRepository(PostableChannelModel).update({
             guildId
         }, {
             [channelType]: value
@@ -39,7 +39,7 @@ export class ChannelManager extends DataSourceAware {
     }
 
     private getModel(guildId: string): Promise<PostableChannelModel> {
-        return this._ds.getRepository(PostableChannelModel).findOne({
+        return this.ds.getRepository(PostableChannelModel).findOne({
             where: {
                 guildId
             }

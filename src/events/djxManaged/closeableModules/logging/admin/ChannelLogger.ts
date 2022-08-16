@@ -1,4 +1,4 @@
-import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger";
+import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger.js";
 import {
     AuditLogEvent,
     BaseChannel,
@@ -13,6 +13,9 @@ import {ArgsOf, Discord, On} from "discordx";
 import {Typeings} from "../../../../../model/Typeings.js";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
 import TIME_UNIT from "../../../../../enums/TIME_UNIT.js";
+import {
+    ChannelLoggerSettings
+} from "../../../../../model/closeableModules/settings/AdminLogger/ChannelLoggerSettings.js";
 import ChannelUpdate = Typeings.ChannelUpdate;
 import ThreadUpdate = Typeings.ThreadUpdate;
 
@@ -26,7 +29,11 @@ import ThreadUpdate = Typeings.ThreadUpdate;
  * Thread Update<br/>
  */
 @Discord()
-export class ChannelLogger extends AbstractAdminAuditLogger {
+export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSettings> {
+
+    public get moduleId(): string {
+        return "ChannelLogger";
+    }
 
     private static appendChannelTypeChanges(embed: EmbedBuilder, update: ThreadUpdate | ChannelUpdate): void {
         for (const name in update) {
@@ -58,7 +65,20 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         }
     }
 
-    @On("channelCreate")
+    public override setDefaults(guildId: string): Promise<void> {
+        return this.saveSettings(guildId, {
+            channelCreated: false,
+            channelDelete: false,
+            channelUpdate: false,
+            threadCreate: false,
+            threadDelete: false,
+            threadUpdate: false
+        });
+    }
+
+    @On({
+        event: "channelCreate"
+    })
     private async channelCreated([channel]: ArgsOf<"channelCreate">): Promise<void> {
         const {guild} = channel;
         const channelAudiEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.ChannelCreate, guild);
@@ -85,7 +105,9 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         super.postToLog(embed, guildId);
     }
 
-    @On("channelDelete")
+    @On({
+        event: "channelDelete"
+    })
     private async channelDelete([channel]: ArgsOf<"channelDelete">): Promise<void> {
         if (!(channel instanceof BaseGuildTextChannel)) {
             return;
@@ -115,7 +137,9 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         super.postToLog(embed, guildId);
     }
 
-    @On("channelUpdate")
+    @On({
+        event: "channelUpdate"
+    })
     private async channelUpdate([oldChannel, newChannel]: ArgsOf<"channelUpdate">): Promise<void> {
         if (!(oldChannel instanceof GuildChannel) || !(newChannel instanceof GuildChannel)) {
             return;
@@ -159,7 +183,9 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         super.postToLog(embed, guildId);
     }
 
-    @On("threadCreate")
+    @On({
+        event: "threadCreate"
+    })
     private async threadCreate([thread]: ArgsOf<"threadCreate">): Promise<void> {
         const {guild} = thread;
         const guildId = guild.id;
@@ -196,7 +222,9 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         super.postToLog(embed, guildId);
     }
 
-    @On("threadDelete")
+    @On({
+        event: "threadDelete"
+    })
     private async threadDelete([thread]: ArgsOf<"threadDelete">): Promise<void> {
         const {guild} = thread;
         const threadAuditEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.ThreadDelete, guild);
@@ -223,7 +251,9 @@ export class ChannelLogger extends AbstractAdminAuditLogger {
         super.postToLog(embed, guildId);
     }
 
-    @On("threadUpdate")
+    @On({
+        event: "threadUpdate"
+    })
     private async threadUpdate([oldThread, newThread]: ArgsOf<"threadUpdate">): Promise<void> {
         if (!(oldThread instanceof ThreadChannel) || !(newThread instanceof ThreadChannel)) {
             return;

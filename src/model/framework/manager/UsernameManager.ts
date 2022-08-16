@@ -11,10 +11,20 @@ import {DbUtils} from "../../../utils/Utils.js";
 @singleton()
 export class UsernameManager extends DataSourceAware {
 
+
+    public getUsername(member: GuildMember): Promise<UsernameModel | null> {
+        return this.ds.getRepository(UsernameModel).findOne({
+            where: {
+                userId: member.id,
+                guildId: member.guild.id
+            }
+        });
+    }
+
     public async setUsername(member: GuildMember, username: string, force = false): Promise<UsernameModel> {
         const guildId = member.guild.id;
         const userId = member.id;
-        const repo = this._ds.getRepository(UsernameModel);
+        const repo = this.ds.getRepository(UsernameModel);
         let modelToSave: UsernameModel;
         const existingObject = await repo.findOne({
             where: {
@@ -39,7 +49,7 @@ export class UsernameManager extends DataSourceAware {
     }
 
     public getAllUsernames(guildId: string): Promise<UsernameModel[]> {
-        return this._ds.manager.find(UsernameModel, {
+        return this.ds.manager.find(UsernameModel, {
             where: {
                 guildId
             }
@@ -48,7 +58,7 @@ export class UsernameManager extends DataSourceAware {
 
     @PostConstruct
     public async init(client: Client): Promise<void> {
-        const allModels = await this._ds.getRepository(GuildableModel).find({
+        const allModels = await this.ds.getRepository(GuildableModel).find({
             relations: ["usernameModel"]
         });
         const pArr: Promise<void>[] = [];
