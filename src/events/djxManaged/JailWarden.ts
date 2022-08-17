@@ -6,7 +6,7 @@ import {BannedWordFilter} from "../../model/closeableModules/subModules/autoMod/
 import {RoleApplier} from "../../model/impl/RoleApplier.js";
 import {RoleManager} from "../../model/framework/manager/RoleManager.js";
 import {DiscordUtils} from "../../utils/Utils.js";
-import type {SubModuleManager} from "../../model/framework/manager/SubModuleManager.js";
+import {SubModuleManager} from "../../model/framework/manager/SubModuleManager.js";
 
 @Discord()
 @injectable()
@@ -31,8 +31,8 @@ export class JailWarden {
         event: "guildMemberUpdate"
     })
     private async memeberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">): Promise<void> {
-        const filter: BannedWordFilter = this._subModuleManager.getSubModule<BannedWordFilter>("BannedWordFilter");
-        if (!filter.isActive) {
+        const filter: BannedWordFilter = this._subModuleManager.getSubModule<BannedWordFilter>("Banned Word Filter");
+        if (!(await filter.isActive(newUser.guild.id))) {
             return;
         }
         if (oldUser.nickname !== newUser.nickname) {

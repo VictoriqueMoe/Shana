@@ -20,7 +20,6 @@ import {LogChannelManager} from "../../../model/framework/manager/LogChannelMana
 import TIME_UNIT from "../../../enums/TIME_UNIT.js";
 import {FilterModuleManager} from "../../../model/framework/manager/FilterModuleManager.js";
 import logger from "../../../utils/LoggerFactory.js";
-import {PostConstruct} from "../../../model/framework/decorators/PostConstruct.js";
 
 @singleton()
 export class AutoMod extends TriggerConstraint<null> {
@@ -43,10 +42,10 @@ export class AutoMod extends TriggerConstraint<null> {
     }
 
 
-    @PostConstruct
     public async init(): Promise<void> {
         for (const [guildId] of this._client.guilds.cache) {
             for (const filter of this.submodules) {
+                await this.ds.queryResultCache.clear();
                 const timeout = await filter.terminalViolationTimeout(guildId);
                 const timedSet = new TimedSet<TerminalViolation>(timeout * 1000);
                 if (this._muteTimeoutArray.has(guildId)) {
@@ -226,7 +225,7 @@ export class AutoMod extends TriggerConstraint<null> {
     }
 
     public setDefaults(guildId: string): Promise<void> {
-        return Promise.resolve(undefined);
+        return this.init();
     }
 
 }

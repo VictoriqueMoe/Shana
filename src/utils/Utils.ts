@@ -5,6 +5,7 @@ import type {
     MessageComponentInteraction
 } from "discord.js";
 import {
+    ChannelType,
     CommandInteraction,
     Guild,
     GuildMember,
@@ -33,6 +34,9 @@ import {EmojiManager} from "../model/framework/manager/EmojiManager.js";
 import {DeepPartial} from "typeorm/common/DeepPartial.js";
 import {EntityTarget} from "typeorm/common/EntityTarget.js";
 import {PermissionFlagsBits} from "discord-api-types/v10";
+import {isValidCron} from "cron-validator";
+import {CronException} from "../model/exceptions/CronException.js";
+import cronstrue from 'cronstrue';
 
 export class Utils {
     public static sleep(ms: number): Promise<void> {
@@ -198,6 +202,18 @@ export class ObjectUtil {
     }
 }
 
+export namespace CronUtils {
+    export function cronToString(cron: string): string {
+        if (!isValidCron(cron, {
+            seconds: true,
+            allowBlankDay: true
+        })) {
+            throw new CronException("cron is not valid");
+        }
+        return cronstrue.toString(cron);
+    }
+}
+
 export class DbUtils {
 
     private static _ds: DataSource;
@@ -220,6 +236,18 @@ export namespace DiscordUtils {
     import envTypes = Typeings.envTypes;
     import EmojiInfo = Typeings.EmojiInfo;
     import StickerInfo = Typeings.StickerInfo;
+
+    export const allChannelsExceptCat = [
+        ChannelType.GuildPrivateThread,
+        ChannelType.GuildNewsThread,
+        ChannelType.GuildVoice,
+        ChannelType.GuildNews,
+        ChannelType.GuildPublicThread,
+        ChannelType.GuildStageVoice,
+        ChannelType.GuildDirectory,
+        ChannelType.GuildForum,
+        ChannelType.GuildText,
+    ];
 
     export class InteractionUtils {
 

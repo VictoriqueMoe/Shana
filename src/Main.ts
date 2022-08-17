@@ -38,6 +38,9 @@ export class Main {
         });
 
         const connectedDs = await datasource.initialize();
+        if (!connectedDs.isInitialized) {
+            throw new Error("Unable to initialise database");
+        }
         await connectedDs.queryResultCache.clear();
         const clientOps: ClientOptions = {
             intents: [
@@ -51,7 +54,7 @@ export class Main {
                 IntentsBitField.Flags.DirectMessages,
                 IntentsBitField.Flags.GuildVoiceStates
             ],
-            silent: Main.envMode !== "development",
+            silent: false,
         };
         if (this.envMode === "development") {
             clientOps["botGuilds"] = [(client: Client): string[] => client.guilds.cache.map((guild) => guild.id)];

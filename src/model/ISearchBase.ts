@@ -5,8 +5,8 @@ import type {AutocompleteInteraction} from "discord.js";
 import FuseResult = Fuse.FuseResult;
 
 export type SearchBase = {
-    name: string;
-    value: string;
+    name?: string;
+    value?: string;
 };
 
 /**

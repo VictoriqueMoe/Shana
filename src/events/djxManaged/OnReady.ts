@@ -3,7 +3,7 @@ import {container, delay, inject, injectable} from "tsyringe";
 import type {EntityManager} from "typeorm";
 import {InsertResult} from "typeorm";
 import Immutable from "immutable";
-import {DbUtils, EnumEx, ObjectUtil} from "../../utils/Utils.js";
+import {DbUtils, DiscordUtils, EnumEx, ObjectUtil} from "../../utils/Utils.js";
 import {CloseOptionModel} from "../../model/DB/entities/autoMod/impl/CloseOption.model.js";
 import {ICloseableModule} from "../../model/closeableModules/ICloseableModule.js";
 import {CloseableModuleManager} from "../../model/framework/manager/CloseableModuleManager.js";
@@ -12,12 +12,14 @@ import logger from "../../utils/LoggerFactory.js";
 import {SubModuleManager} from "../../model/framework/manager/SubModuleManager.js";
 import {FilterModuleManager} from "../../model/framework/manager/FilterModuleManager.js";
 import {GuildableModel} from "../../model/DB/entities/guild/Guildable.model.js";
-import {ActivityType} from "discord-api-types/v10";
+import {ActivityType, InteractionType} from "discord-api-types/v10";
 import {SettingsManager} from "../../model/framework/manager/SettingsManager.js";
 import SETTINGS, {DEFAULT_SETTINGS} from "../../enums/SETTINGS.js";
 import {PostableChannelModel} from "../../model/DB/entities/guild/PostableChannel.model.js";
 import {LogChannelManager} from "../../model/framework/manager/LogChannelManager.js";
 import {UsernameManager} from "../../model/framework/manager/UsernameManager.js";
+import {ChannelType} from "discord.js";
+import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @injectable()
@@ -36,10 +38,10 @@ export class OnReady extends DataSourceAware {
      */
     public async init(): Promise<void> {
         await this.populateClosableEvents();
+        await this.cleanUpGuilds();
         await this.ds.transaction(async (transactionalEntityManager: EntityManager) => {
             await this.setDefaultSettings(transactionalEntityManager);
             await this.populatePostableChannels(transactionalEntityManager);
-            await this.cleanUpGuilds(transactionalEntityManager);
             await this.initAppCommands();
             await this.joinThreads();
         });
@@ -80,8 +82,14 @@ export class OnReady extends DataSourceAware {
         return this._client.initApplicationCommands();
     }
 
-    private async cleanUpGuilds(transactionManager: EntityManager): Promise<void> {
+    private async cleanUpGuilds(): Promise<void> {
+        const transactionManager = this.ds.manager;
         const guildsJoined = [...this._client.guilds.cache.keys()];
+        if (!ObjectUtil.isValidArray(guildsJoined)) {
+            await transactionManager.clear(GuildableModel);
+            await this.ds.queryResultCache.clear();
+            return;
+        }
         for (const guildsJoinedId of guildsJoined) {
             const guildModels = await transactionManager.find(GuildableModel, {
                 where: {
@@ -126,6 +134,31 @@ export class OnReady extends DataSourceAware {
                 process.send('ready');
             }
         });
+    }
+
+    @On()
+    private async interactionCreate([interaction]: ArgsOf<"interactionCreate">, client: Client): Promise<void> {
+        try {
+            await client.executeInteraction(interaction);
+        } catch (e) {
+            if (e instanceof Error) {
+                logger.error(e.message);
+            } else {
+                logger.error(e);
+            }
+            const me = interaction.guild.members.me;
+            if (interaction.type === InteractionType.ApplicationCommand || interaction.type === InteractionType.MessageComponent) {
+                const channel = interaction.channel;
+                if (channel.type !== ChannelType.GuildText || !channel.permissionsFor(me).has("SendMessages")) {
+                    logger.error(`cannot send warning message to this channel`, interaction);
+                    return;
+                }
+                return InteractionUtils.replyOrFollowUp(
+                    interaction,
+                    "Something went wrong, please notify my developer: <@697417252320051291>"
+                );
+            }
+        }
     }
 
     private initDi(): void {
@@ -173,7 +206,6 @@ export class OnReady extends DataSourceAware {
                         guildId
                     });
                     await transactionManager.save(CloseOptionModel, m);
-                    await module.setDefaults(guildId);
                 }
             }
         }
@@ -182,9 +214,19 @@ export class OnReady extends DataSourceAware {
     private async initModuleSettings(): Promise<void> {
         await this._subModuleManager.initDefaults(this._client);
         await this._filterModuleManager.initDefaults(this._client);
+        await this._initSubModules();
     }
 
     private initUsernames(): Promise<any> {
         return this._usernameManager.init(this._client);
+    }
+
+    private async _initSubModules(): Promise<void> {
+        const allModules: Immutable.Set<ICloseableModule<unknown>> = container.resolve(CloseableModuleManager).closeableModules;
+        for (const module of allModules) {
+            for (const [guildId] of this._client.guilds.cache) {
+                await module.setDefaults(guildId);
+            }
+        }
     }
 }

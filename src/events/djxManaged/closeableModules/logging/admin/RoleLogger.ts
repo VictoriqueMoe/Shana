@@ -1,9 +1,10 @@
 import {AuditLogEvent, EmbedBuilder, Role, User} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../../../../utils/Utils.js";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger.js";
-import {ArgsOf, Discord, On} from "discordx";
+import {ArgsOf, Client, Discord, On} from "discordx";
 import {MemberRoleChange} from "../../../../../model/impl/MemberRoleChange.js";
 import {RoleLoggerSettings} from "../../../../../model/closeableModules/settings/AdminLogger/RoleLoggerSettings.js";
+import {EventDeletedListener} from "../../../eventDispatcher/EventDeletedListener.js";
 
 /**
  * Role Created<br/>
@@ -32,10 +33,16 @@ export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
         event: "guildMemberUpdate"
     })
     private async roleGiven([oldMember, newMember]: ArgsOf<"guildMemberUpdate">): Promise<void> {
+        if (EventDeletedListener.isMemberRemoved(newMember)) {
+            return;
+        }
         const oldRolesMan = oldMember.roles;
         const newRolesMan = newMember.roles;
         const wasChange = oldRolesMan.cache.size !== newRolesMan.cache.size;
         if (!wasChange) {
+            return;
+        }
+        if (newMember.roles.cache.size === 1 && newMember === newMember.guild.members.me) {
             return;
         }
         const avatarUrl = newMember.user.displayAvatarURL();
@@ -231,7 +238,11 @@ export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
     @On({
         event: "roleDelete"
     })
-    private async roleDeleted([role]: ArgsOf<"roleDelete">): Promise<void> {
+    private async roleDeleted([role]: ArgsOf<"roleDelete">, client: Client): Promise<void> {
+        const me = client.guilds.cache.get(role.guild.id).members.me;
+        if (me.roles.cache.size === 1) {
+            return;
+        }
         const guildId = role.guild.id;
         const roleAuditLogEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.RoleDelete, role.guild);
         const {executor, target} = roleAuditLogEntry;

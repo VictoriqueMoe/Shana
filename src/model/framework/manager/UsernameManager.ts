@@ -45,13 +45,12 @@ export class UsernameManager extends DataSourceAware {
             existingObject.usernameToPersist = username;
             modelToSave = existingObject;
         } else {
-            const obj = {
+            modelToSave = DbUtils.build(UsernameModel, {
                 userId,
-                username,
+                usernameToPersist: username,
                 force,
                 guildId
-            };
-            modelToSave = DbUtils.build(UsernameModel, obj);
+            });
         }
         return repo.save(modelToSave);
     }
