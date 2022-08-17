@@ -21,7 +21,7 @@ type NextBirthday = {
 @SlashGroup({
     name: "birthday",
     description: "Commands to add your Birthday!",
-    defaultMemberPermissions: PermissionsBitField.Default
+    defaultMemberPermissions: PermissionsBitField.Flags.UseApplicationCommands
 })
 @SlashGroup("birthday")
 @injectable()

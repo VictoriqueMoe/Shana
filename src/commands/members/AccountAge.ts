@@ -17,7 +17,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "ages",
     description: "commands to get ages of accounts and servers",
-    defaultMemberPermissions: PermissionsBitField.Default
+    defaultMemberPermissions: PermissionsBitField.Flags.UseApplicationCommands
 })
 @SlashGroup("ages")
 @injectable()

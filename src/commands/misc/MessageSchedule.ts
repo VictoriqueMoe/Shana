@@ -6,7 +6,8 @@ import {
     BaseGuildTextChannel,
     Channel,
     CommandInteraction,
-    EmbedBuilder
+    EmbedBuilder,
+    PermissionsBitField
 } from "discord.js";
 import {injectable} from "tsyringe";
 import {MessageScheduleManager} from "../../model/framework/manager/MessageScheduleManager.js";
@@ -18,8 +19,9 @@ import allChannelsExceptCat = DiscordUtils.allChannelsExceptCat;
 @SlashGroup({
     name: "message_schedule",
     description: "Commands to schedule posts to channels",
+    defaultMemberPermissions: PermissionsBitField.Flags.ManageMessages
 })
-@SlashGroup("messageschedule")
+@SlashGroup("message_schedule")
 @injectable()
 export class MessageSchedule {
     public constructor(private _messageScheduleManager: MessageScheduleManager, private _client: Client) {

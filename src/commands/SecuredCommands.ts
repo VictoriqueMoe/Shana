@@ -11,6 +11,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "secure",
     description: "secured commands used as moderation utilities",
+    defaultMemberPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.MuteMembers]
 })
 @SlashGroup("secure")
 @injectable()
@@ -26,7 +27,6 @@ export class SecuredCommands {
     @Slash({
         name: "no_roles",
         description: "Get a list of all members with no roles",
-        defaultMemberPermissions: PermissionsBitField.Flags.ManageRoles
     })
     @Guard(NotBot)
     private async noRoles(interaction: CommandInteraction): Promise<void> {
@@ -40,7 +40,6 @@ export class SecuredCommands {
 
     @Slash({
         description: "Get a list of all mutes",
-        defaultMemberPermissions: PermissionsBitField.Flags.MuteMembers
     })
     @Guard(NotBot)
     private async mutes(interaction: CommandInteraction): Promise<void> {

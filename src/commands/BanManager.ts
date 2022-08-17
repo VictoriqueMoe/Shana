@@ -8,14 +8,14 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "bans",
     description: "commands to manage bans in this server",
+    defaultMemberPermissions: PermissionsBitField.Flags.BanMembers
 })
 @SlashGroup("bans")
 export class BanManager {
 
     @Slash({
         name: "clean_bans",
-        description: "Remove all the deleted accounts from your bans",
-        defaultMemberPermissions: PermissionsBitField.Flags.BanMembers
+        description: "Remove all the deleted accounts from your bans"
     })
     @Guard(NotBot)
     private async cleanBans(interaction: CommandInteraction): Promise<void> {
