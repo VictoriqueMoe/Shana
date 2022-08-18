@@ -1,51 +1,45 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {AutoResponderModel} from "../../DB/entities/autoMod/impl/AutoResponder.model";
+import {AutoResponderModel} from "../../DB/entities/autoMod/impl/AutoResponder.model.js";
 import {singleton} from "tsyringe";
-import {getManager, getRepository, Repository, Transaction, TransactionRepository} from "typeorm";
+import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
+import {EntityManager, Repository} from "typeorm";
 
 @singleton()
-export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
+export class AutoResponderManager extends DataSourceAware {
 
-    public constructor() {
-        super();
-    }
-
-    @Transaction()
-    public async editAutoResponder(obj: AutoResponderModel, currentTitle: string, @TransactionRepository(AutoResponderModel) editResponderRepo?: Repository<AutoResponderModel>): Promise<AutoResponderModel> {
+    public async editAutoResponder(obj: AutoResponderModel, currentTitle: string): Promise<AutoResponderModel> {
         try {
-            await this.deleteAutoResponse(obj.guildId, currentTitle, editResponderRepo);
-            return this.addAutoResponder(obj, editResponderRepo);
+            return await this.ds.transaction(async entityManager => {
+                await this.deleteAutoResponse(obj.guildId, currentTitle, entityManager);
+                return this.addAutoResponder(obj, entityManager);
+            });
         } catch (e) {
             throw new Error(e.message);
         }
     }
 
-    public async addAutoResponder(obj: AutoResponderModel, transaction?: Repository<AutoResponderModel>): Promise<AutoResponderModel> {
-        if (transaction) {
-            const commitResult = await super.commitToDatabase(transaction, [obj]);
-            return commitResult[0];
-        }
-        const commitResult = await super.commitToDatabase(getManager(), [obj], AutoResponderModel);
+    public async addAutoResponder(obj: AutoResponderModel, transaction?: EntityManager): Promise<AutoResponderModel> {
+        const repo: Repository<AutoResponderModel> = transaction ? transaction.getRepository(AutoResponderModel) : this.ds.getRepository(AutoResponderModel);
+        const commitResult = await repo.save([obj]);
         return commitResult[0];
     }
 
-    public async getAllAutoResponders(guildId: string): Promise<AutoResponderModel[]> {
-        return getRepository(AutoResponderModel).find({
+    public getAllAutoResponders(guildId: string): Promise<AutoResponderModel[]> {
+        return this.ds.getRepository(AutoResponderModel).find({
             where: {
                 guildId
             }
         });
     }
 
-    public async deleteAutoResponse(guildId: string, title: string, t?: Repository<AutoResponderModel>): Promise<boolean> {
+    public async deleteAutoResponse(guildId: string, title: string, t?: EntityManager): Promise<boolean> {
         if (t) {
-            const deleteResponse = await t.delete({
+            const deleteResponse = await t.getRepository(AutoResponderModel).delete({
                 guildId,
                 title
             });
             return deleteResponse.affected === 1;
         } else {
-            const transactionDelete = await getRepository(AutoResponderModel).delete({
+            const transactionDelete = await this.ds.getRepository(AutoResponderModel).delete({
                 guildId,
                 title
             });
@@ -54,7 +48,7 @@ export class AutoResponderManager extends BaseDAO<AutoResponderModel> {
     }
 
     public async getAutoResponderFromTitle(title: string, guildId: string): Promise<AutoResponderModel | null> {
-        const fromDb = await getRepository(AutoResponderModel).findOne({
+        const fromDb = await this.ds.getRepository(AutoResponderModel).findOne({
             where: {
                 title,
                 guildId

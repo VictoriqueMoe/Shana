@@ -1,7 +1,7 @@
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
-import {GuildableModel} from "../../guild/Guildable.model";
-import {AbstractEventSecurityConstraint} from "../../AbstractEventSecurityConstraint";
-import {AbstractModel} from "../../AbstractModel";
+import {GuildableModel} from "../../guild/Guildable.model.js";
+import {AbstractEventSecurityConstraint} from "../../AbstractEventSecurityConstraint.js";
+import {AbstractModel} from "../../AbstractModel.js";
 
 @Entity()
 export class AutoResponderModel extends AbstractEventSecurityConstraint {
@@ -36,5 +36,5 @@ export class AutoResponderModel extends AbstractEventSecurityConstraint {
 
     @ManyToOne(() => GuildableModel, guildableModel => guildableModel.autoResponderModel, AbstractModel.cascadeOps)
     @JoinColumn({name: AbstractModel.joinCol})
-    guildableModel: GuildableModel;
+    public guildableModel: GuildableModel;
 }

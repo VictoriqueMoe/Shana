@@ -1,12 +1,11 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {BookmarkModel} from "../../DB/entities/guild/Bookmark.model";
+import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
 import {singleton} from "tsyringe";
-import {BaseGuildTextChannel, GuildMember, Message} from "discord.js";
-import {ArrayUtils} from "../../../utils/Utils";
-import {getRepository} from "typeorm";
+import {BaseGuildTextChannel, GuildMember, Message, PartialMessage} from "discord.js";
+import {BookmarkModel} from "../../DB/entities/guild/Bookmark.model.js";
+import {DbUtils, ObjectUtil} from "../../../utils/Utils.js";
 
 @singleton()
-export class BookmarkManager extends BaseDAO<BookmarkModel> {
+export class BookmarkManager extends DataSourceAware {
 
     /**
      * adds a bew bookmark to a member or makes a new entry
@@ -18,7 +17,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
-        const repo = getRepository(BookmarkModel);
+        const repo = this.ds.getRepository(BookmarkModel);
         const bookMarksExists = await repo.findOne({
             where: {
                 guildId,
@@ -37,21 +36,21 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
             });
             return bookMarksExists;
         } else {
-            const newModel = BaseDAO.build(BookmarkModel, {
+            const newModel = DbUtils.build(BookmarkModel, {
                 guildId,
                 userId: id,
                 messageIds: [messageToAddUrls]
             });
-            return super.commitToDatabase(repo, [newModel]).then(values => values[0]);
+            return repo.save(newModel);
         }
     }
 
-    public async deleteBookmark(member: GuildMember, message: Message | string): Promise<boolean> {
+    public async deleteBookmark(member: GuildMember, message: Message | PartialMessage | string): Promise<boolean> {
         const messageToDeleteId = typeof message === "string" ? message : message.id;
         if (!member) {
             return false;
         }
-        const repo = getRepository(BookmarkModel);
+        const repo = this.ds.getRepository(BookmarkModel);
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
@@ -71,7 +70,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
                 return false;
             }
             messageIds.splice(indexInArray, 1);
-            if (!ArrayUtils.isValidArray(messageIds)) {
+            if (!ObjectUtil.isValidArray(messageIds)) {
                 return (await repo.delete({
                     guildId,
                     userId: id
@@ -93,7 +92,7 @@ export class BookmarkManager extends BaseDAO<BookmarkModel> {
         const {id} = member;
         const {guild} = member;
         const guildId = guild.id;
-        const bookMarks = await getRepository(BookmarkModel).findOne({
+        const bookMarks = await this.ds.getRepository(BookmarkModel).findOne({
             where: {
                 guildId,
                 userId: id

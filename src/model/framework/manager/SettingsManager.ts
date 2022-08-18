@@ -1,9 +1,10 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {SettingsModel} from "../../DB/entities/guild/Settings.model";
-import {SETTINGS} from "../../../enums/SETTINGS";
-import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
+import {SettingsModel} from "../../DB/entities/guild/Settings.model.js";
 import {singleton} from "tsyringe";
-import {EntityManager, getRepository} from "typeorm";
+import {EntityManager} from "typeorm";
+import {DbUtils, ObjectUtil} from "../../../utils/Utils.js";
+import SETTINGS from "../../../enums/SETTINGS.js";
+import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
+import logger from "../../../utils/LoggerFactory.js";
 
 export type ALL_SETTINGS_TYPE = {
     [key in keyof typeof SETTINGS]?: string
@@ -13,7 +14,7 @@ export type ALL_SETTINGS_TYPE = {
  * ideally this will user super dao for retrieving and saving settings
  */
 @singleton()
-export class SettingsManager extends BaseDAO<SettingsModel> {
+export class SettingsManager extends DataSourceAware {
     private readonly _cache: Map<string, ALL_SETTINGS_TYPE>;
 
     public constructor() {
@@ -26,13 +27,6 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
         this._cache.clear();
     }
 
-    public async getPrefix(guildId: string): Promise<string> {
-        if (!ObjectUtil.validString(guildId)) {
-            return "~";
-        }
-        return this.getSetting(SETTINGS.PREFIX, guildId);
-    }
-
     /**
      * Get an object of ALL settings valid for this guild
      * @param guildId
@@ -41,12 +35,12 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
         if (this._cache.has(guildId)) {
             return this._cache.get(guildId);
         }
-        const models = await getRepository(SettingsModel).find({
+        const models = await this.ds.getRepository(SettingsModel).find({
             where: {
                 guildId
             }
         });
-        if (!ArrayUtils.isValidArray(models)) {
+        if (!ObjectUtil.isValidArray(models)) {
             return {};
         }
         for (const model of models) {
@@ -64,7 +58,7 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
         if (this.getFromCache(setting, guildId)) {
             return this.getFromCache(setting, guildId);
         }
-        const model = await getRepository(SettingsModel).findOne({
+        const model = await this.ds.getRepository(SettingsModel).findOne({
             where: {
                 setting,
                 guildId
@@ -85,15 +79,15 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
      * @param saveOnly
      * @param transactionManager
      */
-    public async saveOrUpdateSetting(setting: SETTINGS, value: string, guildId: string, saveOnly: boolean = false, transactionManager?: EntityManager): Promise<number> {
-        const newModel = BaseDAO.build(SettingsModel, {
+    public async saveOrUpdateSetting(setting: SETTINGS, value: string, guildId: string, saveOnly = false, transactionManager?: EntityManager): Promise<number> {
+        const newModel = DbUtils.build(SettingsModel, {
             setting,
             value,
             guildId
         });
         let retRow = -1;
         let textPrefix = "";
-        const repo = transactionManager ? transactionManager.getRepository(SettingsModel) : getRepository(SettingsModel);
+        const repo = transactionManager ? transactionManager.getRepository(SettingsModel) : this.ds.getRepository(SettingsModel);
         if (await repo.count({
             where: {
                 guildId,
@@ -113,13 +107,13 @@ export class SettingsManager extends BaseDAO<SettingsModel> {
             retRow = result[0];
             textPrefix = "Updated";
         } else {
-            await super.commitToDatabase(repo, [newModel]);
+            await repo.save([newModel]);
             this.updateCache(setting, value, guildId);
             retRow = 1;
             textPrefix = "Saved";
         }
         if (retRow > 0) {
-            console.log(`${textPrefix} setting: "${setting}" with value: "${value}" on guildId: ${guildId}`);
+            logger.info(`${textPrefix} setting: "${setting}" with value: "${value}" on guildId: ${guildId}`);
         }
         return retRow;
     }

@@ -1,8 +1,8 @@
-import {IScheduledJob} from "../IScheduledJob";
 import * as schedule from "node-schedule";
+import {IScheduledJob} from "../IScheduledJob.js";
 
 export class ScheduledJob implements IScheduledJob {
-    constructor(private _name: string, private _job: schedule.Job, private _cron: string | Date, private _guildId: string) {
+    public constructor(private _name: string, private _job: schedule.Job, private _cron: string | Date, private _guildId: string) {
     }
 
     public get name(): string {

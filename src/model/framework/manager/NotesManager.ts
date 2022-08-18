@@ -1,29 +1,21 @@
+import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
 import {singleton} from "tsyringe";
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {NotesModel} from "../../DB/entities/guild/Notes.model";
+import {NotesModel} from "../../DB/entities/guild/Notes.model.js";
+import {ShanaFuse} from "../../impl/ShanaFuse.js";
+import {defaultSearch, fuseOptions, ISearchBase} from "../../ISearchBase.js";
 import {AutocompleteInteraction, GuildMember} from "discord.js";
-import {getRepository} from "typeorm";
-import {ObjectUtil} from "../../../utils/Utils";
-import {defaultSearch, fuseOptions, ISearchBase} from "../../ISearchBase";
+import {DbUtils, ObjectUtil} from "../../../utils/Utils.js";
+import {PostConstruct} from "../decorators/PostConstruct.js";
 import Fuse from "fuse.js";
-import {PostConstruct} from "../../decorators/PostConstruct";
-import {ShanaFuse} from "../../Impl/ShanaFuse";
 
 @singleton()
-export class NotesManager extends BaseDAO<NotesModel> implements ISearchBase<NotesModel> {
+export class NotesManager extends DataSourceAware implements ISearchBase<NotesModel> {
     private _fuseCache: ShanaFuse<NotesModel> = null;
-
-    @PostConstruct
-    private async init(): Promise<void> {
-        const repo = getRepository(NotesModel);
-        const allModels = await repo.find();
-        this._fuseCache = new ShanaFuse(allModels, fuseOptions);
-    }
 
     public async getNotes(member: GuildMember, title?: string): Promise<NotesModel[]> {
         const guildId = member.guild.id;
         const userId = member.id;
-        const repo = getRepository(NotesModel);
+        const repo = this.ds.getRepository(NotesModel);
         const whereClause = {
             guildId,
             userId
@@ -39,7 +31,7 @@ export class NotesManager extends BaseDAO<NotesModel> implements ISearchBase<Not
     public async removeNote(member: GuildMember, title: string): Promise<boolean> {
         const guildId = member.guild.id;
         const userId = member.id;
-        const repo = getRepository(NotesModel);
+        const repo = this.ds.getRepository(NotesModel);
         const deleteResult = await repo.delete({
             guildId,
             name: title,
@@ -51,10 +43,10 @@ export class NotesManager extends BaseDAO<NotesModel> implements ISearchBase<Not
         return deleteResult.affected === 1;
     }
 
-    public async addOrUpdateNote(member: GuildMember, title: string, message: string, update: boolean = false): Promise<NotesModel> {
+    public async addOrUpdateNote(member: GuildMember, title: string, message: string, update = false): Promise<NotesModel> {
         const guildId = member.guild.id;
         const userId = member.id;
-        const repo = getRepository(NotesModel);
+        const repo = this.ds.getRepository(NotesModel);
         if (update) {
             const exists = await repo.findOne({
                 where: {
@@ -67,8 +59,7 @@ export class NotesManager extends BaseDAO<NotesModel> implements ISearchBase<Not
                 throw new Error(`Unable to find note with title: "${title}"`);
             }
             exists.text = message;
-            return super.commitToDatabase(repo, [exists]).then(values => {
-                const v = values[0];
+            return repo.save(exists).then(v => {
                 this._fuseCache.remove(doc => {
                     return doc.name === exists.name;
                 });
@@ -76,17 +67,15 @@ export class NotesManager extends BaseDAO<NotesModel> implements ISearchBase<Not
                 return v;
             });
         }
-        const newModel = BaseDAO.build(NotesModel, {
+        const newModel = DbUtils.build(NotesModel, {
             guildId,
             userId,
             name: title,
             text: message
         });
-        return super.commitToDatabase(repo, [newModel]).then(values => {
-            const v = values[0];
-            this._fuseCache.add(v);
-            return v;
-        });
+        const savedModel = await repo.save(newModel);
+        this._fuseCache.add(savedModel);
+        return savedModel;
     }
 
     public search(interaction: AutocompleteInteraction): Fuse.FuseResult<NotesModel>[] {
@@ -96,5 +85,12 @@ export class NotesManager extends BaseDAO<NotesModel> implements ISearchBase<Not
         return result.filter(match =>
             match.item.guildId === guildId && match.item.userId === member.id
         );
+    }
+
+    @PostConstruct
+    private async init(): Promise<void> {
+        const repo = this.ds.getRepository(NotesModel);
+        const allModels = await repo.find();
+        this._fuseCache = new ShanaFuse(allModels, fuseOptions);
     }
 }

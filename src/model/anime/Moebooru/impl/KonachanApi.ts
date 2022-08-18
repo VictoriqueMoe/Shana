@@ -1,14 +1,18 @@
-import {MoebooruApi} from "../MoebooruApi";
 import {singleton} from "tsyringe";
-import {Typeings} from "../../../types/Typeings";
-import {RunEvery} from "../../../decorators/RunEvery";
-import {TimeUtils} from "../../../../utils/Utils";
-import {ShanaFuse} from "../../../Impl/ShanaFuse";
+import {RunEvery} from "../../../framework/decorators/RunEvery.js";
+import {ShanaFuse} from "../../../impl/ShanaFuse.js";
+import {MoebooruApi} from "../MoebooruApi.js";
+import {Typeings} from "../../../Typeings.js";
+import METHOD_EXECUTOR_TIME_UNIT from "../../../../enums/METHOD_EXECUTOR_TIME_UNIT.js";
 import KonachanTag = Typeings.MoebooruTypes.KonachanTag;
 
 @singleton()
 export class KonachanApi extends MoebooruApi<KonachanTag> {
     private _tagCache: ShanaFuse<KonachanTag>;
+
+    public get enabled(): Promise<boolean> {
+        return Promise.resolve(true);
+    }
 
     protected get baseUrl(): string {
         return "https://konachan.net";
@@ -26,11 +30,7 @@ export class KonachanApi extends MoebooruApi<KonachanTag> {
         return "Konachan";
     }
 
-    public get enabled(): Promise<boolean> {
-        return Promise.resolve(true);
-    }
-
-    @RunEvery(1, TimeUtils.METHOD_EXECUTOR_TIME_UNIT.hours)
+    @RunEvery(1, METHOD_EXECUTOR_TIME_UNIT.hours, true)
     protected update(): Promise<void> {
         return this.tagUpdater(value => value.count > 0);
     }

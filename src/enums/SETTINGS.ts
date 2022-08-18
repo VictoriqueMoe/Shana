@@ -1,13 +1,13 @@
-export enum SETTINGS {
-    PREFIX = "PREFIX",
+enum SETTINGS {
     JAIL_ROLE = "JAIL_ROLE",
     YOUNG_ACCOUNT_ROLE = "YOUNG_ACCOUNT_ROLE",
     BIRTHDAY_POST_HOUR = "BIRTHDAY_POST_HOUR"
 }
 
 export enum DEFAULT_SETTINGS {
-    PREFIX = "~",
     JAIL_ROLE = "",
     YOUNG_ACCOUNT_ROLE = "",
     BIRTHDAY_POST_HOUR = "0"
 }
+
+export default SETTINGS;

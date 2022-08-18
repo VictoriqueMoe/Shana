@@ -1,39 +1,40 @@
-import {GuildAuditLogsEntry, GuildMember, User} from "discord.js";
-import {DiscordUtils, TimeUtils} from "../../../utils/Utils";
+import {GuildAuditLogsEntry, GuildMember} from "discord.js";
 import {singleton} from "tsyringe";
-import {GuildManager} from "./GuildManager";
+import {AuditManager} from "./AuditManager.js";
+import TIME_OUT from "../../../enums/TIME_OUT.js";
+import {DiscordUtils} from "../../../utils/Utils.js";
 
 
 @singleton()
 export class MuteManager {
 
-    public constructor(private _guildManager: GuildManager) {
+    public constructor(private _auditManager: AuditManager) {
     }
 
     public isMuted(user: GuildMember): boolean {
         return user.isCommunicationDisabled();
     }
 
-    public async muteUser(user: GuildMember, reason: string, length: TimeUtils.TIME_OUT): Promise<GuildMember> {
+    public async muteUser(user: GuildMember, reason: string, length: TIME_OUT): Promise<GuildMember> {
         return user.timeout(length, reason);
     }
 
     public async getAllMutedMembers(guildId: string): Promise<GuildMember[]> {
-        const guild = await this._guildManager.getGuild(guildId);
+        const guild = await DiscordUtils.getGuild(guildId);
         const memberManager = guild.members;
         return [...memberManager.cache.filter(member => this.isMuted(member)).values()];
     }
 
 
-    public async getAudit(user: GuildMember): Promise<GuildAuditLogsEntry> {
-        const guild = await this._guildManager.getGuild(user.guild.id);
-        const auditEntries = await DiscordUtils.getAuditLogEntries("MEMBER_UPDATE", guild, null);
+    public async getAudit(/* user: GuildMember */): Promise<GuildAuditLogsEntry> {
+        /* const guild = await DiscordUtils.getGuild(user.guild.id);
+        const auditEntries = await this._auditManager.getAuditLogEntries(AuditLogEvent.MemberUpdate, guild, null);
         const filteredEntries = [...auditEntries.entries.filter(entry =>
             entry.actionType === "UPDATE" && entry.target instanceof User && entry.target.id === user.id
         ).values()];
         for (const entry of filteredEntries) {
             console.log(entry);
-        }
+        } */
         return null;
     }
 }

@@ -1,9 +1,9 @@
-import {CloseableModule} from "./CloseableModule";
-import {ITriggerConstraint} from "../ITriggerConstraint";
-import {IEventSecurityConstraint} from "../../DB/entities/IEventSecurityConstraint";
+import {CloseableModule} from "./CloseableModule.js";
+import type {ITriggerConstraint} from "../ITriggerConstraint.js";
+import type {IEventSecurityConstraint} from "../../DB/entities/IEventSecurityConstraint.js";
 import {GuildChannel, Message} from "discord.js";
-import {ArrayUtils} from "../../../utils/Utils";
-import {ModuleSettings} from "../ModuleSettings";
+import type {ModuleSettings} from "../settings/ModuleSettings.js";
+import {ObjectUtil} from "../../../utils/Utils.js";
 
 export abstract class TriggerConstraint<T extends ModuleSettings> extends CloseableModule<T> implements ITriggerConstraint {
 
@@ -23,21 +23,21 @@ export abstract class TriggerConstraint<T extends ModuleSettings> extends Closea
         const parentChannelId = channel.parentId;
         const {allowedChannels, allowedRoles, ignoredChannels, ignoredRoles} = obj;
 
-        if (ArrayUtils.isValidArray(allowedChannels)) {
+        if (ObjectUtil.isValidArray(allowedChannels)) {
             if (!allowedChannels.some(chId => chId.id === channelId || chId.id === parentChannelId)) {
                 return false;
             }
-        } else if (ArrayUtils.isValidArray(ignoredChannels)) {
+        } else if (ObjectUtil.isValidArray(ignoredChannels)) {
             if (ignoredChannels.some(chId => chId.id === channelId || chId.id === parentChannelId)) {
                 return false;
             }
         }
 
-        if (ArrayUtils.isValidArray(allowedRoles)) {
+        if (ObjectUtil.isValidArray(allowedRoles)) {
             if (!allowedRoles.some(role => roleIds.includes(role.id))) {
                 return false;
             }
-        } else if (ArrayUtils.isValidArray(ignoredRoles)) {
+        } else if (ObjectUtil.isValidArray(ignoredRoles)) {
             if (ignoredRoles.some(role => roleIds.includes(role.id))) {
                 return false;
             }

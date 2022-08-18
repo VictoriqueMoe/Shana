@@ -1,37 +1,22 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {BirthdaysModel} from "../../DB/entities/guild/Birthdays.model";
-import {singleton} from "tsyringe";
-import {Guild, GuildMember, MessageEmbed} from "discord.js";
-import {DateTime} from "luxon";
-import {getRepository} from "typeorm";
-import {PostConstruct} from "../../decorators/PostConstruct";
-import {GuildManager} from "./GuildManager";
+import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
 import schedule, {Job, RecurrenceSpecObjLit} from "node-schedule";
-import {ChannelManager} from "./ChannelManager";
-import {Channels} from "../../../enums/Channels";
-import {ObjectUtil} from "../../../utils/Utils";
+import {singleton} from "tsyringe";
+import {EmbedBuilder, Guild, GuildMember} from "discord.js";
+import {DbUtils, DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
+import Channels from "../../../enums/Channels.js";
+import {DateTime} from "luxon";
+import {BirthdaysModel} from "../../DB/entities/guild/Birthdays.model.js";
+import {PostConstruct} from "../decorators/PostConstruct.js";
+import {ChannelManager} from "./ChannelManager.js";
+import logger from "../../../utils/LoggerFactory.js";
 
 @singleton()
-export class BirthdayManager extends BaseDAO<BirthdaysModel> {
+export class BirthdayManager extends DataSourceAware {
 
     private _birthdayJobs: Job[] = [];
 
-    public constructor(private _guildManager: GuildManager, private _channelManager: ChannelManager) {
+    public constructor(private _channelManager: ChannelManager) {
         super();
-    }
-
-    private async isEnabled(guildId: string): Promise<boolean> {
-        const channel = await this._channelManager.getChannel(guildId, Channels.BIRTHDAY_CHANNEL);
-        return ObjectUtil.isValidObject(channel);
-    }
-
-    @PostConstruct
-    private async initBirthdays(): Promise<void> {
-        const model = getRepository(BirthdaysModel);
-        const allBirthdays = await model.find();
-        for (const birthday of allBirthdays) {
-            await this.registerBirthdayListener(birthday);
-        }
     }
 
     public getNumberWithOrdinal(n: number): string {
@@ -39,10 +24,10 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
     }
 
     public async getNext10Birthdays(guildId: string): Promise<BirthdaysModel[]> {
-        const model = getRepository(BirthdaysModel);
+        const model = this.ds.getRepository(BirthdaysModel);
         const currentDayOfYear = DateTime.now().ordinal;
         // sort by day of year
-        //get next 10 records where day of the year is >= current day of year
+        // get next 10 records where day of the year is >= current day of year
         const first10 = await model.createQueryBuilder("BirthdaysModel")
             .where("BirthdaysModel.guildId = :guildId", {guildId})
             .andWhere("BirthdaysModel.dayOfYear >= :currentDayOfYear", {currentDayOfYear})
@@ -62,9 +47,83 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
         return first10;
     }
 
+    public async addBirthday(member: GuildMember, discordFormat: string): Promise<BirthdaysModel> {
+        if (!await this.isEnabled(member.guild.id)) {
+            throw new Error("Birthday is not enabled on this server");
+        }
+        const dateWithoutYear = DateTime.fromFormat(discordFormat, "dd-MM");
+        const dateWithYear = DateTime.fromFormat(discordFormat, "yyyy-MM-dd");
+        if (!dateWithoutYear.isValid && !dateWithYear.isValid) {
+            throw new Error("Invalid date format, please use MM-dd (03-12 third of december) OR YYYY-MM-dd 1995-07-03 (3rd of July 1995)");
+        }
+        const userId = member.id;
+        const guildId = member.guild.id;
+        const includeYear = dateWithYear.isValid;
+        const luxonBirthday = (includeYear ? dateWithYear : dateWithoutYear);
+        const dayOfYear = luxonBirthday.ordinal;
+        const seconds = luxonBirthday.toSeconds();
+        const repo = this.ds.getRepository(BirthdaysModel);
+        const existingBirthday = await repo.findOne({
+            where: {
+                guildId,
+                userId
+            }
+        });
+        let obj: BirthdaysModel;
+        if (existingBirthday) {
+            existingBirthday.birthday = seconds;
+            existingBirthday.dayOfYear = dayOfYear;
+            existingBirthday.includeYear = includeYear;
+            obj = existingBirthday;
+        } else {
+            obj = DbUtils.build(BirthdaysModel, {
+                birthday: seconds,
+                dayOfYear,
+                includeYear,
+                guildId,
+                userId
+            });
+        }
+
+        const model = await repo.save(obj);
+        await this.registerBirthdayListener(model);
+        return model;
+    }
+
+    public async removeBirthday(userId: string, guild: Guild): Promise<boolean> {
+        const guildId = guild.id;
+        const repo = this.ds.getRepository(BirthdaysModel);
+        const deleteResult = await repo.delete({
+            userId,
+            guildId
+        });
+        if (deleteResult.affected !== 1) {
+            return false;
+        }
+        const key = `${userId}${guildId}`;
+        const job = this._birthdayJobs.find(job => job.name === key);
+        ObjectUtil.removeObjectFromArray(job, this._birthdayJobs);
+        job.cancel(false);
+        return true;
+    }
+
+    private async isEnabled(guildId: string): Promise<boolean> {
+        const channel = await this._channelManager.getChannel(guildId, Channels.BIRTHDAY_CHANNEL);
+        return ObjectUtil.isValidObject(channel);
+    }
+
+    @PostConstruct
+    private async initBirthdays(): Promise<void> {
+        const model = this.ds.getRepository(BirthdaysModel);
+        const allBirthdays = await model.find();
+        for (const birthday of allBirthdays) {
+            await this.registerBirthdayListener(birthday);
+        }
+    }
+
     private async registerBirthdayListener(model: BirthdaysModel): Promise<void> {
         const {guildId, userId, includeYear, birthday} = model;
-        const guild = await this._guildManager.getGuild(guildId);
+        const guild = await DiscordUtils.getGuild(guildId);
         let member: GuildMember = null;
         try {
             member = await guild.members.fetch(userId);
@@ -81,12 +140,15 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
             tz: "Etc/UTC"
         };
         const channel = await this._channelManager.getChannel(guildId, Channels.BIRTHDAY_CHANNEL);
-        console.log(`Registering ${member.user.tag}'s birthday on guild ${guild.name}`);
+        logger.info(`Registering ${member.user.tag}'s birthday on guild ${guild.name}`);
         const job = schedule.scheduleJob(`${member.id}${guildId}`, rule, () => {
             const displayHexColor = member.displayHexColor;
-            const avatar = member.displayAvatarURL({dynamic: true});
-            const embed = new MessageEmbed()
-                .setAuthor(member.displayName, avatar)
+            const avatar = member.displayAvatarURL();
+            const embed = new EmbedBuilder()
+                .setAuthor({
+                    name: member.displayName,
+                    iconURL: avatar
+                })
                 .setColor(displayHexColor)
                 .setTimestamp();
             let str = `It's <@${member.id}>'s `;
@@ -103,49 +165,5 @@ export class BirthdayManager extends BaseDAO<BirthdaysModel> {
 
         });
         this._birthdayJobs.push(job);
-    }
-
-    public async addBirthday(member: GuildMember, discordFormat: string): Promise<BirthdaysModel> {
-        if (!await this.isEnabled(member.guild.id)) {
-            throw new Error("Birthday is not enabled on this server");
-        }
-        const dateWithoutYear = DateTime.fromFormat(discordFormat, "dd-MM");
-        const dateWithYear = DateTime.fromFormat(discordFormat, "yyyy-MM-dd");
-        if (!dateWithoutYear.isValid && !dateWithYear.isValid) {
-            throw new Error("Invalid date format, please use MM-dd (03-12 third of december) OR YYYY-MM-dd 1995-07-03 (3rd of July 1995)");
-        }
-        const userId = member.id;
-        const guildId = member.guild.id;
-        const includeYear = dateWithYear.isValid;
-        const luxonBirthday = (includeYear ? dateWithYear : dateWithoutYear);
-        const dayOfYear = luxonBirthday.ordinal;
-        const seconds = luxonBirthday.toSeconds();
-        const obj = BaseDAO.build(BirthdaysModel, {
-            birthday: seconds,
-            dayOfYear,
-            includeYear,
-            guildId,
-            userId
-        });
-        const model = await super.commitToDatabase(getRepository(BirthdaysModel), [obj]).then(values => values[0]);
-        await this.registerBirthdayListener(model);
-        return model;
-    }
-
-    public async removeBirthday(userId: string, guild: Guild): Promise<boolean> {
-        const guildId = guild.id;
-        const repo = getRepository(BirthdaysModel);
-        const deleteResult = await repo.delete({
-            userId,
-            guildId
-        });
-        if (deleteResult.affected !== 1) {
-            return false;
-        }
-        const key = `${userId}${guildId}`;
-        const job = this._birthdayJobs.find(job => job.name === key);
-        ObjectUtil.removeObjectFromArray(job, this._birthdayJobs);
-        job.cancel(false);
-        return true;
     }
 }

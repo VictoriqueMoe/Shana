@@ -1,30 +1,32 @@
+import {MessageScheduleModel} from "../../DB/entities/guild/MessageSchedule.model.js";
 import {singleton} from "tsyringe";
-import {BaseDAO, UniqueViolationError} from "../../../DAO/BaseDAO";
-import {MessageScheduleModel} from "../../DB/entities/guild/MessageSchedule.model";
+import {DbUtils, DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
-import {PostConstruct} from "../../decorators/PostConstruct";
-import {GuildManager} from "./GuildManager";
-import {MessageScheduler} from "../../scheduler/impl/MessageScheduler";
-import {IScheduledMessageJob} from "../../scheduler/impl/ScheduledJob/IScheduledMessageJob";
-import {ObjectUtil} from "../../../utils/Utils";
-import {getRepository, Repository, Transaction, TransactionRepository} from "typeorm";
+import {PostConstruct} from "../decorators/PostConstruct.js";
+import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
+import {MessageScheduler} from "../../scheduler/impl/MessageScheduler.js";
+import type {IScheduledMessageJob} from "../../scheduler/impl/ScheduledJob/IScheduledMessageJob.js";
+import {Client} from "discordx";
+import logger from "../../../utils/LoggerFactory.js";
 
 @singleton()
-export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
+export class MessageScheduleManager extends DataSourceAware {
 
-    public constructor(private _guildManager: GuildManager, private _messageScheduler: MessageScheduler) {
+    public constructor(private _messageScheduler: MessageScheduler) {
         super();
     }
 
-    @Transaction()
-    public async deleteMessageSchedule(guildId: string, name: string, @TransactionRepository(MessageScheduleModel) messageScheduleModelRepository?: Repository<MessageScheduleModel>): Promise<boolean> {
-        const destroyResult = await messageScheduleModelRepository.delete({
-            guildId,
-            name
+    public async deleteMessageSchedule(guildId: string, name: string): Promise<boolean> {
+        return this.ds.transaction(async entityManager => {
+            const destroyResult = await entityManager.delete(MessageScheduleModel, {
+                guildId,
+                name
+            });
+            const didDestroy = destroyResult.affected == 1;
+            const engineResponse = this._messageScheduler.cancelJob(name);
+            return didDestroy && engineResponse;
         });
-        const didDestroy = destroyResult.affected == 1;
-        const engineResponse = this._messageScheduler.cancelJob(name);
-        return didDestroy && engineResponse;
+
     }
 
     public getAllActiveMessageSchedules(guildId: string, channel?: BaseGuildTextChannel): IScheduledMessageJob[] {
@@ -41,8 +43,8 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
 
     public async getOwner(schedule: IScheduledMessageJob): Promise<GuildMember> {
         const {guildId} = schedule;
-        const guild = await this._guildManager.getGuild(guildId);
-        const model = await getRepository(MessageScheduleModel).findOne({
+        const guild = await DiscordUtils.getGuild(guildId);
+        const model = await this.ds.getRepository(MessageScheduleModel).findOne({
             where: {
                 guildId,
             }
@@ -51,7 +53,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
     }
 
     public async addMessageSchedule(guildId: string, channel: BaseGuildTextChannel, cron: string, message: string, user: GuildMember, name: string): Promise<IScheduledMessageJob> {
-        const newMessageSchedule = BaseDAO.build(MessageScheduleModel, {
+        const newMessageSchedule = DbUtils.build(MessageScheduleModel, {
             guildId,
             cron,
             message,
@@ -59,22 +61,20 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
             channel,
             userId: user.id
         });
-        return getRepository(MessageScheduleModel).manager.transaction(async entityManager => {
+        return this.ds.getRepository(MessageScheduleModel).manager.transaction(async entityManager => {
             try {
-                await super.commitToDatabase(entityManager, [newMessageSchedule], MessageScheduleModel);
+                await entityManager.save(newMessageSchedule);
             } catch (e) {
-                if (e instanceof UniqueViolationError) {
-                    throw new Error("Message Schedule already exists in this server with this name");
-                }
+                throw new Error("Message Schedule already exists in this server with this name");
             }
             return this._messageScheduler.register(name, cron, null, null, channel, message);
         });
     }
 
     @PostConstruct
-    private async initAllMessageSchedules(): Promise<void> {
-        const allGuilds = await this._guildManager.getGuilds();
-        const repo = getRepository(MessageScheduleModel);
+    private async initAllMessageSchedules(client: Client): Promise<void> {
+        const allGuilds = [...client.guilds.cache.values()];
+        const repo = this.ds.getRepository(MessageScheduleModel);
         for (const guild of allGuilds) {
             const allMessageSchedules = await repo.find({
                 where: {
@@ -82,7 +82,7 @@ export class MessageScheduleManager extends BaseDAO<MessageScheduleModel> {
                 }
             });
             for (const model of allMessageSchedules) {
-                console.log(`Re-registering scheduled message "${model.name}" for guild "${model.guildId}" to post on channel #${model.channel.id}`);
+                logger.info(`Re-registering scheduled message "${model.name}" for guild "${model.guildId}" to post on channel #${model.channel.id}`);
                 this._messageScheduler.register(model.name, model.cron, null, null, model.channel, model.message);
             }
         }

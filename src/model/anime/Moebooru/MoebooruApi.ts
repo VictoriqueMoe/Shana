@@ -1,14 +1,15 @@
-import {Typeings} from "../../types/Typeings";
-import {ArrayUtils, ObjectUtil} from "../../../utils/Utils";
-import Fuse from "fuse.js";
-import {defaultSearch, fuseOptions, ISearchBase} from "../../ISearchBase";
-import {AutocompleteInteraction} from "discord.js";
-import {ShanaFuse} from "../../Impl/ShanaFuse";
+import {Typeings} from "../../Typeings.js";
+import {ShanaFuse} from "../../impl/ShanaFuse.js";
+import {defaultSearch, fuseOptions, ISearchBase} from "../../ISearchBase.js";
+import {ObjectUtil} from "../../../utils/Utils.js";
 import axios from "axios";
+import {AutocompleteInteraction} from "discord.js";
+import Fuse from "fuse.js";
+import LoggerFactory from "../../../utils/LoggerFactory.js";
+import MoebooruImage = Typeings.MoebooruTypes.MoebooruImage;
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
 import MoebooruResponse = Typeings.MoebooruTypes.MoebooruResponse;
-import MoebooruImage = Typeings.MoebooruTypes.MoebooruImage;
 
 export type RandomImageResponse = {
     image: MoebooruImage,
@@ -17,21 +18,16 @@ export type RandomImageResponse = {
 }[];
 
 export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<T> {
-    private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "bottomless"];
-
+    public abstract enabled: Promise<boolean>;
     protected abstract baseUrl: string;
     protected abstract name: string;
     protected abstract fuseCache: ShanaFuse<T>;
+    private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "bottomless"];
 
-    protected abstract update(): Promise<void>;
-
-    public abstract enabled: Promise<boolean>;
-
-
-    public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = 1): Promise<RandomImageResponse> {
+    public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize = 1): Promise<RandomImageResponse> {
         const results = await this.getPosts(tags, explictRating);
 
-        if (!ArrayUtils.isValidArray(results)) {
+        if (!ObjectUtil.isValidArray(results)) {
             return [];
         }
         if (returnSize > results.length) {
@@ -51,7 +47,28 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         return retArr;
     }
 
-    protected async tagUpdater(filter?: (value: T, index: number, array: MoebooruTag[]) => boolean, limit: number = 0): Promise<void> {
+    public async getPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize = -1): Promise<MoebooruResponse> {
+        if (!await this.enabled) {
+            return [];
+        }
+        if (!ObjectUtil.isValidArray(tags)) {
+            throw new Error("Please supply at least 1 tag");
+        }
+        if (this.blackList.some(blackListed => tags.some(tag => tag.includes(blackListed)))) {
+            return [];
+        }
+        const tagsStr = tags.join(" ");
+        const url = `${this.baseUrl}/post.json?tags=${tagsStr}`;
+        return this.doCall(url, returnSize, explictRating);
+    }
+
+    public search(interaction: AutocompleteInteraction): Fuse.FuseResult<T>[] {
+        return defaultSearch(interaction, this.fuseCache);
+    }
+
+    protected abstract update(): Promise<void>;
+
+    protected async tagUpdater(filter?: (value: T, index: number, array: MoebooruTag[]) => boolean, limit = 0): Promise<void> {
         if (!await this.enabled) {
             return;
         }
@@ -67,7 +84,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         json = json.filter(tag => !this.blackList.some(v => tag.name.includes(v)));
         const index = Fuse.createIndex(fuseOptions.keys, json);
         this.fuseCache = new ShanaFuse(json, fuseOptions, index);
-        console.log(`Indexed: ${json.length} tags from ${this.name}`);
+        LoggerFactory.info(`Indexed: ${json.length} tags from ${this.name}`);
     }
 
     private async doCall(url: string, returnSize: number, explictRating: EXPLICIT_RATING[]): Promise<MoebooruResponse> {
@@ -89,7 +106,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
                 throw new Error(result.statusText);
             }
             const responseArray: MoebooruResponse = result.data;
-            if (!ArrayUtils.isValidArray(responseArray)) {
+            if (!ObjectUtil.isValidArray(responseArray)) {
                 break;
             }
             for (const jsonResponse of responseArray) {
@@ -105,25 +122,6 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
             }
         }
         return retJson;
-    }
-
-    public async getPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize: number = -1): Promise<MoebooruResponse> {
-        if (!await this.enabled) {
-            return [];
-        }
-        if (!ArrayUtils.isValidArray(tags)) {
-            throw new Error("Please supply at least 1 tag");
-        }
-        if (this.blackList.some(blackListed => tags.some(tag => tag.includes(blackListed)))) {
-            return [];
-        }
-        const tagsStr = tags.join(" ");
-        const url = `${this.baseUrl}/post.json?tags=${tagsStr}`;
-        return this.doCall(url, returnSize, explictRating);
-    }
-
-    public search(interaction: AutocompleteInteraction): Fuse.FuseResult<T>[] {
-        return defaultSearch(interaction, this.fuseCache);
     }
 }
 

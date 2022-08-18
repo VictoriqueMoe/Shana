@@ -1,6 +1,6 @@
-import {ISubModule} from "./subModules/ISubModule";
-import * as Immutable from "immutable";
-import {ModuleSettings} from "./ModuleSettings";
+import type * as Immutable from "immutable";
+import type {ModuleSettings} from "./settings/ModuleSettings.js";
+import type {ISubModule} from "./subModules/ISubModule.js";
 
 /**
  * A closable module is a module that can be deactivated and activated dynamically, this encapsulated a "Module" in the context of this application
@@ -40,4 +40,19 @@ export interface ICloseableModule<T extends ModuleSettings> {
      * Opens this module, allowing events to be fired.
      */
     open(guildId: string): Promise<boolean>;
+
+    /**
+     * Return true if this module is enabled, false otherwise
+     * @param {string} guildId
+     * @returns {Promise<boolean>}
+     */
+    isEnabled(guildId: string): Promise<boolean>;
+
+    /**
+     * Called when the application starts up and when a new guild is joined to set the defaults settings*
+     * @param {string} guildId
+     * @returns {Promise<void>}
+     */
+    setDefaults(guildId: string): Promise<void>;
+
 }

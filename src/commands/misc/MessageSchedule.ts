@@ -1,94 +1,42 @@
-import {Client, DefaultPermissionResolver, Discord, Guard, Permission, Slash, SlashGroup, SlashOption} from "discordx";
+import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
+import {Category, NotBot} from "@discordx/utilities";
+import {CronUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
+import {
+    ApplicationCommandOptionType,
+    BaseGuildTextChannel,
+    Channel,
+    CommandInteraction,
+    EmbedBuilder,
+    PermissionsBitField
+} from "discord.js";
 import {injectable} from "tsyringe";
-import {AbstractCommand} from "../AbstractCommand";
-import {MessageScheduleManager} from "../../model/framework/manager/MessageScheduleManager";
-import {NotBot} from "@discordx/utilities";
-import {CommandEnabled} from "../../guards/CommandEnabled";
-import {BaseGuildTextChannel, Channel, CommandInteraction, MessageEmbed} from "discord.js";
-import {ArrayUtils, CronUtils, DiscordUtils, ObjectUtil} from "../../utils/Utils";
-import {Category} from "../../modules/category";
+import {MessageScheduleManager} from "../../model/framework/manager/MessageScheduleManager.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
+import allChannelsExceptCat = DiscordUtils.allChannelsExceptCat;
 
 @Discord()
-@Category("messageschedule", "Commands to schedule posts to channels")
-@Category("messageschedule", [
-    {
-        "name": "addScheduleMessage",
-        "type": "SLASH",
-        "options": [
-            {
-                "name": "name",
-                "description": "The Unique ID of this scheduled job",
-                "optional": false,
-                "type": "STRING"
-            },
-            {
-                "name": "channel",
-                "description": "The channel to post to",
-                "optional": false,
-                "type": "USER"
-            },
-            {
-                "name": "cron",
-                "description": "the cron string to represent the time",
-                "optional": false,
-                "type": "STRING"
-            },
-            {
-                "name": "message",
-                "description": "the message to post",
-                "optional": false,
-                "type": "STRING"
-            }
-        ],
-        "description": "create a message to schedule to a channel"
-    },
-    {
-        "name": "removeScheduledMessage",
-        "type": "SLASH",
-        "options": [
-            {
-                "name": "name",
-                "description": "The Unique ID of the schedule schedule you want to remove",
-                "optional": false,
-                "type": "STRING"
-            }
-        ],
-        "description": "remove a scheduled post by name"
-    },
-    {
-        "name": "getScheduledMessage",
-        "type": "SLASH",
-        "options": [
-            {
-                "name": "channel",
-                "description": "A filter for all scheduled messages by channel",
-                "optional": false,
-                "type": "USER"
-            }
-        ],
-        "description": "get all scheduled posts optionally by channel"
-    }
-])
+@Category("Misc")
 @SlashGroup({
-    name: "messageschedule",
+    name: "message_schedule",
     description: "Commands to schedule posts to channels",
+    defaultMemberPermissions: PermissionsBitField.Flags.ManageMessages
 })
-@SlashGroup("messageschedule")
-@Permission(new DefaultPermissionResolver(AbstractCommand.getDefaultPermissionAllow))
-@Permission(AbstractCommand.getPermissions)
+@SlashGroup("message_schedule")
 @injectable()
-export class MessageSchedule extends AbstractCommand {
+export class MessageSchedule {
     public constructor(private _messageScheduleManager: MessageScheduleManager, private _client: Client) {
-        super();
     }
 
-    @Slash("getscheduledmessage", {
+    @Slash({
+        name: "get_scheduled_message",
         description: "get all scheduled posts optionally by channel"
     })
-    @Guard(NotBot, CommandEnabled())
+    @Guard(NotBot)
     private async getScheduledMessage(
-        @SlashOption("channel", {
+        @SlashOption({
+            name: "channel",
+            type: ApplicationCommandOptionType.Channel,
+            channelTypes: allChannelsExceptCat,
             description: "A filter for all scheduled messages by channel",
             required: false,
         })
@@ -102,13 +50,16 @@ export class MessageSchedule extends AbstractCommand {
         if (ObjectUtil.isValidObject(channel) && !(channel instanceof BaseGuildTextChannel)) {
             return InteractionUtils.replyOrFollowUp(interaction, "Channel must be a text channel, that is a channel that i can send message to");
         }
-        const botAvatar = this._client.user.displayAvatarURL({dynamic: true});
-        const embed = new MessageEmbed()
+        const botAvatar = this._client.user.displayAvatarURL();
+        const embed = new EmbedBuilder()
             .setColor(this._client.user.hexAccentColor)
-            .setAuthor(`${this._client.user.username}`, botAvatar)
+            .setAuthor({
+                name: `${this._client.user.username}`,
+                iconURL: botAvatar
+            })
             .setTimestamp();
         const result = this._messageScheduleManager.getAllActiveMessageSchedules(guildId, channel as BaseGuildTextChannel | null);
-        if (!ArrayUtils.isValidArray(result)) {
+        if (!ObjectUtil.isValidArray(result)) {
             embed.setDescription("There are no scheduled posts registered this server or channel");
         }
         for (const schedule of result) {
@@ -118,21 +69,23 @@ export class MessageSchedule extends AbstractCommand {
             if (whoCreated) {
                 replyStr += `\n**Created by:**\n<@${whoCreated.id}>`;
             }
-            embed.addField(schedule.name, replyStr);
+            embed.addFields(ObjectUtil.singleFieldBuilder(schedule.name, replyStr));
         }
         interaction.editReply({
             embeds: [embed]
         });
     }
 
-    @Slash("removescheduledmessage", {
+    @Slash({
+        name: "remove_scheduled_message",
         description: "remove a scheduled post by name"
     })
-    @Guard(NotBot, CommandEnabled())
+    @Guard(NotBot)
     private async removeScheduledMessage(
-        @SlashOption("name", {
+        @SlashOption({
             description: "The Unique ID of the schedule schedule you want to remove",
-
+            name: "name",
+            type: ApplicationCommandOptionType.String
         })
             name: string,
         interaction: CommandInteraction
@@ -152,29 +105,35 @@ export class MessageSchedule extends AbstractCommand {
         return InteractionUtils.replyOrFollowUp(interaction, `schedule "${name}" has been deleted and stopped`);
     }
 
-    @Slash("addschedulemessage", {
+    @Slash({
+        name: "add_scheduled_message",
         description: "create a message to schedule to a channel"
     })
-    @Guard(NotBot, CommandEnabled())
+    @Guard(NotBot)
     private async scheduleMessage(
-        @SlashOption("name", {
+        @SlashOption({
+            name: "name",
             description: "The Unique ID of this scheduled job",
-
+            type: ApplicationCommandOptionType.String
         })
             name: string,
-        @SlashOption("channel", {
+        @SlashOption({
             description: "The channel to post to",
-
+            name: "channel",
+            type: ApplicationCommandOptionType.Channel,
+            channelTypes: allChannelsExceptCat
         })
             channel: Channel,
-        @SlashOption("cron", {
+        @SlashOption({
+            name: "cron",
             description: "the cron string to represent the time",
-
+            type: ApplicationCommandOptionType.String
         })
             cron: string,
-        @SlashOption("message", {
+        @SlashOption({
             description: "the message to post",
-
+            name: "message",
+            type: ApplicationCommandOptionType.String
         })
             message: string,
         interaction: CommandInteraction

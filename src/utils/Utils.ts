@@ -1,141 +1,388 @@
-import {
+import type {
+    APIEmbedField,
     AutocompleteInteraction,
-    BaseCommandInteraction,
-    BaseGuildTextChannel,
-    CategoryChannel,
-    ContextMenuInteraction,
+    InteractionReplyOptions,
+    MessageComponentInteraction
+} from "discord.js";
+import {
+    ChannelType,
+    CommandInteraction,
     Guild,
-    GuildAuditLogs,
-    GuildAuditLogsAction,
-    GuildAuditLogsEntry,
-    GuildAuditLogsFetchOptions,
-    GuildChannel,
     GuildMember,
-    HexColorString,
     Message,
-    MessageComponentInteraction,
-    MessageEmbed,
-    PartialGuildMember,
-    Permissions,
-    Role,
-    StaticImageURLOptions,
+    MessageContextMenuCommandInteraction,
     Sticker,
-    TextChannel,
-    ThreadAutoArchiveDuration,
-    ThreadChannel,
+    StickerFormatType,
     User
 } from "discord.js";
-import cronstrue from 'cronstrue';
-import {isValidCron} from 'cron-validator';
-import {CloseOptionModel} from "../model/DB/entities/autoMod/impl/CloseOption.model";
-import {glob} from "glob";
-import * as path from "path";
-import {ChannelManager} from "../model/framework/manager/ChannelManager";
-import {GuildManager} from "../model/framework/manager/GuildManager";
-import {SettingsManager} from "../model/framework/manager/SettingsManager";
-import {SETTINGS} from "../enums/SETTINGS";
-import {StatusCodes} from "http-status-codes";
-import {Typeings} from "../model/types/Typeings";
 import {container} from "tsyringe";
-import {Client} from "discordx";
-import {getRepository} from "typeorm";
-import {ISearchBase, SearchBase} from "../model/ISearchBase";
-import {Channels} from "../enums/Channels";
+import type constructor from "tsyringe/dist/typings/types/constructor";
+
+import TIME_UNIT from "../enums/TIME_UNIT.js";
+import {Property} from "../model/framework/decorators/Property.js";
+import {ISearchBase, SearchBase} from "../model/ISearchBase.js";
+import {Typeings} from "../model/Typeings.js";
 import axios from "axios";
-import {constructor} from "tsyringe/dist/typings/types";
+import {StatusCodes} from "http-status-codes";
+import {DataSource} from "typeorm";
+import isImageFast from "is-image-fast";
+import {Client} from "discordx";
+import {RoleManager} from "../model/framework/manager/RoleManager.js";
+import {ChannelManager} from "../model/framework/manager/ChannelManager.js";
+import Channels from "../enums/Channels.js";
+import {EmojiManager} from "../model/framework/manager/EmojiManager.js";
+import {DeepPartial} from "typeorm/common/DeepPartial.js";
+import {EntityTarget} from "typeorm/common/EntityTarget.js";
+import {PermissionFlagsBits} from "discord-api-types/v10";
+import {isValidCron} from "cron-validator";
+import {CronException} from "../model/exceptions/CronException.js";
+import cronstrue from 'cronstrue';
 
-const emojiRegex = require('emoji-regex');
-const isImageFast = require('is-image-fast');
-
-export class CronException extends Error {
-    constructor(e: string) {
-        super(e);
-
-        Object.setPrototypeOf(this, CronException.prototype);
+export class Utils {
+    public static sleep(ms: number): Promise<void> {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
     }
 }
 
-export function loadClasses(...paths: string[]): Promise<any[]> {
-    const globs = paths.map(globPath => glob.sync(globPath));
-    const pArr = globs.flatMap(filePaths => {
-        return filePaths.map(filePath => import(path.resolve(filePath)));
-    });
-    return Promise.all(pArr);
+export class ObjectUtil {
+
+    /**
+     * Ensures value(s) strings and has a size after trim
+     * @param strings
+     * @returns {boolean}
+     */
+    public static validString(...strings: Array<unknown>): boolean {
+        if (strings.length === 0) {
+            return false;
+        }
+        for (const currString of strings) {
+            if (typeof currString !== "string") {
+                return false;
+            }
+            if (currString.length === 0) {
+                return false;
+            }
+            if (currString.trim().length === 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, contextHandler: constructor<T>): Promise<void> {
+        const handler = container.resolve(contextHandler);
+        const result = await handler.search(interaction);
+        if (ObjectUtil.isValidArray(result)) {
+            const responseMap = result.map(result => {
+                return {
+                    name: result.item.name,
+                    value: result.item.name
+                };
+            });
+            return interaction.respond(responseMap);
+        }
+        return interaction.respond([]);
+    }
+
+    public static truncate(str: string, limit: number): string {
+        return str.length > limit ? `${str.substring(0, limit - 3)}...` : str;
+    }
+
+    public static singleFieldBuilder(name: string, value: string, inline = false): [APIEmbedField] {
+        return [
+            {
+                name,
+                value,
+                inline
+            }
+        ];
+    }
+
+    public static delayFor(ms: number): Promise<void> {
+        return new Promise(res => setTimeout(res, ms));
+    }
+
+    /**
+     * ensures value is an array and has at least 1 item in it
+     * @param array
+     * @returns {array is any[]}
+     */
+    public static isValidArray(array: any): array is any[] {
+        return Array.isArray(array) && array.length > 0;
+    }
+
+    /**
+     * Assert argument is an object, and it has more than one key
+     * @param obj
+     * @returns {obj is Record<string, any>}
+     */
+    public static isValidObject(obj: unknown): obj is Record<string, any> {
+        return typeof obj === "object" && obj !== null && obj !== undefined && Object.keys(obj).length > 0;
+    }
+
+    public static convertToMilli(value: number, unit: TIME_UNIT): number {
+        switch (unit) {
+            case TIME_UNIT.seconds:
+                return value * 1000;
+            case TIME_UNIT.minutes:
+                return value * 60000;
+            case TIME_UNIT.hours:
+                return value * 3600000;
+            case TIME_UNIT.days:
+                return value * 86400000;
+            case TIME_UNIT.weeks:
+                return value * 604800000;
+            case TIME_UNIT.months:
+                return value * 2629800000;
+            case TIME_UNIT.years:
+                return value * 31556952000;
+            case TIME_UNIT.decades:
+                return value * 315569520000;
+        }
+    }
+
+    public static timeToHuman(value: number, timeUnit: TIME_UNIT = TIME_UNIT.milliseconds): string {
+        let seconds: number;
+        if (timeUnit === TIME_UNIT.milliseconds) {
+            seconds = Math.round(value / 1000);
+        } else if (timeUnit !== TIME_UNIT.seconds) {
+            seconds = Math.round(ObjectUtil.convertToMilli(value, timeUnit) / 1000);
+        } else {
+            seconds = Math.round(value);
+        }
+        if (Number.isNaN(seconds)) {
+            throw new Error("Unknown error");
+        }
+        const levels: [number, string][] = [
+            [Math.floor(seconds / 31536000), "years"],
+            [Math.floor((seconds % 31536000) / 86400), "days"],
+            [Math.floor(((seconds % 31536000) % 86400) / 3600), "hours"],
+            [Math.floor((((seconds % 31536000) % 86400) % 3600) / 60), "minutes"],
+            [(((seconds % 31536000) % 86400) % 3600) % 60, "seconds"]
+        ];
+        let returnText = "";
+
+        for (let i = 0, max = levels.length; i < max; i++) {
+            if (levels[i][0] === 0) {
+                continue;
+            }
+            returnText += ` ${levels[i][0]} ${levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]}`;
+        }
+        return returnText.trim();
+    }
+
+    public static removeObjectFromArray(itemToRemove: any, arr: any[]): void {
+        let arrLen = arr.length;
+        while (arrLen--) {
+            const currentItem: any = arr[arrLen];
+            if (itemToRemove === currentItem) {
+                arr.splice(arrLen, 1);
+            }
+        }
+    }
+
+    public static getUrls(str: string): Set<string> {
+        const regexp = /(http(s)?:\/\/.)(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/gim;
+        const matches = str.match(regexp);
+        if (!ObjectUtil.isValidArray(matches)) {
+            return new Set();
+        }
+        return new Set(matches);
+    }
+
+    public static guid(): string {
+        function s4(): string {
+            return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+        }
+
+        return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
+    }
+
+    public static getAmountOfCapsAsPercentage(valueCheck: string): number {
+        if (!ObjectUtil.validString(valueCheck)) {
+            return 0;
+        }
+
+        function isUpper(str: string): boolean {
+            return !/[a-z]/.test(str) && /[A-Z]/.test(str);
+        }
+
+        valueCheck = valueCheck.trim();
+        valueCheck = valueCheck.replace(/\s/g, '');
+        const stringLength = valueCheck.length;
+        const amountOfCaps = valueCheck.split("").filter(char => isUpper(char)).length;
+        return Math.floor((amountOfCaps * 100) / stringLength);
+    }
 }
 
-export namespace GuildUtils {
-    const settingsManager = container.resolve(SettingsManager);
+export namespace CronUtils {
+    export function cronToString(cron: string): string {
+        if (!isValidCron(cron, {
+            seconds: true,
+            allowBlankDay: true
+        })) {
+            throw new CronException("cron is not valid");
+        }
+        return cronstrue.toString(cron);
+    }
+}
 
-    export namespace RoleUtils {
+export class DbUtils {
 
-        export function getJailRole(guildId: string): Promise<Role | null> {
-            return getRole(guildId, SETTINGS.JAIL_ROLE);
+    private static _ds: DataSource;
+
+    /**
+     * Build an entity by injecting props as an object
+     * @param instance
+     * @param data
+     */
+    public static build<T>(instance: EntityTarget<T>, data: DeepPartial<T>): T {
+        if (!DbUtils._ds) {
+            DbUtils._ds = container.resolve(DataSource);
+        }
+        return DbUtils._ds.manager.create(instance, data);
+    }
+}
+
+export namespace DiscordUtils {
+
+    import envTypes = Typeings.envTypes;
+    import EmojiInfo = Typeings.EmojiInfo;
+    import StickerInfo = Typeings.StickerInfo;
+
+    export const allChannelsExceptCat = [
+        ChannelType.GuildPrivateThread,
+        ChannelType.GuildNewsThread,
+        ChannelType.GuildVoice,
+        ChannelType.GuildNews,
+        ChannelType.GuildPublicThread,
+        ChannelType.GuildStageVoice,
+        ChannelType.GuildDirectory,
+        ChannelType.GuildForum,
+        ChannelType.GuildText,
+    ];
+
+    export class InteractionUtils {
+
+        @Property("NODE_ENV")
+        private static readonly environment: envTypes["NODE_ENV"];
+
+        public static getMessageFromContextInteraction(interaction: MessageContextMenuCommandInteraction): Promise<Message | undefined> {
+            const messageId = interaction.targetId;
+            return interaction.channel.messages.fetch(messageId);
         }
 
-        export function getYoungAccountRole(guildId: string): Promise<Role | null> {
-            return getRole(guildId, SETTINGS.YOUNG_ACCOUNT_ROLE);
-        }
-
-        async function getRole(guildId: string, setting: SETTINGS): Promise<Role | null> {
-            const role = await settingsManager.getSetting(setting, guildId);
-            if (!ObjectUtil.validString(role)) {
-                return null;
+        public static async replyOrFollowUp(interaction: CommandInteraction | MessageComponentInteraction, replyOptions: (InteractionReplyOptions & { ephemeral?: boolean }) | string): Promise<void> {
+            // if interaction is already replied
+            if (interaction.replied) {
+                await interaction.followUp(replyOptions);
+                return;
             }
-            let roleResolved: Role = null;
-            try {
-                const guildManager = container.resolve(GuildManager);
-                const guild = await guildManager.getGuild(guildId);
-                roleResolved = await guild.roles.fetch(role);
-            } catch {
-                return null;
+
+            // if interaction is deferred but not replied
+            if (interaction.deferred) {
+                await interaction.editReply(replyOptions);
+                return;
             }
-            return roleResolved;
+
+            // if interaction is not handled yet
+            await interaction.reply(replyOptions);
+        }
+
+        public static getInteractionCaller(interaction: CommandInteraction | MessageComponentInteraction): GuildMember | null {
+            const {member} = interaction;
+            if (member == null) {
+                InteractionUtils.replyOrFollowUp(interaction, "Unable to extract member");
+                throw new Error("Unable to extract member");
+            }
+            if (member instanceof GuildMember) {
+                return member;
+            }
+            return null;
+        }
+
+        public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, contextHandler: constructor<T>): Promise<void> {
+            const handler = container.resolve(contextHandler);
+            const searchResults = await handler.search(interaction);
+            if (ObjectUtil.isValidArray(searchResults)) {
+                const responseMap = searchResults.map(({item}) => {
+                    return {
+                        name: item.name,
+                        value: item.value
+                    };
+                });
+                return interaction.respond(responseMap);
+            }
+            return interaction.respond([]);
         }
     }
 
-    export async function applyPanicModeRole(member: GuildMember): Promise<void> {
-        const guildId = member.guild.id;
-        const guildManager = container.resolve(GuildManager);
-        const guild = await guildManager.getGuild(guildId);
-        return applyUnverified(member, `Hello, we have detected unusual mass joins on our server recently, we must verify your account before you can access the ${guild.name} Discord Server`, guild, true);
+    export function getGuild(guildId: string): Promise<Guild | null> {
+        const client = container.resolve(Client);
+        return client.guilds.fetch(guildId);
     }
 
-    export async function applyYoungAccountConstraint(member: GuildMember, timeout: string): Promise<void> {
-        const guildId = member.guild.id;
-        const guildManager = container.resolve(GuildManager);
-        const guild = await guildManager.getGuild(guildId);
-        return applyUnverified(member, `Hello, as your Discord account is less than ${timeout} old and because of recent scams, we must verify your account before you can access the ${guild.name} Discord Server`, guild);
+    export function sanitiseString(str: string): string {
+        return str ?? "None";
     }
 
-    async function applyUnverified(member: GuildMember, dmStr: string, guild: Guild, panicMode: boolean = false): Promise<void> {
-        if (GuildUtils.isMemberAdmin(member)) {
-            return;
+    export function getAccountAge(user: User | GuildMember, format = false): number | string {
+        if (user instanceof GuildMember) {
+            user = user.user;
         }
-        const guildId = guild.id;
-        const unverifiedRole = await GuildUtils.RoleUtils.getYoungAccountRole(guildId);
-        if (!unverifiedRole) {
-            throw new Error("Unable to find Unverified account role");
+        const createdDate = user.createdAt.getTime();
+        const accountAge = Date.now() - createdDate;
+        if (format) {
+            return ObjectUtil.timeToHuman(accountAge);
+        } else {
+            return accountAge;
         }
-        await member.roles.set([unverifiedRole]);
-        if (!panicMode) {
-            DiscordUtils.postToLog(`Member <@${member.id}> ${member.user.tag} has been applied the ${unverifiedRole.name} role`, guildId);
-        }
+    }
 
-        let message = dmStr;
-        const channelManager = container.resolve(ChannelManager);
-        const jailChannel = await channelManager.getChannel(guild.id, Channels.JAIL_CHANNEL);
-        if (jailChannel) {
-            message += `\nPlease post in the #${jailChannel.name} channel for faster verification process`;
+    export function stripUrls(message: Message | string): string {
+        const regexp = /(http(s)?:\/\/.)(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/gm;
+        let retStr = typeof message === "string" ? message : message.content;
+        retStr = `${retStr}`;
+        if (!ObjectUtil.validString(retStr)) {
+            return retStr;
         }
-        await member.send(message);
+        const matches = retStr.match(regexp);
+        if (!matches) {
+            return retStr;
+        }
+        for (const match of matches) {
+            retStr = retStr.replace(match, "");
+        }
+        return retStr.trim();
+    }
+
+    export function removeMentions(str: string): string {
+        return str.replace(/<@.?[0-9]*?>/gm, "");
+    }
+
+    export function sanitiseTextForApiConsumption(message: Message | string): string {
+        const emojiManager = container.resolve(EmojiManager);
+        let retStr = typeof message === "string" ? message : message.content;
+        retStr = `${retStr}`;
+        retStr = emojiManager.stripAllEmojiFromText(retStr);
+        retStr = stripUrls(retStr);
+        retStr = removeMentions(retStr);
+        return retStr.trim();
+    }
+
+    export function isMemberAdmin(member: GuildMember): boolean {
+        return member.permissions.has(PermissionFlagsBits.Administrator);
     }
 
     export async function sendToJail(member: GuildMember, reason: string): Promise<void> {
-        if (GuildUtils.isMemberAdmin(member)) {
+        if (isMemberAdmin(member)) {
             return;
         }
+        const roleManager = container.resolve(RoleManager);
         const guildId = member.guild.id;
-        const jailRole = await GuildUtils.RoleUtils.getJailRole(guildId);
+        const jailRole = await roleManager.getJailRole(guildId);
         if (!jailRole) {
             return;
         }
@@ -164,284 +411,6 @@ export namespace GuildUtils {
         }, 6000);
     }
 
-
-    export function getGuildIconUrl(guildId: string): string {
-        const client = container.resolve(Client);
-        const guild = client.guilds.cache.get(guildId);
-        return guild.iconURL({
-            dynamic: true,
-        });
-    }
-
-    export function getGuildName(guildId: string): string {
-        const client = container.resolve(Client);
-        const guild = client.guilds.cache.get(guildId);
-        return guild.name;
-    }
-
-    export function isMemberAdmin(member: GuildMember): boolean {
-        const memberRoles = member.roles.cache;
-        for (const [, role] of memberRoles) {
-            const perms = role.permissions;
-            const isAdmin = perms.has(Permissions.FLAGS.ADMINISTRATOR, true);
-            if (isAdmin) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    export async function getAutoBotIds(guildId: string): Promise<string[]> {
-        const guildManager = container.resolve(GuildManager);
-        const guild = await guildManager.getGuild(guildId);
-        const membersCollection = guild.members.cache;
-        const reArr: string[] = [];
-        for (const [id, member] of membersCollection) {
-            if (member.user.bot) {
-                reArr.push(id);
-            }
-        }
-        return reArr;
-    }
-
-}
-
-export namespace StringUtils {
-    export function splitCommandLine(commandLine: string): string[] {
-        let spaceMarker = '<SP>';
-        while (commandLine.indexOf(spaceMarker) > -1) {
-            spaceMarker += '@';
-        }
-        const noSpacesInQuotes = commandLine.replace(/"([^"]*)"?/g, (fullMatch, capture) => capture.replace(/ /g, spaceMarker));
-        const mangledParamArray = noSpacesInQuotes.split(/ +/);
-        const paramArray = mangledParamArray.map((mangledParam) => mangledParam.replace(RegExp(spaceMarker, 'g'), ' '));
-        paramArray.shift();
-        return paramArray;
-    }
-
-    export function truncate(str: string, limit: number): string {
-        return str.length > limit ? `${str.substring(0, limit - 3)}...` : str;
-    }
-}
-
-export namespace Ffmpeg {
-
-    const {promisify} = require('util');
-    const execFile = promisify(require('child_process').execFile);
-    const pathToFfmpeg = require('ffmpeg-static');
-
-    export async function checkVideo(file: string, obufferSize: number): Promise<string[]> {
-        const info: string[] = [];
-        try {
-            const {stderr} = await execFile(pathToFfmpeg, ['-v', 'debug', '-nostats', '-i', file, '-f', 'null', '-',], {
-                maxBuffer: obufferSize
-            });
-            if (stderr) {
-                info.push(stderr);
-            }
-        } catch (err) {
-            info.push(err.message);
-        }
-
-        return info;
-    }
-}
-
-export namespace ArrayUtils {
-    export function isValidArray(array: any): array is any[] {
-        return Array.isArray(array) && array.length > 0;
-    }
-}
-
-export namespace TimeUtils {
-    export enum TIME_UNIT {
-        milliseconds = "mil",
-        seconds = "s",
-        minutes = "mi",
-        hours = "h",
-        days = "d",
-        weeks = "w",
-        months = "mo",
-        years = "y",
-        decades = "de"
-    }
-
-    export enum TIME_OUT {
-        "60 seconds" = convertToMilli(60, TIME_UNIT.seconds),
-        "5 min" = convertToMilli(5, TIME_UNIT.minutes),
-        "10 min" = convertToMilli(10, TIME_UNIT.minutes),
-        "1 hour" = convertToMilli(1, TIME_UNIT.hours),
-        "1 day" = convertToMilli(1, TIME_UNIT.days),
-        "1 week" = convertToMilli(1, TIME_UNIT.weeks)
-    }
-
-    export enum METHOD_EXECUTOR_TIME_UNIT {
-        seconds = "seconds",
-        minutes = "minutes",
-        hours = "hours",
-        days = "days",
-    }
-
-    export function convertToMilli(value: number, unit: TIME_UNIT): number {
-        switch (unit) {
-            case TimeUtils.TIME_UNIT.seconds:
-                return value * 1000;
-            case TimeUtils.TIME_UNIT.minutes:
-                return value * 60000;
-            case TimeUtils.TIME_UNIT.hours:
-                return value * 3600000;
-            case TimeUtils.TIME_UNIT.days:
-                return value * 86400000;
-            case TimeUtils.TIME_UNIT.weeks:
-                return value * 604800000;
-            case TimeUtils.TIME_UNIT.months:
-                return value * 2629800000;
-            case TimeUtils.TIME_UNIT.years:
-                return value * 31556952000;
-            case TimeUtils.TIME_UNIT.decades:
-                return value * 315569520000;
-        }
-    }
-}
-
-export namespace CronUtils {
-    export function cronToString(cron: string): string {
-        if (!isValidCron(cron, {
-            seconds: true,
-            allowBlankDay: true
-        })) {
-            throw new CronException("cron is not valid");
-        }
-        return cronstrue.toString(cron);
-    }
-}
-
-
-export namespace DiscordUtils {
-
-    import ObjectChange = Typeings.ObjectChange;
-    export namespace InteractionUtils {
-
-        export function getUserFromUserContextInteraction(interaction: ContextMenuInteraction): GuildMember | undefined {
-            const memberId = interaction.targetId;
-            return interaction.guild.members.cache.get(memberId);
-        }
-
-        export function getMessageFromContextInteraction(interaction: ContextMenuInteraction): Promise<Message | undefined> {
-            const messageId = interaction.targetId;
-            return interaction.channel.messages.fetch(messageId);
-        }
-
-        export function replyOrFollowUp(interaction: BaseCommandInteraction | MessageComponentInteraction, content: string, ephemeral: boolean = false): Promise<void> {
-            if (interaction.replied) {
-                return interaction.followUp({
-                    ephemeral,
-                    content
-                }) as unknown as Promise<void>;
-            }
-            if (interaction.deferred) {
-                return interaction.editReply(content) as unknown as Promise<void>;
-            }
-            return interaction.reply({
-                ephemeral,
-                content
-            });
-        }
-
-        export function getInteractionCaller(interaction: BaseCommandInteraction | MessageComponentInteraction): GuildMember | null {
-            const {member} = interaction;
-            if (member == null) {
-                replyOrFollowUp(interaction, "Unable to extract member");
-                throw new Error("Unable to extract member");
-            }
-            if (member instanceof GuildMember) {
-                return member;
-            }
-            return null;
-        }
-    }
-
-    export type EmojiInfo = {
-        "buffer"?: Buffer,
-        "url": string,
-        "id": string
-    };
-
-    export type StickerInfo = EmojiInfo;
-
-    export async function getMembersWithNoRoles(guildId: string): Promise<GuildMember[]> {
-        const guildManager = container.resolve(GuildManager);
-        const guild = await guildManager.getGuild(guildId);
-        const members = await guild.members.fetch({
-            force: true
-        });
-        return [...members.values()].filter(member => {
-            for (const [roleId] of member.roles.cache) {
-                if (roleId !== guild.roles.everyone.id) {
-                    return false;
-                }
-            }
-            return true;
-        });
-    }
-
-
-    export async function getBot(guildId: string): Promise<GuildMember> {
-        const guildManager = container.resolve(GuildManager);
-        const guild = await guildManager.getGuild(guildId);
-        return guild.me;
-    }
-
-    export async function getStickerInfo(sticker: Sticker, includeBuffer: boolean = true): Promise<StickerInfo> {
-        const {url, format, id} = sticker;
-        const retObj: StickerInfo = {
-            url,
-            id
-        };
-        if (!includeBuffer) {
-            return retObj;
-        }
-        if (format === "LOTTIE") {
-            retObj["buffer"] = Buffer.from(url, 'utf8');
-        } else {
-            try {
-                retObj["buffer"] = await DiscordUtils.loadResourceFromURL(url);
-            } catch {
-
-            }
-        }
-        return retObj;
-    }
-
-    export async function getEmojiInfo(emojiId: string, includeBuffer: boolean = true): Promise<EmojiInfo> {
-        let emojiInfo: EmojiInfo = null;
-        const tryExtensions = ["gif", "png"];
-        for (let i = 0; i < tryExtensions.length; i++) {
-            const ext = tryExtensions[i];
-            const url = `https://cdn.discordapp.com/emojis/${emojiId}.${ext}`;
-            try {
-                const emojiImageBuffer = await DiscordUtils.loadResourceFromURL(url);
-                if (emojiImageBuffer.length > 0) {
-                    emojiInfo = {
-                        url: url,
-                        id: emojiId
-                    };
-                    if (includeBuffer) {
-                        emojiInfo["buffer"] = emojiImageBuffer;
-                    }
-                    break;
-                }
-            } catch {
-
-            }
-        }
-        if (!emojiInfo) {
-            throw new Error("Error finding emoji");
-        }
-        return emojiInfo;
-    }
-
-
     /**
      * Obtains image URL for a message on this order:
      * message Attachments
@@ -459,7 +428,7 @@ export namespace DiscordUtils {
         if (!ignore.attachments && messageAttachments && messageAttachments.size > 0) {
             const attachmentUrls: string[] = messageAttachments.map(value => value.attachment).filter(attachment => ObjectUtil.validString(attachment)) as string[];
             const urlMessageSet = new Set<string>();
-            if (ArrayUtils.isValidArray(attachmentUrls)) {
+            if (ObjectUtil.isValidArray(attachmentUrls)) {
                 for (const attachmentUrl of attachmentUrls) {
                     if (await isImageFast(attachmentUrl)) {
                         urlMessageSet.add(attachmentUrl);
@@ -495,11 +464,11 @@ export namespace DiscordUtils {
                 const repliedMessageID = repliedMessageRef.messageId;
                 const repliedMessageObj = await message.channel.messages.fetch(repliedMessageID);
                 const repliedMessageContent = repliedMessageObj.content;
-                const repliedMessageAttatch = (repliedMessageObj.attachments && repliedMessageObj.attachments.size > 0) ? repliedMessageObj.attachments : null;
-                if (repliedMessageAttatch) {
-                    const repliedMessageAttatch = repliedMessageObj.attachments;
-                    const attachmentUrls: string[] = repliedMessageAttatch.map(value => value.attachment).filter(attachment => ObjectUtil.validString(attachment)) as string[];
-                    if (ArrayUtils.isValidArray(attachmentUrls)) {
+                const repliedMessageAttach = (repliedMessageObj.attachments && repliedMessageObj.attachments.size > 0) ? repliedMessageObj.attachments : null;
+                if (repliedMessageAttach) {
+                    const repliedMessageAttach = repliedMessageObj.attachments;
+                    const attachmentUrls: string[] = repliedMessageAttach.map(value => value.attachment).filter(attachment => ObjectUtil.validString(attachment)) as string[];
+                    if (ObjectUtil.isValidArray(attachmentUrls)) {
                         for (const attachmentUrl of attachmentUrls) {
                             if (await isImageFast(attachmentUrl)) {
                                 urlMessageSet.add(attachmentUrl);
@@ -526,359 +495,9 @@ export namespace DiscordUtils {
                     return urlMessageSet;
                 }
             }
-
             return new Set();
         }
-
         return new Set();
-    }
-
-
-    export type RoleChange = {
-        permissions?: ObjectChange<Array<string>>
-        nameChange?: ObjectChange<string>,
-        colourChange?: ObjectChange<HexColorString>,
-        iconChange?: ObjectChange<string>,
-        hoist?: ObjectChange<boolean>
-    };
-
-    export type ChannelUpdate = {
-        name?: ObjectChange<string>,
-        topic?: ObjectChange<string>,
-        slowMode?: ObjectChange<number>,
-        nsfw?: ObjectChange<boolean>,
-        parent?: ObjectChange<CategoryChannel>
-    };
-
-
-    export type GuildUpdate = {
-        banner?: ObjectChange<string>,
-        rulesChannel?: ObjectChange<TextChannel>,
-        splash?: ObjectChange<string>,
-        description?: ObjectChange<string>,
-        discoverySplash?: ObjectChange<string>,
-        icon?: ObjectChange<string>,
-        vanityURLCode?: ObjectChange<string>,
-        name?: ObjectChange<string>,
-
-    };
-
-    export type ThreadUpdate = {
-        archived?: ObjectChange<boolean>,
-        type?: ObjectChange<"Public" | "Private" | null>
-        locked?: ObjectChange<boolean>,
-        name?: ObjectChange<string>,
-        slowMode?: ObjectChange<number>,
-        archiveDuration?: ObjectChange<ThreadAutoArchiveDuration | null>
-    };
-
-    export type MemberUpdate = {
-        nickName?: ObjectChange<string>,
-        timeout?: ObjectChange<number>
-    }
-
-    export function getMemberChanges(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember): MemberUpdate {
-        const retObj: MemberUpdate = {};
-        const oldNick = oldMember.nickname;
-        const newNick = newMember.nickname;
-        if (oldNick !== newNick) {
-            retObj["nickName"] = {
-                before: oldNick,
-                after: newNick
-            };
-        }
-
-        const oldTimeout = oldMember.communicationDisabledUntilTimestamp;
-        const newTimeout = newMember.communicationDisabledUntilTimestamp;
-        if (oldTimeout !== newTimeout) {
-            retObj["timeout"] = {
-                before: oldTimeout,
-                after: newTimeout
-            };
-        }
-
-        return retObj;
-    }
-
-    export function getThreadChanges(oldThread: ThreadChannel, newThread: ThreadChannel): ThreadUpdate {
-        const retObj: ThreadUpdate = {};
-        const oldName = oldThread.name;
-        const newName = newThread.name;
-        if (oldName !== newName) {
-            retObj["name"] = {
-                before: oldName,
-                after: newName
-            };
-        }
-
-        const oldType = oldThread.type;
-        const newType = newThread.type;
-        if (oldType !== newType) {
-            let oldParsed: "Public" | "Private" | null = null;
-            let newParsed: "Public" | "Private" | null = null;
-            if (ObjectUtil.validString(oldType)) {
-                oldParsed = oldType === "GUILD_PRIVATE_THREAD" ? "Private" : "Public";
-            }
-            if (ObjectUtil.validString(newType)) {
-                newParsed = newType === "GUILD_PRIVATE_THREAD" ? "Private" : "Public";
-            }
-            retObj["type"] = {
-                before: oldParsed,
-                after: newParsed
-            };
-        }
-
-        const oldLocked = oldThread.locked;
-        const newLocked = newThread.locked;
-        if (oldLocked !== newLocked) {
-            retObj["locked"] = {
-                before: oldLocked,
-                after: newLocked
-            };
-        }
-
-        const oldArchived = oldThread.archived;
-        const newArchived = newThread.archived;
-        if (oldArchived !== newArchived) {
-            retObj["archived"] = {
-                before: oldArchived,
-                after: newArchived
-            };
-        }
-
-        const oldSlowMode = oldThread.rateLimitPerUser;
-        const newSlowMode = newThread.rateLimitPerUser;
-        if (oldSlowMode !== newSlowMode) {
-            retObj["slowMode"] = {
-                before: oldSlowMode,
-                after: newSlowMode
-            };
-        }
-
-        const oldArchiveDuration = oldThread.autoArchiveDuration;
-        const newArchiveDuration = newThread.autoArchiveDuration;
-        if (oldArchiveDuration !== newArchiveDuration) {
-            retObj["archiveDuration"] = {
-                before: oldArchiveDuration,
-                after: newArchiveDuration
-            };
-        }
-        return retObj;
-    }
-
-    export function getGuildUpdate(oldGuild: Guild, newGuild: Guild): GuildUpdate {
-        const retObj: GuildUpdate = {};
-        const oldName = oldGuild.name;
-        const newName = newGuild.name;
-        if (oldName !== newName) {
-            retObj["name"] = {
-                before: oldName,
-                after: newName
-            };
-        }
-        const oldBanner = oldGuild.banner;
-        const newBanner = newGuild.banner;
-        if (oldBanner !== newBanner) {
-            retObj["banner"] = {
-                before: sanitiseString(oldGuild.bannerURL({
-                    size: 1024
-                })),
-                after: sanitiseString(newGuild.bannerURL({
-                    size: 1024
-                }))
-            };
-        }
-
-        const oldRulesChannel = oldGuild.rulesChannelId;
-        const newRulesChannel = newGuild.rulesChannelId;
-        if (oldRulesChannel !== newRulesChannel) {
-            retObj["rulesChannel"] = {
-                before: oldGuild.rulesChannel,
-                after: newGuild.rulesChannel
-            };
-        }
-
-        const oldSplash = oldGuild.splash;
-        const newSplash = newGuild.splash;
-        if (oldSplash !== newSplash) {
-            retObj["splash"] = {
-                before: sanitiseString(newGuild.splashURL({
-                    size: 1024
-                })),
-                after: sanitiseString(newGuild.splashURL({
-                    size: 1024
-                }))
-            };
-        }
-
-        const oldDescription = oldGuild.description;
-        const newDescription = newGuild.description;
-        if (oldDescription !== newDescription) {
-            retObj["description"] = {
-                before: sanitiseString(oldDescription),
-                after: sanitiseString(newDescription)
-            };
-        }
-
-        const oldDiscoverySplash = oldGuild.discoverySplash;
-        const newDiscoverySplash = newGuild.discoverySplash;
-        if (oldDiscoverySplash !== newDiscoverySplash) {
-            retObj["discoverySplash"] = {
-                before: sanitiseString(oldGuild.discoverySplashURL({
-                    size: 1024
-                })),
-                after: sanitiseString(newGuild.discoverySplashURL({
-                    size: 1024
-                }))
-            };
-        }
-
-        const oldIcon = oldGuild.icon;
-        const newIcon = newGuild.icon;
-        if (oldIcon !== newIcon) {
-            retObj["icon"] = {
-                before: sanitiseString(oldGuild.iconURL({
-                    size: 1024,
-                    dynamic: true
-                })),
-                after: sanitiseString(newGuild.iconURL({
-                    size: 1024,
-                    dynamic: true
-                }))
-            };
-        }
-
-        const oldVanityUrl = oldGuild.vanityURLCode;
-        const newVanityUrl = newGuild.vanityURLCode;
-        if (oldVanityUrl !== newVanityUrl) {
-            retObj["vanityURLCode"] = {
-                before: sanitiseString(oldVanityUrl),
-                after: sanitiseString(newVanityUrl)
-            };
-        }
-
-        return retObj;
-    }
-
-    export function getChannelChanges(oldChannel: GuildChannel, newChannel: GuildChannel): ChannelUpdate {
-        const retObj: ChannelUpdate = {};
-        const oldName = oldChannel.name;
-        const newName = newChannel.name;
-        const isTextBasedChannel = oldChannel instanceof BaseGuildTextChannel && newChannel instanceof BaseGuildTextChannel;
-        const isTextChannel = oldChannel instanceof TextChannel && newChannel instanceof TextChannel;
-        if (oldName !== newName) {
-            retObj["name"] = {
-                before: oldName,
-                after: newName
-            };
-        }
-        if (isTextBasedChannel) {
-            const oldTopic = oldChannel.topic;
-            const newTopic = newChannel.topic;
-            if (oldTopic !== newTopic) {
-                retObj["topic"] = {
-                    before: oldTopic,
-                    after: newTopic
-                };
-            }
-            if (isTextChannel) {
-                const oldSlowMode = oldChannel.rateLimitPerUser;
-                const newSlowMode = newChannel.rateLimitPerUser;
-                if (oldSlowMode !== newSlowMode) {
-                    retObj["slowMode"] = {
-                        before: oldSlowMode,
-                        after: newSlowMode
-                    };
-                }
-            }
-            const oldNsfw = oldChannel.nsfw;
-            const newNsfw = newChannel.nsfw;
-            if (oldNsfw !== newNsfw) {
-                retObj["nsfw"] = {
-                    before: oldNsfw,
-                    after: newNsfw
-                };
-            }
-        }
-        const oldParent = oldChannel.parent;
-        const newParent = newChannel.parent;
-        if (oldParent == null && newParent !== null) {
-            retObj["parent"] = {
-                before: null,
-                after: newParent
-            };
-        } else if (newParent == null && oldParent !== null) {
-            retObj["parent"] = {
-                before: oldParent,
-                after: null
-            };
-        } else if (newParent && oldParent) {
-            if (oldParent.id !== newParent.id) {
-                retObj["parent"] = {
-                    before: oldParent,
-                    after: newParent
-                };
-            }
-        }
-        return retObj;
-    }
-
-    export function getRoleChanges(oldRole: Role, newRole: Role): RoleChange {
-        const retObj: RoleChange = {};
-        const iconUrlSettings: StaticImageURLOptions = {
-            format: "png",
-            size: 64
-        };
-        const added = oldRole.permissions.missing(newRole.permissions.bitfield);
-        const removed = newRole.permissions.missing(oldRole.permissions.bitfield);
-
-        if (added.length > 0 || removed.length > 0) {
-            retObj["permissions"] = {
-                before: removed,
-                after: added
-            };
-        }
-        const oldName = oldRole.name;
-        const newName = newRole.name;
-        if (oldName !== newName) {
-            retObj["nameChange"] = {
-                "before": oldName,
-                "after": newName
-            };
-        }
-
-        const oldColour = oldRole.hexColor;
-        const newColour = newRole.hexColor;
-        if (oldColour !== newColour) {
-            retObj["colourChange"] = {
-                "before": oldColour,
-                "after": newColour
-            };
-        }
-
-        const oldIcon = oldRole.iconURL(iconUrlSettings);
-        const newIcon = newRole.iconURL(iconUrlSettings);
-        if (oldIcon !== newIcon) {
-            retObj["iconChange"] = {
-                "before": sanitiseString(oldIcon),
-                "after": sanitiseString(newIcon)
-            };
-        }
-
-        const oldHoist = oldRole.hoist;
-        const newHoist = newRole.hoist;
-        if (oldHoist !== newHoist) {
-            retObj["hoist"] = {
-                "before": oldHoist,
-                "after": newHoist
-            };
-        }
-
-        return retObj;
-    }
-
-    function sanitiseString(str: string): string {
-        return str ?? "None";
     }
 
     export async function loadResourceFromURL(url: string): Promise<Buffer> {
@@ -892,351 +511,56 @@ export namespace DiscordUtils {
         return buffer;
     }
 
-    export function getAccountAge(user: User | GuildMember, format: boolean = false): number | string {
-        if (user instanceof GuildMember) {
-            user = user.user;
-        }
-        const createdDate = user.createdAt.getTime();
-        const accountAge = Date.now() - createdDate;
-        if (format) {
-            return ObjectUtil.timeToHuman(accountAge);
-        } else {
-            return accountAge;
-        }
-    }
-
-    export function stripUrls(message: Message | string): string {
-        const regexp = /(http(s)?:\/\/.)(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/gm;
-        let retStr = typeof message === "string" ? message : message.content;
-        retStr = `${retStr}`;
-        if (!ObjectUtil.validString(retStr)) {
-            return retStr;
-        }
-        const matches = retStr.match(regexp);
-        if (!matches) {
-            return retStr;
-        }
-        for (const match of matches) {
-            retStr = retStr.replace(match, "");
-        }
-        return retStr.trim();
-    }
-
-    export function removeMentions(str: string): string {
-        return str.replace(/<@.?[0-9]*?>/gm, "");
-    }
-
-    export function sanitiseTextForApiConsumption(message: Message | string): string {
-        let retStr = typeof message === "string" ? message : message.content;
-        retStr = `${retStr}`;
-        retStr = stripAllEmojiFromText(retStr);
-        retStr = stripUrls(retStr);
-        retStr = removeMentions(retStr);
-        return retStr.trim();
-    }
-
-    export function stripAllEmojiFromText(message: Message | string): string {
-        let retStr = typeof message === "string" ? message : message.content;
-        retStr = `${retStr}`;
-        if (!ObjectUtil.validString(retStr)) {
-            return retStr;
-        }
-        const emojis = getEmojiFromMessage(retStr, true);
-        for (const emoji of emojis) {
-            retStr = retStr.replace(emoji, "");
-        }
-        return retStr.trim();
-    }
-
-    export function getEmojiFromMessage(message: Message | string, includeDefaultEmoji: boolean = true): string[] {
-        const regex = new RegExp(/<(a?):(\w+):(\d+)>/, "g");
-        const messageText = typeof message === "string" ? message : message.content;
-        const emojiArray = messageText.match(regex) || [];
-        if (includeDefaultEmoji) {
-            const emoJiRexp = emojiRegex();
-            let match: string[];
-            while ((match = emoJiRexp.exec(messageText)) !== null) {
-                const emoji = match[0];
-                emojiArray.push(emoji);
-            }
-        }
-        return emojiArray;
-    }
-
-    export async function postToLog(message: MessageEmbed[] | string, guildId: string, adminLog: boolean = false): Promise<Message | null> {
-        let channel: BaseGuildTextChannel;
-        const channelManager = container.resolve(ChannelManager);
-        if (adminLog) {
-            channel = await channelManager.getChannel(guildId, Channels.ADMIN_LOG_CHANNEL);
-        } else {
-            channel = await channelManager.getChannel(guildId, Channels.LOG_CHANNEL);
-        }
-        if (channel == null) {
-            return null;
-        }
-        try {
-            if (ArrayUtils.isValidArray(message)) {
-                return channel.send({embeds: message});
-            } else {
-                return channel.send(message);
-            }
-        } catch (e) {
-            console.warn(e.message);
-        }
-    }
-
-    /**
-     * Please note: if you are checking for an entry of one you are NOT listening to, you will need to check the creation date against user join date for ALL events
-     * @param type
-     * @param guild
-     */
-    export async function getAuditLogEntry(type: GuildAuditLogsAction, guild: Guild): Promise<GuildAuditLogsEntry<GuildAuditLogsAction>> {
-        const fetchedAuditLog = await getAuditLogEntries(type, guild);
-        if (!fetchedAuditLog) {
-            return null;
-        }
-        const logEntry = fetchedAuditLog.entries.first();
-        if (!logEntry) {
-            return null;
-        }
-        return logEntry;
-    }
-
-    /**
-     * Get all entries from the audit log with optinal limit
-     * @param type
-     * @param guild
-     * @param limit
-     */
-    export async function getAuditLogEntries(type: GuildAuditLogsAction, guild: Guild, limit: number = 1): Promise<GuildAuditLogs<GuildAuditLogsAction> | null> {
-        const fetchObj: GuildAuditLogsFetchOptions<GuildAuditLogsAction> = {
-            limit,
-            type
+    export async function getStickerInfo(sticker: Sticker, includeBuffer = true): Promise<StickerInfo> {
+        const {url, format, id} = sticker;
+        const retObj: StickerInfo = {
+            url,
+            id
         };
-        try {
-            return await guild.fetchAuditLogs(fetchObj);
-        } catch {
-            return null;
+        if (!includeBuffer) {
+            return retObj;
         }
-    }
-
-    export async function getAllClosableModules(guildId?: string): Promise<CloseOptionModel[]> {
-        const builder = getRepository(CloseOptionModel)
-            .createQueryBuilder("closeOptionModel")
-            .distinct(true);
-        if (ObjectUtil.validString(guildId)) {
-            builder.where("closeOptionModel.guildId = :guildId", {
-                guildId
-            });
-        }
-        return await builder.getMany();
-    }
-
-}
-
-export class ObjectUtil {
-
-    public static delayFor(ms: number): Promise<void> {
-        return new Promise(res => setTimeout(res, ms));
-    }
-
-    public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, contextHandler: constructor<T>): Promise<void> {
-        const handler = container.resolve(contextHandler);
-        const result = await handler.search(interaction);
-        if (ArrayUtils.isValidArray(result)) {
-            const responseMap = result.map(result => {
-                return {
-                    name: result.item.name,
-                    value: result.item.name
-                };
-            });
-            return interaction.respond(responseMap);
-        }
-        return interaction.respond([]);
-    }
-
-    public static getUrls(str: string): Set<string> {
-        const regexp = /(http(s)?:\/\/.)(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&/=]*)/gim;
-        const matches = str.match(regexp);
-        if (!ArrayUtils.isValidArray(matches)) {
-            return new Set();
-        }
-        return new Set(matches);
-    }
-
-    public static guid(): string {
-        function s4(): string {
-            return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-        }
-
-        return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
-    }
-
-    public static deepCompare(...objects: Record<string, any>[]): boolean {
-        let i, l, leftChain, rightChain;
-
-        function compare2Objects(x: any, y: any): boolean {
-            let p;
-            if (isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
-                return true;
-            }
-            if (x === y) {
-                return true;
-            }
-            if ((typeof x === 'function' && typeof y === 'function') ||
-                (x instanceof Date && y instanceof Date) ||
-                (x instanceof RegExp && y instanceof RegExp) ||
-                (x instanceof String && y instanceof String) ||
-                (x instanceof Number && y instanceof Number)) {
-                return x.toString() === y.toString();
-            }
-            if (!(x instanceof Object && y instanceof Object)) {
-                return false;
-            }
-
-            if (x.isPrototypeOf(y) || y.isPrototypeOf(x)) {
-                return false;
-            }
-
-            if (x.constructor !== y.constructor) {
-                return false;
-            }
-
-            if (x.prototype !== y.prototype) {
-                return false;
-            }
-
-            if (leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
-                return false;
-            }
-            for (p in y) {
-                if (y.hasOwnProperty(p) !== x.hasOwnProperty(p) || typeof y[p] !== typeof x[p]) {
-                    return false;
-                }
-            }
-            for (p in x) {
-                if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-                    return false;
-                } else if (typeof y[p] !== typeof x[p]) {
-                    return false;
-                }
-
-                switch (typeof (x[p])) {
-                    case 'object':
-                    case 'function':
-                        leftChain.push(x);
-                        rightChain.push(y);
-                        if (!compare2Objects(x[p], y[p])) {
-                            return false;
-                        }
-                        leftChain.pop();
-                        rightChain.pop();
-                        break;
-                    default:
-                        if (x[p] !== y[p]) {
-                            return false;
-                        }
-                        break;
-                }
-            }
-
-            return true;
-        }
-
-        if (arguments.length < 1) {
-            return true;
-        }
-
-        for (i = 1, l = objects.length; i < l; i++) {
-            leftChain = [];
-            rightChain = [];
-            if (!compare2Objects(objects[0], objects[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static getAmountOfCapsAsPercentage(valueCheck: string): number {
-        if (!ObjectUtil.validString(valueCheck)) {
-            return 0;
-        }
-
-        function isUpper(str: string): boolean {
-            return !/[a-z]/.test(str) && /[A-Z]/.test(str);
-        }
-
-        valueCheck = valueCheck.trim();
-        valueCheck = valueCheck.replace(/\s/g, '');
-        const stringLength = valueCheck.length;
-        const amountOfCaps = valueCheck.split("").filter(char => isUpper(char)).length;
-        return Math.floor((amountOfCaps * 100) / stringLength);
-    }
-
-    public static isValidObject(obj: unknown): obj is Record<string, any> {
-        return typeof obj === "object" && obj !== null && obj !== undefined && Object.keys(obj).length > 0;
-    }
-
-    public static timeToHuman(value: number, timeUnit: TimeUtils.TIME_UNIT = TimeUtils.TIME_UNIT.milliseconds): string {
-        let seconds: number;
-        if (timeUnit === TimeUtils.TIME_UNIT.milliseconds) {
-            seconds = Math.round(value / 1000);
-        } else if (timeUnit !== TimeUtils.TIME_UNIT.seconds) {
-            seconds = Math.round(TimeUtils.convertToMilli(value, timeUnit) / 1000);
+        if (format === StickerFormatType.Lottie) {
+            retObj["buffer"] = Buffer.from(url, 'utf8');
         } else {
-            seconds = value;
-        }
-        if (Number.isNaN(seconds)) {
-            throw new Error("Unknown error");
-        }
-        const levels = [
-            [Math.floor(seconds / 31536000), 'years'],
-            [Math.floor((seconds % 31536000) / 86400), 'days'],
-            [Math.floor(((seconds % 31536000) % 86400) / 3600), 'hours'],
-            [Math.floor((((seconds % 31536000) % 86400) % 3600) / 60), 'minutes'],
-            [(((seconds % 31536000) % 86400) % 3600) % 60, 'seconds'],
-        ];
-        let returnText = '';
+            try {
+                retObj["buffer"] = await DiscordUtils.loadResourceFromURL(url);
+            } catch {
 
-        for (let i = 0, max = levels.length; i < max; i++) {
-            if (levels[i][0] === 0) {
-                continue;
             }
-            // @ts-ignore
-            returnText += ` ${levels[i][0]} ${levels[i][0] === 1 ? levels[i][1].substr(0, levels[i][1].length - 1) : levels[i][1]}`;
         }
-        return returnText.trim();
+        return retObj;
     }
 
-    public static validString(...strings: Array<unknown>): boolean {
-        if (strings.length === 0) {
-            return false;
+    export async function getEmojiInfo(emojiId: string, includeBuffer = true): Promise<EmojiInfo> {
+        let emojiInfo: EmojiInfo = null;
+        const tryExtensions = ["gif", "png"];
+        for (let i = 0; i < tryExtensions.length; i++) {
+            const ext = tryExtensions[i];
+            const url = `https://cdn.discordapp.com/emojis/${emojiId}.${ext}`;
+            try {
+                const emojiImageBuffer = await DiscordUtils.loadResourceFromURL(url);
+                if (emojiImageBuffer.length > 0) {
+                    emojiInfo = {
+                        url: url,
+                        id: emojiId
+                    };
+                    if (includeBuffer) {
+                        emojiInfo["buffer"] = emojiImageBuffer;
+                    }
+                    break;
+                }
+            } catch {
+
+            }
         }
-        for (const currString of strings) {
-            if (typeof currString !== "string") {
-                return false;
-            }
-            if (currString.length === 0) {
-                return false;
-            }
-            if (currString.trim().length === 0) {
-                return false;
-            }
+        if (!emojiInfo) {
+            throw new Error("Error finding emoji");
         }
-        return true;
+        return emojiInfo;
     }
 
-    public static removeObjectFromArray(itemToRemove: any, arr: any[]): void {
-        let arrLen = arr.length;
-        while (arrLen--) {
-            const currentItem: any = arr[arrLen];
-            if (itemToRemove === currentItem) {
-                arr.splice(arrLen, 1);
-            }
-        }
-    }
 }
-
 
 export class EnumEx {
 
@@ -1245,12 +569,13 @@ export class EnumEx {
     }
 
     /**
-     * get the numValue associated with it's own key. if you want to get a TypeScript Enum based on an index you can use this
+     * get the numValue associated with its own key. if you want to get a TypeScript Enum based on an index you can use this
      * @param e
      * @param aName
+     * @param asValue
      * @returns {string|null}
      */
-    public static loopBack<T>(e: any, aName: any, asValue: boolean = false): T {
+    public static loopBack<T>(e: any, aName: any, asValue = false): T {
         const keyValuePair: Array<{ name: T, value: any }> = EnumEx.getNamesAndValues(e) as Array<{ name: T, value: any }>;
         for (let i = 0; i < keyValuePair.length; i++) {
             const obj: { name: T, value: any } = keyValuePair[i];

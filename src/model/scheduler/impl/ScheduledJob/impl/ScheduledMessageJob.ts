@@ -1,10 +1,10 @@
-import {ScheduledJob} from "./ScheduledJob";
-import * as schedule from "node-schedule";
-import {GuildChannel} from "discord.js";
-import {IScheduledMessageJob} from "../IScheduledMessageJob";
+import schedule from "node-schedule";
+import type {GuildChannel} from "discord.js";
+import {ScheduledJob} from "./ScheduledJob.js";
+import type {IScheduledMessageJob} from "../IScheduledMessageJob.js";
 
 export class ScheduledMessageJob extends ScheduledJob implements IScheduledMessageJob {
-    constructor(_name: string, _job: schedule.Job, _cron: string | Date, private _channel: GuildChannel, private _message: string) {
+    public constructor(_name: string, _job: schedule.Job, _cron: string | Date, private _channel: GuildChannel, private _message: string) {
         super(_name, _job, _cron, _channel.guildId);
     }
 

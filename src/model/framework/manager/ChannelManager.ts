@@ -1,29 +1,19 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {PostableChannelModel} from "../../DB/entities/guild/PostableChannel.model";
+import {PostableChannelModel} from "../../DB/entities/guild/PostableChannel.model.js";
 import {BaseGuildTextChannel} from "discord.js";
-import {ObjectUtil} from "../../../utils/Utils";
-import {GuildManager} from "./GuildManager";
+import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
 import {singleton} from "tsyringe";
-import {getRepository} from "typeorm";
-import {Channels} from "../../../enums/Channels";
+import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
+import Channels from "../../../enums/Channels.js";
 
 @singleton()
-export class ChannelManager extends BaseDAO<PostableChannelModel> {
+export class ChannelManager extends DataSourceAware {
 
-    public constructor(private _guildManager: GuildManager) {
+    public constructor() {
         super();
     }
 
-    private getModel(guildId: string): Promise<PostableChannelModel> {
-        return getRepository(PostableChannelModel).findOne({
-            where: {
-                guildId
-            }
-        });
-    }
-
     public async setChannel(guildId: string, channelType: Channels, value: string): Promise<PostableChannelModel[] | null> {
-        const result = await getRepository(PostableChannelModel).update({
+        const result = await this.ds.getRepository(PostableChannelModel).update({
             guildId
         }, {
             [channelType]: value
@@ -40,11 +30,19 @@ export class ChannelManager extends BaseDAO<PostableChannelModel> {
             return null;
         }
         const channelId = model[channelEnum] as string;
-        const guild = await this._guildManager.getGuild(guildId);
+        const guild = await DiscordUtils.getGuild(guildId);
         const channel = guild.channels.resolve(channelId);
         if (channel instanceof BaseGuildTextChannel) {
             return channel;
         }
         throw new Error(`"${channel.name}" is NOT text channel`);
+    }
+
+    private getModel(guildId: string): Promise<PostableChannelModel> {
+        return this.ds.getRepository(PostableChannelModel).findOne({
+            where: {
+                guildId
+            }
+        });
     }
 }

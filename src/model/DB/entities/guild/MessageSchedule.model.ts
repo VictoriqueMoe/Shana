@@ -1,8 +1,8 @@
 import {AfterLoad, BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne} from "typeorm";
-import {GuildableModel} from "./Guildable.model";
+import type {GuildableModel} from "./Guildable.model.js";
 import {BaseGuildTextChannel} from "discord.js";
-import {IdentifiableModel} from "../IdentifiableModel";
-import {AbstractModel} from "../AbstractModel";
+import {IdentifiableModel} from "../IdentifiableModel.js";
+import {AbstractModel} from "../AbstractModel.js";
 import {container} from "tsyringe";
 import {Client} from "discordx";
 
@@ -11,6 +11,25 @@ import {Client} from "discordx";
     unique: true
 })
 export class MessageScheduleModel extends IdentifiableModel {
+
+    @Column({unique: false, nullable: false})
+    public cron: string;
+    @Column({
+        unique: false,
+        nullable: false,
+        type: "text"
+    })
+    public channel: BaseGuildTextChannel;
+
+    @Column({unique: false, nullable: false})
+    public message: string;
+
+    @Column({nullable: false})
+    public name: string;
+
+    @ManyToOne("GuildableModel", "messageScheduleModel", AbstractModel.cascadeOps)
+    @JoinColumn({name: AbstractModel.joinCol})
+    public guildableModel: GuildableModel;
 
     @BeforeInsert()
     private marshalTransformer(): void {
@@ -28,24 +47,4 @@ export class MessageScheduleModel extends IdentifiableModel {
         const guild = client.guilds.cache.get(this.guildId);
         this.channel = guild.channels.cache.get(value) as BaseGuildTextChannel;
     }
-
-    @Column({unique: false, nullable: false})
-    public cron: string;
-
-    @Column({
-        unique: false,
-        nullable: false,
-        type: "text"
-    })
-    public channel: BaseGuildTextChannel;
-
-    @Column({unique: false, nullable: false})
-    public message: string;
-
-    @Column({nullable: false})
-    public name: string;
-
-    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.messageScheduleModel, AbstractModel.cascadeOps)
-    @JoinColumn({name: AbstractModel.joinCol})
-    public guildableModel: GuildableModel;
 }

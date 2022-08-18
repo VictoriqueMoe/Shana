@@ -1,6 +1,7 @@
-import {Response} from "./AnimeTypings";
 import {singleton} from "tsyringe";
 import axios from "axios";
+import type {Response} from "./AnimeTypings";
+import LoggerFactory from "../../utils/LoggerFactory.js";
 
 @singleton()
 export class AnimeTractApi {
@@ -20,7 +21,7 @@ export class AnimeTractApi {
             });
             return res.data;
         } catch (e) {
-            console.error(e);
+            LoggerFactory.error(e);
             throw e;
         }
     }

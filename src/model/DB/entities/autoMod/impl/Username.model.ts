@@ -1,7 +1,7 @@
-import {GuildableModel} from "../../guild/Guildable.model";
-import {IdentifiableModel} from "../../IdentifiableModel";
+import type {GuildableModel} from "../../guild/Guildable.model.js";
+import {IdentifiableModel} from "../../IdentifiableModel.js";
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
-import {AbstractModel} from "../../AbstractModel";
+import {AbstractModel} from "../../AbstractModel.js";
 
 @Entity()
 export class UsernameModel extends IdentifiableModel {
@@ -14,7 +14,7 @@ export class UsernameModel extends IdentifiableModel {
     })
     public force: boolean;
 
-    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.usernameModel, AbstractModel.cascadeOps)
+    @ManyToOne("GuildableModel", "usernameModel", AbstractModel.cascadeOps)
     @JoinColumn({name: AbstractModel.joinCol})
     public guildableModel: GuildableModel;
 

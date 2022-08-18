@@ -1,4 +1,8 @@
-import {ICloseableModule} from "../ICloseableModule";
+export type SubModuleSettings = {
+    id?: string,
+    isActive?: boolean
+};
+
 
 /**
  * A sub module is  something that belongs to the parent module
@@ -11,12 +15,12 @@ export interface ISubModule {
     readonly id: string;
 
     /**
-     * Is this filter active
+     * Get the parent module ID this belongs to
      */
-    readonly isActive: boolean;
+    readonly parentModuleId: string;
 
     /**
-     * Get the parent module this belongs to
+     * Is this filter active
      */
-    readonly parentModule: ICloseableModule<any>;
+    isActive(guildId: string): Promise<boolean>;
 }

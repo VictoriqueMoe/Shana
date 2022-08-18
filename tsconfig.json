@@ -1,22 +1,18 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
     "target": "ES2021",
-    "noImplicitAny": false,
+    "module": "ESNext",
+    "outDir": "build",
+    "rootDir": "src",
+    "moduleResolution": "Node",
     "sourceMap": true,
-    "emitDecoratorMetadata": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "importHelpers": true,
-    "allowJs": true,
-    "checkJs": true,
-    "esModuleInterop": true,
-    "noEmit": false,
-    "watch": false,
+    "emitDecoratorMetadata": true,
     "noImplicitOverride": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "outDir": "./build",
-    "allowSyntheticDefaultImports": true
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src/**/*"

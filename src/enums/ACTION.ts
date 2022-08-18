@@ -1,7 +1,10 @@
-export enum ACTION {
+enum ACTION {
     WARN,
     DELETE,
     MUTE,
     BAN,
-    KICK
+    KICK,
+    NONE
 }
+
+export default ACTION;

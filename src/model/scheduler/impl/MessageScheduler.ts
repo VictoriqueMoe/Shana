@@ -1,12 +1,12 @@
-import {IScheduledMessageJob} from "./ScheduledJob/IScheduledMessageJob";
-import * as schedule from 'node-schedule';
-import {JobCallback} from 'node-schedule';
-import {BaseGuildTextChannel} from "discord.js";
-import {ScheduledMessageJob} from "./ScheduledJob/impl/ScheduledMessageJob";
 import {singleton} from "tsyringe";
-import {Scheduler} from "./Scheduler";
-import {ObjectUtil} from "../../../utils/Utils";
-import {IMessageScheduler} from "../IMessageScheduler";
+import schedule, {JobCallback} from "node-schedule";
+import {IMessageScheduler} from "../IMessageScheduler.js";
+import {ScheduledMessageJob} from "./ScheduledJob/impl/ScheduledMessageJob.js";
+import {Scheduler} from "./Scheduler.js";
+import {IScheduledMessageJob} from "./ScheduledJob/IScheduledMessageJob.js";
+import {ObjectUtil} from "../../../utils/Utils.js";
+import {BaseGuildTextChannel} from "discord.js";
+import LoggerFactory from "../../../utils/LoggerFactory.js";
 
 @singleton()
 export class MessageScheduler extends Scheduler implements IMessageScheduler {
@@ -34,7 +34,7 @@ export class MessageScheduler extends Scheduler implements IMessageScheduler {
                 channel.send({
                     content: message
                 }).catch(error => {
-                    console.error(error);
+                    LoggerFactory.error(error);
                 });
             };
         }

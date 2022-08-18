@@ -1,18 +1,19 @@
-import * as schedule from 'node-schedule';
-import {JobCallback} from 'node-schedule';
-import {isValidCron} from 'cron-validator';
-import {CronException, ObjectUtil} from '../../../utils/Utils';
-import {IScheduledJob} from "./ScheduledJob/IScheduledJob";
-import {ScheduledJob} from "./ScheduledJob/impl/ScheduledJob";
 import {singleton} from "tsyringe";
-import {IScheduler} from "../IScheduler";
+import schedule, {JobCallback} from "node-schedule";
+import {ScheduledJob} from "./ScheduledJob/impl/ScheduledJob.js";
+import {ObjectUtil} from "../../../utils/Utils.js";
+import {isValidCron} from "cron-validator";
+import {IScheduler} from "../IScheduler.js";
+import {IScheduledJob} from "./ScheduledJob/IScheduledJob.js";
+import {CronException} from "../../exceptions/CronException.js";
+import logger from "../../../utils/LoggerFactory.js";
 
 @singleton()
 export class Scheduler implements IScheduler {
 
     protected _jobs: IScheduledJob[] = [];
 
-    get jobs(): IScheduledJob[] {
+    public get jobs(): IScheduledJob[] {
         return this._jobs;
     }
 
@@ -39,7 +40,7 @@ export class Scheduler implements IScheduler {
             throw new CronException("cron is not valid");
         }
 
-        console.log(`Register schedule "${name}"`);
+        logger.info(`Register schedule "${name}"`);
         const job = schedule.scheduleJob(name, whenToExecute, callBack);
         const sJob = this.registerJob(name, job, whenToExecute, guildId, additionalArgs);
         this.jobs.push(sJob);
@@ -55,7 +56,7 @@ export class Scheduler implements IScheduler {
         if (j == null) {
             return false;
         }
-        console.log(`job "${name}" has been cancelled`);
+        logger.info(`job "${name}" has been cancelled`);
         const jobObj = j.job;
         const b = jobObj.cancel();
         ObjectUtil.removeObjectFromArray(j, this.jobs);

@@ -1,16 +1,13 @@
-import {IGuildAware} from "../IGuildAware";
-import {RolePersistenceModel} from "../autoMod/impl/RolePersistence.model";
-import {UsernameModel} from "../autoMod/impl/Username.model";
-import {CloseOptionModel} from "../autoMod/impl/CloseOption.model";
-import {BannedAttachmentsModel} from "./BannedAttachments.model";
-import {SettingsModel} from "./Settings.model";
-import {PostableChannelModel} from "./PostableChannel.model";
-import {CommandSecurityModel} from "./CommandSecurity.model";
-import {AutoResponderModel} from "../autoMod/impl/AutoResponder.model";
-import {RoleJoinerModel} from "./RoleJoiner.model";
-import {BookmarkModel} from "./Bookmark.model";
-import {MessageScheduleModel} from "./MessageSchedule.model";
-import {TwitterModel} from "./Twitter.model";
+import {IGuildAware} from "../IGuildAware.js";
+import {RolePersistenceModel} from "../autoMod/impl/RolePersistence.model.js";
+import {UsernameModel} from "../autoMod/impl/Username.model.js";
+import {CloseOptionModel} from "../autoMod/impl/CloseOption.model.js";
+import {SettingsModel} from "./Settings.model.js";
+import {PostableChannelModel} from "./PostableChannel.model.js";
+import {AutoResponderModel} from "../autoMod/impl/AutoResponder.model.js";
+import {RoleJoinerModel} from "./RoleJoiner.model.js";
+import {BookmarkModel} from "./Bookmark.model.js";
+import {MessageScheduleModel} from "./MessageSchedule.model.js";
 import {Column, Entity, OneToMany} from "typeorm";
 
 @Entity()
@@ -30,17 +27,11 @@ export class GuildableModel implements IGuildAware {
     @OneToMany(() => CloseOptionModel, closeOptionModel => closeOptionModel.guildableModel)
     public closeOptionModel: CloseOptionModel[];
 
-    @OneToMany(() => BannedAttachmentsModel, bannedAttachmentsModel => bannedAttachmentsModel.guildableModel)
-    public bannedAttachmentsModel: BannedAttachmentsModel[];
-
     @OneToMany(() => SettingsModel, settingsModel => settingsModel.guildableModel)
     public settingsModel: SettingsModel[];
 
     @OneToMany(() => PostableChannelModel, postableChannels => postableChannels.guildableModel)
     public postableChannels: PostableChannelModel[];
-
-    @OneToMany(() => CommandSecurityModel, commandSecurityModel => commandSecurityModel.guildableModel)
-    public commandSecurityModel: CommandSecurityModel[];
 
     @OneToMany(() => AutoResponderModel, autoResponderModel => autoResponderModel.guildableModel)
     public autoResponderModel: AutoResponderModel[];
@@ -53,7 +44,4 @@ export class GuildableModel implements IGuildAware {
 
     @OneToMany(() => MessageScheduleModel, messageScheduleModel => messageScheduleModel.guildableModel)
     public messageScheduleModel: MessageScheduleModel[];
-
-    @OneToMany(() => TwitterModel, twitterModel => twitterModel.guildableModel)
-    public twitterModel: TwitterModel[];
 }

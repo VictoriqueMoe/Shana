@@ -1,6 +1,6 @@
-import {GuildableModel} from "./Guildable.model";
-import {AbstractModel} from "../AbstractModel";
+import {AbstractModel} from "../AbstractModel.js";
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
+import type {GuildableModel} from "./Guildable.model.js";
 
 @Entity()
 export class PostableChannelModel extends AbstractModel {
@@ -17,7 +17,7 @@ export class PostableChannelModel extends AbstractModel {
     @Column({unique: true, default: null, nullable: true})
     public birthdayChannel: string;
 
-    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.postableChannels, AbstractModel.cascadeOps)
+    @ManyToOne("GuildableModel", "postableChannels", AbstractModel.cascadeOps)
     @JoinColumn({name: AbstractModel.joinCol})
-    guildableModel: GuildableModel;
+    public guildableModel: GuildableModel;
 }

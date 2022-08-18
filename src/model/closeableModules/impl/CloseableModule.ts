@@ -1,25 +1,22 @@
-import {BaseDAO} from "../../../DAO/BaseDAO";
-import {ICloseOption} from "../../DB/entities/autoMod/ICloseOption";
-import {ICloseableModule} from "../ICloseableModule";
-import {ISubModule} from "../subModules/ISubModule";
+import type {ICloseOption} from "../../DB/entities/autoMod/ICloseOption.js";
+import type {ICloseableModule} from "../ICloseableModule.js";
+import type {ISubModule} from "../subModules/ISubModule.js";
 import * as Immutable from "immutable";
-import {SubModuleManager} from "../manager/SubModuleManager";
-import {ModuleSettings} from "../ModuleSettings";
-import {GuildUtils, ObjectUtil} from "../../../utils/Utils";
-import {GuildMember, TextBasedChannel} from "discord.js";
-import {Roles} from "../../../enums/Roles";
-import {CloseOptionModel} from "../../DB/entities/autoMod/impl/CloseOption.model";
+import type {ModuleSettings} from "../settings/ModuleSettings.js";
+import {ObjectUtil} from "../../../utils/Utils.js";
+import {CloseOptionModel} from "../../DB/entities/autoMod/impl/CloseOption.model.js";
 import {container, delay} from "tsyringe";
-import {getRepository} from "typeorm";
-import RolesEnum = Roles.RolesEnum;
+import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
+import {SubModuleManager} from "../../framework/manager/SubModuleManager.js";
+import logger from "../../../utils/LoggerFactory.js";
 
-export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<ICloseOption> implements ICloseableModule<T> {
+export abstract class CloseableModule<T extends ModuleSettings> extends DataSourceAware implements ICloseableModule<T> {
 
+    protected readonly _subModuleManager: SubModuleManager;
     private _isEnabled: Map<string, boolean | null>;
     private _settings: Map<string, T | null>;
-    protected readonly _subModuleManager: SubModuleManager;
 
-    protected constructor(private _model: typeof CloseOptionModel) {
+    protected constructor() {
         super();
         this._settings = new Map();
         this._isEnabled = new Map();
@@ -32,43 +29,45 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
         return this._subModuleManager.getSubModulesFromParent(this);
     }
 
-    public async saveSettings(guildId: string, setting: T, merge: boolean = false): Promise<void> {
-        let obj = setting;
+    public async saveSettings(guildId: string, setting: T, merge = false): Promise<void> {
+        const model: ICloseOption = await this.ds.getRepository(CloseOptionModel).findOne({
+            where: {
+                moduleId: this.moduleId,
+                guildId
+            }
+        });
         if (merge) {
-            const percistedSettings = await this.getSettings(guildId);
-            obj = {...percistedSettings, ...setting};
+            model.settings = {...model.settings, ...setting};
+        } else {
+            model.settings = setting as Record<string, unknown>;
         }
         try {
-            await getRepository(this._model).update(
-                {
-                    moduleId: this.moduleId,
-                    guildId
-                },
-                {
-                    settings: obj
-                }
-            );
+            await this.ds.getRepository(CloseOptionModel).save(model);
         } catch (e) {
-            console.error(e);
+            logger.error(e);
             throw e;
         }
 
-        this._settings.set(guildId, obj);
+        this._settings.set(guildId, model.settings as T);
     }
 
-    public async getSettings(guildId: string, force: boolean = false): Promise<T | Record<string, never>> {
+    public async getSettings(guildId: string, force = false): Promise<T> {
         if (!force && this._settings.has(guildId)) {
             return this._settings.get(guildId);
         }
-        const model: ICloseOption = await getRepository(this._model).findOne({
+        const model: ICloseOption = await this.ds.getRepository(CloseOptionModel).findOne({
             select: ["settings"],
+            cache: {
+                id: `${this.moduleId}_settings`,
+                milliseconds: 30000
+            },
             where: {
                 moduleId: this.moduleId,
                 guildId
             }
         });
         if (!model || !ObjectUtil.isValidObject(model.settings)) {
-            return {};
+            return {} as T;
         }
         this._settings.set(guildId, model.settings as T);
         return this._settings.get(guildId);
@@ -78,7 +77,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
      * Close this module, this prevents all events from being fired. events are NOT queued
      */
     public async close(guildId: string): Promise<boolean> {
-        const m = await getRepository(this._model).update(
+        const m = await this.ds.getRepository(CloseOptionModel).update(
             {
                 moduleId: this.moduleId,
                 guildId
@@ -88,7 +87,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
             }
         );
         this._isEnabled.set(guildId, m.affected === 1);
-        console.log(`Module: ${this.moduleId} disabled`);
+        logger.info(`Module: ${this.moduleId} disabled`);
         return m[0] === 1;
     }
 
@@ -96,7 +95,7 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
      * Opens this module, allowing events to be fired.
      */
     public async open(guildId: string): Promise<boolean> {
-        const m = await getRepository(this._model).update(
+        const m = await this.ds.getRepository(CloseOptionModel).update(
             {
                 moduleId: this.moduleId,
                 guildId
@@ -106,62 +105,26 @@ export abstract class CloseableModule<T extends ModuleSettings> extends BaseDAO<
             }
         );
         this._isEnabled.set(guildId, m.affected === 1);
-        console.log(`Module: ${this.moduleId} enabled for guild ${guildId}`);
+        logger.info(`Module: ${this.moduleId} enabled for guild ${guildId}`);
         return m[0] === 1;
     }
 
     public async isEnabled(guildId: string): Promise<boolean> {
         if (!this._isEnabled.has(guildId)) {
-            const model: ICloseOption = await getRepository(this._model).findOne({
+            const model: ICloseOption = await this.ds.getRepository(CloseOptionModel).findOne({
                 select: ["status"],
                 where: {
                     moduleId: this.moduleId,
                     guildId
                 }
             });
+            if (!model) {
+                return false;
+            }
             this._isEnabled.set(guildId, model.status);
         }
         return this._isEnabled.get(guildId);
     }
 
-    /**
-     * Will check if:
-     * Current user is able to trigger this module
-     * is this module enabled
-     * @param guildId
-     * @param member
-     * @param channel
-     * @protected
-     */
-    protected async canRun(guildId: string, member: GuildMember | null, channel: TextBasedChannel | null): Promise<boolean> {
-        if (!ObjectUtil.validString(guildId)) {
-            throw new Error("Unable to find guild");
-        }
-        const enabled = await this.isEnabled(guildId);
-        if (!enabled) {
-            return false;
-        }
-
-        if (member) {
-            //TODO remove when i figure out how to get all closeable modules to implement ITriggerConstraint
-            if (GuildUtils.isMemberAdmin(member)) {
-                return false;
-            }
-            const memberRoles = member.roles.cache;
-            const hardCodedImmunes = [RolesEnum.OVERWATCH_ELITE, RolesEnum.CIVIL_PROTECTION, RolesEnum.ZOMBIES];
-            for (const immuneRoles of hardCodedImmunes) {
-                if (memberRoles.has(immuneRoles)) {
-                    return false;
-                }
-            }
-        }
-        const module = await getRepository(this._model).findOne({
-            where: {
-                moduleId: this.moduleId,
-                guildId,
-                status: true
-            }
-        });
-        return module && module.status;
-    }
+    public abstract setDefaults(guildId: string): Promise<void>;
 }

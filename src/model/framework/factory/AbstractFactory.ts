@@ -1,20 +1,17 @@
-import {IDiFactory} from "./IDiFactory";
 import Immutable from "immutable";
 
-export abstract class AbstractFactory<T> implements IDiFactory<T> {
+import type {IDiFactory} from "./IDiFactory.js";
 
+export abstract class AbstractFactory<T> implements IDiFactory<T> {
+    public static readonly factories: AbstractFactory<unknown>[] = [];
     private readonly _engines: Immutable.Set<T>;
 
-    public static readonly factories: AbstractFactory<unknown>[] = [];
-
-    public constructor() {
-        this._engines = this.populateEngines();
+    protected constructor(engines: T[]) {
+        this._engines = Immutable.Set(engines);
         AbstractFactory.factories.push(this);
     }
 
-    get engines(): Immutable.Set<T> {
-        return Immutable.Set(this._engines);
+    public get engines(): Immutable.Set<T> {
+        return this._engines;
     }
-
-    protected abstract populateEngines(): Immutable.Set<T>;
 }
