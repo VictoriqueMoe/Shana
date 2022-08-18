@@ -1,4 +1,4 @@
-import {Category, NotBot, TimedSet} from "@discordx/utilities";
+import {Category, NotBot, RateLimit, TIME_UNIT} from "@discordx/utilities";
 import {
     ApplicationCommandOptionType,
     ApplicationCommandType,
@@ -39,7 +39,6 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup("miscellaneous")
 @injectable()
 export class Misc {
-    private static readonly coolDown = new TimedSet<AnimeQuery>(60000);
 
     @Property("DEEPL")
     private readonly deepl: string;
@@ -172,7 +171,11 @@ export class Misc {
         description: "Find an anime from an anime screenshot",
         name: "find_anime"
     })
-    @Guard(NotBot, AttachmentAllowedFileTypes(["jpg", "png"], "screenshot"))
+    @Guard(NotBot,
+        AttachmentAllowedFileTypes(["jpg", "png"], "screenshot"),
+        RateLimit(TIME_UNIT.minutes, 1, {
+            message: "Please wait 1 min before using this command again"
+        }))
     private async findAnime(
         @SlashOption({
             name: "screenshot",
@@ -183,18 +186,8 @@ export class Misc {
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
-
+        const guildId = interaction.guildId;
         const freshHold = 0.86;
-        if (Misc.coolDown.isEmpty()) {
-            const entry = new AnimeQuery();
-            Misc.coolDown.add(entry);
-        } else {
-            const entry = Misc.coolDown.values().next().value as AnimeQuery;
-            entry.increment();
-            if (entry.timesQueries >= 10) {
-                return InteractionUtils.replyOrFollowUp(interaction, "Please wait 1 min before using this command again");
-            }
-        }
         let resp: Response = null;
         const url = attachment.url;
         try {
