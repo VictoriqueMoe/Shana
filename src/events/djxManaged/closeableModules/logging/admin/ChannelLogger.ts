@@ -37,7 +37,7 @@ export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSetting
 
     private static appendChannelTypeChanges(embed: EmbedBuilder, update: ThreadUpdate | ChannelUpdate): void {
         for (const name in update) {
-            if (update.hasOwnProperty(name)) {
+            if (Object.prototype.hasOwnProperty.call(update, name)) {
                 const value = update[name];
                 let beforeValue = value.before ? value.before : "None";
                 let afterValue = value.after ? value.after : "None";
