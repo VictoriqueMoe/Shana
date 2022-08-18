@@ -156,7 +156,8 @@ export class AutoMod extends TriggerConstraint<null> {
                             if (!(channel instanceof BaseGuildTextChannel)) {
                                 continue;
                             }
-                            const warnResponse = await channel.send(`<@${member.id}>, ${filter.warnMessage}`);
+                            const warnMessage = await filter.warnMessage(guildid);
+                            const warnResponse = await channel.send(`<@${member.id}>, ${warnMessage}`);
                             setTimeout(async () => {
                                 try {
                                     await warnResponse.delete();
