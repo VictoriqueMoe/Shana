@@ -25,7 +25,3 @@ enabled = true
 	  ]
 	  dialect = "typescript"
 	  skip_doc_coverage = ["class-expression", "method-definition"]
-
-[[transformers]]
-name = "prettier"
-enabled = true
