@@ -10,7 +10,7 @@ export class SpoilersFilter extends AbstractFilter {
     }
 
     public async doFilter(content: Message): Promise<boolean> {
-        const regex = /\|{2}(.*)\|{2}/gm;
+        const regex = /\|{2}(.*)\|{2}/gmu;
         const messageContent = content.content;
         if (regex.test(messageContent)) {
             return false;
