@@ -32,7 +32,7 @@ export class Main {
         LoggerFactory.info(process.execArgv);
         LoggerFactory.info(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         const testMode = Main.envMode === "development";
-        await moduleRegistrar();
+        moduleRegistrar();
         const dbName = testMode ? "database_test.sqlite" : "database.sqlite";
 
         const datasource = new DataSource({
