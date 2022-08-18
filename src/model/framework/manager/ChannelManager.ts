@@ -29,7 +29,7 @@ export class ChannelManager extends DataSourceAware {
         if (!model || !ObjectUtil.validString(model[channelEnum])) {
             return null;
         }
-        const channelId = model[channelEnum] as string;
+        const channelId = model[channelEnum];
         const guild = await DiscordUtils.getGuild(guildId);
         const channel = guild.channels.resolve(channelId);
         if (channel instanceof BaseGuildTextChannel) {
