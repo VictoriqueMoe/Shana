@@ -1,12 +1,5 @@
 import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
-import {
-    ApplicationCommandOptionType,
-    Channel,
-    CommandInteraction,
-    GuildMember,
-    PermissionsBitField,
-    User
-} from "discord.js";
+import {ApplicationCommandOptionType, Channel, CommandInteraction, GuildMember, User} from "discord.js";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
 import {injectable} from "tsyringe";
 import {Category, NotBot} from "@discordx/utilities";
@@ -16,8 +9,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Category("Members")
 @SlashGroup({
     name: "ages",
-    description: "commands to get ages of accounts and servers",
-    defaultMemberPermissions: PermissionsBitField.Flags.UseApplicationCommands
+    description: "commands to get ages of accounts and servers"
 })
 @SlashGroup("ages")
 @injectable()

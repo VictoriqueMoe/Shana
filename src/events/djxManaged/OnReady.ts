@@ -153,10 +153,14 @@ export class OnReady extends DataSourceAware {
                     logger.error(`cannot send warning message to this channel`, interaction);
                     return;
                 }
-                return InteractionUtils.replyOrFollowUp(
-                    interaction,
-                    "Something went wrong, please notify my developer: <@697417252320051291>"
-                );
+                try {
+                    await InteractionUtils.replyOrFollowUp(
+                        interaction,
+                        "Something went wrong, please notify my developer: <@697417252320051291>"
+                    );
+                } catch (e) {
+                    logger.error(e);
+                }
             }
         }
     }

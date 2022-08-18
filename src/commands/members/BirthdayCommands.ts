@@ -1,6 +1,6 @@
 import {ArgsOf, Client, Discord, Guard, On, Slash, SlashGroup, SlashOption} from "discordx";
 import {Category, NotBot} from "@discordx/utilities";
-import {ApplicationCommandOptionType, CommandInteraction, EmbedBuilder, PermissionsBitField} from "discord.js";
+import {ApplicationCommandOptionType, CommandInteraction, EmbedBuilder} from "discord.js";
 import {DateTime} from "luxon";
 import Channels from "../../enums/Channels.js";
 import {injectable} from "tsyringe";
@@ -20,8 +20,7 @@ type NextBirthday = {
 @Category("Members")
 @SlashGroup({
     name: "birthday",
-    description: "Commands to add your Birthday!",
-    defaultMemberPermissions: PermissionsBitField.Flags.UseApplicationCommands
+    description: "Commands to add your Birthday!"
 })
 @SlashGroup("birthday")
 @injectable()

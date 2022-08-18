@@ -71,6 +71,21 @@ export class ObjectUtil {
         return true;
     }
 
+    public static async search<T extends ISearchBase<SearchBase>>(interaction: AutocompleteInteraction, contextHandler: constructor<T>): Promise<void> {
+        const handler = container.resolve(contextHandler);
+        const result = await handler.search(interaction);
+        if (ObjectUtil.isValidArray(result)) {
+            const responseMap = result.map(result => {
+                return {
+                    name: result.item.name,
+                    value: result.item.name
+                };
+            });
+            return interaction.respond(responseMap);
+        }
+        return interaction.respond([]);
+    }
+
     public static truncate(str: string, limit: number): string {
         return str.length > limit ? `${str.substring(0, limit - 3)}...` : str;
     }

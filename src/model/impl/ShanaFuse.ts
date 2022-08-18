@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import {ObjectUtil} from "../../utils/Utils";
+import {ObjectUtil} from "../../utils/Utils.js";
 import type {SearchBase} from "../ISearchBase.js";
 
 export class ShanaFuse<T extends SearchBase> extends Fuse<T> {

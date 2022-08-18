@@ -7,7 +7,10 @@ import {dirname, importx} from "@discordx/importer";
 import {DataSource} from "typeorm";
 import {Typeings} from "./model/Typeings.js";
 import {IntentsBitField} from "discord.js";
-import {registerInstance} from "./model/framework/DI/moduleRegistrar.js";
+import {moduleRegistrar, registerInstance} from "./model/framework/DI/moduleRegistrar.js";
+import {Settings} from "luxon";
+import v8 from "v8";
+import LoggerFactory from "./utils/LoggerFactory.js";
 import propTypes = Typeings.propTypes;
 
 dotenv.config();
@@ -24,7 +27,12 @@ export class Main {
 
     public static async start(): Promise<void> {
         DIService.engine = tsyringeDependencyRegistryEngine.setInjector(container);
+        Settings.defaultZone = "utc";
+        Settings.defaultLocale = "en-gb";
+        LoggerFactory.info(process.execArgv);
+        LoggerFactory.info(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         const testMode = Main.envMode === "development";
+        await moduleRegistrar();
         const dbName = testMode ? "database_test.sqlite" : "database.sqlite";
 
         const datasource = new DataSource({
