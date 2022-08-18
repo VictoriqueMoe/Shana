@@ -11,7 +11,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "username",
     description: "Commands to set usernames for people",
-    defaultMemberPermissions: PermissionsBitField.Flags.Administrator
+    defaultMemberPermissions: PermissionsBitField.Flags.ManageNicknames
 })
 @SlashGroup("username")
 @injectable()
