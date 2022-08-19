@@ -17,6 +17,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "bookmarks",
     description: "Commands to manage bookmarks",
+    dmPermission: false
 })
 @SlashGroup("bookmarks")
 @injectable()

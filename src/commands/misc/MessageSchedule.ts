@@ -19,7 +19,8 @@ import allChannelsExceptCat = DiscordUtils.allChannelsExceptCat;
 @SlashGroup({
     name: "message_schedule",
     description: "Commands to schedule posts to channels",
-    defaultMemberPermissions: PermissionsBitField.Flags.ManageMessages
+    defaultMemberPermissions: PermissionsBitField.Flags.ManageMessages,
+    dmPermission: false
 })
 @SlashGroup("message_schedule")
 @injectable()

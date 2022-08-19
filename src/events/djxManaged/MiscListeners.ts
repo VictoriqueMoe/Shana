@@ -15,7 +15,17 @@ export class MiscListeners {
 
     @rest()
     private async rateLimited([rateLimitData]: RestArgsOf<"rateLimited">): Promise<void> {
-        logger.warn(rateLimitData);
+        const {limit, url, hash, majorParameter, method, route, timeToReset, global} = rateLimitData;
+        logger.warn({
+            limit,
+            url,
+            hash,
+            majorParameter,
+            method,
+            route,
+            timeToReset,
+            global
+        });
     }
 
     @On()

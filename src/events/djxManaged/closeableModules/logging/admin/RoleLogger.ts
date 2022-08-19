@@ -261,7 +261,6 @@ export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
         }
         const guildId = role.guild.id;
         const roleAuditLogEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.RoleDelete, role.guild);
-        const {executor, target} = roleAuditLogEntry;
         const embed = new EmbedBuilder()
             .setColor(role.hexColor)
             .setAuthor({
@@ -273,11 +272,14 @@ export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
             .setFooter({
                 text: `${role.id}`
             });
-        if (ObjectUtil.isValidObject(target)) {
-            const targetRoleId = (target as { id: string }).id;
-            if (targetRoleId === role.id) {
-                if (role.createdAt <= roleAuditLogEntry.createdAt) {
-                    embed.addFields(ObjectUtil.singleFieldBuilder("Role deleted by", executor.tag));
+        if (roleAuditLogEntry) {
+            const {executor, target} = roleAuditLogEntry;
+            if (ObjectUtil.isValidObject(target)) {
+                const targetRoleId = (target as { id: string }).id;
+                if (targetRoleId === role.id) {
+                    if (role.createdAt <= roleAuditLogEntry.createdAt) {
+                        embed.addFields(ObjectUtil.singleFieldBuilder("Role deleted by", executor.tag));
+                    }
                 }
             }
         }

@@ -96,7 +96,7 @@ export class FilterModuleManager extends DataSourceAware {
         return allModels.filter(model => model.pSubModuleId === filter.id)?.[0];
     }
 
-    public async getSetting(guildId: string, filter: IAutoModFilter, useCache = true): Promise<UnionSettings> {
+    public async getSetting(guildId: string, filter: IAutoModFilter): Promise<UnionSettings> {
         let res: FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel;
         const opts: FindOneOptions<FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel> = {
             relations: ["subModule"],
@@ -106,34 +106,10 @@ export class FilterModuleManager extends DataSourceAware {
             }
         };
         if (this.isBannedWordAutoModFilter(filter)) {
-            if (useCache) {
-                opts["cache"] = {
-                    id: "bannedWordSetting_query",
-                    milliseconds: 30000
-                };
-            } else {
-                opts["cache"] = false;
-            }
             res = await this.ds.manager.findOne(BannedWordFilterModuleModel, opts);
         } else if (this.isValueBackedAutoModFilter(filter)) {
-            if (useCache) {
-                opts["cache"] = {
-                    id: "valueBackedSetting_query",
-                    milliseconds: 30000
-                };
-            } else {
-                opts["cache"] = false;
-            }
             res = await this.ds.manager.findOne(ValueBackedFilterModuleModel, opts);
         } else {
-            if (useCache) {
-                opts["cache"] = {
-                    id: "FilterSetting_query",
-                    milliseconds: 30000
-                };
-            } else {
-                opts["cache"] = false;
-            }
             res = await this.ds.manager.findOne(FilterModuleModel, opts);
         }
         return res?.getSettings();

@@ -7,12 +7,15 @@ class LoggerFactory {
     private readonly _logger: Logger;
 
     public constructor() {
-        const {combine, splat, timestamp, printf} = format;
+        const {combine, splat, timestamp, printf, colorize} = format;
 
         const myFormat = printf(({level: l, message: m, timestamp: t, ...metadata}) => {
             let msg = `⚡ ${t} [${l}] : ${m} `;
             if (metadata && JSON.stringify(metadata) !== "{}") {
                 msg += JSON.stringify(metadata);
+            }
+            if (m.constructor === Object) {
+                msg += JSON.stringify(m, null, 4);
             }
             return msg;
         });
@@ -20,12 +23,7 @@ class LoggerFactory {
         const transportsArray: Transport[] = [
             new transports.Console({
                 level: "debug",
-                format: combine(format.colorize(), splat(), timestamp(), myFormat)
-            }),
-            new transports.File({
-                level: "info",
-                format: format.combine(format.timestamp(), format.json()),
-                filename: `${process.cwd()}/combined.log`
+                format: combine(colorize(), splat(), timestamp(), myFormat)
             })
         ];
 

@@ -19,11 +19,17 @@ import {PostableChannelModel} from "../../model/DB/entities/guild/PostableChanne
 import {LogChannelManager} from "../../model/framework/manager/LogChannelManager.js";
 import {UsernameManager} from "../../model/framework/manager/UsernameManager.js";
 import {ChannelType} from "discord.js";
+import {Property} from "../../model/framework/decorators/Property.js";
+import {Typeings} from "../../model/Typeings.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
+import propTypes = Typeings.propTypes;
 
 @Discord()
 @injectable()
 export class OnReady extends DataSourceAware {
+
+    @Property("NODE_ENV")
+    private readonly envMode: propTypes["NODE_ENV"];
 
     public constructor(private _client: Client,
                        @inject(delay(() => SubModuleManager)) private _subModuleManager: SubModuleManager,
@@ -42,7 +48,6 @@ export class OnReady extends DataSourceAware {
         await this.ds.transaction(async (transactionalEntityManager: EntityManager) => {
             await this.setDefaultSettings(transactionalEntityManager);
             await this.populatePostableChannels(transactionalEntityManager);
-            await this.initAppCommands();
             await this.joinThreads();
         });
         await this.initModuleSettings();
@@ -78,7 +83,12 @@ export class OnReady extends DataSourceAware {
         }
     }
 
-    private async initAppCommands(): Promise<void> {
+    public async initAppCommands(): Promise<void> {
+        if (this.envMode === "production") {
+            for (const [guildId] of this._client.guilds.cache) {
+                await this._client.clearApplicationCommands(guildId);
+            }
+        }
         return this._client.initApplicationCommands();
     }
 
@@ -123,6 +133,7 @@ export class OnReady extends DataSourceAware {
     })
     private async initialise([client]: ArgsOf<"ready">): Promise<void> {
         client.user.setActivity('Half-Life 3', {type: ActivityType.Playing});
+        await this.initAppCommands();
         const pArr: Promise<any>[] = [];
         await this.populateGuilds();
         pArr.push(this.initUsernames());

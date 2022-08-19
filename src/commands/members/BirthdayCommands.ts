@@ -20,7 +20,8 @@ type NextBirthday = {
 @Category("Members")
 @SlashGroup({
     name: "birthday",
-    description: "Commands to add your Birthday!"
+    description: "Commands to add your Birthday!",
+    dmPermission: false
 })
 @SlashGroup("birthday")
 @injectable()

@@ -35,6 +35,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "miscellaneous",
     description: "Miscellaneous commands",
+    dmPermission: false
 })
 @SlashGroup("miscellaneous")
 @injectable()

@@ -11,6 +11,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "notes",
     description: "Commands to manage your personal notes",
+    dmPermission: false
 })
 @SlashGroup("notes")
 @injectable()

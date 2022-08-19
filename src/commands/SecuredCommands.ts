@@ -11,7 +11,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "secure",
     description: "secured commands used as moderation utilities",
-    defaultMemberPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.MuteMembers]
+    defaultMemberPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.MuteMembers],
+    dmPermission: false
 })
 @SlashGroup("secure")
 @injectable()

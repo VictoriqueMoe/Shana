@@ -22,6 +22,7 @@ import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
 @SlashGroup({
     name: "moebooru",
     description: "Commands to get waifus",
+    dmPermission: false
 })
 @SlashGroup("moebooru")
 @injectable()

@@ -22,6 +22,7 @@
     "spaced-comment": "error",
     "no-unused-vars": "off",
     "curly": "error",
+    "semi": "error",
     "camelcase": "off",
     // TypeScript
     "@typescript-eslint/explicit-function-return-type": "off",

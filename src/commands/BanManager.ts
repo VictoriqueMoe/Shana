@@ -8,7 +8,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "bans",
     description: "commands to manage bans in this server",
-    defaultMemberPermissions: PermissionsBitField.Flags.BanMembers
+    defaultMemberPermissions: PermissionsBitField.Flags.BanMembers,
+    dmPermission: false
 })
 @SlashGroup("bans")
 export class BanManager {

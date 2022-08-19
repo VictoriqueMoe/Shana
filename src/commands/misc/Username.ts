@@ -11,7 +11,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "username",
     description: "Commands to set usernames for people",
-    defaultMemberPermissions: PermissionsBitField.Flags.ManageNicknames
+    defaultMemberPermissions: PermissionsBitField.Flags.ManageNicknames,
+    dmPermission: false
 })
 @SlashGroup("username")
 @injectable()
@@ -38,7 +39,7 @@ export class Username {
         for (const model of allModels) {
             try {
                 const member = await guild.members.fetch(model.userId);
-                messageDisplay += `\n user: "${member.user.tag}" has a persisted username of "${model.usernameToPersist}"`;
+                messageDisplay += `\nuser: "${member.user.tag}" has a persisted username of "${model.usernameToPersist}"`;
                 if (model.force) {
                     messageDisplay += ` Additionally, this user is not allowed to change it`;
                 }

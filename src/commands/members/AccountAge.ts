@@ -9,7 +9,8 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @Category("Members")
 @SlashGroup({
     name: "ages",
-    description: "commands to get ages of accounts and servers"
+    description: "commands to get ages of accounts and servers",
+    dmPermission: false
 })
 @SlashGroup("ages")
 @injectable()

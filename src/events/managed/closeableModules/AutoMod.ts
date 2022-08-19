@@ -194,7 +194,7 @@ export class AutoMod extends TriggerConstraint<null> {
                         break outer;
                     }
                 }
-                const enabled = await this.isEnabled(guildid);
+                const enabled = await filter.isActive(guildid);
                 logger.info(`message from server ${member.guild.name} (${guildid}) violated filter ${filter.id}. Filter status is ${enabled}`);
                 filter.postProcess(message);
             }
