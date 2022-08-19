@@ -73,13 +73,17 @@ export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSetting
             threadCreate: false,
             threadDelete: false,
             threadUpdate: false
-        });
+        }, false, true);
     }
 
     @On({
         event: "channelCreate"
     })
     private async channelCreated([channel]: ArgsOf<"channelCreate">): Promise<void> {
+        const enabled = await this.isEnabledInternal(channel.guildId, "channelCreated");
+        if (!enabled) {
+            return;
+        }
         const {guild} = channel;
         const channelAudiEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.ChannelCreate, guild);
         const {executor, target} = channelAudiEntry;
@@ -112,6 +116,10 @@ export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSetting
         if (!(channel instanceof BaseGuildTextChannel)) {
             return;
         }
+        const enabled = await this.isEnabledInternal(channel.guildId, "channelDelete");
+        if (!enabled) {
+            return;
+        }
         const {guild} = channel;
         const channelAudiEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.ChannelDelete, guild);
         const {executor, target} = channelAudiEntry;
@@ -142,6 +150,10 @@ export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSetting
     })
     private async channelUpdate([oldChannel, newChannel]: ArgsOf<"channelUpdate">): Promise<void> {
         if (!(oldChannel instanceof GuildChannel) || !(newChannel instanceof GuildChannel)) {
+            return;
+        }
+        const enabled = await this.isEnabledInternal(newChannel.guildId, "channelUpdate");
+        if (!enabled) {
             return;
         }
         const channelUpdate = this._guildInfoChangeManager.getChannelChanges(oldChannel, newChannel);
@@ -187,6 +199,10 @@ export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSetting
         event: "threadCreate"
     })
     private async threadCreate([thread]: ArgsOf<"threadCreate">): Promise<void> {
+        const enabled = await this.isEnabledInternal(thread.guildId, "threadCreate");
+        if (!enabled) {
+            return;
+        }
         const {guild} = thread;
         const guildId = guild.id;
         const architectTime = thread.autoArchiveDuration;
@@ -226,6 +242,10 @@ export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSetting
         event: "threadDelete"
     })
     private async threadDelete([thread]: ArgsOf<"threadDelete">): Promise<void> {
+        const enabled = await this.isEnabledInternal(thread.guildId, "threadDelete");
+        if (!enabled) {
+            return;
+        }
         const {guild} = thread;
         const threadAuditEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.ThreadDelete, guild);
         const {executor, target} = threadAuditEntry;
@@ -256,6 +276,10 @@ export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSetting
     })
     private async threadUpdate([oldThread, newThread]: ArgsOf<"threadUpdate">): Promise<void> {
         if (!(oldThread instanceof ThreadChannel) || !(newThread instanceof ThreadChannel)) {
+            return;
+        }
+        const enabled = await this.isEnabledInternal(newThread.guildId, "threadUpdate");
+        if (!enabled) {
             return;
         }
         const threadUpdate = this._guildInfoChangeManager.getThreadChanges(oldThread, newThread);

@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
 import {Property} from "./model/framework/decorators/Property.js";
-import {Client, ClientOptions, DIService, tsyringeDependencyRegistryEngine} from "discordx";
+import {Client, ClientOptions, DIService, ILogger, tsyringeDependencyRegistryEngine} from "discordx";
 import {container} from "tsyringe";
 import {dirname, importx} from "@discordx/importer";
 import {DataSource} from "typeorm";
@@ -11,6 +11,7 @@ import {moduleRegistrar, registerInstance} from "./model/framework/DI/moduleRegi
 import {Settings} from "luxon";
 import v8 from "v8";
 import LoggerFactory from "./utils/LoggerFactory.js";
+import loggerFactory from "./utils/LoggerFactory.js";
 import propTypes = Typeings.propTypes;
 
 dotenv.config();
@@ -38,7 +39,7 @@ export class Main {
         const datasource = new DataSource({
             type: "better-sqlite3",
             database: dbName,
-            synchronize: testMode,
+            synchronize: false,
             cache: {
                 duration: 1000
             },
@@ -62,6 +63,23 @@ export class Main {
                 IntentsBitField.Flags.DirectMessages,
                 IntentsBitField.Flags.GuildVoiceStates
             ],
+            logger: new class djxLogger implements ILogger {
+                public error(...args: unknown[]): void {
+                    loggerFactory.error(args);
+                }
+
+                public info(...args: unknown[]): void {
+                    loggerFactory.info(args);
+                }
+
+                public log(...args: unknown[]): void {
+                    loggerFactory.info(args);
+                }
+
+                public warn(...args: unknown[]): void {
+                    loggerFactory.warn(args);
+                }
+            },
             silent: false,
         };
         if (this.envMode === "development") {

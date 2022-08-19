@@ -37,4 +37,13 @@ export abstract class AbstractAdminAuditLogger<T extends LoggerSettings> extends
         const guild = client.guilds.cache.get(guildId);
         return guild.name;
     }
+
+    public async isEnabledInternal(guildId: string, logger: keyof T): Promise<boolean> {
+        const moduleEnabled = await super.isEnabled(guildId);
+        if (!moduleEnabled) {
+            return false;
+        }
+        const settings = await this.getSettings(guildId, false);
+        return settings[logger] as unknown as boolean ?? false;
+    }
 }

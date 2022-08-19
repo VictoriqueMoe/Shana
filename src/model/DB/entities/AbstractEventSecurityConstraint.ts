@@ -43,7 +43,7 @@ export abstract class AbstractEventSecurityConstraint extends AbstractModel impl
             return;
         }
         const guild = this.getGuild();
-        this[prop] = value.map(roleId => guild.roles.cache.get(roleId));
+        this[prop] = value.map(roleId => guild.roles.cache.get(roleId)).filter(roleId => ObjectUtil.isValidObject(roleId));
     }
 
     private getChannels(prop: string): void {
@@ -53,7 +53,7 @@ export abstract class AbstractEventSecurityConstraint extends AbstractModel impl
             return;
         }
         const guild = this.getGuild();
-        this[prop] = value.map(channelId => guild.channels.cache.get(channelId));
+        this[prop] = value.map(channelId => guild.channels.cache.get(channelId)).filter(channel => ObjectUtil.isValidObject(channel));
     }
 
     private getGuild(): Guild {

@@ -32,7 +32,7 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
             bulkDelete: false,
             messageDeleted: false,
             messageEdited: false
-        });
+        }, false, true);
     }
 
     @On({

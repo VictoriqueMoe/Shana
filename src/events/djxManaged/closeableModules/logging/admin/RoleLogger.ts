@@ -26,7 +26,7 @@ export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
             roleDeleted: false,
             roleGiven: false,
             roleUpdated: false
-        });
+        }, false, true);
     }
 
     @On({

@@ -19,13 +19,17 @@ export class GuildLogger extends AbstractAdminAuditLogger<GuildLoggerSettings> {
     public setDefaults(guildId: string): Promise<void> {
         return super.saveSettings(guildId, {
             guildUpdate: false
-        });
+        }, false, true);
     }
 
     @On({
         event: "guildUpdate"
     })
     private async guildUpdate([oldGuild, newGuild]: ArgsOf<"guildUpdate">): Promise<void> {
+        const enabled = await this.isEnabledInternal(newGuild.id, "guildUpdate");
+        if (!enabled) {
+            return;
+        }
         const guildUpdate = this._guildInfoChangeManager.getGuildUpdate(oldGuild, newGuild);
         if (!ObjectUtil.isValidObject(guildUpdate)) {
             return;

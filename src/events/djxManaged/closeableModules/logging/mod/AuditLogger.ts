@@ -47,7 +47,7 @@ export class AuditLogger extends CloseableModule<ModAuditLogSettings> {
             memberKicked: false,
             memberLeaves: false,
             memberMuted: false
-        });
+        }, false, true);
     }
 
     @On({

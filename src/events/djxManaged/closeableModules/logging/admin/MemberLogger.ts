@@ -30,7 +30,7 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
             memberJoins: false,
             memberLeaves: false,
             voiceChannelChanged: false
-        });
+        }, false, true);
     }
 
     @On({

@@ -9,7 +9,7 @@ export class ValueBackedFilterModuleModel extends FilterModuleModel {
 
     @Column({
         type: "text",
-        unique: true,
+        unique: false,
         default: null,
         nullable: true
     })

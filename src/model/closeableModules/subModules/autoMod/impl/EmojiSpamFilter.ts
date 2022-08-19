@@ -18,6 +18,12 @@ export class EmojiSpamFilter extends AbstractValueBackedAutoModFilter<number> {
         return 6;
     }
 
+    public override async warnMessage(guildId: string): Promise<string> {
+        const message = await super.warnMessage(guildId);
+        const limit = await this.value(guildId);
+        return `${message}, the limit is: ${limit}`;
+    }
+
     public async doFilter(content: Message): Promise<boolean> {
         const value = await this.value(content.guildId);
         return this._emojiManager.getEmojiFromMessage(content).length <= value;

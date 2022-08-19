@@ -102,6 +102,9 @@ export class BirthdayManager extends DataSourceAware {
         }
         const key = `${userId}${guildId}`;
         const job = this._birthdayJobs.find(job => job.name === key);
+        if (!job) {
+            return true;
+        }
         ObjectUtil.removeObjectFromArray(job, this._birthdayJobs);
         job.cancel(false);
         return true;

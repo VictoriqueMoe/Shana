@@ -29,13 +29,18 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
         return this._subModuleManager.getSubModulesFromParent(this);
     }
 
-    public async saveSettings(guildId: string, setting: T, merge = false): Promise<void> {
+    public async saveSettings(guildId: string, setting: T, merge = false, appendOnly = false): Promise<void> {
         const model: ICloseOption = await this.ds.getRepository(CloseOptionModel).findOne({
             where: {
                 moduleId: this.moduleId,
                 guildId
             }
         });
+        if (appendOnly) {
+            if (model.settings) {
+                return;
+            }
+        }
         if (merge) {
             model.settings = {...model.settings, ...setting};
         } else {

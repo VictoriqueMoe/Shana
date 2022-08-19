@@ -22,7 +22,7 @@ export abstract class AbstractFilter implements IAutoModFilter {
     }
 
     public actions(guildId: string): Promise<ACTION[]> {
-        return this._filterManager.getSetting(guildId, this).then(setting => setting.actions);
+        return this._filterManager.getSetting(guildId, this).then(setting => setting.actions.map(action => Number.parseInt(action as unknown as string)));
     }
 
     public warnMessage(guildId: string): Promise<string> {
