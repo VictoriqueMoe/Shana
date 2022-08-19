@@ -33,6 +33,10 @@ export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
         event: "guildMemberUpdate"
     })
     private async roleGiven([oldMember, newMember]: ArgsOf<"guildMemberUpdate">): Promise<void> {
+        const enabled = await this.isEnabledInternal(newMember.guild.id, "roleGiven");
+        if (!enabled) {
+            return;
+        }
         if (EventDeletedListener.isMemberRemoved(newMember)) {
             return;
         }
@@ -100,6 +104,10 @@ export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
         event: "roleUpdate"
     })
     private async roleUpdated([oldRole, newRole]: ArgsOf<"roleUpdate">): Promise<void> {
+        const enabled = await this.isEnabledInternal(newRole.guild.id, "roleUpdated");
+        if (!enabled) {
+            return;
+        }
         const roleChange = this._guildInfoChangeManager.getRoleChanges(oldRole, newRole);
         const guildId = newRole.guild.id;
         if (!ObjectUtil.isValidObject(roleChange)) {
@@ -210,6 +218,10 @@ export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
         event: "roleCreate"
     })
     private async roleCreated([role]: ArgsOf<"roleCreate">): Promise<void> {
+        const enabled = await this.isEnabledInternal(role.guild.id, "roleCreated");
+        if (!enabled) {
+            return;
+        }
         const roleAuditLogEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.RoleCreate, role.guild);
         const {target} = roleAuditLogEntry;
         const guildId = role.guild.id;
@@ -239,6 +251,10 @@ export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
         event: "roleDelete"
     })
     private async roleDeleted([role]: ArgsOf<"roleDelete">, client: Client): Promise<void> {
+        const enabled = await this.isEnabledInternal(role.guild.id, "roleDeleted");
+        if (!enabled) {
+            return;
+        }
         const me = client.guilds.cache.get(role.guild.id).members.me;
         if (me.roles.cache.size === 1) {
             return;

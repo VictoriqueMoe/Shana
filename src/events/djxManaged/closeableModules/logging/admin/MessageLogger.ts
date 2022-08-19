@@ -39,6 +39,10 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
         event: "messageUpdate"
     })
     private async messageEdited([oldMessage, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
+        const enabled = await this.isEnabledInternal(newMessage.guildId, "messageEdited");
+        if (!enabled) {
+            return;
+        }
         if (!newMessage.member) {
             return;
         }
@@ -86,6 +90,10 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
         event: "messageDelete"
     })
     private async messageDeleted([message]: ArgsOf<"messageDelete">, client: Client): Promise<void> {
+        const enabled = await this.isEnabledInternal(message.guildId, "messageDeleted");
+        if (!enabled) {
+            return;
+        }
         if (message?.member?.id === client.user.id) {
             return;
         }
@@ -163,6 +171,10 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
         const len = collection.size;
         const channelSet: Set<string> = new Set();
         const guildId: string = collection.first().guild.id;
+        const enabled = await this.isEnabledInternal(guildId, "messageDeleted");
+        if (!enabled) {
+            return;
+        }
         collection.forEach(({id}) => channelSet.add(id));
         const channelIdArray = Array.from(channelSet.entries());
         const description = `Bulk Delete in ${channelIdArray.map(id => `<#${id}>`).join(", ")}, ${len} messages deleted`;

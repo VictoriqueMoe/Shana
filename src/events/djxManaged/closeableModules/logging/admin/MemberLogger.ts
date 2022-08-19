@@ -37,6 +37,10 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
         event: "voiceStateUpdate"
     })
     private async voiceChannelChanged([oldState, newState]: ArgsOf<"voiceStateUpdate">): Promise<void> {
+        const enabled = await this.isEnabledInternal(newState.guild.id, "voiceChannelChanged");
+        if (!enabled) {
+            return;
+        }
         const {member} = newState;
         const {user} = member;
         const guildId = member.guild.id;
@@ -81,6 +85,10 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
         event: "guildMemberUpdate"
     })
     private async memberDetailsChanged([oldUser, newUser]: ArgsOf<"guildMemberUpdate">): Promise<void> {
+        const enabled = await this.isEnabledInternal(newUser.guild.id, "memberDetailsChanged");
+        if (!enabled) {
+            return;
+        }
         const memberUpdate = this._guildInfoChangeManager.getMemberChanges(oldUser, newUser);
         if (!ObjectUtil.isValidObject(memberUpdate)) {
             return;
@@ -150,6 +158,10 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
         event: "guildBanRemove"
     })
     private async banRemoved([ban]: ArgsOf<"guildBanRemove">): Promise<void> {
+        const enabled = await this.isEnabledInternal(ban.guild.id, "memberBanned");
+        if (!enabled) {
+            return;
+        }
         const {guild, user} = ban;
         const memberBannedId = user.id;
         const MemberBannedTag = user.tag;
@@ -178,6 +190,10 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
         event: "guildMemberAdd"
     })
     private async memberJoins([member]: ArgsOf<"guildMemberAdd">): Promise<void> {
+        const enabled = await this.isEnabledInternal(member.guild.id, "memberJoins");
+        if (!enabled) {
+            return;
+        }
         const memberJoinedId = member.id;
         const memberJoinedTag = member.user.tag;
         const avatarUrl = member.user.displayAvatarURL();
@@ -206,6 +222,10 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
     })
     private async memberLeaves([member]: ArgsOf<"guildMemberRemove">): Promise<void> {
         const guild = member.guild;
+        const enabled = await this.isEnabledInternal(guild.id, "memberLeaves");
+        if (!enabled) {
+            return;
+        }
         const banLog = await this._auditManager.getAuditLogEntry(AuditLogEvent.MemberBanAdd, guild);
         if (banLog) {
             // do not bother to log a member leaving if they where banned
@@ -289,6 +309,10 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
         event: "guildBanAdd"
     })
     private async memberBanned([ban]: ArgsOf<"guildBanAdd">): Promise<void> {
+        const enabled = await this.isEnabledInternal(ban.guild.id, "memberBanned");
+        if (!enabled) {
+            return;
+        }
         if (ban.partial) {
             ban = await ban.fetch(true);
         }
