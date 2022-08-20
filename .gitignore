@@ -128,3 +128,4 @@ dist
 /database.sqlite-shm
 /database.sqlite-wal
 *.sqlite
+/WeebBotV2.rar

@@ -30,6 +30,9 @@ export class UsernameEvents {
         const guild = await client.guilds.fetch(guildId);
         const member = await guild.members.fetch(executor.id);
         const isMemberStaff = member.permissions.has(PermissionFlagsBits.ManageNicknames);
+        if (model.usernameToPersist === newUser.nickname) {
+            return;
+        }
         if (isMemberStaff || (executor.id === newUser.id && model.force === false)) {
             const newNick = newUser.nickname;
             if (newNick === null) {
