@@ -29,7 +29,7 @@ class JoinEntry {
 @injectable()
 export class AutoRole extends CloseableModule<AutoRoleSettings> {
 
-    private static readonly _joinTimedSet: Map<string, TimedSet<JoinEntry>>;
+    private static readonly _joinTimedSet: Map<string, TimedSet<JoinEntry>> = new Map();
 
     public constructor(private _roleApplier: RoleApplier,
                        private _logManager: LogChannelManager,
