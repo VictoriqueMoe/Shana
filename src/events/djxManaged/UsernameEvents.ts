@@ -41,7 +41,7 @@ export class UsernameEvents {
                 if (newNick === null) {
                     this._logManager.postToLog(`User "${newUser.user.tag}" has had their username remove from persistence`, guildId);
                 } else {
-                    this._logManager.postToLog(`User "${newUser.user.tag}" has a persisted nickname of "${model.usernameToPersist}", howerver, this has been updated to "${(newNick)}"`, guildId);
+                    this._logManager.postToLog(`User "${newUser.user.tag}" has a persisted nickname of "${model.usernameToPersist}", however, this has been updated to "${(newNick)}"`, guildId);
                 }
                 return;
             }
