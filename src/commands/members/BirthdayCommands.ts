@@ -1,4 +1,4 @@
-import {ArgsOf, Client, Discord, Guard, On, Slash, SlashGroup, SlashOption} from "discordx";
+import {ArgsOf, Discord, Guard, On, Slash, SlashGroup, SlashOption} from "discordx";
 import {Category, NotBot} from "@discordx/utilities";
 import {ApplicationCommandOptionType, CommandInteraction, EmbedBuilder} from "discord.js";
 import {DateTime} from "luxon";
@@ -31,7 +31,7 @@ export class BirthdayCommands {
     }
 
     @On()
-    private async guildMemberRemove([member]: ArgsOf<"guildMemberRemove">, client: Client): Promise<void> {
+    private async guildMemberRemove([member]: ArgsOf<"guildMemberRemove">): Promise<void> {
         const memberId = member.id;
         const {guild} = member;
         this._birthdayManager.removeBirthday(memberId, guild);

@@ -125,7 +125,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         }
     }
 
-    public setDefaults(guildId?: string): Promise<void> {
+    public setDefaults(): Promise<void> {
         return Promise.resolve(undefined);
     }
 

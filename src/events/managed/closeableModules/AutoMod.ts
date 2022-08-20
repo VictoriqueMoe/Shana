@@ -42,7 +42,7 @@ export class AutoMod extends TriggerConstraint<null> {
     }
 
 
-    public setDefaults(guildId: string): Promise<void> {
+    public setDefaults(): Promise<void> {
         return Promise.resolve();
     }
 

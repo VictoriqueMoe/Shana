@@ -1,4 +1,4 @@
-import {ArgsOf, Client, ContextMenu, Discord, Guard, On, Slash, SlashGroup, SlashOption} from "discordx";
+import {ArgsOf, ContextMenu, Discord, Guard, On, Slash, SlashGroup, SlashOption} from "discordx";
 import {Category, NotBot} from "@discordx/utilities";
 import {
     ApplicationCommandOptionType,
@@ -26,7 +26,7 @@ export class Bookmark {
     }
 
     @On()
-    private async messageDelete([message]: ArgsOf<"messageDelete">, client: Client): Promise<void> {
+    private async messageDelete([message]: ArgsOf<"messageDelete">): Promise<void> {
         this._bookmarkManager.deleteBookmark(message.member, message);
     }
 

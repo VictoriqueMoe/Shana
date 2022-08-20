@@ -187,7 +187,6 @@ export class Misc {
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
-        const guildId = interaction.guildId;
         const freshHold = 0.86;
         let resp: Response = null;
         const url = attachment.url;
@@ -304,7 +303,7 @@ export class Misc {
             title: string
         }[];
         const promiseWrapper = async (url: string): Promise<GoogleImageResult> => {
-            return new Promise((resolve, reject) => reverseImageSearch(url, resolve));
+            return new Promise(resolve => reverseImageSearch(url, resolve));
         };
 
         const imageUrl = attatchment.url;
@@ -335,14 +334,5 @@ export class Misc {
         InteractionUtils.replyOrFollowUp(interaction, {
             embeds: [embed]
         });
-    }
-}
-
-class AnimeQuery {
-    public constructor(public timesQueries: number = 1) {
-    }
-
-    public increment(): void {
-        this.timesQueries++;
     }
 }

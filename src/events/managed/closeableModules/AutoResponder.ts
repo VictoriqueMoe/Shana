@@ -17,7 +17,7 @@ import {EventDeletedListener} from "../../djxManaged/eventDispatcher/EventDelete
 @singleton()
 export class AutoResponder extends TriggerConstraint<null> {
 
-    public setDefaults(guildId: string): Promise<void> {
+    public setDefaults(): Promise<void> {
         return Promise.resolve(undefined);
     }
 

@@ -50,7 +50,7 @@ export class UsernameEvents {
     }
 
     @On()
-    private async guildMemberAdd([member]: ArgsOf<"guildMemberAdd">, client: Client): Promise<void> {
+    private async guildMemberAdd([member]: ArgsOf<"guildMemberAdd">): Promise<void> {
         const model = await this._usernameManager.getUsername(member);
         if (model) {
             member.setNickname(model.usernameToPersist);
