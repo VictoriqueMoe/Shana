@@ -3,8 +3,6 @@ import {singleton} from "tsyringe";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
 import {TimedSet} from "@discordx/utilities";
 import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
-import {PostConstruct} from "../../../../framework/decorators/PostConstruct.js";
-import {Client} from "discordx";
 
 @singleton()
 export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number> {
@@ -26,14 +24,6 @@ export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number>
         return "Link Cooldown Filter";
     }
 
-    @PostConstruct
-    public async init(clinet: Client): Promise<void> {
-        for (const [guildId] of clinet.guilds.cache) {
-            const value = await this.value(guildId) * 1000;
-            this._cooldownArray.set(guildId, new TimedSet(value));
-        }
-    }
-
     /**
      * The time between links
      */
@@ -42,6 +32,10 @@ export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number>
     }
 
     public async doFilter(content: Message): Promise<boolean> {
+        if (!this._cooldownArray.has(content.guildId)) {
+            const value = await this.value(content.guildId) * 1000;
+            this._cooldownArray.set(content.guildId, new TimedSet(value));
+        }
         const messageContent = content.content;
         const urls = ObjectUtil.getUrls(messageContent);
         if (urls && urls.size > 0) {
@@ -49,7 +43,7 @@ export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number>
             const guildId = content.member.guild.id;
             let fromArray = this.getFromArray(memberId, guildId);
             if (!fromArray) {
-                fromArray = new LinkCooldownEntry(memberId, guildId);
+                fromArray = new LinkCooldownEntry(memberId);
                 fromArray.messageArray.push(content);
                 this._cooldownArray.get(guildId).add(fromArray);
                 return true;
@@ -63,7 +57,7 @@ export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number>
 
     public getFromArray(userId: string, guildId: string): LinkCooldownEntry {
         const arr = this._cooldownArray.get(guildId).rawSet;
-        return arr.find(value => value.userId === userId && value.guildId === guildId);
+        return arr.find(value => value.userId === userId);
     }
 
     public async postProcess(message: Message): Promise<void> {
@@ -75,6 +69,6 @@ class LinkCooldownEntry {
 
     public messageArray: Message[] = [];
 
-    public constructor(public userId: string, public guildId: string) {
+    public constructor(public userId: string) {
     }
 }

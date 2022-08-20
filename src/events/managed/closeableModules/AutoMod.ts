@@ -42,24 +42,28 @@ export class AutoMod extends TriggerConstraint<null> {
     }
 
 
-    public async init(): Promise<void> {
-        for (const [guildId] of this._client.guilds.cache) {
-            for (const filter of this.submodules) {
-                await this.ds.queryResultCache.clear();
-                const timeout = await filter.terminalViolationTimeout(guildId);
-                const timedSet = new TimedSet<TerminalViolation>(timeout * 1000);
-                if (this._muteTimeoutArray.has(guildId)) {
-                    if (this._muteTimeoutArray.get(guildId).has(filter)) {
-                        continue;
-                    }
-                    this._muteTimeoutArray.get(guildId).set(filter, timedSet);
-                } else {
-                    const newMap: Map<IAutoModFilter, TimedSet<TerminalViolation>> = new Map();
-                    newMap.set(filter, timedSet);
-                    this._muteTimeoutArray.set(guildId, newMap);
-                }
+    public setDefaults(guildId: string): Promise<void> {
+        return Promise.resolve();
+    }
+
+    private async muteUser(violationObj: TerminalViolation, user: GuildMember, reason: string, creatorID: string, channel?: BaseGuildTextChannel, time?: number): Promise<GuildMember> {
+        if (!user) {
+            return;
+        }
+        if (!time) {
+            time = TIME_OUT["1 hour"];
+        }
+        const guildId = user.guild.id;
+        const model = await this._muteManager.muteUser(user, reason, time * 1000);
+        this._muteTimeoutArray.get(guildId).get(violationObj.filter).delete(violationObj);
+        if (model) {
+            const humanMuted = ObjectUtil.timeToHuman(time, TIME_UNIT.seconds);
+            await this._logManager.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: \`"${violationObj.filter.id}"\` for ${humanMuted}`, user.guild.id);
+            if (channel) {
+                await channel.send(`<@${user.id}>, you have been muted for ${humanMuted} due to the violation of the \`${violationObj.filter.id}\``);
             }
         }
+        return model;
     }
 
     @MessageListenerDecorator(true, [notBot, Enabled(AutoMod)])
@@ -69,13 +73,27 @@ export class AutoMod extends TriggerConstraint<null> {
         if (!message.member) {
             return;
         }
-        const guildid = message.guildId;
+        const guildId = message.guildId;
         const member = message.member;
         const userId = member.id;
         for (const filter of filters) {
-            if (!(await filter.isActive(guildid))) {
+            if (!(await filter.isActive(guildId))) {
                 continue;
             }
+            if (this._muteTimeoutArray.has(guildId)) {
+                if (!this._muteTimeoutArray.get(guildId).has(filter)) {
+                    const timeout = await filter.terminalViolationTimeout(guildId);
+                    const timedSet = new TimedSet<TerminalViolation>(timeout * 1000);
+                    this._muteTimeoutArray.get(guildId).set(filter, timedSet);
+                }
+            } else {
+                const timeout = await filter.terminalViolationTimeout(guildId);
+                const timedSet = new TimedSet<TerminalViolation>(timeout * 1000);
+                const newMap: Map<IAutoModFilter, TimedSet<TerminalViolation>> = new Map();
+                newMap.set(filter, timedSet);
+                this._muteTimeoutArray.set(guildId, newMap);
+            }
+
             const filterConstraintSettings = await this._filterModuleManager.getModel(message.guildId, filter);
             if (!super.canTrigger(filterConstraintSettings, message)) {
                 continue;
@@ -90,7 +108,7 @@ export class AutoMod extends TriggerConstraint<null> {
             return;
         }
         const priorityFilters = violatedFilters.map(filter => {
-            return filter.priority(guildid).then(priority => {
+            return filter.priority(guildId).then(priority => {
                 return {
                     priority,
                     filter
@@ -103,7 +121,7 @@ export class AutoMod extends TriggerConstraint<null> {
         const {channel} = message;
         outer:
             for (const filter of violatedFilters) {
-                const actionsToTake = await filter.actions(guildid);
+                const actionsToTake = await filter.actions(guildId);
                 let didPreformTerminaloperation = false;
                 for (const action of actionsToTake) {
                     switch (action) {
@@ -113,15 +131,15 @@ export class AutoMod extends TriggerConstraint<null> {
                             if (action === ACTION.MUTE && this._muteManager.isMuted(member)) {
                                 continue;
                             }
-                            let fromArray = this.getFromArray(userId, guildid, filter);
+                            let fromArray = this.getFromArray(userId, guildId, filter);
                             if (fromArray) {
                                 fromArray.violations++;
-                                this._muteTimeoutArray.get(guildid).get(filter).refresh(fromArray);
+                                this._muteTimeoutArray.get(guildId).get(filter).refresh(fromArray);
                             } else {
-                                fromArray = new TerminalViolation(userId, filter, guildid);
-                                this._muteTimeoutArray.get(guildid).get(filter).add(fromArray);
+                                fromArray = new TerminalViolation(userId, filter);
+                                this._muteTimeoutArray.get(guildId).get(filter).add(fromArray);
                             }
-                            if (await fromArray.hasViolationLimitReached(guildid)) {
+                            if (await fromArray.hasViolationLimitReached(guildId)) {
                                 try {
                                     switch (action) {
                                         case ACTION.KICK:
@@ -139,7 +157,7 @@ export class AutoMod extends TriggerConstraint<null> {
                                             if (channel instanceof BaseGuildTextChannel) {
                                                 textChannel = channel;
                                             }
-                                            const autoMuteTimeout = await filter.autoMuteTimeout(guildid);
+                                            const autoMuteTimeout = await filter.autoMuteTimeout(guildId);
                                             await this.muteUser(fromArray, member, "Auto mod violation limit reached", this._client.user.id, textChannel, autoMuteTimeout);
                                             break;
                                         }
@@ -156,7 +174,7 @@ export class AutoMod extends TriggerConstraint<null> {
                             if (!(channel instanceof BaseGuildTextChannel)) {
                                 continue;
                             }
-                            const warnMessage = await filter.warnMessage(guildid);
+                            const warnMessage = await filter.warnMessage(guildId);
                             const warnResponse = await channel.send(`<@${member.id}>, ${warnMessage}`);
                             setTimeout(async () => {
                                 try {
@@ -168,7 +186,7 @@ export class AutoMod extends TriggerConstraint<null> {
                         }
                         case ACTION.DELETE: {
                             if (filter.constructor.name === "FastMessageSpamFilter") {
-                                const messageSpamEntry = (filter as FastMessageSpamFilter).getFromArray(userId, guildid);
+                                const messageSpamEntry = (filter as FastMessageSpamFilter).getFromArray(userId, guildId);
                                 if (messageSpamEntry) {
                                     for (const messageEntryM of messageSpamEntry.messages) {
                                         if (!EventDeletedListener.isMessageDeleted(messageEntryM)) {
@@ -194,39 +212,15 @@ export class AutoMod extends TriggerConstraint<null> {
                         break outer;
                     }
                 }
-                const enabled = await filter.isActive(guildid);
-                logger.info(`message from server ${member.guild.name} (${guildid}) violated filter ${filter.id}. Filter status is ${enabled}`);
+                const enabled = await filter.isActive(guildId);
+                logger.info(`message from server ${member.guild.name} (${guildId}) violated filter ${filter.id}. Filter status is ${enabled}`);
                 filter.postProcess(message);
             }
     }
 
-    private async muteUser(violationObj: TerminalViolation, user: GuildMember, reason: string, creatorID: string, channel?: BaseGuildTextChannel, time?: number): Promise<GuildMember> {
-        if (!user) {
-            return;
-        }
-        if (!time) {
-            time = TIME_OUT["1 hour"];
-        }
-        const guildId = user.guild.id;
-        const model = await this._muteManager.muteUser(user, reason, time * 1000);
-        this._muteTimeoutArray.get(guildId).get(violationObj.filter).delete(violationObj);
-        if (model) {
-            const humanMuted = ObjectUtil.timeToHuman(time, TIME_UNIT.seconds);
-            await this._logManager.postToLog(`User: "${user.user.username}" has been muted for the reason: "${reason}" by module: \`"${violationObj.filter.id}"\` for ${humanMuted}`, user.guild.id);
-            if (channel) {
-                await channel.send(`<@${user.id}>, you have been muted for ${humanMuted} due to the violation of the \`${violationObj.filter.id}\``);
-            }
-        }
-        return model;
-    }
-
     private getFromArray(userId: string, guildId: string, filter: IAutoModFilter): TerminalViolation {
         const arr = this._muteTimeoutArray.get(guildId).get(filter).rawSet;
-        return arr.find(value => value.userId === userId && value._guildId === guildId);
-    }
-
-    public setDefaults(guildId: string): Promise<void> {
-        return this.init();
+        return arr.find(value => value.userId === userId);
     }
 
 }
@@ -234,7 +228,7 @@ export class AutoMod extends TriggerConstraint<null> {
 class TerminalViolation {
     public violations: number;
 
-    public constructor(public userId: string, public filter: IAutoModFilter, public _guildId: string) {
+    public constructor(public userId: string, public filter: IAutoModFilter) {
         this.violations = 1;
     }
 

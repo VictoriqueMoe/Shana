@@ -29,7 +29,7 @@ class JoinEntry {
 @injectable()
 export class AutoRole extends CloseableModule<AutoRoleSettings> {
 
-    private static readonly _joinTimedSet = new TimedSet<JoinEntry>(10000);
+    private static readonly _joinTimedSet: Map<string, TimedSet<JoinEntry>>;
 
     public constructor(private _roleApplier: RoleApplier,
                        private _logManager: LogChannelManager,
@@ -41,7 +41,26 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         return "AutoRole";
     }
 
-    public async applyRole(member: GuildMember, guildId: string, isTimed = false): Promise<void> {
+    @PostConstruct
+    public async PostConstruct(clinet: Client): Promise<Map<Guild, string[]>> {
+        const retMap: Map<Guild, string[]> = new Map();
+        for (const [guildId, guild] of clinet.guilds.cache) {
+            const enabled = await this.isEnabled(guildId);
+            if (enabled) {
+                const membersApplied: string[] = [];
+                const noRoles = await this._roleManager.getMembersWithNoRoles(guildId);
+                for (const noRole of noRoles) {
+                    logger.info(`setting roles for ${noRole.user.tag} as they have no roles`);
+                    membersApplied.push(noRole.user.tag);
+                    await this.applyRole(noRole, guildId);
+                }
+                retMap.set(guild, membersApplied);
+            }
+        }
+        return retMap;
+    }
+
+    private async applyRole(member: GuildMember, guildId: string, isTimed = false): Promise<void> {
         if (EventDeletedListener.isMemberRemoved(member)) {
             return;
         }
@@ -95,25 +114,6 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         }
     }
 
-    @PostConstruct
-    public async applyEmptyRoles(clinet: Client): Promise<Map<Guild, string[]>> {
-        const retMap: Map<Guild, string[]> = new Map();
-        for (const [guildId, guild] of clinet.guilds.cache) {
-            const enabled = await this.isEnabled(guildId);
-            if (enabled) {
-                const membersApplied: string[] = [];
-                const noRoles = await this._roleManager.getMembersWithNoRoles(guildId);
-                for (const noRole of noRoles) {
-                    logger.info(`setting roles for ${noRole.user.tag} as they have no roles`);
-                    membersApplied.push(noRole.user.tag);
-                    await this.applyRole(noRole, guildId);
-                }
-                retMap.set(guild, membersApplied);
-            }
-        }
-        return retMap;
-    }
-
     private async doPanic(member: GuildMember, settings: AutoRoleSettings): Promise<boolean> {
         if (settings.panicMode) {
             try {
@@ -137,14 +137,17 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         if (!await this.isEnabled(guildId)) {
             return;
         }
+        if (!AutoRole._joinTimedSet.has(guildId)) {
+            AutoRole._joinTimedSet.set(guildId, new TimedSet<JoinEntry>(10000));
+        }
         const settings = await this.getSettings(guildId);
         if (settings.massJoinProtection > 0 && !settings.panicMode) {
-            if (AutoRole._joinTimedSet.isEmpty()) {
+            if (AutoRole._joinTimedSet.get(guildId).isEmpty()) {
                 const entry = new JoinEntry(1);
-                AutoRole._joinTimedSet.add(entry);
+                AutoRole._joinTimedSet.get(guildId).add(entry);
             } else {
-                const entry: JoinEntry = AutoRole._joinTimedSet.rawSet.values().next().value;
-                AutoRole._joinTimedSet.refresh(entry);
+                const entry: JoinEntry = AutoRole._joinTimedSet.get(guildId).rawSet.values().next().value;
+                AutoRole._joinTimedSet.get(guildId).refresh(entry);
                 entry.increment();
                 if (entry.joinCount > settings.massJoinProtection) {
                     this._logManager.postToLog(`More than ${settings.massJoinProtection} has joined this server in 10 seconds, panic mode is enabled`, guildId);
