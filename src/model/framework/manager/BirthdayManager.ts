@@ -54,11 +54,17 @@ export class BirthdayManager extends DataSourceAware {
         const dateWithoutYear = DateTime.fromFormat(discordFormat, "dd-MM");
         const dateWithYear = DateTime.fromFormat(discordFormat, "yyyy-MM-dd");
         if (!dateWithoutYear.isValid && !dateWithYear.isValid) {
-            throw new Error("Invalid date format, please use MM-dd (03-12 third of december) OR YYYY-MM-dd 1995-07-03 (3rd of July 1995)");
+            throw new Error("Invalid date format, please use MM-dd ( (03-12) third of december) OR YYYY-MM-dd ((1995-07-03 3rd) of July 1995)");
         }
         const userId = member.id;
         const guildId = member.guild.id;
         const includeYear = dateWithYear.isValid;
+        if (includeYear) {
+            const yearSelected = dateWithYear.year;
+            if (yearSelected > DateTime.now().year) {
+                throw new Error("Your birthday can't be in the future!");
+            }
+        }
         const luxonBirthday = (includeYear ? dateWithYear : dateWithoutYear);
         const dayOfYear = luxonBirthday.ordinal;
         const seconds = luxonBirthday.toSeconds();
