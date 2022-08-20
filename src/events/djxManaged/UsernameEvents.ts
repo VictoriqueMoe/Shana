@@ -30,22 +30,21 @@ export class UsernameEvents {
         const guild = await client.guilds.fetch(guildId);
         const member = await guild.members.fetch(executor.id);
         const isMemberStaff = member.permissions.has(PermissionFlagsBits.ManageNicknames);
-        if (model.usernameToPersist === newUser.nickname) {
-            return;
-        }
-        if (isMemberStaff || (executor.id === newUser.id && model.force === false)) {
-            const newNick = newUser.nickname;
-            if (newNick === null) {
-                await this._usernameManager.removeNickname(newUser);
-            } else {
-                await this._usernameManager.setUsername(newUser, newNick, model.force);
+        if (model.usernameToPersist !== newUser.nickname) {
+            if (isMemberStaff || (executor.id === newUser.id && model.force === false)) {
+                const newNick = newUser.nickname;
+                if (newNick === null) {
+                    await this._usernameManager.removeNickname(newUser);
+                } else {
+                    await this._usernameManager.setUsername(newUser, newNick, model.force);
+                }
+                if (newNick === null) {
+                    this._logManager.postToLog(`User "${newUser.user.tag}" has had their username remove from persistence`, guildId);
+                } else {
+                    this._logManager.postToLog(`User "${newUser.user.tag}" has a persisted nickname of "${model.usernameToPersist}", howerver, this has been updated to "${(newNick)}"`, guildId);
+                }
+                return;
             }
-            if (newNick === null) {
-                this._logManager.postToLog(`User "${newUser.user.tag}" has had their username remove from persistence`, guildId);
-            } else {
-                this._logManager.postToLog(`User "${newUser.user.tag}" has a persisted nickname of "${model.usernameToPersist}", howerver, this has been updated to "${(newNick)}"`, guildId);
-            }
-            return;
         }
         newUser.setNickname(model.usernameToPersist);
     }
