@@ -4,15 +4,13 @@ import {
     ApplicationCommandType,
     Attachment,
     AttachmentBuilder,
-    BooleanCache,
-    CacheType,
     ColorResolvable,
     CommandInteraction,
     EmbedBuilder,
     GuildMember,
     InteractionResponse,
     MessageContextMenuCommandInteraction,
-    User
+    UserContextMenuCommandInteraction
 } from "discord.js";
 import {Client, ContextMenu, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
 import {ImageURLOptions} from "@discordjs/rest";
@@ -114,48 +112,36 @@ export class Misc {
         });
     }
 
-    @Slash({
-        description: "The user to display the avatar"
+    @ContextMenu({
+        type: ApplicationCommandType.User
     })
     @Guard(NotBot)
-    private async avatar(
-        @SlashOption({
-            name: "user",
-            type: ApplicationCommandOptionType.User,
-            description: "The user to display the avatar",
-
-        })
-            user: User,
-        interaction: CommandInteraction
-    ): Promise<InteractionResponse<BooleanCache<CacheType>>> {
+    private async avatar(interaction: UserContextMenuCommandInteraction): Promise<InteractionResponse> {
         const ops: ImageURLOptions = {
             size: 1024
         };
-        const avatarUrl = user.displayAvatarURL(ops);
+        let userAvatarUrl: string;
+        const member = interaction.targetMember;
+        if (member instanceof GuildMember) {
+            userAvatarUrl = member.displayAvatarURL(ops);
+        } else {
+            userAvatarUrl = interaction.targetUser.avatarURL(ops);
+        }
         return interaction.reply({
-            files: [avatarUrl]
+            files: [userAvatarUrl]
         });
     }
 
-    @Slash({
-        description: "Display a users profile banner"
+    @ContextMenu({
+        type: ApplicationCommandType.User
     })
     @Guard(NotBot)
-    private async banner(
-        @SlashOption({
-            name: "user",
-            type: ApplicationCommandOptionType.User,
-            description: "The user to display the banner",
-        })
-            user: User,
-        interaction: CommandInteraction
-    ): Promise<void> {
+    private async banner(interaction: UserContextMenuCommandInteraction): Promise<void> {
         await interaction.deferReply();
         const ops: ImageURLOptions = {
             size: 1024
         };
-        const userFetched: User = await (<GuildMember><unknown>user).user.fetch(true);
-        const bannerUrl = userFetched.bannerURL(ops);
+        const bannerUrl = (await interaction.targetUser.fetch(true)).bannerURL(ops);
         if (!ObjectUtil.validString(bannerUrl)) {
             return InteractionUtils.replyOrFollowUp(interaction, {
                 content: "User has no banner",
