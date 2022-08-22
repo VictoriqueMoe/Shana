@@ -29,7 +29,7 @@ export class Scheduler implements IScheduler {
      * @param guildId
      * @param additionalArgs
      */
-    public register(name: string, whenToExecute: string | Date, callBack: JobCallback, guildId: string): IScheduledJob {
+    public register(name: string, whenToExecute: string | Date, callBack: JobCallback, guildId: string, additionalArgs?: Record<string, any>): IScheduledJob {
         if (this.getJob(name)) {
             this.cancelJob(name);
         }
@@ -42,7 +42,7 @@ export class Scheduler implements IScheduler {
 
         logger.info(`Register schedule "${name}"`);
         const job = schedule.scheduleJob(name, whenToExecute, callBack);
-        const sJob = this.registerJob(name, job, whenToExecute, guildId);
+        const sJob = this.registerJob(name, job, whenToExecute, guildId, additionalArgs);
         this.jobs.push(sJob);
         return sJob;
     }
@@ -68,7 +68,8 @@ export class Scheduler implements IScheduler {
         this.jobs = [];
     }
 
-    protected registerJob(name: string, job: schedule.Job, cron: string | Date, guildId: string): IScheduledJob {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    protected registerJob(name: string, job: schedule.Job, cron: string | Date, guildId: string, additionalArgs?: Record<string, any>): IScheduledJob {
         return new ScheduledJob(name, job, cron, guildId);
     }
 }
