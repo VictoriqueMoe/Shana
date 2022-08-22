@@ -23,10 +23,6 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
         super();
     }
 
-    public get moduleId(): string {
-        return "MessageLogger";
-    }
-
     public setDefaults(guildId: string): Promise<void> {
         return super.saveSettings(guildId, {
             bulkDelete: false,

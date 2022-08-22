@@ -30,10 +30,6 @@ export class AutoResponder extends TriggerConstraint<null> {
         this._autoResponderManager = container.resolve(AutoResponderManager);
     }
 
-    public get moduleId(): string {
-        return "AutoResponder";
-    }
-
     @MessageListenerDecorator(true, [notBot, Enabled(AutoResponder)])
     private async process([message]: ArgsOf<"messageCreate">, client: Client, guardPayload: any, isUpdate = false): Promise<void> {
         const channel = message.channel;

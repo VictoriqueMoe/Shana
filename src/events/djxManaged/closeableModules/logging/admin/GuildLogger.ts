@@ -12,10 +12,6 @@ import {GuildLoggerSettings} from "../../../../../model/closeableModules/setting
 @Discord()
 export class GuildLogger extends AbstractAdminAuditLogger<GuildLoggerSettings> {
 
-    public get moduleId(): string {
-        return "GuildLogger";
-    }
-
     public setDefaults(guildId: string): Promise<void> {
         return super.saveSettings(guildId, {
             guildUpdate: false

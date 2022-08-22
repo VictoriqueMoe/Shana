@@ -31,10 +31,6 @@ import ThreadUpdate = Typeings.ThreadUpdate;
 @Discord()
 export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSettings> {
 
-    public get moduleId(): string {
-        return "ChannelLogger";
-    }
-
     private static appendChannelTypeChanges(embed: EmbedBuilder, update: ThreadUpdate | ChannelUpdate): void {
         for (const name in update) {
             if (Object.prototype.hasOwnProperty.call(update, name)) {

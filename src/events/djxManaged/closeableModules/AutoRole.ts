@@ -37,10 +37,6 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
         super();
     }
 
-    public get moduleId(): string {
-        return "AutoRole";
-    }
-
     @PostConstruct
     public async PostConstruct(clinet: Client): Promise<Map<Guild, string[]>> {
         const retMap: Map<Guild, string[]> = new Map();

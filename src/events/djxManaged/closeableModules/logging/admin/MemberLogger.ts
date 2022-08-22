@@ -18,10 +18,6 @@ import {MemberLoggerSettings} from "../../../../../model/closeableModules/settin
 @Discord()
 export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings> {
 
-    public get moduleId(): string {
-        return "MemberLogger";
-    }
-
     public setDefaults(guildId: string): Promise<void> {
         return super.saveSettings(guildId, {
             banRemoved: false,

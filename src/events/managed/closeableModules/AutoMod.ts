@@ -33,10 +33,6 @@ export class AutoMod extends TriggerConstraint<null> {
         super();
     }
 
-    public get moduleId(): string {
-        return "AutoMod";
-    }
-
     public override get submodules(): Immutable.Set<IAutoModFilter> {
         return super.submodules as Immutable.Set<IAutoModFilter>;
     }

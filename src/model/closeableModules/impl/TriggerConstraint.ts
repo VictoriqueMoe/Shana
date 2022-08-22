@@ -7,8 +7,6 @@ import {ObjectUtil} from "../../../utils/Utils.js";
 
 export abstract class TriggerConstraint<T extends ModuleSettings> extends CloseableModule<T> implements ITriggerConstraint {
 
-    public abstract override get moduleId(): string;
-
     public canTrigger(obj: IEventSecurityConstraint, message: Message): boolean {
         const member = message.member;
         if (!member) {

@@ -16,10 +16,6 @@ import {EventDeletedListener} from "../../../eventDispatcher/EventDeletedListene
 @Discord()
 export class RoleLogger extends AbstractAdminAuditLogger<RoleLoggerSettings> {
 
-    public get moduleId(): string {
-        return "RoleLogger";
-    }
-
     public setDefaults(guildId: string): Promise<void> {
         return super.saveSettings(guildId, {
             roleCreated: false,

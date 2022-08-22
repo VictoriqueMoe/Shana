@@ -11,7 +11,8 @@
     "serve": "node build/Main.js",
     "lint": "eslint . --ext .ts --max-warnings 0",
     "lint-fix": "eslint . --ext .ts --fix",
-    "start_js": "npm run build & node build/Main.js",
+    "start": "node build/Main.js",
+    "rebuild_and_start": "npm run build & npm run start",
     "build_and_start": "npm run build & npm run restart_p2",
     "restart_p2": "pm2 restart ../ecosystem/ecosystem.config.js --only ShanaBot",
     "update_deps": "npx npm-check-updates"

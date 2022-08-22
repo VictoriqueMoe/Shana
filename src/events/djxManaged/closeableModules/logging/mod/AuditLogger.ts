@@ -27,7 +27,7 @@ export class AuditLogger extends CloseableModule<ModAuditLogSettings> {
         super();
     }
 
-    public get moduleId(): string {
+    public override get moduleId(): string {
         return "userLog";
     }
 

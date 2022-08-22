@@ -23,7 +23,9 @@ export abstract class CloseableModule<T extends ModuleSettings> extends DataSour
         this._subModuleManager = container.resolve(delay(() => SubModuleManager));
     }
 
-    public abstract get moduleId(): string;
+    public get moduleId(): string {
+        return this.constructor.name;
+    }
 
     public get submodules(): Immutable.Set<ISubModule> {
         return this._subModuleManager.getSubModulesFromParent(this);
