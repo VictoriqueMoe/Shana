@@ -15,6 +15,7 @@
     "rebuild_and_start": "npm run build & npm run start",
     "build_and_start": "npm run build & npm run restart_p2",
     "restart_p2": "pm2 restart ../ecosystem/ecosystem.config.js --only ShanaBot",
+    "pm2_flush": "pm2 flush",
     "update_deps": "npx npm-check-updates"
   },
   "repository": {
@@ -74,9 +75,9 @@
     "@types/express-jwt": "^6.0.4",
     "@types/ffmpeg": "^1.0.4",
     "@types/glob": "^7.2.0",
-    "@types/jsonwebtoken": "^8.5.8",
+    "@types/jsonwebtoken": "^8.5.9",
     "@types/luxon": "^3.0.0",
-    "@types/node": "^18.7.11",
+    "@types/node": "^18.7.13",
     "@types/node-schedule": "^2.1.0",
     "@types/validator": "^13.7.5",
     "@typescript-eslint/eslint-plugin": "^5.34.0",
