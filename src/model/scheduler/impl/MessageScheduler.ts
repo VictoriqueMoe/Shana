@@ -6,7 +6,7 @@ import {Scheduler} from "./Scheduler.js";
 import {IScheduledMessageJob} from "./ScheduledJob/IScheduledMessageJob.js";
 import {ObjectUtil} from "../../../utils/Utils.js";
 import {BaseGuildTextChannel} from "discord.js";
-import LoggerFactory from "../../../utils/LoggerFactory.js";
+import logger from "../../../utils/LoggerFactory.js";
 
 @singleton()
 export class MessageScheduler extends Scheduler implements IMessageScheduler {
@@ -34,7 +34,7 @@ export class MessageScheduler extends Scheduler implements IMessageScheduler {
                 channel.send({
                     content: message
                 }).catch(error => {
-                    LoggerFactory.error(error);
+                    logger.error(error);
                 });
             };
         }

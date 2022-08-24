@@ -1,7 +1,7 @@
 import {singleton} from "tsyringe";
 import type {Response} from "./AnimeTypings";
-import LoggerFactory from "../../utils/LoggerFactory.js";
 import fetch from "node-fetch";
+import logger from "../../utils/LoggerFactory.js";
 
 @singleton()
 export class AnimeTractApi {
@@ -21,7 +21,7 @@ export class AnimeTractApi {
             const arrayBuffer = await res.arrayBuffer();
             return Buffer.from(arrayBuffer);
         } catch (e) {
-            LoggerFactory.error(e);
+            logger.error(e);
             throw e;
         }
     }

@@ -40,7 +40,7 @@ export abstract class AbstractAdminAuditLogger<T extends LoggerSettings> extends
         return guild.name;
     }
 
-    public async isEnabledInternal(guildId: string, logger: keyof T): Promise<boolean> {
+    protected async isEnabledInternal(guildId: string, logger: keyof T): Promise<boolean> {
         const moduleEnabled = await super.isEnabled(guildId);
         if (!moduleEnabled) {
             return false;

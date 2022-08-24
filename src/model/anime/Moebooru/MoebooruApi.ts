@@ -4,8 +4,8 @@ import {defaultSearch, fuseOptions, ISearchBase} from "../../ISearchBase.js";
 import {ObjectUtil} from "../../../utils/Utils.js";
 import {AutocompleteInteraction} from "discord.js";
 import Fuse from "fuse.js";
-import LoggerFactory from "../../../utils/LoggerFactory.js";
 import fetch from "node-fetch";
+import logger from "../../../utils/LoggerFactory.js";
 import MoebooruImage = Typeings.MoebooruTypes.MoebooruImage;
 import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
@@ -84,7 +84,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         json = json.filter(tag => !this.blackList.some(v => tag.name.includes(v)));
         const index = Fuse.createIndex(fuseOptions.keys, json);
         this.fuseCache = new ShanaFuse(json, fuseOptions, index);
-        LoggerFactory.info(`Indexed: ${json.length} tags from ${this.name}`);
+        logger.info(`Indexed: ${json.length} tags from ${this.name}`);
     }
 
     private async doCall(url: string, returnSize: number, explictRating: EXPLICIT_RATING[]): Promise<MoebooruResponse> {

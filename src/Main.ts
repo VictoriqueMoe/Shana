@@ -10,8 +10,7 @@ import {IntentsBitField} from "discord.js";
 import {moduleRegistrar, registerInstance} from "./model/framework/DI/moduleRegistrar.js";
 import {Settings} from "luxon";
 import v8 from "v8";
-import LoggerFactory from "./utils/LoggerFactory.js";
-import loggerFactory from "./utils/LoggerFactory.js";
+import logger from "./utils/LoggerFactory.js";
 import propTypes = Typeings.propTypes;
 
 dotenv.config();
@@ -30,8 +29,8 @@ export class Main {
         DIService.engine = tsyringeDependencyRegistryEngine.setInjector(container);
         Settings.defaultZone = "utc";
         Settings.defaultLocale = "en-gb";
-        LoggerFactory.info(process.execArgv);
-        LoggerFactory.info(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
+        logger.info(process.execArgv);
+        logger.info(`max heap sapce: ${v8.getHeapStatistics().total_available_size / 1024 / 1024}`);
         const testMode = Main.envMode === "development";
         moduleRegistrar();
         const dbName = testMode ? "database_test.sqlite" : "database.sqlite";
@@ -65,19 +64,19 @@ export class Main {
             ],
             logger: new class djxLogger implements ILogger {
                 public error(...args: unknown[]): void {
-                    loggerFactory.error(args);
+                    logger.error(args);
                 }
 
                 public info(...args: unknown[]): void {
-                    loggerFactory.info(args);
+                    logger.info(args);
                 }
 
                 public log(...args: unknown[]): void {
-                    loggerFactory.info(args);
+                    logger.info(args);
                 }
 
                 public warn(...args: unknown[]): void {
-                    loggerFactory.warn(args);
+                    logger.warn(args);
                 }
             },
             silent: false,

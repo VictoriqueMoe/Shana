@@ -25,7 +25,7 @@ import reverseImageSearch from "node-reverse-image-search";
 import isImageFast from "is-image-fast";
 import {Response} from "../../model/anime/AnimeTypings";
 import {AttachmentAllowedFileTypes} from "../../guards/AttachmentAllowedFileTypes.js";
-import LoggerFactory from "../../utils/LoggerFactory.js";
+import logger from "../../utils/LoggerFactory.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -179,7 +179,7 @@ export class Misc {
         try {
             resp = await this._animeTractApi.fetchAnime(url);
         } catch (e) {
-            LoggerFactory.error(e);
+            logger.error(e);
         }
 
         if (!ObjectUtil.isValidObject(resp) || ObjectUtil.validString(resp.error)) {
