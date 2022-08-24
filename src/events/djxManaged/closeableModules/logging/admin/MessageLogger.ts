@@ -2,12 +2,13 @@ import {ObjectUtil} from "../../../../../utils/Utils.js";
 import {AbstractAdminAuditLogger} from "./AbstractAdminAuditLogger.js";
 import {injectable} from "tsyringe";
 import {ArgsOf, Client, Discord, On} from "discordx";
-import {ImgurManager} from "../../../../../model/framework/manager/ImgurManager.js";
-import {AuditLogEvent, EmbedBuilder, StickerFormatType} from "discord.js";
+import {AttachmentBuilder, AuditLogEvent, EmbedBuilder, StickerFormatType} from "discord.js";
 import isImageFast from "is-image-fast";
 import {
     MessageLoggerSettings
 } from "../../../../../model/closeableModules/settings/AdminLogger/MessageLoggerSettings.js";
+import {AnonFilesManager} from "../../../../../model/framework/manager/AnonFilesManager.js";
+import logger from "../../../../../utils/LoggerFactory.js";
 
 /**
  * Message Edited<br/>
@@ -19,7 +20,7 @@ import {
 export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSettings> {
     private static messageLimit = 1024;
 
-    public constructor(private _imgur: ImgurManager) {
+    public constructor(private _anonFilesManager: AnonFilesManager) {
         super();
     }
 
@@ -96,7 +97,7 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
         const dateNow = Date.now();
         const attatchments = message.attachments;
         const member = message.member;
-        if (!member || !member.user) {
+        if (!member?.user) {
             return;
         }
         await ObjectUtil.delayFor(900);
@@ -131,18 +132,29 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
         if (ObjectUtil.validString(executor)) {
             embed.addFields(ObjectUtil.singleFieldBuilder("Deleted by", executor));
         }
-        if (attatchments.size === 1 && this._imgur.enabled) {
+        let fileObj: {
+            file: string,
+            name: string
+        } = null;
+        if (attatchments.size === 1) {
             const messageAttachment = attatchments.first();
             const url = messageAttachment.attachment as string;
             try {
                 if (ObjectUtil.validString(url)) {
                     const isImage: boolean = await isImageFast(url);
+                    const newUrl = await this._anonFilesManager.uploadFile(url);
                     if (isImage) {
-                        const newUrl = await this._imgur.uploadImageFromUrl(url);
                         embed.setImage(newUrl);
+                    } else {
+                        const filename = url.split("/").pop();
+                        fileObj = {
+                            file: newUrl,
+                            name: filename
+                        };
                     }
                 }
-            } catch {
+            } catch (e) {
+                logger.error(e.message);
             }
         }
         if (stickers.size > 0) {
@@ -157,7 +169,16 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
                 embed.addFields(ObjectUtil.singleFieldBuilder("Stickers", stickerUrls.join("\n")));
             }
         }
-        super.postToLog(embed, message.guild.id);
+        if (fileObj) {
+            const attachment = new AttachmentBuilder(fileObj.file, {
+                name: fileObj.name,
+                description: "This file was deleted by a user, open with caution"
+            });
+            super.postToLog(embed, message.guild.id, [attachment]);
+        } else {
+            super.postToLog(embed, message.guild.id);
+        }
+
     }
 
     @On({

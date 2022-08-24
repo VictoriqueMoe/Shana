@@ -22,7 +22,6 @@ import TIME_UNIT from "../enums/TIME_UNIT.js";
 import {Property} from "../model/framework/decorators/Property.js";
 import {ISearchBase, SearchBase} from "../model/ISearchBase.js";
 import {Typeings} from "../model/Typeings.js";
-import axios from "axios";
 import {StatusCodes} from "http-status-codes";
 import {DataSource} from "typeorm";
 import isImageFast from "is-image-fast";
@@ -37,6 +36,7 @@ import {PermissionFlagsBits} from "discord-api-types/v10";
 import {isValidCron} from "cron-validator";
 import {CronException} from "../model/exceptions/CronException.js";
 import cronstrue from 'cronstrue';
+import fetch from "node-fetch";
 
 export class Utils {
     public static sleep(ms: number): Promise<void> {
@@ -501,10 +501,9 @@ export namespace DiscordUtils {
     }
 
     export async function loadResourceFromURL(url: string): Promise<Buffer> {
-        const response = await axios.get(url, {
-            responseType: "arraybuffer"
-        });
-        const buffer: Buffer = response.data;
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer: Buffer = Buffer.from(arrayBuffer);
         if (response.status !== StatusCodes.OK) {
             throw new Error(buffer.toString("utf-8"));
         }

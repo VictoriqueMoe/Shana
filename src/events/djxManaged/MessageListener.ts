@@ -5,10 +5,10 @@ import {DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
 import {MessageListenerDecorator} from "../../model/framework/decorators/MessageListenerDecorator.js";
 import {notBot} from "../../guards/managedGuards/NotABot.js";
 import {ArgsOf} from "discordx";
-import axios from "axios";
 import {Property} from "../../model/framework/decorators/Property.js";
 import {RoleManager} from "../../model/framework/manager/RoleManager.js";
 import {LogChannelManager} from "../../model/framework/manager/LogChannelManager.js";
+import fetch from "node-fetch";
 
 @singleton()
 export class MessageListener {
@@ -70,8 +70,8 @@ export class MessageListener {
         const url = Object.keys(request).map(key => `${key}=${encodeURIComponent(request[key])}`).join('&');
         let reply = null;
         try {
-            const replyPayload = await axios.get(`https://www.cleverbot.com/getreply?${url}`);
-            reply = replyPayload.data;
+            const replyPayload = await fetch(`https://www.cleverbot.com/getreply?${url}`);
+            reply = await replyPayload.json();
         } catch (e) {
             return;
         }
