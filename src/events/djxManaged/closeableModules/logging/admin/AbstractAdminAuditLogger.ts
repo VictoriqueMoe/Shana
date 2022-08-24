@@ -6,6 +6,8 @@ import {AuditManager} from "../../../../../model/framework/manager/AuditManager.
 import {Client} from "discordx";
 import {GuildInfoChangeManager} from "../../../../../model/framework/manager/GuildInfoChangeManager.js";
 import type {LoggerSettings} from "../../../../../model/closeableModules/settings/AdminLogger/LoggerSettings.js";
+import {Typeings} from "../../../../../model/Typeings.js";
+import FileResolvable = Typeings.FileResolvable;
 
 export abstract class AbstractAdminAuditLogger<T extends LoggerSettings> extends CloseableModule<T> {
     protected readonly _auditManager: AuditManager;
@@ -19,11 +21,11 @@ export abstract class AbstractAdminAuditLogger<T extends LoggerSettings> extends
         this._guildInfoChangeManager = container.resolve(GuildInfoChangeManager);
     }
 
-    protected postToLog(content: EmbedBuilder | string, guildId: string): Promise<Message> {
+    protected postToLog(content: EmbedBuilder | string, guildId: string, files: FileResolvable = []): Promise<Message> {
         if (content instanceof EmbedBuilder) {
-            return this._logManager.postToLog([content], guildId, true);
+            return this._logManager.postToLog([content], guildId, true, files);
         }
-        return this._logManager.postToLog(content, guildId, true);
+        return this._logManager.postToLog(content, guildId, true, files);
     }
 
     protected getGuildIconUrl(guildId: string): string {

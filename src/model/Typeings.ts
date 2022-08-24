@@ -1,7 +1,16 @@
 import SETTINGS from "../enums/SETTINGS.js";
 import type {ArgsOf, Awaitable, Client} from "discordx";
 import type {CategoryChannel, HexColorString, Message, TextChannel} from "discord.js";
-import {ThreadAutoArchiveDuration} from "discord.js";
+import {
+    Attachment,
+    AttachmentBuilder,
+    AttachmentPayload,
+    BufferResolvable,
+    ThreadAutoArchiveDuration
+} from "discord.js";
+import {Stream} from "node:stream";
+import {JSONEncodable} from "@discordjs/builders";
+import {APIAttachment} from "discord-api-types/v10.js";
 
 export namespace Typeings {
     export type propTypes = envTypes & packageJsonTypes
@@ -199,4 +208,11 @@ export namespace Typeings {
         nickName?: ObjectChange<string>,
         timeout?: ObjectChange<number>
     }
+
+    export type FileResolvable = (BufferResolvable
+        | Stream
+        | JSONEncodable<APIAttachment>
+        | Attachment
+        | AttachmentBuilder
+        | AttachmentPayload) [];
 }
