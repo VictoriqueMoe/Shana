@@ -39,7 +39,7 @@ export class Main {
         const datasource = new DataSource({
             type: "better-sqlite3",
             database: dbName,
-            synchronize: false,
+            synchronize: testMode,
             cache: {
                 duration: 1000
             },
