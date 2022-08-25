@@ -24,12 +24,7 @@ export namespace Typeings {
         DANBOORU: string;
         OCR_LOC: string;
         RAPID_API_CODE: string;
-        NODE_ENV: "production" | "development",
-        IMGUR_CLIENT_ID: string,
-        IMGUR_CLIENT_SECRET: string,
-        IMGUR_EMAIL: string,
-        IMGUR_PASSWORD: string,
-        IMGUR_ALBUM_ID: string,
+        NODE_ENV: "production" | "development"
     };
 
     type packageJsonTypes = {
