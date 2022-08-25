@@ -15,7 +15,7 @@ export abstract class TriggerConstraint<T extends ModuleSettings> extends Closea
         }
         const isAdmin = member.permissions.has(PermissionFlagsBits.Administrator, true);
         if (isAdmin) {
-            return true;
+            return false;
         }
         const roleIds = [...member.roles.cache.keys()];
         const channel = message.channel;
