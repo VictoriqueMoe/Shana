@@ -4,12 +4,17 @@ import type {IEventSecurityConstraint} from "../../DB/entities/IEventSecurityCon
 import {GuildChannel, Message} from "discord.js";
 import type {ModuleSettings} from "../settings/ModuleSettings.js";
 import {ObjectUtil} from "../../../utils/Utils.js";
+import {PermissionFlagsBits} from "discord-api-types/v10.js";
 
 export abstract class TriggerConstraint<T extends ModuleSettings> extends CloseableModule<T> implements ITriggerConstraint {
 
     public canTrigger(obj: IEventSecurityConstraint, message: Message): boolean {
         const member = message.member;
         if (!member) {
+            return false;
+        }
+        const isAdmin = member.permissions.has(PermissionFlagsBits.Administrator, true);
+        if (isAdmin) {
             return false;
         }
         const roleIds = [...member.roles.cache.keys()];
