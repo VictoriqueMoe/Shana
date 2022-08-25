@@ -4,7 +4,7 @@ import type {IEventSecurityConstraint} from "../../DB/entities/IEventSecurityCon
 import {GuildChannel, Message} from "discord.js";
 import type {ModuleSettings} from "../settings/ModuleSettings.js";
 import {ObjectUtil} from "../../../utils/Utils.js";
-import {PermissionFlagsBits} from "discord-api-types/v10.js";
+import {PermissionFlagsBits} from "discord-api-types/v10";
 
 export abstract class TriggerConstraint<T extends ModuleSettings> extends CloseableModule<T> implements ITriggerConstraint {
 
