@@ -6,8 +6,8 @@ import {Discord, On} from "discordx";
 @Discord()
 export class EventDeletedListener {
 
-    private static deletedMessages: WeakSet<Message | PartialMessage> = new WeakSet();
-    private static deletedMembers: WeakSet<GuildMember | PartialGuildMember> = new WeakSet();
+    private static readonly deletedMessages: WeakSet<Message | PartialMessage> = new WeakSet();
+    private static readonly deletedMembers: WeakSet<GuildMember | PartialGuildMember> = new WeakSet();
 
     public static isMessageDeleted(message: Message | PartialMessage): boolean {
         return EventDeletedListener.deletedMessages.has(message);
