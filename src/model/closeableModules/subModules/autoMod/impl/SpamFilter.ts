@@ -16,10 +16,6 @@ export class SpamFilter extends AbstractFilter {
         return "Spam Filter";
     }
 
-    /* public override get autoTerminalViolationCount(): number {
-        return 1;
-    } */
-
     public async doFilter(message: Message): Promise<boolean> {
         const content = message.content;
         if (content.startsWith("https://discord.gift")) {
