@@ -135,7 +135,7 @@ export class Notes {
     }
 
     @Slash({
-        name: "dele_tenote",
+        name: "delete_note",
         description: "Delete a note"
     })
     @Guard(NotBot)
