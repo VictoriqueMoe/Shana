@@ -1,9 +1,6 @@
 # <ins>Shana</ins>
 
-Shana is a bot with many functions, its initial idea was to completely replace Dyno, as such, to make it more reliable
-and
-faster. After fully implementing both Dyno's AutoRole and AutoMod modules, this bot has expected upon its own custom
-automod features and more.
+Shana is a bespoke automod bot that is written in Typescript using the Discordx framework
 
 ### Global settings
 
@@ -32,8 +29,8 @@ only, not commands. Commands are defined in the own entity set contained in cate
 
 #### Audit Logger
 
-The Audit logger is a non-admin styled logger designed to log quick events like when a member leaves, joins, kicked and
-banned (and by whom) and when an Auto mod event is triggered.
+The Audit logger is a non-admin styled logger designed to log quick events like when a member joins, leaves, is kicked
+or banned (along with by whom) and when an Auto Mod event is triggered.
 
 In order for this module to work, it must be both enabled AND have the `LOG_CHANNEL` global setting populated with the
 ID of a channel
@@ -52,16 +49,14 @@ This is a quick non-admin style logger that can log:
 #### Admin Loggers
 
 Admin Loggers are an embed style logger that will post realtime, detailed events to a chosen channel, these events are
-presented in a rich-embed. All triggered events contain an executor, in that will tell you who did what.
+presented in a rich-embed. All triggered events contain an executor, the executor is the member who triggered the event;
+for example, if i deleted your message in Discord, then i would be the executor
 
-for example, if a message is deleted, or a member is kicked or banned, or even if a channel was modified or created. It
-will query your servers event log and pull the person who did that action. so it will tell you who deleted the message,
-kicked or banned the user or deleted the channel.
+for example, if a message is deleted, kicked, banned, or even if a channel was modified or created. It will display who
+caused that action from the audit logs
 
 In order for these modules to work, it must be both enabled AND have the `ADMIN_LOG_CHANNEL` global setting populated
 with the ID of a channel.
-
-To enable this, you must have a
 
 they consist of:
 
@@ -142,7 +137,7 @@ such as kicking, muting, banning and warning users, logging them and using regex
 this module relies on a number of submodules known as filters. a Filter is a self-contained and isolated unit of work
 that takes a message and returns true or false if that message violated the filter.
 
-Each filter can be turned off and on
+Each filter can be turned on and off
 
 the list of filters are:
 
@@ -249,7 +244,7 @@ You can only have ONE type of response type per auto responder.
 #### Auto Role
 
 The Auto role module deals with applying roles to members when they join with an optional timeout. the roles that can be
-applied is flexible and can be configured in the modules settings.
+applied are flexible and can be configured in the modules settings.
 
 | Setting            | Description                                                                                                                                                                                                                                                                                                |
 |--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -336,7 +331,7 @@ Misc is a mix of commands that have a default security constraint attached. all 
 
 This bot is architected in a way to take heavy use of decorators, DAO's, Managers, Factories, Engines and Dependency
 Injection. It's main design pattern is the decorator pattern with its main underlying framework being Discord.js wrapped
-in Discord.ts and with my persistence and service layer on top of it. Each manager that acts as the repository to the
+in Discordx and with my persistence and service layer on top of it. Each manager that acts as the repository to the
 DAO
 has its own internal cache that works with discord.js's cache to be as performant as possible.
 
