@@ -52,7 +52,8 @@ Admin Loggers are an embed style logger that will post realtime, detailed events
 presented in a rich-embed. All triggered events contain an executor, the executor is the member who triggered the event;
 for example, if i deleted your message in Discord, then i would be the executor
 
-for example, if a message is deleted, kicked, banned, or even if a channel was modified or created. It will display who
+for example, if a message is deleted, a member is kicked, banned, or even if a channel was modified or created. It will
+display who
 caused that action from the audit logs
 
 In order for these modules to work, it must be both enabled AND have the `ADMIN_LOG_CHANNEL` global setting populated
