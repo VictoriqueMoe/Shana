@@ -16,12 +16,12 @@ export class SpamFilter extends AbstractFilter {
         return "Spam Filter";
     }
 
-    public async doFilter(message: Message): Promise<boolean> {
+    public doFilter(message: Message): Promise<boolean> {
         const content = message.content;
         if (content.startsWith("https://discord.gift")) {
-            return true;
+            return Promise.resolve(true);
         }
-        return !SpamMeta.isSpam(message.content);
+        return Promise.resolve(!SpamMeta.isSpam(message.content));
     }
 
     public async postProcess(message: Message): Promise<void> {
