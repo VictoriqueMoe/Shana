@@ -42,7 +42,7 @@ export class AutoMod extends TriggerConstraint<null> {
         return Promise.resolve();
     }
 
-    private async muteUser(violationObj: TerminalViolation, user: GuildMember, reason: string, creatorID: string, channel?: BaseGuildTextChannel, time?: number): Promise<GuildMember> {
+    private async muteUser(violationObj: TerminalViolation, user: GuildMember, reason: string, channel?: BaseGuildTextChannel, time?: number): Promise<GuildMember> {
         if (!user) {
             return;
         }
@@ -118,7 +118,7 @@ export class AutoMod extends TriggerConstraint<null> {
         outer:
             for (const filter of violatedFilters) {
                 const actionsToTake = await filter.actions(guildId);
-                let didPreformTerminaloperation = false;
+                let didPreformTerminalOperation = false;
                 for (const action of actionsToTake) {
                     switch (action) {
                         case ACTION.BAN:
@@ -154,11 +154,11 @@ export class AutoMod extends TriggerConstraint<null> {
                                                 textChannel = channel;
                                             }
                                             const autoMuteTimeout = await filter.autoMuteTimeout(guildId);
-                                            await this.muteUser(fromArray, member, "Auto mod violation limit reached", this._client.user.id, textChannel, autoMuteTimeout);
+                                            await this.muteUser(fromArray, member, "Auto mod violation limit reached", textChannel, autoMuteTimeout);
                                             break;
                                         }
                                     }
-                                    didPreformTerminaloperation = true;
+                                    didPreformTerminalOperation = true;
                                 } catch (e) {
                                     logger.error(e);
                                     continue;
@@ -204,7 +204,7 @@ export class AutoMod extends TriggerConstraint<null> {
                             }
                         }
                     }
-                    if (didPreformTerminaloperation) {
+                    if (didPreformTerminalOperation) {
                         break outer;
                     }
                 }

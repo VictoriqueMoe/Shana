@@ -75,7 +75,7 @@ export class FilterModuleModel extends AbstractEventSecurityConstraint {
             id: this.pSubModuleId,
             priority: this.priority,
             autoTerminalViolationCount: this.autoTerminalViolationCount,
-            isActive: this.subModule.isActive ?? false,
+            isActive: this?.subModule.isActive ?? false,
             terminalViolationTimeout: this.terminalViolationTimeout,
             warnMessage: this.warnMessage
         };

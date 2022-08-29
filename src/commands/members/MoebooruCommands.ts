@@ -13,9 +13,10 @@ import {DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
 import {MoebooruApi, RandomImageResponse} from "../../model/anime/Moebooru/MoebooruApi.js";
 import {injectable} from "tsyringe";
 import {Typeings} from "../../model/Typeings.js";
+import {DanbooruApi} from "../../model/anime/Moebooru/impl/DanbooruApi.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
-import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 import MoebooruTag = Typeings.MoebooruTypes.MoebooruTag;
+import EXPLICIT_RATING = Typeings.MoebooruTypes.EXPLICIT_RATING;
 
 @Discord()
 @Category("Fun")
@@ -30,6 +31,7 @@ export class MoebooruCommands {
 
     public constructor(private _konachanApi: KonachanApi,
                        private _lolibooruApi: LolibooruApi,
+                       private _danbooruApi: DanbooruApi,
                        private _client: Client) {
     }
 
@@ -49,6 +51,24 @@ export class MoebooruCommands {
     ): Promise<void> {
         await interaction.deferReply();
         return this.executeInteraction(interaction, tags, this._lolibooruApi);
+    }
+
+    @Slash({
+        description: "Get random image from danbooru.donmai.us"
+    })
+    @Guard(NotBot)
+    private async danbooru(
+        @SlashOption({
+            name: "tags",
+            description: "space seperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
+            type: ApplicationCommandOptionType.String,
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, DanbooruApi)
+        })
+            tags: string,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply();
+        return this.executeInteraction(interaction, tags, this._danbooruApi);
     }
 
 
@@ -75,10 +95,10 @@ export class MoebooruCommands {
             return InteractionUtils.replyOrFollowUp(interaction, "Command is not enabled");
         }
         const tagArray = tags.split(" ");
-        const explicitRating = [EXPLICIT_RATING.safe];
+        const explicitRating = [EXPLICIT_RATING.safe, EXPLICIT_RATING.general];
         const channel = interaction.channel as TextChannel;
         if (channel.nsfw) {
-            explicitRating.push(EXPLICIT_RATING.questionable);
+            explicitRating.push(EXPLICIT_RATING.questionable, EXPLICIT_RATING.sensitive);
         }
         let results: RandomImageResponse;
         try {
@@ -111,6 +131,9 @@ export class MoebooruCommands {
         if (ObjectUtil.validString(randomImage.preview_url)) {
             embed.setThumbnail(encodeURI(randomImage.preview_url));
         }
+        if (ObjectUtil.validString(randomImage.preview_file_url)) {
+            embed.setThumbnail(encodeURI(randomImage.preview_file_url));
+        }
         if (ObjectUtil.validString(randomImage.author)) {
             embed.addFields(ObjectUtil.singleFieldBuilder("Author", randomImage.author));
         }
@@ -120,8 +143,9 @@ export class MoebooruCommands {
         if (ObjectUtil.validString(randomImage.rating)) {
             embed.addFields(ObjectUtil.singleFieldBuilder("Explicit rating", this.parseExplicitRating(randomImage.rating)));
         }
-        if (ObjectUtil.validString(randomImage.tags)) {
-            let tags = randomImage.tags.split(" ").join(", ");
+        if (ObjectUtil.validString(randomImage.tags) || ObjectUtil.validString(randomImage["tag_string"])) {
+            const tag: string = ObjectUtil.validString(randomImage["tag_string"]) ? randomImage["tag_string"] : randomImage.tags;
+            let tags = tag.split(" ").join(", ");
             tags = ObjectUtil.truncate(tags, 1024);
             embed.addFields(ObjectUtil.singleFieldBuilder("Tags", tags));
         }
@@ -131,13 +155,14 @@ export class MoebooruCommands {
         return embed;
     }
 
-    private parseExplicitRating(rating: "s" | "q" | "e"): "explicit" | "questionable" | "safe" {
+    private parseExplicitRating(rating: "g" | "s" | "q" | "e"): "explicit" | "questionable" | "safe" {
         switch (rating) {
             case "e":
                 return "explicit";
             case "q":
                 return "questionable";
             case "s":
+            case "g":
                 return "safe";
             default:
                 return "explicit";

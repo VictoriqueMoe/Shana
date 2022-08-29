@@ -22,7 +22,7 @@ export class MuteManager {
     public async getAllMutedMembers(guildId: string): Promise<GuildMember[]> {
         const guild = await DiscordUtils.getGuild(guildId);
         const memberManager = guild.members;
-        return [...memberManager.cache.filter(member => this.isMuted(member)).values()];
+        return [...memberManager.cache.filter(this.isMuted).values()];
     }
 
 

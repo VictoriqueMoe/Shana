@@ -34,4 +34,8 @@ export class KonachanApi extends MoebooruApi<KonachanTag> {
     protected update(): Promise<void> {
         return this.tagUpdater(value => value.count > 0);
     }
+
+    protected get postPage(): string {
+        return "post";
+    }
 }

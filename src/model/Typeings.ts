@@ -21,7 +21,8 @@ export namespace Typeings {
         CLEVERBOT_KEY: string;
         DEEPAPI: string;
         DEEPL: string;
-        DANBOORU: string;
+        DANBOORU_API_KEY: string;
+        DANBOORU_API_USER: string;
         OCR_LOC: string;
         RAPID_API_CODE: string;
         NODE_ENV: "production" | "development"
@@ -76,18 +77,21 @@ export namespace Typeings {
     export namespace MoebooruTypes {
         export enum EXPLICIT_RATING {
             "safe" = "s",
+            "general" = "g",
+            "sensitive" = "s",
             "questionable" = "q",
             "explicit" = "e"
         }
 
         export type MoebooruResponse = MoebooruImage[];
 
+        export type DanbooruTag = LoliBooruTag;
         export type KonachanTag = MoebooruTag & {
             "count"?: number
-        }
+        };
         export type LoliBooruTag = MoebooruTag & {
             "post_count"?: number
-        }
+        };
         export type MoebooruTag = {
             "id"?: number,
             "name": string,
@@ -108,6 +112,7 @@ export namespace Typeings {
             "file_url": string,
             "is_shown_in_index": boolean,
             "preview_url": string,
+            "preview_file_url": string,
             "preview_width": number,
             "preview_height": number,
             "actual_preview_width": number,

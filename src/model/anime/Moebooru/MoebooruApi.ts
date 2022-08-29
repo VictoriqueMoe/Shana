@@ -22,7 +22,7 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
     protected abstract baseUrl: string;
     protected abstract name: string;
     protected abstract fuseCache: ShanaFuse<T>;
-    private readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "bottomless"];
+    protected readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "bottomless"];
 
     public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize = 1): Promise<RandomImageResponse> {
         const results = await this.getPosts(tags, explictRating);
@@ -47,6 +47,8 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         return retArr;
     }
 
+    protected abstract get postPage(): string;
+
     public async getPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize = -1): Promise<MoebooruResponse> {
         if (!await this.enabled) {
             return [];
@@ -58,12 +60,12 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
             return [];
         }
         const tagsStr = tags.join(" ");
-        const url = `${this.baseUrl}/post.json?tags=${tagsStr}`;
+        const url = `${this.baseUrl}/${this.postPage}.json?tags=${tagsStr}`;
         return this.doCall(url, returnSize, explictRating);
     }
 
-    public search(interaction: AutocompleteInteraction): Fuse.FuseResult<T>[] {
-        return defaultSearch(interaction, this.fuseCache);
+    public search(interaction: AutocompleteInteraction): Promise<Fuse.FuseResult<T>[]> {
+        return Promise.resolve(defaultSearch(interaction, this.fuseCache));
     }
 
     protected abstract update(): Promise<void>;
@@ -111,7 +113,11 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
             }
             for (const jsonResponse of responseArray) {
                 if (ObjectUtil.validString(jsonResponse.rating) && explictRating.includes(jsonResponse.rating)) {
-                    if (this.blackList.some(v => jsonResponse.tags.includes(v))) {
+                    let tags = jsonResponse.tags;
+                    if (ObjectUtil.validString(jsonResponse["tag_string"])) {
+                        tags = (jsonResponse["tag_string"] as string);
+                    }
+                    if (this.blackList.some(v => tags.includes(v))) {
                         continue;
                     }
                     if (retJson.length === returnSize) {
@@ -123,5 +129,6 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
         }
         return retJson;
     }
+
 }
 

@@ -35,4 +35,8 @@ export class LolibooruApi extends MoebooruApi<LoliBooruTag> {
         return this.tagUpdater(value => value.post_count > 0, Number.MAX_SAFE_INTEGER);
     }
 
+    protected get postPage(): string {
+        return "post";
+    }
+
 }
