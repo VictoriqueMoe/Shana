@@ -5,7 +5,7 @@ import {AutocompleteInteraction} from "discord.js";
 import Fuse from "fuse.js";
 import {Property} from "../../../framework/decorators/Property.js";
 import {ObjectUtil} from "../../../../utils/Utils.js";
-import fetch from "node-fetch";
+import fetch, {Headers} from "node-fetch";
 import DanbooruTag = Typeings.MoebooruTypes.DanbooruTag;
 import FuseResult = Fuse.FuseResult;
 
@@ -17,7 +17,14 @@ export class DanbooruApi extends MoebooruApi<DanbooruTag> {
     @Property("DANBOORU_API_USER")
     private readonly apiUser: string;
 
+    private readonly auth: string;
+
     private _tagCache: ShanaFuse<DanbooruTag>;
+
+    public constructor() {
+        super();
+        this.auth = `Basic ${Buffer.from(`${this.apiUser}:${this.apiKey}`).toString('base64')}`;
+    }
 
     public get enabled(): Promise<boolean> {
         return Promise.resolve(true);
@@ -49,7 +56,12 @@ export class DanbooruApi extends MoebooruApi<DanbooruTag> {
         if (ObjectUtil.validString(query)) {
             url += `&search[name_matches]=${query}*`;
         }
-        const resultFetch = await fetch(url);
+        const headers = new Headers();
+        headers.set('Authorization', this.auth);
+        const resultFetch = await fetch(url, {
+            method: "GET",
+            headers
+        });
         if (resultFetch.status !== 200) {
             throw new Error(resultFetch.statusText);
         }
