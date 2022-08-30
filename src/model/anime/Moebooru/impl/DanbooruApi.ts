@@ -56,8 +56,9 @@ export class DanbooruApi extends MoebooruApi<DanbooruTag> {
         if (ObjectUtil.validString(query)) {
             url += `&search[name_matches]=${query}*`;
         }
-        const headers = new Headers();
-        headers.set('Authorization', this.auth);
+        const headers = new Headers({
+            'Authorization': this.auth
+        });
         const resultFetch = await fetch(url, {
             method: "GET",
             headers
