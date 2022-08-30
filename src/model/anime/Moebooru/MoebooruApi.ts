@@ -90,12 +90,10 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
     }
 
     private async doCall(url: string, returnSize: number, explictRating: EXPLICIT_RATING[]): Promise<MoebooruResponse> {
-        if (returnSize < 100 && returnSize > 0) {
-            url += `&limit=${returnSize}`;
-        }
         if (returnSize === -1) {
             returnSize = 500;
         }
+        url += `&limit=${returnSize}`;
         const retJson: MoebooruResponse = [];
         let currentPage = 0;
         while (retJson.length !== returnSize) {
