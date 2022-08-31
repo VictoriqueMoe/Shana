@@ -239,7 +239,7 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
         const avatarUrl = member.user.displayAvatarURL();
         const roles = member.roles.cache;
         const kickLog = await this._auditManager.getAuditLogEntry(AuditLogEvent.MemberKick, guild);
-        let userJoinEmbed: EmbedBuilder = null;
+        let userLeaveEmbed: EmbedBuilder;
         let wasKicked = false;
         if (kickLog) {
             const target = kickLog.target;
@@ -254,7 +254,7 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
         }
         const rolesArr = roles.filter(r => r.id !== guild.roles.everyone.id).map(role => `<@&${role.id}>`);
         if (wasKicked) {
-            userJoinEmbed = new EmbedBuilder()
+            userLeaveEmbed = new EmbedBuilder()
                 .setColor('#FF470F')
                 .setTitle('Member Was Kicked')
                 .setAuthor({
@@ -276,7 +276,7 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
                     text: `${member.id}`
                 });
         } else {
-            userJoinEmbed = new EmbedBuilder()
+            userLeaveEmbed = new EmbedBuilder()
                 .setColor('#FF470F')
                 .setTitle('Member Left')
                 .setAuthor({
@@ -291,14 +291,14 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
                 });
         }
         if (rolesArr.length > 0) {
-            userJoinEmbed = userJoinEmbed.addFields(
+            userLeaveEmbed = userLeaveEmbed.addFields(
                 {
                     name: 'Roles',
                     value: rolesArr.join(", ")
                 }
             );
         }
-        super.postToLog(userJoinEmbed, member.guild.id);
+        super.postToLog(userLeaveEmbed, member.guild.id);
     }
 
     @On({
