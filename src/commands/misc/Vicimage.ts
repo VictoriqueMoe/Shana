@@ -95,4 +95,32 @@ export class Vicimage {
             console.log(`Failed to send ${loadedImage.name}`);
         }
     }
+
+    @Slash({
+        description: "Re-index image metadata from dropbox"
+    })
+    @Guard(NotBot)
+    private async reindex(
+        @SlashOption({
+            name: "token",
+            description: "the token to use",
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, VicImageTokenManager),
+            type: ApplicationCommandOptionType.String,
+            required: true,
+        })
+            token: string,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply({
+            ephemeral: true
+        });
+        const validToken = await this._vicImageTokenManager.validateToken(token, interaction.user.id);
+        if (!validToken) {
+            return InteractionUtils.replyOrFollowUp(interaction, "Invalid token");
+        }
+        await this._vicDropbox.index();
+        await interaction.editReply({
+            content: `Re-indexed ${this._vicDropbox.allImages.length} images from Dropbox`
+        });
+    }
 }
