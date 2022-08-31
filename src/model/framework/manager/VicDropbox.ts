@@ -11,7 +11,7 @@ import FuseResult = Fuse.FuseResult;
 
 
 class DropBoxProxy extends Dropbox {
-    constructor(accessToken: string) {
+    public constructor(accessToken: string) {
         super({
             accessToken
         });
@@ -60,7 +60,7 @@ export class VicDropbox extends ModuleEnabledConfigure implements ISearchBase<fi
         console.log(`Indexed ${this._imageCache.length} images`);
     }
 
-    async filesDownload(param: { path: string }): Promise<DropboxResponse<files.FileMetadata>> {
+    public filesDownload(param: { path: string }): Promise<DropboxResponse<files.FileMetadata>> {
         return this._dropbox.filesDownload(param);
     }
 

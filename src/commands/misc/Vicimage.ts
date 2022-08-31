@@ -17,7 +17,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @injectable()
 export class Vicimage {
 
-    constructor(private _vicDropbox: VicDropbox, private _vicImageTokenManager: VicImageTokenManager) {
+    public constructor(private _vicDropbox: VicDropbox, private _vicImageTokenManager: VicImageTokenManager) {
     }
 
     @Slash({
@@ -33,7 +33,7 @@ export class Vicimage {
         })
             user: User,
         interaction: CommandInteraction
-    ) {
+    ): Promise<void> {
         const executor = interaction?.user;
         if (executor?.id !== "697417252320051291") {
             return InteractionUtils.replyOrFollowUp(interaction, "Authorised");
