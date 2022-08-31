@@ -34,7 +34,7 @@ export class AutoResponderModel extends AbstractEventSecurityConstraint {
     })
     public emojiReactions: string[];
 
-    @ManyToOne(() => GuildableModel, guildableModel => guildableModel.autoResponderModel, AbstractModel.cascadeOps)
+    @ManyToOne("GuildableModel", "autoResponderModel", AbstractModel.cascadeOps)
     @JoinColumn({name: AbstractModel.joinCol})
     public guildableModel: GuildableModel;
 }

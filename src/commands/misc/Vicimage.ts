@@ -2,9 +2,10 @@ import {Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
 import {Category, NotBot} from "@discordx/utilities";
 import {injectable} from "tsyringe";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
-import {ApplicationCommandOptionType, AutocompleteInteraction, CommandInteraction, User} from "discord.js";
+import {ApplicationCommandOptionType, AutocompleteInteraction, CommandInteraction, GuildMember} from "discord.js";
 import {VicDropbox} from "../../model/framework/manager/VicDropbox.js";
 import {VicImageTokenManager} from "../../model/framework/manager/VicImageTokenManager.js";
+import {BotOwnerOnly} from "../../guards/BotOwnerOnly.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
@@ -21,28 +22,46 @@ export class Vicimage {
     }
 
     @Slash({
-        name: "register_token",
-        description: "Register user"
+        name: "register_user",
+        description: "Register user to use this command"
     })
-    @Guard(NotBot)
-    private async registerToken(
+    @Guard(NotBot, BotOwnerOnly)
+    private async registerUser(
         @SlashOption({
             name: "user",
             description: "The user you want to register",
             type: ApplicationCommandOptionType.User
         })
-            user: User,
+            user: GuildMember,
         interaction: CommandInteraction
     ): Promise<void> {
-        const executor = interaction?.user;
-        if (executor?.id !== "697417252320051291") {
-            return InteractionUtils.replyOrFollowUp(interaction, "Authorised");
-        }
         await interaction.deferReply({
             ephemeral: true
         });
-        const newToken = await this._vicImageTokenManager.registerToken(user.id);
-        return InteractionUtils.replyOrFollowUp(interaction, newToken);
+        await this._vicImageTokenManager.registerUser(user.id);
+        return InteractionUtils.replyOrFollowUp(interaction, `${user.user.tag} has been registered`);
+    }
+
+    @Slash({
+        name: "revoke_user",
+        description: "Register user to use this command"
+    })
+    @Guard(NotBot, BotOwnerOnly)
+    private async revokeUser(
+        @SlashOption({
+            name: "user",
+            description: "The user you want to register",
+            type: ApplicationCommandOptionType.User
+        })
+            user: GuildMember,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        await interaction.deferReply({
+            ephemeral: true
+        });
+        const didRemove = await this._vicImageTokenManager.revokeUser(user.id);
+        let msg = didRemove ? `revoked user "${user.user.tag}"` : `user ${user.user.tag} is not authorised in the first place`;
+        return InteractionUtils.replyOrFollowUp(interaction, msg);
     }
 
 
@@ -52,14 +71,6 @@ export class Vicimage {
     })
     @Guard(NotBot)
     private async vicImage(
-        @SlashOption({
-            name: "token",
-            description: "the token to use",
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, VicImageTokenManager),
-            type: ApplicationCommandOptionType.String,
-            required: true,
-        })
-            token: string,
         @SlashOption({
             name: "file_name",
             description: "Know the filename? put it here",
@@ -71,9 +82,9 @@ export class Vicimage {
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply();
-        const validToken = await this._vicImageTokenManager.validateToken(token, interaction.user.id);
+        const validToken = await this._vicImageTokenManager.validateUser(interaction.user.id);
         if (!validToken) {
-            return InteractionUtils.replyOrFollowUp(interaction, "Invalid token");
+            return InteractionUtils.replyOrFollowUp(interaction, "unauthorised");
         }
         const image = ObjectUtil.validString(fileName) ? this._vicDropbox.getImageFromFileName(fileName) : this._vicDropbox.randomImage;
         if (!image) {
@@ -101,20 +112,12 @@ export class Vicimage {
     })
     @Guard(NotBot)
     private async reindex(
-        @SlashOption({
-            name: "token",
-            description: "the token to use",
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, VicImageTokenManager),
-            type: ApplicationCommandOptionType.String,
-            required: true,
-        })
-            token: string,
         interaction: CommandInteraction
     ): Promise<void> {
         await interaction.deferReply({
             ephemeral: true
         });
-        const validToken = await this._vicImageTokenManager.validateToken(token, interaction.user.id);
+        const validToken = await this._vicImageTokenManager.validateUser(interaction.user.id);
         if (!validToken) {
             return InteractionUtils.replyOrFollowUp(interaction, "Invalid token");
         }

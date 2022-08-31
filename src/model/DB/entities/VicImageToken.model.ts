@@ -1,7 +1,8 @@
 import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {IIdentifiable} from "./IIdentifiable.js";
 
 @Entity()
-export class VicImageTokenModel {
+export class VicImageTokenModel implements IIdentifiable {
     @PrimaryGeneratedColumn("increment")
     public id: number;
 
@@ -14,15 +15,8 @@ export class VicImageTokenModel {
     @Column({
         unique: true,
         nullable: false,
-        name: "userId"
     })
-    public name: string;
+    public userId: string;
 
-    @Column({
-        unique: true,
-        nullable: false,
-        name: "token"
-    })
-    public value: string;
 
 }
