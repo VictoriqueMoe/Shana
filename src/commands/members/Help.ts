@@ -245,7 +245,13 @@ export class Help {
                                  catCommand: CatCommand,
                                  member: GuildMember): void {
         function addOrRemove(this: void, permission: boolean, toRemove: CatCommand[], catCommand: CatCommand): void {
-            permission ? ObjectUtil.removeObjectFromArray(catCommand, toRemove) : toRemove.push(catCommand);
+            if (permission) {
+                if (!toRemove.includes(catCommand)) {
+                    toRemove.push(catCommand);
+                }
+            } else {
+                ObjectUtil.removeObjectFromArray(catCommand, toRemove);
+            }
         }
 
         if (ObjectUtil.isValidArray(applicationCommandPermissions)) {
