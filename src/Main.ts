@@ -60,7 +60,8 @@ export class Main {
                 IntentsBitField.Flags.GuildMessageReactions,
                 IntentsBitField.Flags.GuildPresences,
                 IntentsBitField.Flags.DirectMessages,
-                IntentsBitField.Flags.GuildVoiceStates
+                IntentsBitField.Flags.GuildVoiceStates,
+                IntentsBitField.Flags.GuildIntegrations
             ],
             logger: new class djxLogger implements ILogger {
                 public error(...args: unknown[]): void {

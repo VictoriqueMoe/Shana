@@ -173,7 +173,7 @@ export class ObjectUtil {
         return returnText.trim();
     }
 
-    public static removeObjectFromArray(itemToRemove: any, arr: any[]): void {
+    public static removeObjectFromArray<T>(itemToRemove: T, arr: T[]): void {
         let arrLen = arr.length;
         while (arrLen--) {
             const currentItem: any = arr[arrLen];
