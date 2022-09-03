@@ -30,7 +30,7 @@ type CatCommand = {
 @Discord()
 export class Help {
 
-    private readonly _catMap: Map<string, Map<string, CatCommand[]>> = new Map();
+    private readonly _catMap: Map<string, CatCommand[]> = new Map();
 
     @Slash({
         description: "Get the description of all commands"
@@ -40,13 +40,10 @@ export class Help {
         await interaction.deferReply();
         const guildId = interaction.guildId;
         const channelId = interaction.channelId;
-        if (!this._catMap.has(guildId)) {
-            await this.populateGuildMap(guildId, client);
-        }
         const member = interaction.member as GuildMember;
         const overridePermissions = await client.application.commands.permissions.fetch({guild: guildId});
-        const embed = this.displayCategory(guildId, client, member, channelId, overridePermissions);
-        const selectMenu = this.getSelectDropdown(guildId, client, member, channelId, overridePermissions);
+        const embed = this.displayCategory(client, member, channelId, overridePermissions);
+        const selectMenu = this.getSelectDropdown(client, member, channelId, overridePermissions);
         return InteractionUtils.replyOrFollowUp(interaction, {
             embeds: [embed],
             components: [selectMenu]
@@ -55,27 +52,23 @@ export class Help {
 
     @PostConstruct
     private async init(client: Client): Promise<void> {
-        for (const [guildId] of client.guilds.cache) {
-            await this.populateGuildMap(guildId, client);
+        const commandManager = client.application.commands.cache;
+        if (!commandManager || commandManager.size === 0) {
+            throw new Error("Unable to obtain commands");
         }
-    }
-
-    private async populateGuildMap(guildId: string, client: Client): Promise<void> {
-        const commandManager = await client.application.commands.fetch({
-            guildId
-        });
         for (const [, command] of commandManager) {
             if (ObjectUtil.isValidArray(command.options)) {
                 for (const opt of command.options) {
-                    this.populateMap(opt.name, opt.description, command, guildId, true);
+                    this.populateMap(opt.name, opt.description, command, true);
                 }
                 continue;
             }
-            this.populateMap(command.name, command.description, command, guildId, false);
+            this.populateMap(command.name, command.description, command, false);
         }
     }
 
-    private populateMap(commandName: string, commandDescription: string, parentCommand: ApplicationCommand, guildId: string, isGroup: boolean): void {
+
+    private populateMap(commandName: string, commandDescription: string, parentCommand: ApplicationCommand, isGroup: boolean): void {
         const dCommand = MetadataStorage.instance.applicationCommandSlashesFlat.find(dCommand => dCommand.name === commandName) as DApplicationCommand & ICategory;
         let category = dCommand?.category;
         if (!ObjectUtil.validString(category)) {
@@ -93,13 +86,10 @@ export class Help {
             isGroup,
             command: parentCommand
         };
-        if (!this._catMap.has(guildId)) {
-            this._catMap.set(guildId, new Map());
-        }
-        if (this._catMap.get(guildId).has(category)) {
-            this._catMap.get(guildId).get(category).push(obj);
+        if (this._catMap.has(category)) {
+            this._catMap.get(category).push(obj);
         } else {
-            this._catMap.get(guildId).set(category, [obj]);
+            this._catMap.set(category, [obj]);
         }
     }
 
@@ -113,16 +103,15 @@ export class Help {
         const channelId = interaction.channelId;
         const guildId = interaction.guildId;
         const overridePermissions = await client.application.commands.permissions.fetch({guild: guildId});
-        const categoryEmbed = this.displayCategory(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
-        const selectMenu = this.getSelectDropdown(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
+        const categoryEmbed = this.displayCategory(client, member, channelId, overridePermissions, catToShow);
+        const selectMenu = this.getSelectDropdown(client, member, channelId, overridePermissions, catToShow);
         return interaction.editReply({
             embeds: [categoryEmbed],
             components: [selectMenu]
         });
     }
 
-    private getSelectDropdown(guildId: string,
-                              client: Client,
+    private getSelectDropdown(client: Client,
                               member: GuildMember,
                               channelId: string,
                               overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
@@ -134,8 +123,8 @@ export class Help {
             value: "categories",
             default: defaultValue === "categories"
         });
-        for (const [cat] of this._catMap.get(guildId)) {
-            const commandsForCat = this.getCommands(cat, guildId, client, member, channelId, overridePermissions);
+        for (const [cat] of this._catMap) {
+            const commandsForCat = this.getCommands(cat, client, member, channelId, overridePermissions);
             if (!ObjectUtil.isValidArray(commandsForCat)) {
                 continue;
             }
@@ -151,8 +140,7 @@ export class Help {
         return new ActionRowBuilder<SelectMenuBuilder>().addComponents(selectMenu);
     }
 
-    private displayCategory(guildId: string,
-                            client: Client,
+    private displayCategory(client: Client,
                             member: GuildMember,
                             channelId: string,
                             overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
@@ -167,8 +155,8 @@ export class Help {
                     text: `${client.user.username}`
                 })
                 .setTimestamp();
-            for (const [cat] of this._catMap.get(guildId)) {
-                const commands = this.getCommands(cat, guildId, client, member, channelId, overridePermissions);
+            for (const [cat] of this._catMap) {
+                const commands = this.getCommands(cat, client, member, channelId, overridePermissions);
                 if (!ObjectUtil.isValidArray(commands)) {
                     continue;
                 }
@@ -177,7 +165,7 @@ export class Help {
             }
             return embed;
         }
-        const commands = this.getCommands(category, guildId, client, member, channelId, overridePermissions);
+        const commands = this.getCommands(category, client, member, channelId, overridePermissions);
         const chunks = this.chunk(commands, 24);
         const maxPage = chunks.length;
         const resultOfPage = chunks[pageNumber];
@@ -209,12 +197,11 @@ export class Help {
     }
 
     private getCommands(categoryId: string,
-                        guildId: string,
                         client: Client,
                         member: GuildMember,
                         channelId: string,
                         overridePermissions: Collection<string, ApplicationCommandPermissions[]>): CatCommand[] {
-        const commands = this._catMap.get(guildId).get(categoryId);
+        const commands = this._catMap.get(categoryId);
         if (DiscordUtils.isMemberAdmin(member)) {
             return commands;
         }
