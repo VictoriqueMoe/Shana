@@ -26,7 +26,7 @@ export class Bookmark {
     }
 
     @On()
-    private async messageDelete([message]: ArgsOf<"messageDelete">): Promise<void> {
+    private messageDelete([message]: ArgsOf<"messageDelete">): void {
         this._bookmarkManager.deleteBookmark(message.member, message);
     }
 

@@ -180,7 +180,7 @@ export class OnReady extends DataSourceAware {
         DIService.allServices;
     }
 
-    private async populateGuilds(): Promise<void> {
+    private populateGuilds(): Promise<void> {
         const guilds = this._client.guilds.cache;
         return this.ds.transaction(async transactionManager => {
             for (const [guildId] of guilds) {

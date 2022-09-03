@@ -77,7 +77,7 @@ export class FilterModuleManager extends DataSourceAware {
         await this.updateCache();
     }
 
-    public async getAllSettings(guildId: string): Promise<(FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel)[]> {
+    public getAllSettings(guildId: string): Promise<(FilterModuleModel | ValueBackedFilterModuleModel | BannedWordFilterModuleModel)[]> {
         const bannedWordRepo = this.ds.getRepository(BannedWordFilterModuleModel);
         const filterRepo = this.ds.getRepository(FilterModuleModel);
         const valueRepo = this.ds.getRepository(ValueBackedFilterModuleModel);

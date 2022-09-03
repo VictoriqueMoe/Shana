@@ -60,7 +60,7 @@ export class Vicimage {
             ephemeral: true
         });
         const didRemove = await this._vicImageTokenManager.revokeUser(user.id);
-        let msg = didRemove ? `revoked user "${user.user.tag}"` : `user ${user.user.tag} is not authorised in the first place`;
+        const msg = didRemove ? `revoked user "${user.user.tag}"` : `user ${user.user.tag} is not authorised in the first place`;
         return InteractionUtils.replyOrFollowUp(interaction, msg);
     }
 

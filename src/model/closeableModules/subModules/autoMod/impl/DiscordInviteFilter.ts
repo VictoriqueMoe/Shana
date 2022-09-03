@@ -9,10 +9,10 @@ export class DiscordInviteFilter extends AbstractFilter {
         return "Discord Invite Filter";
     }
 
-    public async doFilter(content: Message): Promise<boolean> {
+    public doFilter(content: Message): Promise<boolean> {
         const messageContent = content.content;
         const regex = /(discord\.gg|discordapp\.com\/invite\/|discord\.com\/invite)/gmi;
-        return !regex.test(messageContent);
+        return Promise.resolve(!regex.test(messageContent));
     }
 
     public async postProcess(message: Message): Promise<void> {

@@ -10,12 +10,12 @@ export class EveryoneMentionsFilter extends AbstractFilter {
         return "Discord everyone filter";
     }
 
-    public async doFilter(content: Message): Promise<boolean> {
+    public doFilter(content: Message): Promise<boolean> {
         const hasPerms = content?.member?.permissions.has(PermissionFlagsBits.MentionEveryone);
         if (hasPerms) {
-            return true;
+            return Promise.resolve(true);
         }
-        return !content.content.includes("@everyone");
+        return Promise.resolve(!content.content.includes("@everyone"));
 
     }
 

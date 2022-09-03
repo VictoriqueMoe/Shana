@@ -13,7 +13,7 @@ export class MiscListeners {
     }
 
     @rest()
-    private async rateLimited([rateLimitData]: RestArgsOf<"rateLimited">): Promise<void> {
+    private rateLimited([rateLimitData]: RestArgsOf<"rateLimited">): void {
         const {limit, url, hash, majorParameter, method, route, timeToReset, global} = rateLimitData;
         logger.warn({
             limit,

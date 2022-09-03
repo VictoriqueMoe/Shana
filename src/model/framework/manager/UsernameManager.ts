@@ -22,7 +22,7 @@ export class UsernameManager extends DataSourceAware {
         });
     }
 
-    public async removeNickname(member: GuildMember): Promise<DeleteResult> {
+    public removeNickname(member: GuildMember): Promise<DeleteResult> {
         return this.ds.getRepository(UsernameModel).delete({
             userId: member.id,
             guildId: member.guild.id

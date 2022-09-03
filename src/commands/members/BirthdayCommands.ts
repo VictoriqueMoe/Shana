@@ -31,7 +31,7 @@ export class BirthdayCommands {
     }
 
     @On()
-    private async guildMemberRemove([member]: ArgsOf<"guildMemberRemove">): Promise<void> {
+    private guildMemberRemove([member]: ArgsOf<"guildMemberRemove">): void {
         const memberId = member.id;
         const {guild} = member;
         this._birthdayManager.removeBirthday(memberId, guild);

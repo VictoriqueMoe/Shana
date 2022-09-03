@@ -12,7 +12,7 @@ import Fuse from "fuse.js";
 export class NotesManager extends DataSourceAware implements ISearchBase<NotesModel> {
     private _fuseCache: ShanaFuse<NotesModel> = null;
 
-    public async getNotes(member: GuildMember, title?: string): Promise<NotesModel[]> {
+    public getNotes(member: GuildMember, title?: string): Promise<NotesModel[]> {
         const guildId = member.guild.id;
         const userId = member.id;
         const repo = this.ds.getRepository(NotesModel);
