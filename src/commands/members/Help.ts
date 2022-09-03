@@ -8,6 +8,7 @@ import {
     ApplicationCommandPermissions,
     ApplicationCommandPermissionType,
     ApplicationCommandType,
+    Collection,
     CommandInteraction,
     EmbedBuilder,
     GuildMember,
@@ -43,8 +44,9 @@ export class Help {
             await this.populateGuildMap(guildId, client);
         }
         const member = interaction.member as GuildMember;
-        const embed = await this.displayCategory(guildId, client, member, channelId);
-        const selectMenu = await this.getSelectDropdown(guildId, client, member, channelId);
+        const overridePermissions = await client.application.commands.permissions.fetch({guild: guildId});
+        const embed = await this.displayCategory(guildId, client, member, channelId, overridePermissions);
+        const selectMenu = await this.getSelectDropdown(guildId, client, member, channelId, overridePermissions);
         return InteractionUtils.replyOrFollowUp(interaction, {
             embeds: [embed],
             components: [selectMenu]
@@ -109,15 +111,22 @@ export class Help {
         const member = interaction.member as GuildMember;
         const catToShow = interaction.values[0];
         const channelId = interaction.channelId;
-        const categoryEmbed = await this.displayCategory(interaction.guildId, client, member, channelId, catToShow);
-        const selectMenu = await this.getSelectDropdown(interaction.guildId, client, member, channelId, catToShow);
+        const guildId = interaction.guildId;
+        const overridePermissions = await client.application.commands.permissions.fetch({guild: guildId});
+        const categoryEmbed = await this.displayCategory(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
+        const selectMenu = await this.getSelectDropdown(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
         return interaction.editReply({
             embeds: [categoryEmbed],
             components: [selectMenu]
         });
     }
 
-    private async getSelectDropdown(guildId: string, client: Client, member: GuildMember, channelId: string, defaultValue = "categories"): Promise<ActionRowBuilder<SelectMenuBuilder>> {
+    private async getSelectDropdown(guildId: string,
+                                    client: Client,
+                                    member: GuildMember,
+                                    channelId: string,
+                                    overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
+                                    defaultValue = "categories"): Promise<ActionRowBuilder<SelectMenuBuilder>> {
         const optionsForEmbed: SelectMenuComponentOptionData[] = [];
         optionsForEmbed.push({
             description: "View all categories",
@@ -126,7 +135,7 @@ export class Help {
             default: defaultValue === "categories"
         });
         for (const [cat] of this._catMap.get(guildId)) {
-            const commandsForCat = await this.getCommands(cat, guildId, client, member, channelId);
+            const commandsForCat = await this.getCommands(cat, guildId, client, member, channelId, overridePermissions);
             if (!ObjectUtil.isValidArray(commandsForCat)) {
                 continue;
             }
@@ -142,7 +151,13 @@ export class Help {
         return new ActionRowBuilder<SelectMenuBuilder>().addComponents(selectMenu);
     }
 
-    private async displayCategory(guildId: string, client: Client, member: GuildMember, channelId: string, category = "categories", pageNumber = 0): Promise<EmbedBuilder> {
+    private async displayCategory(guildId: string,
+                                  client: Client,
+                                  member: GuildMember,
+                                  channelId: string,
+                                  overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
+                                  category = "categories",
+                                  pageNumber = 0): Promise<EmbedBuilder> {
         if (category === "categories") {
             const embed = new EmbedBuilder()
                 .setTitle(`${client.user.username} commands`)
@@ -153,7 +168,7 @@ export class Help {
                 })
                 .setTimestamp();
             for (const [cat] of this._catMap.get(guildId)) {
-                const commands = await this.getCommands(cat, guildId, client, member, channelId);
+                const commands = await this.getCommands(cat, guildId, client, member, channelId, overridePermissions);
                 if (!ObjectUtil.isValidArray(commands)) {
                     continue;
                 }
@@ -162,7 +177,7 @@ export class Help {
             }
             return embed;
         }
-        const commands = await this.getCommands(category, guildId, client, member, channelId);
+        const commands = await this.getCommands(category, guildId, client, member, channelId, overridePermissions);
         const chunks = this.chunk(commands, 24);
         const maxPage = chunks.length;
         const resultOfPage = chunks[pageNumber];
@@ -193,13 +208,17 @@ export class Help {
         return embed;
     }
 
-    private async getCommands(categoryId: string, guildId: string, client: Client, member: GuildMember, channelId: string): Promise<CatCommand[]> {
+    private async getCommands(categoryId: string,
+                              guildId: string,
+                              client: Client,
+                              member: GuildMember,
+                              channelId: string,
+                              overridePermissions: Collection<string, ApplicationCommandPermissions[]>): Promise<CatCommand[]> {
         const commands = this._catMap.get(guildId).get(categoryId);
         if (DiscordUtils.isMemberAdmin(member)) {
             return commands;
         }
         const toRemove: CatCommand[] = [];
-        const overridePermissions = await client.application.commands.permissions.fetch({guild: guildId});
         const hasGlobalOverrides = overridePermissions.has(client.application.id);
         for (const catCommand of commands) {
             const command = catCommand.command;
