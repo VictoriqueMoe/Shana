@@ -135,7 +135,7 @@ export class Help {
             default: defaultValue === "categories"
         });
         for (const [cat] of this._catMap.get(guildId)) {
-            const commandsForCat = await this.getCommands(cat, guildId, client, member, channelId, overridePermissions);
+            const commandsForCat = this.getCommands(cat, guildId, client, member, channelId, overridePermissions);
             if (!ObjectUtil.isValidArray(commandsForCat)) {
                 continue;
             }
@@ -168,7 +168,7 @@ export class Help {
                 })
                 .setTimestamp();
             for (const [cat] of this._catMap.get(guildId)) {
-                const commands = await this.getCommands(cat, guildId, client, member, channelId, overridePermissions);
+                const commands = this.getCommands(cat, guildId, client, member, channelId, overridePermissions);
                 if (!ObjectUtil.isValidArray(commands)) {
                     continue;
                 }
@@ -177,7 +177,7 @@ export class Help {
             }
             return embed;
         }
-        const commands = await this.getCommands(category, guildId, client, member, channelId, overridePermissions);
+        const commands = this.getCommands(category, guildId, client, member, channelId, overridePermissions);
         const chunks = this.chunk(commands, 24);
         const maxPage = chunks.length;
         const resultOfPage = chunks[pageNumber];
@@ -208,12 +208,12 @@ export class Help {
         return embed;
     }
 
-    private async getCommands(categoryId: string,
-                              guildId: string,
-                              client: Client,
-                              member: GuildMember,
-                              channelId: string,
-                              overridePermissions: Collection<string, ApplicationCommandPermissions[]>): Promise<CatCommand[]> {
+    private getCommands(categoryId: string,
+                        guildId: string,
+                        client: Client,
+                        member: GuildMember,
+                        channelId: string,
+                        overridePermissions: Collection<string, ApplicationCommandPermissions[]>): CatCommand[] {
         const commands = this._catMap.get(guildId).get(categoryId);
         if (DiscordUtils.isMemberAdmin(member)) {
             return commands;
