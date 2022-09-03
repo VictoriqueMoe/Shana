@@ -145,7 +145,7 @@ export class AuditLogger extends CloseableModule<ModAuditLogSettings> {
         this.postToLog(`${memeberTag} has left the server`, guild.id);
     }
 
-    private async postToLog(content: EmbedBuilder | string, guildId: string): Promise<Message> {
+    private postToLog(content: EmbedBuilder | string, guildId: string): Promise<Message> {
         if (content instanceof EmbedBuilder) {
             return this._logManager.postToLog([content], guildId);
         }

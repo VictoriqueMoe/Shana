@@ -9,21 +9,21 @@ export class SpoilersFilter extends AbstractFilter {
         return "Spoilers Filter";
     }
 
-    public async doFilter(content: Message): Promise<boolean> {
+    public doFilter(content: Message): Promise<boolean> {
         const regex = /\|{2}(.*)\|{2}/gmu;
         const messageContent = content.content;
         if (regex.test(messageContent)) {
-            return false;
+            return Promise.resolve(false);
         }
         const attachmentsCollection = content.attachments;
         if (attachmentsCollection.size > 0) {
             for (const [, attachment] of attachmentsCollection) {
                 if (attachment.spoiler) {
-                    return false;
+                    return Promise.resolve(false);
                 }
             }
         }
-        return true;
+        return Promise.resolve(true);
     }
 
     public async postProcess(message: Message): Promise<void> {

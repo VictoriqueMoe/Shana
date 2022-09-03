@@ -16,7 +16,7 @@ export class MessageScheduleManager extends DataSourceAware {
         super();
     }
 
-    public async deleteMessageSchedule(guildId: string, name: string): Promise<boolean> {
+    public deleteMessageSchedule(guildId: string, name: string): Promise<boolean> {
         return this.ds.transaction(async entityManager => {
             const destroyResult = await entityManager.delete(MessageScheduleModel, {
                 guildId,
@@ -52,7 +52,7 @@ export class MessageScheduleManager extends DataSourceAware {
         return guild.members.fetch(model.userId);
     }
 
-    public async addMessageSchedule(guildId: string, channel: BaseGuildTextChannel, cron: string, message: string, user: GuildMember, name: string): Promise<IScheduledMessageJob> {
+    public addMessageSchedule(guildId: string, channel: BaseGuildTextChannel, cron: string, message: string, user: GuildMember, name: string): Promise<IScheduledMessageJob> {
         const newMessageSchedule = DbUtils.build(MessageScheduleModel, {
             guildId,
             cron,

@@ -10,8 +10,8 @@ export class AllCapsFilter extends AbstractFilter {
         return "All Caps Filter";
     }
 
-    public async doFilter(content: Message): Promise<boolean> {
-        return ObjectUtil.getAmountOfCapsAsPercentage(content.content) < 70;
+    public doFilter(content: Message): Promise<boolean> {
+        return Promise.resolve(ObjectUtil.getAmountOfCapsAsPercentage(content.content) < 70);
     }
 
     public async postProcess(message: Message): Promise<void> {

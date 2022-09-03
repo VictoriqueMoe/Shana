@@ -116,7 +116,7 @@ export class Misc {
         type: ApplicationCommandType.User
     })
     @Guard(NotBot)
-    private async avatar(interaction: UserContextMenuCommandInteraction): Promise<InteractionResponse> {
+    private avatar(interaction: UserContextMenuCommandInteraction): Promise<InteractionResponse> {
         const ops: ImageURLOptions = {
             size: 1024
         };
@@ -288,7 +288,7 @@ export class Misc {
             url?: string,
             title: string
         }[];
-        const promiseWrapper = async (url: string): Promise<GoogleImageResult> => {
+        const promiseWrapper = (url: string): Promise<GoogleImageResult> => {
             return new Promise(resolve => reverseImageSearch(url, resolve));
         };
 

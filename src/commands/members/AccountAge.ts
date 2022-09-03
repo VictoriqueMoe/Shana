@@ -49,7 +49,7 @@ export class AccountAge {
         description: "View the age of a channel"
     })
     @Guard(NotBot)
-    private async channelAge(
+    private channelAge(
         @SlashOption({
             name: "channel",
             description: "The reference to the channel",
@@ -69,7 +69,7 @@ export class AccountAge {
         description: "Get the age on an account"
     })
     @Guard(NotBot)
-    private async getAccountAge(
+    private getAccountAge(
         @SlashOption({
             name: "user",
             description: "The user you want to check the account age of",

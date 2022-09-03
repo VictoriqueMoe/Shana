@@ -45,7 +45,7 @@ export class Help {
         }
         const member = interaction.member as GuildMember;
         const overridePermissions = await client.application.commands.permissions.fetch({guild: guildId});
-        const embed = await this.displayCategory(guildId, client, member, channelId, overridePermissions);
+        const embed = this.displayCategory(guildId, client, member, channelId, overridePermissions);
         const selectMenu = this.getSelectDropdown(guildId, client, member, channelId, overridePermissions);
         return InteractionUtils.replyOrFollowUp(interaction, {
             embeds: [embed],
@@ -113,7 +113,7 @@ export class Help {
         const channelId = interaction.channelId;
         const guildId = interaction.guildId;
         const overridePermissions = await client.application.commands.permissions.fetch({guild: guildId});
-        const categoryEmbed = await this.displayCategory(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
+        const categoryEmbed = this.displayCategory(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
         const selectMenu = this.getSelectDropdown(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
         return interaction.editReply({
             embeds: [categoryEmbed],
@@ -151,13 +151,13 @@ export class Help {
         return new ActionRowBuilder<SelectMenuBuilder>().addComponents(selectMenu);
     }
 
-    private async displayCategory(guildId: string,
-                                  client: Client,
-                                  member: GuildMember,
-                                  channelId: string,
-                                  overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
-                                  category = "categories",
-                                  pageNumber = 0): Promise<EmbedBuilder> {
+    private displayCategory(guildId: string,
+                            client: Client,
+                            member: GuildMember,
+                            channelId: string,
+                            overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
+                            category = "categories",
+                            pageNumber = 0): EmbedBuilder {
         if (category === "categories") {
             const embed = new EmbedBuilder()
                 .setTitle(`${client.user.username} commands`)
