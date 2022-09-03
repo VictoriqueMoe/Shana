@@ -46,7 +46,7 @@ export class Help {
         const member = interaction.member as GuildMember;
         const overridePermissions = await client.application.commands.permissions.fetch({guild: guildId});
         const embed = await this.displayCategory(guildId, client, member, channelId, overridePermissions);
-        const selectMenu = await this.getSelectDropdown(guildId, client, member, channelId, overridePermissions);
+        const selectMenu = this.getSelectDropdown(guildId, client, member, channelId, overridePermissions);
         return InteractionUtils.replyOrFollowUp(interaction, {
             embeds: [embed],
             components: [selectMenu]
@@ -114,19 +114,19 @@ export class Help {
         const guildId = interaction.guildId;
         const overridePermissions = await client.application.commands.permissions.fetch({guild: guildId});
         const categoryEmbed = await this.displayCategory(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
-        const selectMenu = await this.getSelectDropdown(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
+        const selectMenu = this.getSelectDropdown(interaction.guildId, client, member, channelId, overridePermissions, catToShow);
         return interaction.editReply({
             embeds: [categoryEmbed],
             components: [selectMenu]
         });
     }
 
-    private async getSelectDropdown(guildId: string,
-                                    client: Client,
-                                    member: GuildMember,
-                                    channelId: string,
-                                    overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
-                                    defaultValue = "categories"): Promise<ActionRowBuilder<SelectMenuBuilder>> {
+    private getSelectDropdown(guildId: string,
+                              client: Client,
+                              member: GuildMember,
+                              channelId: string,
+                              overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
+                              defaultValue = "categories"): ActionRowBuilder<SelectMenuBuilder> {
         const optionsForEmbed: SelectMenuComponentOptionData[] = [];
         optionsForEmbed.push({
             description: "View all categories",
