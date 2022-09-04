@@ -233,11 +233,11 @@ export class Help {
                                  member: GuildMember): void {
         function addOrRemove(this: void, permission: boolean, toRemove: CatCommand[], catCommand: CatCommand): void {
             if (permission) {
+                ObjectUtil.removeObjectFromArray(catCommand, toRemove);
+            } else {
                 if (!toRemove.includes(catCommand)) {
                     toRemove.push(catCommand);
                 }
-            } else {
-                ObjectUtil.removeObjectFromArray(catCommand, toRemove);
             }
         }
 
