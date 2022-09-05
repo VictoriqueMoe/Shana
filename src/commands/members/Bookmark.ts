@@ -53,10 +53,11 @@ export class Bookmark {
     }
 
     @Slash({
-        description: "Gets all of your saved bookmarks"
+        description: "Gets all of your saved bookmarks",
+        name: "get_bookmark"
     })
     @Guard(NotBot)
-    private async getbookmark(
+    private async getBookmark(
         @SlashOption({
             name: "public",
             type: ApplicationCommandOptionType.Boolean,
@@ -103,10 +104,11 @@ export class Bookmark {
     }
 
     @Slash({
-        description: "Delete a bookmark"
+        description: "Delete a bookmark",
+        name: "delete_bookmarks"
     })
     @Guard(NotBot)
-    private async deletebookmarks(
+    private async deleteBookmarks(
         @SlashOption({
             name: "id",
             type: ApplicationCommandOptionType.String,

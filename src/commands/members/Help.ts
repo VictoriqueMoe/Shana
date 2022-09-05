@@ -1,7 +1,6 @@
 import {Client, DApplicationCommand, Discord, Guard, MetadataStorage, SelectMenuComponent, Slash} from "discordx";
 import {ICategory, NotBot} from "@discordx/utilities";
 import {DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
-import {PostConstruct} from "../../model/framework/decorators/PostConstruct.js";
 import {
     ActionRowBuilder,
     ApplicationCommand,
@@ -18,7 +17,11 @@ import {
     SelectMenuComponentOptionData,
     SelectMenuInteraction
 } from "discord.js";
+import {injectable} from "tsyringe";
+import {Property} from "../../model/framework/decorators/Property.js";
+import {Typeings} from "../../model/Typeings.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
+import propTypes = Typeings.propTypes;
 
 type CatCommand = {
     name: string,
@@ -28,9 +31,32 @@ type CatCommand = {
 } & ICategory;
 
 @Discord()
+@injectable()
 export class Help {
 
     private readonly _catMap: Map<string, CatCommand[]> = new Map();
+
+    @Property("NODE_ENV")
+    private readonly envMode: propTypes["NODE_ENV"];
+
+    public constructor(client: Client) {
+        const commandManager = client.application.commands.cache;
+        if (!commandManager || commandManager.size === 0) {
+            if (this.envMode === "development") {
+                return;
+            }
+            throw new Error("Unable to obtain commands");
+        }
+        for (const [, command] of commandManager) {
+            if (ObjectUtil.isValidArray(command.options)) {
+                for (const opt of command.options) {
+                    this.populateMap(opt.name, opt.description, command, true);
+                }
+                continue;
+            }
+            this.populateMap(command.name, command.description, command, false);
+        }
+    }
 
     @Slash({
         description: "Get the description of all commands"
@@ -48,23 +74,6 @@ export class Help {
             embeds: [embed],
             components: [selectMenu]
         });
-    }
-
-    @PostConstruct
-    private async init(client: Client): Promise<void> {
-        const commandManager = client.application.commands.cache;
-        if (!commandManager || commandManager.size === 0) {
-            throw new Error("Unable to obtain commands");
-        }
-        for (const [, command] of commandManager) {
-            if (ObjectUtil.isValidArray(command.options)) {
-                for (const opt of command.options) {
-                    this.populateMap(opt.name, opt.description, command, true);
-                }
-                continue;
-            }
-            this.populateMap(command.name, command.description, command, false);
-        }
     }
 
 
