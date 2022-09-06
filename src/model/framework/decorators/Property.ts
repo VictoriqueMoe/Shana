@@ -14,7 +14,7 @@ const propCache: Map<keyof propTypes, PropertyTYpe> = new Map();
  */
 export function Property(prop: keyof propTypes, required = true): PropertyDecorator {
     return (target, key): void => {
-        let original = target[key];
+        const original = target[key];
         Reflect.deleteProperty(target, key);
         Reflect.defineProperty(target, key, {
             configurable: true,
