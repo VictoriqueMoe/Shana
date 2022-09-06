@@ -10,6 +10,7 @@ const propCache: Map<keyof propTypes, PropertyTYpe> = new Map();
 
 /**
  * Get a property from the system. The location where the property is loaded from is agnostic and defined by the registered IPropertyResolutionEngine classes.
+ * This will make the prop immutable, and can not be changed after set
  * This acts the similar to Spring's Value annotation
  */
 export function Property(prop: keyof propTypes, required = true): PropertyDecorator {
@@ -17,7 +18,6 @@ export function Property(prop: keyof propTypes, required = true): PropertyDecora
         const original = target[key];
         Reflect.deleteProperty(target, key);
         Reflect.defineProperty(target, key, {
-            configurable: true,
             enumerable: true,
             get: () => {
                 if (propCache.has(prop)) {
@@ -33,9 +33,6 @@ export function Property(prop: keyof propTypes, required = true): PropertyDecora
                 }
                 propCache.set(prop, propValue);
                 return propValue;
-            },
-            set: (newVal) => {
-                propCache.set(prop, newVal);
             }
         });
     };
