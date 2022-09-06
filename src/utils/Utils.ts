@@ -253,11 +253,11 @@ export namespace DiscordUtils {
     import StickerInfo = Typeings.StickerInfo;
 
     export const allChannelsExceptCat = [
-        ChannelType.GuildPrivateThread,
-        ChannelType.GuildNewsThread,
+        ChannelType.PrivateThread,
+        ChannelType.AnnouncementThread,
         ChannelType.GuildVoice,
-        ChannelType.GuildNews,
-        ChannelType.GuildPublicThread,
+        ChannelType.GuildAnnouncement,
+        ChannelType.PublicThread,
         ChannelType.GuildStageVoice,
         ChannelType.GuildDirectory,
         ChannelType.GuildForum,

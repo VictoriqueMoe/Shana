@@ -2,9 +2,11 @@ import {container} from "tsyringe";
 
 import {PropertyResolutionManager} from "../manager/PropertyResolutionManager.js";
 import {Typeings} from "../../Typeings.js";
+import {PropertyTYpe} from "../engine/IPropertyResolutionEngine.js";
 import propTypes = Typeings.propTypes;
 
 const manager = container.resolve(PropertyResolutionManager);
+const propCache: Map<keyof propTypes, PropertyTYpe> = new Map();
 
 /**
  * Get a property from the system. The location where the property is loaded from is agnostic and defined by the registered IPropertyResolutionEngine classes.
@@ -18,17 +20,22 @@ export function Property(prop: keyof propTypes, required = true): PropertyDecora
             configurable: true,
             enumerable: true,
             get: () => {
-                const propValue = manager.getProperty(prop);
+                if (propCache.has(prop)) {
+                    return propCache.get(prop);
+                }
+                let propValue = manager.getProperty(prop);
                 if (required && propValue === null) {
                     throw new Error(`Unable to find prop with key "${prop}"`);
                 }
                 if (!required && propValue === null && original !== null && original !== undefined) {
-                    return original;
+                    // if not required and a default value is set
+                    propValue = original;
                 }
+                propCache.set(prop, propValue);
                 return propValue;
             },
             set: (newVal) => {
-                original = newVal;
+                propCache.set(prop, newVal);
             }
         });
     };

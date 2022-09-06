@@ -95,7 +95,7 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
             return;
         }
         const dateNow = Date.now();
-        const attatchments = message.attachments;
+        const attachments = message.attachments;
         const member = message.member;
         if (!member?.user) {
             return;
@@ -136,8 +136,8 @@ export class MessageLogger extends AbstractAdminAuditLogger<MessageLoggerSetting
             file: string,
             name: string
         } = null;
-        if (attatchments.size === 1) {
-            const messageAttachment = attatchments.first();
+        if (attachments.size === 1) {
+            const messageAttachment = attachments.first();
             const url = messageAttachment.attachment as string;
             try {
                 if (ObjectUtil.validString(url)) {

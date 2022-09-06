@@ -214,7 +214,7 @@ export class ChannelLogger extends AbstractAdminAuditLogger<ChannelLoggerSetting
         const avatarUrl = ownerMember.displayAvatarURL();
         const ownerTag = ownerMember.user.tag;
         const parent = thread.parent;
-        const type = thread.type === ChannelType.GuildPrivateThread ? "Private" : "Public";
+        const type = thread.type === ChannelType.PrivateThread ? "Private" : "Public";
         const embed = new EmbedBuilder()
             .setColor('#0099ff')
             .setAuthor({

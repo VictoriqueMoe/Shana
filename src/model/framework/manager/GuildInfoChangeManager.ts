@@ -63,10 +63,10 @@ export class GuildInfoChangeManager {
             let oldParsed: "Public" | "Private" | null = null;
             let newParsed: "Public" | "Private" | null = null;
             if (ObjectUtil.validString(oldType)) {
-                oldParsed = oldType === ChannelType.GuildPrivateThread ? "Private" : "Public";
+                oldParsed = oldType === ChannelType.PrivateThread ? "Private" : "Public";
             }
             if (ObjectUtil.validString(newType)) {
-                newParsed = newType === ChannelType.GuildPrivateThread ? "Private" : "Public";
+                newParsed = newType === ChannelType.PrivateThread ? "Private" : "Public";
             }
             retObj["type"] = {
                 before: oldParsed,

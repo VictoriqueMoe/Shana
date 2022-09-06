@@ -1,7 +1,8 @@
 import {singleton} from "tsyringe";
 import fs from "fs";
 import {ObjectUtil} from "../../../../utils/Utils.js";
-import type {IPropertyResolutionEngine, Property} from "../IPropertyResolutionEngine.js";
+import type {IPropertyResolutionEngine} from "../IPropertyResolutionEngine.js";
+import {PropertyTYpe} from "../IPropertyResolutionEngine.js";
 import {PostConstruct} from "../../decorators/PostConstruct.js";
 
 @singleton()
@@ -9,7 +10,7 @@ export class PackageJsonResolutionEngine implements IPropertyResolutionEngine {
     private readonly packageLocation: string = process.env.npm_package_json;
     private packageJson: Record<string, any>;
 
-    public getProperty(prop: string): Property {
+    public getProperty(prop: string): PropertyTYpe {
         return this.packageJson?.[prop];
     }
 
