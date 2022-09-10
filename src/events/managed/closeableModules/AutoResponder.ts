@@ -2,7 +2,7 @@ import {ArgsOf, Client} from "discordx";
 import {DiscordUtils, ObjectUtil} from "../../../utils/Utils.js";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint.js";
 import {Message} from "discord.js";
-import {container, singleton} from "tsyringe";
+import {container, injectable} from "tsyringe";
 import {AutoResponderModel} from "../../../model/DB/entities/autoMod/impl/AutoResponder.model.js";
 import path from 'path';
 import isImageFast from 'is-image-fast';
@@ -14,7 +14,7 @@ import {AutoResponderManager} from "../../../model/framework/manager/AutoRespond
 import {OcrManager} from "../../../model/framework/manager/OcrManager.js";
 import {EventDeletedListener} from "../../djxManaged/eventDispatcher/EventDeletedListener.js";
 
-@singleton()
+@injectable()
 export class AutoResponder extends TriggerConstraint<null> {
 
     public setDefaults(): Promise<void> {

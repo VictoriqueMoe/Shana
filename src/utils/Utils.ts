@@ -176,7 +176,7 @@ export class ObjectUtil {
     public static removeObjectFromArray<T>(itemToRemove: T, arr: T[]): void {
         let arrLen = arr.length;
         while (arrLen--) {
-            const currentItem: any = arr[arrLen];
+            const currentItem = arr[arrLen];
             if (itemToRemove === currentItem) {
                 arr.splice(arrLen, 1);
             }

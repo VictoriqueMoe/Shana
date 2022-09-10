@@ -1,10 +1,8 @@
 import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
-import {singleton} from "tsyringe";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
 import {BannedWordEntries, BannedWordFilterSettings, IBannedWordAutoModFilter} from "../IBannedWordAutoModFilter.js";
 
-@singleton()
 export class BannedWordFilter extends AbstractFilter implements IBannedWordAutoModFilter {
 
     public get id(): string {

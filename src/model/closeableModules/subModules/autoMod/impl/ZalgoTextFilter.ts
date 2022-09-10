@@ -1,9 +1,7 @@
 import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
-import {singleton} from "tsyringe";
 
-@singleton()
 export class ZalgoTextFilter extends AbstractFilter {
 
     public get id(): string {

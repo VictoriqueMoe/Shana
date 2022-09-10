@@ -1,10 +1,8 @@
 import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
-import {singleton} from "tsyringe";
 import {SpamMeta} from "discord-spams";
 import {RunEvery} from "../../../../framework/decorators/RunEvery.js";
 
-@singleton()
 export class SpamFilter extends AbstractFilter {
 
     public constructor() {

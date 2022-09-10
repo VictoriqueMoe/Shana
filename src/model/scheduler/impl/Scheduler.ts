@@ -53,7 +53,7 @@ export class Scheduler implements IScheduler {
 
     public cancelJob(name: string): boolean {
         const j = this.getJob(name);
-        if (j == null) {
+        if (!j) {
             return false;
         }
         logger.info(`job "${name}" has been cancelled`);

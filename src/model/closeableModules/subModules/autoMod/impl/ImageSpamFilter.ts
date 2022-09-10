@@ -1,9 +1,7 @@
 import {Message} from "discord.js";
-import {singleton} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";
 import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
 
-@singleton()
 export class ImageSpamFilter extends AbstractValueBackedAutoModFilter<number> {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;

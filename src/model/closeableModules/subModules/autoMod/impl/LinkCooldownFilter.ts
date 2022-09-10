@@ -1,10 +1,8 @@
 import {Message} from "discord.js";
-import {singleton} from "tsyringe";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
 import {TimedSet} from "@discordx/utilities";
 import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
 
-@singleton()
 export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number> {
     private readonly _cooldownArray: Map<string, TimedSet<LinkCooldownEntry>> = new Map();
 

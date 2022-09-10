@@ -1,9 +1,7 @@
-import {singleton} from "tsyringe";
 import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {PermissionFlagsBits} from "discord-api-types/v10";
 
-@singleton()
 export class EveryoneMentionsFilter extends AbstractFilter {
 
     public get id(): string {

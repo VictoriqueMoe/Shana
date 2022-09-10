@@ -14,22 +14,23 @@ import {AllCapsFilter} from "../../../closeableModules/subModules/autoMod/impl/A
 import {FastMessageSpamFilter} from "../../../closeableModules/subModules/autoMod/impl/FastMessageSpamFilter.js";
 import {ZalgoTextFilter} from "../../../closeableModules/subModules/autoMod/impl/ZalgoTextFilter.js";
 import {EveryoneMentionsFilter} from "../../../closeableModules/subModules/autoMod/impl/EveryoneMentionsFilter.js";
+import {getInstanceCashingSingletonFactory} from "../../DI/moduleRegistrar.js";
 
 
 @singleton()
 @registry([
-    {token: Beans.ISubModuleToken, useToken: ZalgoTextFilter},
-    {token: Beans.ISubModuleToken, useToken: ImageSpamFilter},
-    {token: Beans.ISubModuleToken, useToken: LinkCooldownFilter},
-    {token: Beans.ISubModuleToken, useToken: SpoilersFilter},
-    {token: Beans.ISubModuleToken, useToken: FastMessageSpamFilter},
-    {token: Beans.ISubModuleToken, useToken: EmojiSpamFilter},
-    {token: Beans.ISubModuleToken, useToken: MassMentionsFilter},
-    {token: Beans.ISubModuleToken, useToken: DiscordInviteFilter},
-    {token: Beans.ISubModuleToken, useToken: BannedWordFilter},
-    {token: Beans.ISubModuleToken, useToken: AllCapsFilter},
-    {token: Beans.ISubModuleToken, useToken: EveryoneMentionsFilter},
-    {token: Beans.ISubModuleToken, useToken: SpamFilter}
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(ZalgoTextFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(ImageSpamFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(LinkCooldownFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(SpoilersFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(FastMessageSpamFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(EmojiSpamFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(MassMentionsFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(DiscordInviteFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(BannedWordFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(AllCapsFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(EveryoneMentionsFilter)},
+    {token: Beans.ISubModuleToken, useFactory: getInstanceCashingSingletonFactory(SpamFilter)}
 ])
 export class SubModuleFactory extends AbstractFactory<ISubModule> {
     public constructor(@injectAll(Beans.ISubModuleToken) beans: ISubModule[]) {
