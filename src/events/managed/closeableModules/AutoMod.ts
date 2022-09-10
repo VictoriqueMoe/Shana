@@ -1,4 +1,4 @@
-import {delay, inject, singleton} from "tsyringe";
+import {delay, inject, injectable} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";
 import {ObjectUtil} from "../../../utils/Utils.js";
 import {BaseGuildTextChannel, GuildMember} from "discord.js";
@@ -11,9 +11,6 @@ import {Enabled} from "../../../guards/managedGuards/Enabled.js";
 import Immutable from "immutable";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint.js";
 import type {IAutoModFilter} from "../../../model/closeableModules/subModules/autoMod/IAutoModFilter.js";
-import type {
-    FastMessageSpamFilter
-} from "../../../model/closeableModules/subModules/autoMod/impl/FastMessageSpamFilter.js";
 import {EventDeletedListener} from "../../djxManaged/eventDispatcher/EventDeletedListener.js";
 import {MuteManager} from "../../../model/framework/manager/MuteManager.js";
 import {LogChannelManager} from "../../../model/framework/manager/LogChannelManager.js";
@@ -21,7 +18,7 @@ import TIME_UNIT from "../../../enums/TIME_UNIT.js";
 import {FilterModuleManager} from "../../../model/framework/manager/FilterModuleManager.js";
 import logger from "../../../utils/LoggerFactory.js";
 
-@singleton()
+@injectable()
 export class AutoMod extends TriggerConstraint<null> {
 
     private readonly _muteTimeoutArray: Map<string, Map<IAutoModFilter, TimedSet<TerminalViolation>>> = new Map();
@@ -181,23 +178,9 @@ export class AutoMod extends TriggerConstraint<null> {
                             break;
                         }
                         case ACTION.DELETE: {
-                            if (filter.constructor.name === "FastMessageSpamFilter") {
-                                const messageSpamEntry = (filter as FastMessageSpamFilter).getFromArray(userId, guildId);
-                                if (messageSpamEntry) {
-                                    for (const messageEntryM of messageSpamEntry.messages) {
-                                        if (!EventDeletedListener.isMessageDeleted(messageEntryM)) {
-                                            messageEntryM.delete().catch(() => {
-                                                return false;
-                                            });
-                                        }
-                                    }
-                                }
-                            }
                             try {
                                 if (!EventDeletedListener.isMessageDeleted(message)) {
-                                    message.delete().catch(() => {
-                                        return false;
-                                    });
+                                    await message.delete();
                                 }
                             } catch {
                                 continue outer;
@@ -210,7 +193,7 @@ export class AutoMod extends TriggerConstraint<null> {
                 }
                 const enabled = await filter.isActive(guildId);
                 logger.info(`message from server ${member.guild.name} (${guildId}) violated filter ${filter.id}. Filter status is ${enabled}`);
-                filter.postProcess(message);
+                await filter.postProcess(message);
             }
     }
 

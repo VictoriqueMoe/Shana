@@ -5,16 +5,17 @@ import {EnvPropertyResolutionEngine} from "../../engine/impl/EnvPropertyResoluti
 import type {IPropertyResolutionEngine} from "../../engine/IPropertyResolutionEngine.js";
 import {AbstractFactory} from "../AbstractFactory.js";
 import {PackageJsonResolutionEngine} from "../../engine/impl/PackageJsonResolutionEngine.js";
+import {getInstanceCashingSingletonFactory} from "../../DI/moduleRegistrar.js";
 
 @singleton()
 @registry([
     {
         token: Beans.IPropertyResolutionEngine,
-        useToken: EnvPropertyResolutionEngine
+        useFactory: getInstanceCashingSingletonFactory(EnvPropertyResolutionEngine)
     },
     {
         token: Beans.IPropertyResolutionEngine,
-        useToken: PackageJsonResolutionEngine
+        useFactory: getInstanceCashingSingletonFactory(PackageJsonResolutionEngine)
     }
 ])
 export class PropertyResolutionFactory extends AbstractFactory<IPropertyResolutionEngine> {

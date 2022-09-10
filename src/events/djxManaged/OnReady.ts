@@ -1,5 +1,5 @@
 import {ArgsOf, Client, Discord, DIService, On} from "discordx";
-import {container, delay, inject, injectable} from "tsyringe";
+import {container, injectable} from "tsyringe";
 import type {EntityManager} from "typeorm";
 import {InsertResult} from "typeorm";
 import Immutable from "immutable";
@@ -32,7 +32,7 @@ export class OnReady extends DataSourceAware {
     private readonly envMode: propTypes["NODE_ENV"];
 
     public constructor(private _client: Client,
-                       @inject(delay(() => SubModuleManager)) private _subModuleManager: SubModuleManager,
+                       private _subModuleManager: SubModuleManager,
                        private _logManager: LogChannelManager,
                        private _filterModuleManager: FilterModuleManager,
                        private _usernameManager: UsernameManager) {

@@ -10,17 +10,18 @@ import {AuditLogger} from "../../../../events/djxManaged/closeableModules/loggin
 import {RoleLogger} from "../../../../events/djxManaged/closeableModules/logging/admin/RoleLogger.js";
 import {MessageLogger} from "../../../../events/djxManaged/closeableModules/logging/admin/MessageLogger.js";
 import {ChannelLogger} from "../../../../events/djxManaged/closeableModules/logging/admin/ChannelLogger.js";
+import {getInstanceCashingSingletonFactory} from "../../DI/moduleRegistrar.js";
 
 @singleton()
 @registry([
-    {token: Beans.ICloseableModuleToken, useToken: AuditLogger},
-    {token: Beans.ICloseableModuleToken, useToken: AutoMod},
-    {token: Beans.ICloseableModuleToken, useToken: RoleLogger},
-    {token: Beans.ICloseableModuleToken, useToken: MemberLogger},
-    {token: Beans.ICloseableModuleToken, useToken: ChannelLogger},
-    {token: Beans.ICloseableModuleToken, useToken: MessageLogger},
-    {token: Beans.ICloseableModuleToken, useToken: AutoRole},
-    {token: Beans.ICloseableModuleToken, useToken: AutoResponder}
+    {token: Beans.ICloseableModuleToken, useFactory: getInstanceCashingSingletonFactory(AuditLogger)},
+    {token: Beans.ICloseableModuleToken, useFactory: getInstanceCashingSingletonFactory(AutoMod)},
+    {token: Beans.ICloseableModuleToken, useFactory: getInstanceCashingSingletonFactory(RoleLogger)},
+    {token: Beans.ICloseableModuleToken, useFactory: getInstanceCashingSingletonFactory(MemberLogger)},
+    {token: Beans.ICloseableModuleToken, useFactory: getInstanceCashingSingletonFactory(ChannelLogger)},
+    {token: Beans.ICloseableModuleToken, useFactory: getInstanceCashingSingletonFactory(MessageLogger)},
+    {token: Beans.ICloseableModuleToken, useFactory: getInstanceCashingSingletonFactory(AutoRole)},
+    {token: Beans.ICloseableModuleToken, useFactory: getInstanceCashingSingletonFactory(AutoResponder)}
 ])
 export class CloseableModuleFactory extends AbstractFactory<ICloseableModule<unknown>> {
     public constructor(@injectAll(Beans.ICloseableModuleToken) beans: ICloseableModule<unknown>[]) {

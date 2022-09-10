@@ -1,8 +1,6 @@
 import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
-import {singleton} from "tsyringe";
 
-@singleton()
 export class SpoilersFilter extends AbstractFilter {
 
     public get id(): string {

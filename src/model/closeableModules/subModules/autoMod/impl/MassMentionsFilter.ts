@@ -1,8 +1,6 @@
 import {Message} from "discord.js";
-import {singleton} from "tsyringe";
 import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
 
-@singleton()
 export class MassMentionsFilter extends AbstractValueBackedAutoModFilter<number> {
 
     public get defaultValue(): number {

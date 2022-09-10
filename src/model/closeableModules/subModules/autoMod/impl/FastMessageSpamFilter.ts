@@ -1,11 +1,10 @@
 import {Message} from "discord.js";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
 import * as Immutable from "immutable";
-import {singleton} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";
 import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
+import {EventDeletedListener} from "../../../../../events/djxManaged/eventDispatcher/EventDeletedListener.js";
 
-@singleton()
 export class FastMessageSpamFilter extends AbstractValueBackedAutoModFilter<number> {
 
     private _cooldownArray: TimedSet<MessageSpamEntry>;
@@ -49,10 +48,26 @@ export class FastMessageSpamFilter extends AbstractValueBackedAutoModFilter<numb
     }
 
     public async postProcess(message: Message): Promise<void> {
+        const userId = message.member.id;
+        const guildId = message.guildId;
+        const messageSpamEntry = this.getFromArray(userId, guildId);
+        if (messageSpamEntry) {
+            try {
+                const messageDeletePArray = messageSpamEntry.messages.map(messageEntryM => {
+                    if (EventDeletedListener.isMessageDeleted(messageEntryM)) {
+                        return Promise.resolve(messageEntryM);
+                    }
+                    return messageEntryM.delete();
+                });
+                await Promise.all(messageDeletePArray);
+            } catch {
+
+            }
+        }
         await super.postToLog("Message spam", message);
     }
 
-    public getFromArray(userId: string, guildId: string): MessageSpamEntry {
+    private getFromArray(userId: string, guildId: string): MessageSpamEntry {
         const arr = this._cooldownArray.rawSet;
         return arr.find(value => value.userId === userId && value.guildId === guildId);
     }

@@ -1,9 +1,9 @@
 import {Message} from "discord.js";
-import {singleton} from "tsyringe";
 import {EmojiManager} from "../../../../framework/manager/EmojiManager.js";
 import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
+import {injectable} from "tsyringe";
 
-@singleton()
+@injectable()
 export class EmojiSpamFilter extends AbstractValueBackedAutoModFilter<number> {
 
     public constructor(private _emojiManager: EmojiManager) {
