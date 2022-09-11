@@ -6,6 +6,7 @@ import type constructor from "tsyringe/dist/typings/types/constructor";
 import {Typeings} from "../../../model/Typeings.js";
 import {ObjectUtil} from "../../../utils/Utils.js";
 import {AbstractFactory} from "../../../model/framework/factory/AbstractFactory.js";
+import logger from "../../../utils/LoggerFactory.js";
 import EditType = Typeings.EditType;
 import EventTriggerCondition = Typeings.EventTriggerCondition;
 
@@ -44,7 +45,13 @@ export class MessageEventDispatcher {
                 return;
             }
         }
-        return this.trigger(newMessage, client, true);
+        return this.trigger(newMessage, client, true).catch(err => {
+            if (err instanceof Error) {
+                logger.error(err.message);
+            } else {
+                logger.error(err);
+            }
+        });
     }
 
     private trigger(message: Message, client: Client, isEdit = false): Promise<void> {

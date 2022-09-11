@@ -67,8 +67,12 @@ class BulkDeleteSpamEntry<T> {
                 if (EventDeletedListener.isMessageDeleted(messageEntryM)) {
                     return Promise.resolve(messageEntryM);
                 }
-                return messageEntryM.delete().catch(reason => {
-                    logger.warn(reason);
+                return messageEntryM.delete().catch(err => {
+                    if (err instanceof Error) {
+                        logger.warn(err.message);
+                    } else {
+                        logger.warn(err);
+                    }
                 });
             });
             return Promise.all(messageDeletePArray);
