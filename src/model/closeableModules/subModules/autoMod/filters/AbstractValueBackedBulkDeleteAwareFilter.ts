@@ -3,6 +3,7 @@ import {TimedSet} from "@discordx/utilities";
 import {Message} from "discord.js";
 import * as Immutable from "immutable";
 import {EventDeletedListener} from "../../../../../events/djxManaged/eventDispatcher/EventDeletedListener.js";
+import logger from "../../../../../utils/LoggerFactory.js";
 
 export abstract class AbstractValueBackedBulkDeleteAwareFilter<T> extends AbstractValueBackedAutoModFilter<T> {
 
@@ -66,7 +67,9 @@ class BulkDeleteSpamEntry<T> {
                 if (EventDeletedListener.isMessageDeleted(messageEntryM)) {
                     return Promise.resolve(messageEntryM);
                 }
-                return messageEntryM.delete();
+                return messageEntryM.delete().catch(reason => {
+                    logger.warn(reason);
+                });
             });
             return Promise.all(messageDeletePArray);
         } catch {

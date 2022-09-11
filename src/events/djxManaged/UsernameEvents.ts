@@ -4,6 +4,7 @@ import {UsernameManager} from "../../model/framework/manager/UsernameManager.js"
 import {AuditManager} from "../../model/framework/manager/AuditManager.js";
 import {AuditLogEvent, PermissionFlagsBits} from "discord-api-types/v10";
 import {LogChannelManager} from "../../model/framework/manager/LogChannelManager.js";
+import {User} from "discord.js";
 
 @Discord()
 @injectable()
@@ -39,7 +40,16 @@ export class UsernameEvents {
                     await this._usernameManager.setUsername(newUser, newNick, model.force);
                 }
                 if (newNick === null) {
-                    this._logManager.postToLog(`User "${newUser.user.tag}" has had their username remove from persistence`, guildId);
+                    let msg = `User "${newUser.user.tag}" has had their username remove from persistence`;
+                    const {id} = newUser;
+                    const auditEntry = await this._auditManager.getAuditLogEntry(AuditLogEvent.MemberUpdate, newUser.guild);
+                    if (auditEntry) {
+                        if (auditEntry.target instanceof User && auditEntry.target.id === id) {
+                            const changedBy = auditEntry.executor.tag;
+                            msg += ` by ${changedBy}`;
+                        }
+                    }
+                    this._logManager.postToLog(msg, guildId);
                 } else {
                     this._logManager.postToLog(`User "${newUser.user.tag}" has a persisted nickname of "${model.usernameToPersist}", however, this has been updated to "${(newNick)}"`, guildId);
                 }

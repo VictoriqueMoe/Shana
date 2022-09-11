@@ -17,17 +17,13 @@ export class EventDeletedListener {
         return EventDeletedListener.deletedMembers.has(member);
     }
 
-    @On({
-        event: "messageDelete"
-    })
-    private messageDeleted([message]: ArgsOf<"messageDelete">): void {
+    @On()
+    private messageDelete([message]: ArgsOf<"messageDelete">): void {
         EventDeletedListener.deletedMessages.add(message);
     }
 
-    @On({
-        event: "guildMemberRemove"
-    })
-    private memberRemoved([member]: ArgsOf<"guildMemberRemove">): void {
+    @On()
+    private guildMemberRemove([member]: ArgsOf<"guildMemberRemove">): void {
         EventDeletedListener.deletedMembers.add(member);
     }
 }
