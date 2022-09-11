@@ -10,7 +10,7 @@ import TIME_OUT from "../../../enums/TIME_OUT.js";
 import {Enabled} from "../../../guards/managedGuards/Enabled.js";
 import Immutable from "immutable";
 import {TriggerConstraint} from "../../../model/closeableModules/impl/TriggerConstraint.js";
-import type {IAutoModFilter} from "../../../model/closeableModules/subModules/autoMod/IAutoModFilter.js";
+import type {IAutoModFilter} from "../../../model/closeableModules/subModules/autoMod/filters/IAutoModFilter.js";
 import {EventDeletedListener} from "../../djxManaged/eventDispatcher/EventDeletedListener.js";
 import {MuteManager} from "../../../model/framework/manager/MuteManager.js";
 import {LogChannelManager} from "../../../model/framework/manager/LogChannelManager.js";

@@ -14,7 +14,9 @@ import {LogChannelManager} from "../../../model/framework/manager/LogChannelMana
 import {RoleManager} from "../../../model/framework/manager/RoleManager.js";
 import {CloseableModule} from "../../../model/closeableModules/impl/CloseableModule.js";
 import TIME_UNIT from "../../../enums/TIME_UNIT.js";
-import type {BannedWordFilter} from "../../../model/closeableModules/subModules/autoMod/impl/BannedWordFilter.js";
+import type {
+    BannedWordFilter
+} from "../../../model/closeableModules/subModules/autoMod/filters/impl/BannedWordFilter.js";
 
 class JoinEntry {
     public constructor(public joinCount: number) {

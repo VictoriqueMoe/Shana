@@ -1,6 +1,6 @@
 import {Message} from "discord.js";
-import {EmojiManager} from "../../../../framework/manager/EmojiManager.js";
-import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
+import {EmojiManager} from "../../../../../framework/manager/EmojiManager.js";
+import {AbstractValueBackedAutoModFilter} from "../AbstractValueBackedAutoModFilter.js";
 import {injectable} from "tsyringe";
 
 @injectable()

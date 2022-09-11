@@ -1,5 +1,5 @@
 import {Message} from "discord.js";
-import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
+import {AbstractValueBackedAutoModFilter} from "../AbstractValueBackedAutoModFilter.js";
 
 export class MassMentionsFilter extends AbstractValueBackedAutoModFilter<number> {
 

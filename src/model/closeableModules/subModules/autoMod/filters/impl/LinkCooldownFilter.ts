@@ -1,7 +1,7 @@
 import {Message} from "discord.js";
-import {ObjectUtil} from "../../../../../utils/Utils.js";
+import {ObjectUtil} from "../../../../../../utils/Utils.js";
 import {TimedSet} from "@discordx/utilities";
-import {AbstractValueBackedAutoModFilter} from "./AbstractValueBackedAutoModFilter.js";
+import {AbstractValueBackedAutoModFilter} from "../AbstractValueBackedAutoModFilter.js";
 
 export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number> {
     private readonly _cooldownArray: Map<string, TimedSet<LinkCooldownEntry>> = new Map();

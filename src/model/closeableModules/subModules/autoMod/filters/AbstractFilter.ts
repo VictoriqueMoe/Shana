@@ -1,9 +1,9 @@
-import ACTION from "../../../../enums/ACTION.js";
+import ACTION from "../../../../../enums/ACTION.js";
 import {EmbedBuilder, Message} from "discord.js";
-import {ObjectUtil} from "../../../../utils/Utils.js";
-import {LogChannelManager} from "../../../framework/manager/LogChannelManager.js";
+import {ObjectUtil} from "../../../../../utils/Utils.js";
+import {LogChannelManager} from "../../../../framework/manager/LogChannelManager.js";
 import {container, delay} from "tsyringe";
-import {FilterModuleManager} from "../../../framework/manager/FilterModuleManager.js";
+import {FilterModuleManager} from "../../../../framework/manager/FilterModuleManager.js";
 import type {IAutoModFilter} from "./IAutoModFilter.js";
 
 export abstract class AbstractFilter implements IAutoModFilter {

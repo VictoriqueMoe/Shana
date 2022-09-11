@@ -2,7 +2,7 @@ import {container, delay, singleton} from "tsyringe";
 import {DataSourceAware} from "../../DB/DAO/DataSourceAware.js";
 import {Client} from "discordx";
 import * as Immutable from "immutable";
-import type {FilterSettings, IAutoModFilter} from "../../closeableModules/subModules/autoMod/IAutoModFilter.js";
+import type {FilterSettings, IAutoModFilter} from "../../closeableModules/subModules/autoMod/filters/IAutoModFilter.js";
 import {FilterModuleModel} from "../../DB/entities/autoMod/impl/subModules/impl/AutoMod/FilterModule.model.js";
 import {DbUtils, ObjectUtil} from "../../../utils/Utils.js";
 import {
@@ -14,16 +14,16 @@ import {
 import type {
     BannedWordFilterSettings,
     IBannedWordAutoModFilter
-} from "../../closeableModules/subModules/autoMod/IBannedWordAutoModFilter.js";
+} from "../../closeableModules/subModules/autoMod/filters/IBannedWordAutoModFilter.js";
 import type {
     IValueBackedAutoModFilter,
     ValueBackedFilterSettings
-} from "../../closeableModules/subModules/autoMod/IValueBackedAutoModFilter.js";
+} from "../../closeableModules/subModules/autoMod/filters/IValueBackedAutoModFilter.js";
 import {SubModuleManager} from "./SubModuleManager.js";
 import {FindOneOptions} from "typeorm/find-options/FindOneOptions.js";
 import {RunEvery} from "../decorators/RunEvery.js";
 import logger from "../../../utils/LoggerFactory.js";
-import {AbstractFilter} from "../../closeableModules/subModules/autoMod/AbstractFilter.js";
+import {AbstractFilter} from "../../closeableModules/subModules/autoMod/filters/AbstractFilter.js";
 
 export type UnionSettings = FilterSettings | BannedWordFilterSettings | ValueBackedFilterSettings;
 

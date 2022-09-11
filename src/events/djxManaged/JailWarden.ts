@@ -2,7 +2,7 @@ import {RolePersistenceModel} from "../../model/DB/entities/autoMod/impl/RolePer
 import {injectable} from "tsyringe";
 import {ArgsOf, Discord, On} from "discordx";
 import {MemberRoleChange} from "../../model/impl/MemberRoleChange.js";
-import {BannedWordFilter} from "../../model/closeableModules/subModules/autoMod/impl/BannedWordFilter.js";
+import {BannedWordFilter} from "../../model/closeableModules/subModules/autoMod/filters/impl/BannedWordFilter.js";
 import {RoleApplier} from "../../model/impl/RoleApplier.js";
 import {RoleManager} from "../../model/framework/manager/RoleManager.js";
 import {DiscordUtils} from "../../utils/Utils.js";

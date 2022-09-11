@@ -4,7 +4,7 @@ import ACTION from "../../../../../../../../enums/ACTION.js";
 import TIME_OUT from "../../../../../../../../enums/TIME_OUT.js";
 import {SubModuleModel} from "../SubModule.model.js";
 import {AbstractModel} from "../../../../../AbstractModel.js";
-import type {FilterSettings} from "../../../../../../../closeableModules/subModules/autoMod/IAutoModFilter.js";
+import type {FilterSettings} from "../../../../../../../closeableModules/subModules/autoMod/filters/IAutoModFilter.js";
 
 @Entity()
 @Index(["guildId", "pSubModuleId"], {

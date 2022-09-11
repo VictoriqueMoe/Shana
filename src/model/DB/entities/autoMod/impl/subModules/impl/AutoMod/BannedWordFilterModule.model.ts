@@ -3,7 +3,7 @@ import {Column, Entity} from "typeorm";
 import type {
     BannedWordEntries,
     BannedWordFilterSettings
-} from "../../../../../../../closeableModules/subModules/autoMod/IBannedWordAutoModFilter.js";
+} from "../../../../../../../closeableModules/subModules/autoMod/filters/IBannedWordAutoModFilter.js";
 
 
 @Entity()

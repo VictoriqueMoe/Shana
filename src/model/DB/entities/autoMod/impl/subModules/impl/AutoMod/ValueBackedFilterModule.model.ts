@@ -2,7 +2,7 @@ import {FilterModuleModel} from "./FilterModule.model.js";
 import {Column, Entity} from "typeorm";
 import type {
     ValueBackedFilterSettings
-} from "../../../../../../../closeableModules/subModules/autoMod/IValueBackedAutoModFilter.js";
+} from "../../../../../../../closeableModules/subModules/autoMod/filters/IValueBackedAutoModFilter.js";
 
 @Entity()
 export class ValueBackedFilterModuleModel extends FilterModuleModel {

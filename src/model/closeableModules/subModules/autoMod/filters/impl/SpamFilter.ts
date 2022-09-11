@@ -1,7 +1,7 @@
 import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
 import {SpamMeta} from "discord-spams";
-import {RunEvery} from "../../../../framework/decorators/RunEvery.js";
+import {RunEvery} from "../../../../../framework/decorators/RunEvery.js";
 
 export class SpamFilter extends AbstractFilter {
 

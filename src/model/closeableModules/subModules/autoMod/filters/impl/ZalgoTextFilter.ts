@@ -1,6 +1,6 @@
 import {AbstractFilter} from "../AbstractFilter.js";
 import {Message} from "discord.js";
-import {ObjectUtil} from "../../../../../utils/Utils.js";
+import {ObjectUtil} from "../../../../../../utils/Utils.js";
 
 export class ZalgoTextFilter extends AbstractFilter {
 

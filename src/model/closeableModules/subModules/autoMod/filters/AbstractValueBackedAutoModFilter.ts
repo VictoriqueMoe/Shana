@@ -1,6 +1,6 @@
-import {AbstractFilter} from "../AbstractFilter.js";
+import {AbstractFilter} from "./AbstractFilter.js";
 import {Message} from "discord.js";
-import {IValueBackedAutoModFilter, ValueBackedFilterSettings} from "../IValueBackedAutoModFilter.js";
+import {IValueBackedAutoModFilter, ValueBackedFilterSettings} from "./IValueBackedAutoModFilter.js";
 import {ObjectUtil} from "../../../../../utils/Utils.js";
 
 export abstract class AbstractValueBackedAutoModFilter<T> extends AbstractFilter implements IValueBackedAutoModFilter<T> {

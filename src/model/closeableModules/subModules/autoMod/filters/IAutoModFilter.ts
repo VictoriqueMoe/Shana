@@ -1,6 +1,6 @@
 import type {Message} from "discord.js";
-import type {ISubModule, SubModuleSettings} from "../ISubModule";
-import type ACTION from "../../../../enums/ACTION.js";
+import type {ISubModule, SubModuleSettings} from "../../ISubModule.js";
+import type ACTION from "../../../../../enums/ACTION.js";
 
 
 export type FilterSettings = SubModuleSettings & {
@@ -13,7 +13,7 @@ export type FilterSettings = SubModuleSettings & {
 };
 
 /**
- * all values hard coded for now, but will be persisted in the future
+ * A auto mod filter is a unit of code that a messages passes through and the message will pass or fail the filter depending on the unit of work that is applied to it
  */
 export interface IAutoModFilter extends ISubModule {
     /**
