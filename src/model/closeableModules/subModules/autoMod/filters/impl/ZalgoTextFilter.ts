@@ -8,12 +8,12 @@ export class ZalgoTextFilter extends AbstractFilter {
         return "Zalgo Text Filter";
     }
 
-    public doFilter(content: Message): Promise<boolean> {
+    public doFilter(content: Message): boolean {
         const message = content.content;
         if (!ObjectUtil.validString(message)) {
-            return Promise.resolve(true);
+            return true;
         }
-        return Promise.resolve(!this.hasZalgo(message));
+        return !this.hasZalgo(message);
     }
 
     public async postProcess(message: Message): Promise<void> {

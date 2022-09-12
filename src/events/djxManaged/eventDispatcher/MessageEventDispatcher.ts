@@ -20,10 +20,8 @@ export class MessageEventDispatcher {
         return MessageEventDispatcher._messageListenerMap;
     }
 
-    @On({
-        event: "messageCreate"
-    })
-    private async eventTrigger([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
+    @On()
+    private async messageCreate([message]: ArgsOf<"messageCreate">, client: Client): Promise<void> {
         await client.executeCommand(message, {
             caseSensitive: false
         });
@@ -31,10 +29,8 @@ export class MessageEventDispatcher {
     }
 
 
-    @On({
-        event: "messageUpdate"
-    })
-    private async messageUpdater([, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
+    @On()
+    private async messageUpdate([, newMessage]: ArgsOf<"messageUpdate">, client: Client): Promise<void> {
         if (newMessage.author.bot) {
             return;
         }

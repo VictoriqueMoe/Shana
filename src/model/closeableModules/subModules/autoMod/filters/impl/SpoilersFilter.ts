@@ -7,21 +7,21 @@ export class SpoilersFilter extends AbstractFilter {
         return "Spoilers Filter";
     }
 
-    public doFilter(content: Message): Promise<boolean> {
+    public doFilter(content: Message): boolean {
         const regex = /\|{2}(.*)\|{2}/gmu;
         const messageContent = content.content;
         if (regex.test(messageContent)) {
-            return Promise.resolve(false);
+            return false;
         }
         const attachmentsCollection = content.attachments;
         if (attachmentsCollection.size > 0) {
             for (const [, attachment] of attachmentsCollection) {
                 if (attachment.spoiler) {
-                    return Promise.resolve(false);
+                    return false;
                 }
             }
         }
-        return Promise.resolve(true);
+        return true;
     }
 
     public async postProcess(message: Message): Promise<void> {

@@ -4,6 +4,7 @@ import {container} from "tsyringe";
 
 import logger from "../../../utils/LoggerFactory.js";
 import type METHOD_EXECUTOR_TIME_UNIT from "../../../enums/METHOD_EXECUTOR_TIME_UNIT.js";
+import constructor from "tsyringe/dist/typings/types/constructor";
 
 export const scheduler = new ToadScheduler();
 
@@ -19,7 +20,7 @@ export function RunEvery(time: number, timeUnit: METHOD_EXECUTOR_TIME_UNIT | str
     const client = container.isRegistered(Client) ? container.resolve(Client) : null;
     return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor): void {
         container.afterResolution(
-            target.constructor as never,
+            target.constructor as constructor<unknown>,
             (_t, result) => {
                 const task = new AsyncTask(
                     `${target.constructor.name}.${propertyKey}`,

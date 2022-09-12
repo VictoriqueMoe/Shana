@@ -1,6 +1,7 @@
 import type {Message} from "discord.js";
 import type {ISubModule, SubModuleSettings} from "../../ISubModule.js";
 import type ACTION from "../../../../../enums/ACTION.js";
+import {Awaitable} from "discordx";
 
 
 export type FilterSettings = SubModuleSettings & {
@@ -53,7 +54,7 @@ export interface IAutoModFilter extends ISubModule {
      * Do the actual filter and return true if it passes or false otherwise
      * @param content
      */
-    doFilter(content: Message): Promise<boolean>;
+    doFilter(content: Message): Awaitable<boolean>;
 
     /**
      * Do any additional processing like posting to logs

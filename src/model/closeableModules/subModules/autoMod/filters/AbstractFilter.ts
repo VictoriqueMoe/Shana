@@ -5,6 +5,7 @@ import {LogChannelManager} from "../../../../framework/manager/LogChannelManager
 import {container, delay} from "tsyringe";
 import {FilterModuleManager} from "../../../../framework/manager/FilterModuleManager.js";
 import type {IAutoModFilter} from "./IAutoModFilter.js";
+import {Awaitable} from "discordx/build/esm/index.js";
 
 export abstract class AbstractFilter implements IAutoModFilter {
 
@@ -51,7 +52,7 @@ export abstract class AbstractFilter implements IAutoModFilter {
 
     public abstract postProcess(member: Message): Promise<void>;
 
-    public abstract doFilter(content: Message): Promise<boolean>;
+    public abstract doFilter(content: Message): Awaitable<boolean>;
 
     protected async postToLog(reason: string, message: Message): Promise<Message | null> {
         const guildId = message.guild.id;
