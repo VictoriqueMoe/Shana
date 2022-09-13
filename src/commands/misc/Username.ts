@@ -76,7 +76,9 @@ export class Username {
             force = false,
         interaction: CommandInteraction
     ): Promise<void> {
-        await interaction.deferReply();
+        await interaction.deferReply({
+            ephemeral: true
+        });
         if (!(mentionedMember instanceof GuildMember)) {
             return InteractionUtils.replyOrFollowUp(interaction, {
                 content: "Unable to find user"

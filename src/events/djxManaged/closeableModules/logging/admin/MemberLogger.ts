@@ -336,7 +336,9 @@ export class MemberLogger extends AbstractAdminAuditLogger<MemberLoggerSettings>
                 }
             }
         }
-        userBanned.addFields(ObjectUtil.singleFieldBuilder("Reason", ObjectUtil.validString(reason) ? reason : "No reason provided"));
+        if (ObjectUtil.validString(reason)) {
+            userBanned.addFields(ObjectUtil.singleFieldBuilder("Reason", reason));
+        }
         super.postToLog(userBanned, guild.id);
     }
 }
