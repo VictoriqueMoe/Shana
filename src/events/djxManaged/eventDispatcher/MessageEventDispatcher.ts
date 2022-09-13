@@ -14,10 +14,10 @@ import EventTriggerCondition = Typeings.EventTriggerCondition;
 @injectable()
 export class MessageEventDispatcher {
 
-    private static readonly _messageListenerMap: Map<constructor<unknown>, MessageEntry[]> = new Map();
+    private readonly _messageListenerMap: Map<constructor<unknown>, MessageEntry[]> = new Map();
 
-    public static get messageListenerMap(): Map<constructor<unknown>, MessageEntry[]> {
-        return MessageEventDispatcher._messageListenerMap;
+    public get messageListenerMap(): Map<constructor<unknown>, MessageEntry[]> {
+        return this._messageListenerMap;
     }
 
     @On()
@@ -34,28 +34,28 @@ export class MessageEventDispatcher {
         if (newMessage.author.bot) {
             return;
         }
-        if (!(newMessage instanceof Message)) {
+        if (newMessage.partial) {
             try {
                 newMessage = await newMessage.fetch();
             } catch {
                 return;
             }
         }
-        return this.trigger(newMessage, client, true).catch(err => {
-            if (err instanceof Error) {
-                logger.error(err.message);
-            } else {
-                logger.error(err);
-            }
-        });
+        return this.trigger(newMessage as Message, client, true);
     }
 
     private trigger(message: Message, client: Client, isEdit = false): Promise<void> {
         const retArr: Promise<void>[] = [];
-        for (const [context, entries] of MessageEventDispatcher._messageListenerMap) {
+        for (const [context, entries] of this._messageListenerMap) {
             const contextInstance = this.getContextInstance(context);
             for (const entry of entries) {
-                retArr.push(entry.trigger(message, client, contextInstance, isEdit));
+                retArr.push(entry.trigger(message, client, contextInstance, isEdit).catch(err => {
+                    if (err instanceof Error) {
+                        logger.error(err.message);
+                    } else {
+                        logger.error(err);
+                    }
+                }));
             }
         }
         return Promise.all(retArr).then();

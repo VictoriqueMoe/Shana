@@ -5,8 +5,11 @@ import {
     MessageEventDispatcher
 } from "../../../events/djxManaged/eventDispatcher/MessageEventDispatcher.js";
 import logger from "../../../utils/LoggerFactory.js";
+import {container} from "tsyringe";
 import EditType = Typeings.EditType;
 import EventTriggerCondition = Typeings.EventTriggerCondition;
+
+const messageEventDispatcher = container.resolve(MessageEventDispatcher);
 
 /**
  * signals this method to be triggered on a message event.
@@ -18,8 +21,7 @@ export function MessageListenerDecorator(triggerOnEdit = false, conditions: Even
     return function (target: any, propertyKey: string): void {
         logger.info(`Adding: "${target.constructor.name}.${propertyKey}" to listeners for messages`);
         const targetConstructor = target.constructor;
-        const map = MessageEventDispatcher.messageListenerMap;
-
+        const map = messageEventDispatcher.messageListenerMap;
         const method: EditType = target[propertyKey];
         const entry = new MessageEntry(method, triggerOnEdit, conditions);
         let context: constructor<unknown> = null;
