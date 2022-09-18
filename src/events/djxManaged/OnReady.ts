@@ -70,6 +70,16 @@ export class OnReady extends DataSourceAware {
         }
     }
 
+    public async initAppCommands(): Promise<void> {
+        if (this.envMode === "production") {
+            // if using global commands, clear out the guild commands
+            for (const [guildId] of this._client.guilds.cache) {
+                await this._client.clearApplicationCommands(guildId);
+            }
+        }
+        return this._client.initApplicationCommands();
+    }
+
     private async joinThreads(): Promise<void> {
         const guilds = [...this._client.guilds.cache.values()];
         for (const guild of guilds) {
@@ -81,15 +91,6 @@ export class OnReady extends DataSourceAware {
                 }
             }
         }
-    }
-
-    public async initAppCommands(): Promise<void> {
-        if (this.envMode === "production") {
-            for (const [guildId] of this._client.guilds.cache) {
-                await this._client.clearApplicationCommands(guildId);
-            }
-        }
-        return this._client.initApplicationCommands();
     }
 
     private async cleanUpGuilds(): Promise<void> {
@@ -175,6 +176,7 @@ export class OnReady extends DataSourceAware {
             }
         }
     }
+
 
     private initDi(): void {
         DIService.allServices;
