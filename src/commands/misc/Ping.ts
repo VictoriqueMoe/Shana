@@ -19,6 +19,6 @@ export class Ping {
           ${msg.createdTimestamp - interaction.createdTimestamp}ms.
           ${client.ws.ping ? `The heartbeat ping is ${Math.round(client.ws.ping)}ms.` : ""}
         `;
-        await msg.reply(content);
+        await msg.edit(content);
     }
 }
