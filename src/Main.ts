@@ -82,9 +82,6 @@ export class Main {
             },
             silent: false,
         };
-        if (this.envMode === "development") {
-            clientOps["botGuilds"] = [(client: Client): string[] => client.guilds.cache.map((guild) => guild.id)];
-        }
         const client = new Client(clientOps);
         registerInstance(connectedDs, client);
         await importx(`${dirname(import.meta.url)}/{events,commands}/**/*.{ts,js}`);

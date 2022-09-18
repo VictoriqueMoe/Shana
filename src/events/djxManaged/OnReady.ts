@@ -158,10 +158,10 @@ export class OnReady extends DataSourceAware {
             } else {
                 logger.error(e);
             }
-            const me = interaction.guild.members.me;
+            const me = interaction?.guild?.members?.me ?? interaction.user;
             if (interaction.type === InteractionType.ApplicationCommand || interaction.type === InteractionType.MessageComponent) {
                 const channel = interaction.channel;
-                if (channel.type !== ChannelType.GuildText || !channel.permissionsFor(me).has("SendMessages")) {
+                if (channel && (channel.type !== ChannelType.GuildText || !channel.permissionsFor(me).has("SendMessages"))) {
                     logger.error(`cannot send warning message to this channel`, interaction);
                     return;
                 }

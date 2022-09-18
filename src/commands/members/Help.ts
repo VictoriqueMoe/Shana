@@ -59,7 +59,8 @@ export class Help {
     }
 
     @Slash({
-        description: "Get the description of all commands"
+        description: "Get the description of all commands",
+        dmPermission: false
     })
     @Guard(NotBot)
     public async help(interaction: CommandInteraction, client: Client): Promise<void> {

@@ -8,7 +8,8 @@ export class Ping {
 
     @Slash({
         description: "Checks the ping to the Discord server",
-        defaultMemberPermissions: PermissionsBitField.Flags.Administrator
+        defaultMemberPermissions: PermissionsBitField.Flags.Administrator,
+        dmPermission: false
     })
     public async ping(interaction: CommandInteraction, client: Client): Promise<void> {
         const msg = await interaction.reply({content: "Pinging...", fetchReply: true});

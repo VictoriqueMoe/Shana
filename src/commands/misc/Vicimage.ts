@@ -13,6 +13,7 @@ import InteractionUtils = DiscordUtils.InteractionUtils;
 @SlashGroup({
     name: "vicimage",
     description: "Obtain images of Victorique#0001",
+    dmPermission: false
 })
 @SlashGroup("vicimage")
 @injectable()
@@ -117,9 +118,9 @@ export class Vicimage {
         await interaction.deferReply({
             ephemeral: true
         });
-        const validToken = await this._vicImageTokenManager.validateUser(interaction.user.id);
-        if (!validToken) {
-            return InteractionUtils.replyOrFollowUp(interaction, "Invalid token");
+        const authorised = await this._vicImageTokenManager.validateUser(interaction.user.id);
+        if (!authorised) {
+            return InteractionUtils.replyOrFollowUp(interaction, "unauthorised");
         }
         await this._vicDropbox.index();
         await interaction.editReply({
