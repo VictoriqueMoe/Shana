@@ -4,6 +4,7 @@ import {DiscordUtils, ObjectUtil} from "../../utils/Utils.js";
 import {
     ActionRowBuilder,
     ApplicationCommand,
+    ApplicationCommandOptionType,
     ApplicationCommandPermissions,
     ApplicationCommandPermissionType,
     ApplicationCommandType,
@@ -20,6 +21,7 @@ import {
 import {injectable} from "tsyringe";
 import {Property} from "../../model/framework/decorators/Property.js";
 import {Typeings} from "../../model/Typeings.js";
+import {PostConstruct} from "../../model/framework/decorators/PostConstruct.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 import propTypes = Typeings.propTypes;
 
@@ -33,30 +35,10 @@ type CatCommand = {
 @Discord()
 @injectable()
 export class Help {
-
     private readonly _catMap: Map<string, CatCommand[]> = new Map();
 
     @Property("NODE_ENV")
     private readonly envMode: propTypes["NODE_ENV"];
-
-    public constructor(client: Client) {
-        const commandManager = client.application.commands.cache;
-        if (!commandManager || commandManager.size === 0) {
-            if (this.envMode === "development") {
-                return;
-            }
-            throw new Error("Unable to obtain commands");
-        }
-        for (const [, command] of commandManager) {
-            if (ObjectUtil.isValidArray(command.options)) {
-                for (const opt of command.options) {
-                    this.populateMap(opt.name, opt.description, command, true);
-                }
-                continue;
-            }
-            this.populateMap(command.name, command.description, command, false);
-        }
-    }
 
     @Slash({
         description: "Get the description of all commands",
@@ -77,9 +59,34 @@ export class Help {
         });
     }
 
+    @PostConstruct
+    private async init(client: Client): Promise<void> {
+        let commandManager = client.application.commands.cache;
+        if (commandManager.size === 0) {
+            commandManager = await client.application.commands.fetch();
+        }
+        if (!commandManager || commandManager.size === 0) {
+            throw new Error("Unable to obtain commands");
+        }
+        for (const [, command] of commandManager) {
+            let shouldPopulateMainCommand = true;
+            if (ObjectUtil.isValidArray(command.options)) {
+                for (const opt of command.options) {
+                    if (opt.type === ApplicationCommandOptionType.Subcommand) {
+                        this.populateMap(opt.name, opt.description, command, true);
+                        shouldPopulateMainCommand = false;
+                    }
+                }
+            }
+            if (!shouldPopulateMainCommand) {
+                continue;
+            }
+            this.populateMap(command.name, command.description, command, false);
+        }
+    }
 
     private populateMap(commandName: string, commandDescription: string, parentCommand: ApplicationCommand, isGroup: boolean): void {
-        const dCommand = MetadataStorage.instance.applicationCommandSlashesFlat.find(dCommand => dCommand.name === commandName) as DApplicationCommand & ICategory;
+        const dCommand = MetadataStorage.instance.applicationCommandSlashesFlat.find((dCommand) => dCommand.name === commandName) as DApplicationCommand & ICategory;
         let category = dCommand?.category;
         if (!ObjectUtil.validString(category)) {
             const commandType = parentCommand.type;
@@ -121,11 +128,13 @@ export class Help {
         });
     }
 
-    private getSelectDropdown(client: Client,
-                              member: GuildMember,
-                              channelId: string,
-                              overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
-                              defaultValue = "categories"): ActionRowBuilder<SelectMenuBuilder> {
+    private getSelectDropdown(
+        client: Client,
+        member: GuildMember,
+        channelId: string,
+        overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
+        defaultValue = "categories"
+    ): ActionRowBuilder<SelectMenuBuilder> {
         const optionsForEmbed: SelectMenuComponentOptionData[] = [];
         optionsForEmbed.push({
             description: "View all categories",
@@ -150,12 +159,14 @@ export class Help {
         return new ActionRowBuilder<SelectMenuBuilder>().addComponents(selectMenu);
     }
 
-    private displayCategory(client: Client,
-                            member: GuildMember,
-                            channelId: string,
-                            overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
-                            category = "categories",
-                            pageNumber = 0): EmbedBuilder {
+    private displayCategory(
+        client: Client,
+        member: GuildMember,
+        channelId: string,
+        overridePermissions: Collection<string, ApplicationCommandPermissions[]>,
+        category = "categories",
+        pageNumber = 0
+    ): EmbedBuilder {
         if (category === "categories") {
             const embed = new EmbedBuilder()
                 .setTitle(`${client.user.username} commands`)
@@ -206,11 +217,7 @@ export class Help {
         return embed;
     }
 
-    private getCommands(categoryId: string,
-                        client: Client,
-                        member: GuildMember,
-                        channelId: string,
-                        overridePermissions: Collection<string, ApplicationCommandPermissions[]>): CatCommand[] {
+    private getCommands(categoryId: string, client: Client, member: GuildMember, channelId: string, overridePermissions: Collection<string, ApplicationCommandPermissions[]>): CatCommand[] {
         const commands = this._catMap.get(categoryId);
         if (DiscordUtils.isMemberAdmin(member)) {
             return commands;
@@ -233,14 +240,10 @@ export class Help {
                 this.calculatePermissions(applicationCommandPermissions, channelId, toRemove, catCommand, member);
             }
         }
-        return commands.filter(el => !toRemove.includes(el));
+        return commands.filter((el) => !toRemove.includes(el));
     }
 
-    private calculatePermissions(applicationCommandPermissions: ApplicationCommandPermissions[],
-                                 channelId: string,
-                                 toRemove: CatCommand[],
-                                 catCommand: CatCommand,
-                                 member: GuildMember): void {
+    private calculatePermissions(applicationCommandPermissions: ApplicationCommandPermissions[], channelId: string, toRemove: CatCommand[], catCommand: CatCommand, member: GuildMember): void {
         function addOrRemove(this: void, permission: boolean, toRemove: CatCommand[], catCommand: CatCommand): void {
             if (permission) {
                 ObjectUtil.removeObjectFromArray(catCommand, toRemove);
@@ -252,30 +255,29 @@ export class Help {
         }
 
         if (ObjectUtil.isValidArray(applicationCommandPermissions)) {
-            loop:
-                for (const applicationCommandPermission of applicationCommandPermissions) {
-                    switch (applicationCommandPermission.type) {
-                        case ApplicationCommandPermissionType.Channel:
-                            if (applicationCommandPermission.id === channelId) {
-                                addOrRemove(applicationCommandPermission.permission, toRemove, catCommand);
-                                break loop;
-                            }
-                            break;
-                        case ApplicationCommandPermissionType.User:
-                            if (applicationCommandPermission.id === member.id) {
-                                addOrRemove(applicationCommandPermission.permission, toRemove, catCommand);
-                                break loop;
-                            }
-                            break;
-                        case ApplicationCommandPermissionType.Role:
-                            const memberRoles = [...member.roles.cache.values()];
-                            if (memberRoles.some(role => role.id === applicationCommandPermission.id)) {
-                                addOrRemove(applicationCommandPermission.permission, toRemove, catCommand);
-                                break loop;
-                            }
-                            break;
-                    }
+            loop: for (const applicationCommandPermission of applicationCommandPermissions) {
+                switch (applicationCommandPermission.type) {
+                    case ApplicationCommandPermissionType.Channel:
+                        if (applicationCommandPermission.id === channelId) {
+                            addOrRemove(applicationCommandPermission.permission, toRemove, catCommand);
+                            break loop;
+                        }
+                        break;
+                    case ApplicationCommandPermissionType.User:
+                        if (applicationCommandPermission.id === member.id) {
+                            addOrRemove(applicationCommandPermission.permission, toRemove, catCommand);
+                            break loop;
+                        }
+                        break;
+                    case ApplicationCommandPermissionType.Role:
+                        const memberRoles = [...member.roles.cache.values()];
+                        if (memberRoles.some((role) => role.id === applicationCommandPermission.id)) {
+                            addOrRemove(applicationCommandPermission.permission, toRemove, catCommand);
+                            break loop;
+                        }
+                        break;
                 }
+            }
         }
     }
 

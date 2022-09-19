@@ -71,12 +71,6 @@ export class OnReady extends DataSourceAware {
     }
 
     public async initAppCommands(): Promise<void> {
-        if (this.envMode === "production") {
-            // if using global commands, clear out the guild commands
-            for (const [guildId] of this._client.guilds.cache) {
-                await this._client.clearApplicationCommands(guildId);
-            }
-        }
         return this._client.initApplicationCommands();
     }
 
