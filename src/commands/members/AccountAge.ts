@@ -54,7 +54,8 @@ export class AccountAge {
             name: "channel",
             description: "The reference to the channel",
             channelTypes: DiscordUtils.allChannelsExceptCat,
-            type: ApplicationCommandOptionType.Channel
+            type: ApplicationCommandOptionType.Channel,
+            required: true
         })
             channel: Channel,
         interaction: CommandInteraction
@@ -73,7 +74,8 @@ export class AccountAge {
         @SlashOption({
             name: "user",
             description: "The user you want to check the account age of",
-            type: ApplicationCommandOptionType.User
+            type: ApplicationCommandOptionType.User,
+            required: true
         })
             user: User,
         interaction: CommandInteraction

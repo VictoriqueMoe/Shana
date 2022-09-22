@@ -168,6 +168,7 @@ export class Misc {
             name: "screenshot",
             type: ApplicationCommandOptionType.Attachment,
             description: "The user to display the banner",
+            required: true
         })
             attachment: Attachment,
         interaction: CommandInteraction
@@ -279,6 +280,7 @@ export class Misc {
             name: "image",
             type: ApplicationCommandOptionType.Attachment,
             description: "Image you want to reverse search",
+            required: true
         })
             attatchment: Attachment,
         interaction: CommandInteraction

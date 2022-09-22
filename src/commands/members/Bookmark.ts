@@ -112,7 +112,8 @@ export class Bookmark {
         @SlashOption({
             name: "id",
             type: ApplicationCommandOptionType.String,
-            description: "ID of the bookmark"
+            description: "ID of the bookmark",
+            required: true
         })
             bookmarkId: string,
         interaction: CommandInteraction

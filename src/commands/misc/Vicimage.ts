@@ -31,7 +31,8 @@ export class Vicimage {
         @SlashOption({
             name: "user",
             description: "The user you want to register",
-            type: ApplicationCommandOptionType.User
+            type: ApplicationCommandOptionType.User,
+            required: true
         })
             user: GuildMember,
         interaction: CommandInteraction
@@ -52,7 +53,8 @@ export class Vicimage {
         @SlashOption({
             name: "user",
             description: "The user you want to register",
-            type: ApplicationCommandOptionType.User
+            type: ApplicationCommandOptionType.User,
+            required: true
         })
             user: GuildMember,
         interaction: CommandInteraction

@@ -29,12 +29,14 @@ export class Notes {
             name: "title",
             type: ApplicationCommandOptionType.String,
             description: "Unique title for this note",
+            required: true
         })
             title: string,
         @SlashOption({
             type: ApplicationCommandOptionType.String,
             name: "value",
             description: "The text for this note",
+            required: true
         })
             value: string,
         interaction: CommandInteraction
@@ -62,12 +64,14 @@ export class Notes {
             description: "The note to modify",
             type: ApplicationCommandOptionType.String,
             autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, NotesManager),
+            required: true
         })
             title: string,
         @SlashOption({
             name: "value",
             type: ApplicationCommandOptionType.String,
             description: "the new text",
+            required: true
         })
             value: string,
         interaction: CommandInteraction

@@ -86,7 +86,8 @@ export class MessageSchedule {
         @SlashOption({
             description: "The Unique ID of the schedule schedule you want to remove",
             name: "name",
-            type: ApplicationCommandOptionType.String
+            type: ApplicationCommandOptionType.String,
+            required: true
         })
             name: string,
         interaction: CommandInteraction
@@ -115,26 +116,30 @@ export class MessageSchedule {
         @SlashOption({
             name: "name",
             description: "The Unique ID of this scheduled job",
-            type: ApplicationCommandOptionType.String
+            type: ApplicationCommandOptionType.String,
+            required: true
         })
             name: string,
         @SlashOption({
             description: "The channel to post to",
             name: "channel",
             type: ApplicationCommandOptionType.Channel,
-            channelTypes: allChannelsExceptCat
+            channelTypes: allChannelsExceptCat,
+            required: true
         })
             channel: Channel,
         @SlashOption({
             name: "cron",
             description: "the cron string to represent the time",
-            type: ApplicationCommandOptionType.String
+            type: ApplicationCommandOptionType.String,
+            required: true
         })
             cron: string,
         @SlashOption({
             description: "the message to post",
             name: "message",
-            type: ApplicationCommandOptionType.String
+            type: ApplicationCommandOptionType.String,
+            required: true
         })
             message: string,
         interaction: CommandInteraction

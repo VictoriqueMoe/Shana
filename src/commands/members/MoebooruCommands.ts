@@ -44,7 +44,8 @@ export class MoebooruCommands {
             name: "tags",
             description: "space seperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
             type: ApplicationCommandOptionType.String,
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, LolibooruApi)
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, LolibooruApi),
+            required: true
         })
             tags: string,
         interaction: CommandInteraction
@@ -62,7 +63,8 @@ export class MoebooruCommands {
             name: "tags",
             description: "space seperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
             type: ApplicationCommandOptionType.String,
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, DanbooruApi)
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, DanbooruApi),
+            required: true
         })
             tags: string,
         interaction: CommandInteraction
@@ -81,7 +83,8 @@ export class MoebooruCommands {
             name: "tags",
             description: "space sperated values of tags (words have _ aka `gothic lolita` is `gothic_lolita`)",
             type: ApplicationCommandOptionType.String,
-            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, KonachanApi)
+            autocomplete: (interaction: AutocompleteInteraction) => ObjectUtil.search(interaction, KonachanApi),
+            required: true
         })
             tags: string,
         interaction: CommandInteraction

@@ -106,7 +106,8 @@ export class BirthdayCommands {
         @SlashOption({
             name: "date",
             type: ApplicationCommandOptionType.String,
-            description: "your birthday (ex: YYYY-MM-dd) 1995-07-05 OR (dd-MM) 03-12)"
+            description: "your birthday (ex: YYYY-MM-dd) 1995-07-05 OR (dd-MM) 03-12)",
+            required: true
         })
             dateStr: string,
         interaction: CommandInteraction

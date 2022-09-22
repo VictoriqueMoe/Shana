@@ -58,13 +58,15 @@ export class Username {
         @SlashOption({
             name: "user",
             description: "The user you want to change nickname",
-            type: ApplicationCommandOptionType.User
+            type: ApplicationCommandOptionType.User,
+            required: true
         })
             mentionedMember: User,
         @SlashOption({
             name: "new_nickname",
             type: ApplicationCommandOptionType.String,
-            description: "The new nickname for the user"
+            description: "The new nickname for the user",
+            required: true
         })
             usernameToPersist: string,
         @SlashOption({
