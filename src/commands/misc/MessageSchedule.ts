@@ -59,7 +59,7 @@ export class MessageSchedule {
                 iconURL: botAvatar
             })
             .setTimestamp();
-        const result = this._messageScheduleManager.getAllActiveMessageSchedules(guildId, channel as BaseGuildTextChannel | null);
+        const result = this._messageScheduleManager.getAllActiveMessageSchedules(guildId, channel);
         if (!ObjectUtil.isValidArray(result)) {
             embed.setDescription("There are no scheduled posts registered this server or channel");
         }

@@ -125,7 +125,7 @@ export class FilterModuleManager extends DataSourceAware {
 
     @RunEvery(1, "hours", true)
     public updateCache(): Promise<void> {
-        logger.info("Clearning cache for 'settings_query' and 'filter_query'");
+        logger.info("Clearing cache for 'settings_query' and 'filter_query'");
         return this.ds.queryResultCache.remove([
             "BannedWordFilterModuleModel_settings",
             "FilterModuleModel_settings",

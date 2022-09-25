@@ -70,7 +70,7 @@ export class OnReady extends DataSourceAware {
         }
     }
 
-    public async initAppCommands(): Promise<void> {
+    public initAppCommands(): Promise<void> {
         return this._client.initApplicationCommands();
     }
 

@@ -43,12 +43,12 @@ export class Scheduler implements IScheduler {
         logger.info(`Register schedule "${name}"`);
         const job = schedule.scheduleJob(name, whenToExecute, callBack);
         const sJob = this.registerJob(name, job, whenToExecute, guildId, additionalArgs);
-        this.jobs.push(sJob);
+        this._jobs.push(sJob);
         return sJob;
     }
 
     public getJob(name: string): IScheduledJob {
-        return this.jobs.find(j => j.name === name);
+        return this._jobs.find(j => j.name === name);
     }
 
     public cancelJob(name: string): boolean {
@@ -59,13 +59,13 @@ export class Scheduler implements IScheduler {
         logger.info(`job "${name}" has been cancelled`);
         const jobObj = j.job;
         const b = jobObj.cancel();
-        ObjectUtil.removeObjectFromArray(j, this.jobs);
+        ObjectUtil.removeObjectFromArray(j, this._jobs);
         return b;
     }
 
     public cancelAllJobs(): void {
-        this.jobs.forEach(scheduledMessage => this.cancelJob(scheduledMessage.name));
-        this.jobs = [];
+        this._jobs.forEach(scheduledMessage => this.cancelJob(scheduledMessage.name));
+        this._jobs = [];
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
