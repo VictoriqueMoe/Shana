@@ -1,21 +1,15 @@
 import {Message} from "discord.js";
 import {ObjectUtil} from "../../../../../../utils/Utils.js";
-import {TimedSet} from "@discordx/utilities";
-import {AbstractValueBackedAutoModFilter} from "../AbstractValueBackedAutoModFilter.js";
+import {AbstractValueBackedBulkDeleteAwareFilter} from "../AbstractValueBackedBulkDeleteAwareFilter.js";
 
-export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number> {
-    private readonly _cooldownArray: Map<string, TimedSet<LinkCooldownEntry>> = new Map();
+export class LinkCooldownFilter extends AbstractValueBackedBulkDeleteAwareFilter<number> {
 
     public constructor() {
-        super();
+        super(5000);
     }
 
     public get defaultValue(): number {
-        return 5;
-    }
-
-    public get cooldownArray(): Map<string, TimedSet<LinkCooldownEntry>> {
-        return this._cooldownArray;
+        return 3;
     }
 
     public get id(): string {
@@ -23,50 +17,26 @@ export class LinkCooldownFilter extends AbstractValueBackedAutoModFilter<number>
     }
 
     /**
-     * The time between links
+     * how many links in 5 seconds
      */
     public unMarshalData(data: string): number {
         return Number.parseInt(data);
     }
 
-    public async doFilter(content: Message): Promise<boolean> {
-        if (!this._cooldownArray.has(content.guildId)) {
-            const value = await this.value(content.guildId) * 1000;
-            this._cooldownArray.set(content.guildId, new TimedSet(value));
-        }
+    public override doFilter(content: Message): Promise<boolean> {
         const messageContent = content.content;
+        if (!ObjectUtil.validString(messageContent)) {
+            return Promise.resolve(true);
+        }
         const urls = ObjectUtil.getUrls(messageContent);
         if (urls && urls.size > 0) {
-            const memberId = content.member.id;
-            const guildId = content.member.guild.id;
-            let fromArray = this.getFromArray(memberId, guildId);
-            if (!fromArray) {
-                fromArray = new LinkCooldownEntry(memberId);
-                fromArray.messageArray.push(content);
-                this._cooldownArray.get(guildId).add(fromArray);
-                return true;
-            }
-            fromArray.messageArray.push(content);
-            this._cooldownArray.get(guildId).refresh(fromArray);
-            return false;
+            return super.doFilter(content);
         }
-        return true;
+        return Promise.resolve(true);
     }
 
-    public getFromArray(userId: string, guildId: string): LinkCooldownEntry {
-        const arr = this._cooldownArray.get(guildId).rawSet;
-        return arr.find(value => value.userId === userId);
-    }
-
-    public async postProcess(message: Message): Promise<void> {
+    public override async postProcess(message: Message): Promise<void> {
+        await super.postProcess(message);
         await super.postToLog("Link cooldown", message);
-    }
-}
-
-class LinkCooldownEntry {
-
-    public messageArray: Message[] = [];
-
-    public constructor(public userId: string) {
     }
 }

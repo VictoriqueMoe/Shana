@@ -40,7 +40,7 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
     }
 
     @PostConstruct
-    public async PostConstruct(clinet: Client): Promise<Map<Guild, string[]>> {
+    public async postConstruct(clinet: Client): Promise<Map<Guild, string[]>> {
         const retMap: Map<Guild, string[]> = new Map();
         for (const [guildId, guild] of clinet.guilds.cache) {
             const enabled = await this.isEnabled(guildId);
@@ -56,6 +56,10 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             }
         }
         return retMap;
+    }
+
+    public setDefaults(): Promise<void> {
+        return Promise.resolve(undefined);
     }
 
     private async applyRole(member: GuildMember, guildId: string, isTimed = false): Promise<void> {
@@ -121,10 +125,6 @@ export class AutoRole extends CloseableModule<AutoRoleSettings> {
             }
             return false;
         }
-    }
-
-    public setDefaults(): Promise<void> {
-        return Promise.resolve(undefined);
     }
 
     @On({

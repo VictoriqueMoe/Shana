@@ -1,5 +1,5 @@
 import {Client} from "discordx";
-import {container} from "tsyringe";
+import {container, InjectionToken} from "tsyringe";
 
 /**
  * Spring-like post construction executor, this will fire after a dependency is resolved and constructed
@@ -8,10 +8,10 @@ import {container} from "tsyringe";
  * @param descriptor
  * @constructor
  */
-export function PostConstruct(target: unknown, propertyKey: string, descriptor: PropertyDescriptor): void {
+export function PostConstruct<T>(target: T, propertyKey: string, descriptor: PropertyDescriptor): void {
     container.afterResolution(
-        target.constructor as never,
-        (_t, result) => {
+        target.constructor as InjectionToken<T>,
+        (_t, result: T) => {
             let client: Client;
             if (container.isRegistered(Client)) {
                 client = container.resolve(Client);
