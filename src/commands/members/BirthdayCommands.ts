@@ -86,7 +86,7 @@ export class BirthdayCommands {
                 const member = await interaction.guild.members.fetch(userId);
                 str += `\n\n**${dateStr}**\n<@${member.id}>`;
                 if (includeYear) {
-                    const age = (-Math.ceil(DateTime.fromSeconds(birthdayModel.birthday).diffNow("years").as("years"))) + 1;
+                    const age = this.getAge(birthdayModel) + 1;
                     str += ` (${age})`;
                 }
             }
@@ -179,8 +179,12 @@ export class BirthdayCommands {
             date
         };
         if (birthday.includeYear) {
-            retObj["age"] = (-Math.ceil(DateTime.fromSeconds(birthday.birthday).diffNow().as('years'))) + 1;
+            retObj["age"] = this.getAge(birthday) + 1;
         }
         return retObj;
+    }
+
+    private getAge(birthday: BirthdaysModel): number {
+        return (-Math.ceil(DateTime.fromSeconds(birthday.birthday).diffNow(["years", "month", "days"]).as('years')));
     }
 }
