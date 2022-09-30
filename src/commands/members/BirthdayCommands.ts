@@ -86,7 +86,7 @@ export class BirthdayCommands {
                 const member = await interaction.guild.members.fetch(userId);
                 str += `\n\n**${dateStr}**\n<@${member.id}>`;
                 if (includeYear) {
-                    const age = (-Math.ceil(DateTime.fromSeconds(birthdayModel.birthday).diffNow().as('years'))) + 1;
+                    const age = (-Math.ceil(DateTime.fromSeconds(birthdayModel.birthday).diffNow("years").as("years"))) + 1;
                     str += ` (${age})`;
                 }
             }
