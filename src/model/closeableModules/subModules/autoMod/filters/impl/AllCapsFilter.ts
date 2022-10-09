@@ -11,8 +11,4 @@ export class AllCapsFilter extends AbstractFilter {
     public doFilter(content: Message): boolean {
         return ObjectUtil.getAmountOfCapsAsPercentage(content.content) < 70;
     }
-
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Too many caps", message);
-    }
 }

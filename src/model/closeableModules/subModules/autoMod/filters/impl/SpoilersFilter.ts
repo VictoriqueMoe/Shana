@@ -23,8 +23,4 @@ export class SpoilersFilter extends AbstractFilter {
         }
         return true;
     }
-
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Spoilers", message);
-    }
 }

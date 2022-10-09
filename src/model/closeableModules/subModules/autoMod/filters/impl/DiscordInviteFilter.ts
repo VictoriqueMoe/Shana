@@ -12,8 +12,4 @@ export class DiscordInviteFilter extends AbstractFilter {
         const regex = /(discord\.gg|discordapp\.com\/invite\/|discord\.com\/invite)/gmi;
         return !regex.test(messageContent);
     }
-
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Invite link", message);
-    }
 }

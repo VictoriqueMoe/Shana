@@ -32,6 +32,5 @@ export class ImageSpamFilter extends AbstractValueBackedBulkDeleteAwareFilter<nu
 
     public override async postProcess(message: Message): Promise<void> {
         await super.postProcess(message);
-        await super.postToLog("Image spam", message);
     }
 }

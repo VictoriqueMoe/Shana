@@ -22,10 +22,6 @@ export class SpamFilter extends AbstractFilter {
         return !SpamMeta.isSpam(message.content);
     }
 
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("spam", message);
-    }
-
     @RunEvery(3, "hours")
     private update(): Promise<void> {
         return SpamMeta.refreshMasterList();

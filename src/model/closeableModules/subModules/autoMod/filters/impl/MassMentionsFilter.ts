@@ -23,8 +23,4 @@ export class MassMentionsFilter extends AbstractValueBackedAutoModFilter<number>
         const value = await this.value(content.guildId);
         return mentions.members.size < value;
     }
-
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Mass Mentions", message);
-    }
 }

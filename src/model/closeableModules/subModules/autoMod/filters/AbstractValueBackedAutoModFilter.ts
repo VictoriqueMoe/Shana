@@ -8,11 +8,7 @@ export abstract class AbstractValueBackedAutoModFilter<T> extends AbstractFilter
     public abstract override readonly id: string;
     protected abstract readonly defaultValue: T;
 
-    public abstract override postProcess(member: Message): Promise<void>;
-
     public abstract override doFilter(content: Message): Awaitable<boolean>;
-
-    protected abstract unMarshalData(data: string): T;
 
     public value(guildId: string): Promise<T> {
         return this._filterManager.getSetting(guildId, this).then((setting: ValueBackedFilterSettings) => {
@@ -22,4 +18,6 @@ export abstract class AbstractValueBackedAutoModFilter<T> extends AbstractFilter
             return ObjectUtil.validString(setting.value) ? this.unMarshalData(setting.value as string) : this.defaultValue;
         });
     }
+
+    protected abstract unMarshalData(data: string): T;
 }

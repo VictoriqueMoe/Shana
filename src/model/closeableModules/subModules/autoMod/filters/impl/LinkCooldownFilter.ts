@@ -37,6 +37,5 @@ export class LinkCooldownFilter extends AbstractValueBackedBulkDeleteAwareFilter
 
     public override async postProcess(message: Message): Promise<void> {
         await super.postProcess(message);
-        await super.postToLog("Link cooldown", message);
     }
 }

@@ -32,6 +32,5 @@ export class FastMessageSpamFilter extends AbstractValueBackedBulkDeleteAwareFil
 
     public override async postProcess(message: Message): Promise<void> {
         await super.postProcess(message);
-        await super.postToLog("Message spam", message);
     }
 }

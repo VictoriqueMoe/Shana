@@ -43,10 +43,6 @@ export class BannedWordFilter extends AbstractFilter implements IBannedWordAutoM
         return !(await this.isWordBanned(content.content, content.guildId));
     }
 
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Banned words", message);
-    }
-
     public bannedWords(guildId: string): Promise<BannedWordEntries> {
         return this._filterManager.getSetting(guildId, this).then((setting: BannedWordFilterSettings) => setting.bannedWords);
     }

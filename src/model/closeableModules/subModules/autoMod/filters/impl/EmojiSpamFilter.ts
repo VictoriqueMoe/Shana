@@ -29,10 +29,6 @@ export class EmojiSpamFilter extends AbstractValueBackedAutoModFilter<number> {
         return this._emojiManager.getEmojiFromMessage(content).length <= value;
     }
 
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("Too many emojis", message);
-    }
-
     /**
      * Limit of the emoji allowed in a single message
      */

@@ -1,7 +1,7 @@
 import {delay, inject, injectable} from "tsyringe";
 import {TimedSet} from "@discordx/utilities";
 import {ObjectUtil} from "../../../utils/Utils.js";
-import {BaseGuildTextChannel, GuildMember} from "discord.js";
+import {BaseGuildTextChannel, EmbedBuilder, GuildMember, Message} from "discord.js";
 import {MessageListenerDecorator} from "../../../model/framework/decorators/MessageListenerDecorator.js";
 import {notBot} from "../../../guards/managedGuards/NotABot.js";
 import {ArgsOf, Client} from "discordx";
@@ -37,6 +37,38 @@ export class AutoMod extends TriggerConstraint<null> {
 
     public setDefaults(): Promise<void> {
         return Promise.resolve();
+    }
+
+    private postToLog(filters: IAutoModFilter[], message: Message): Promise<Message | null> {
+        const guildId = message.guildId;
+        const member = message.member;
+        const avatarUrl = member.user.displayAvatarURL({size: 1024});
+        const channel = message.channel;
+        const messageContent = message.content;
+        const filtersFailed = filters.map(filter => `• ${filter.id}`).join("\n");
+        const embed = new EmbedBuilder()
+            .setColor(member.roles.highest.hexColor)
+            .setAuthor({
+                url: avatarUrl,
+                name: member.user.tag
+            })
+            .setThumbnail(avatarUrl)
+            .setTimestamp()
+            .setDescription(`**Message sent by <@${member.id}> deleted in <#${channel.id}>**`)
+            .setFooter({
+                text: `${member.user.id}`
+            });
+        embed.addFields([
+            {
+                name: "message content:",
+                value: messageContent
+            },
+            {
+                name: "failed filters:",
+                value: filtersFailed
+            }
+        ]);
+        return this._logManager.postToLog([embed], guildId, false);
     }
 
     private async muteUser(violationObj: TerminalViolation, user: GuildMember, reason: string, channel?: BaseGuildTextChannel, time?: number): Promise<GuildMember> {
@@ -195,6 +227,7 @@ export class AutoMod extends TriggerConstraint<null> {
                 logger.info(`message from server ${member.guild.name} (${guildId}) violated filter ${filter.id}. Filter status is ${enabled}`);
                 await filter.postProcess(message);
             }
+        await this.postToLog(violatedFilters, message);
     }
 
     private getFromArray(userId: string, guildId: string, filter: IAutoModFilter): TerminalViolation {

@@ -29,7 +29,7 @@ export abstract class AbstractValueBackedBulkDeleteAwareFilter<T> extends Abstra
         return !(await fromArray.hasViolationLimitReached(guildId));
     }
 
-    public async postProcess(message: Message): Promise<void> {
+    public override async postProcess(message: Message): Promise<void> {
         const userId = message.member.id;
         const guildId = message.guildId;
         const messageSpamEntry = this.getFromArray(userId, guildId);

@@ -16,8 +16,4 @@ export class EveryoneMentionsFilter extends AbstractFilter {
         return !content.content.includes("@everyone");
 
     }
-
-    public async postProcess(message: Message): Promise<void> {
-        await super.postToLog("everyone ping", message);
-    }
 }
