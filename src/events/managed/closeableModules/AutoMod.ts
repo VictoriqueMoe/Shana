@@ -75,6 +75,9 @@ export class AutoMod extends TriggerConstraint<null> {
         if (!user) {
             return;
         }
+        if (this._muteManager.isMuted(user)) {
+            return;
+        }
         if (!time) {
             time = TIME_OUT["1 hour"];
         }

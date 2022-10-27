@@ -1,7 +1,7 @@
 import {Message} from "discord.js";
 import {AbstractValueBackedBulkDeleteAwareFilter} from "../AbstractValueBackedBulkDeleteAwareFilter.js";
 
-export class ImageSpamFilter extends AbstractValueBackedBulkDeleteAwareFilter<number> {
+export class ImageSpamFilter extends AbstractValueBackedBulkDeleteAwareFilter {
 
     public constructor() {
         super(10000);
@@ -28,9 +28,5 @@ export class ImageSpamFilter extends AbstractValueBackedBulkDeleteAwareFilter<nu
             return Promise.resolve(true);
         }
         return super.doFilter(content);
-    }
-
-    public override async postProcess(message: Message): Promise<void> {
-        await super.postProcess(message);
     }
 }

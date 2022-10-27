@@ -2,7 +2,7 @@ import {Message} from "discord.js";
 import {ObjectUtil} from "../../../../../../utils/Utils.js";
 import {AbstractValueBackedBulkDeleteAwareFilter} from "../AbstractValueBackedBulkDeleteAwareFilter.js";
 
-export class FastMessageSpamFilter extends AbstractValueBackedBulkDeleteAwareFilter<number> {
+export class FastMessageSpamFilter extends AbstractValueBackedBulkDeleteAwareFilter {
 
     public constructor() {
         super(5000);
@@ -28,9 +28,5 @@ export class FastMessageSpamFilter extends AbstractValueBackedBulkDeleteAwareFil
             return Promise.resolve(true);
         }
         return super.doFilter(content);
-    }
-
-    public override async postProcess(message: Message): Promise<void> {
-        await super.postProcess(message);
     }
 }

@@ -5,9 +5,14 @@ import * as Immutable from "immutable";
 import {EventDeletedListener} from "../../../../../events/djxManaged/eventDispatcher/EventDeletedListener.js";
 import logger from "../../../../../utils/LoggerFactory.js";
 
-export abstract class AbstractValueBackedBulkDeleteAwareFilter<T> extends AbstractValueBackedAutoModFilter<T> {
+/**
+ * Base class for filters that can bulk delete all messages that are sent from the first time a filter failed. this assumes `value` to a number and that number is how many times this filter needs to fail to be marked as violated. if the violation limit is not hit, then this filter is not "failed" <br/> <br/>
+ * if the limit is hit, then the filter is reported as failed and all messages sent from the first failure to now will be deleted. <br/> <br/>
+ * This filter is timed. any value that is sent will have a limited time before it is evicted from the internal set. this is mainly used for message spam filters to detect if a member has sent too many messages in a time range.
+ */
+export abstract class AbstractValueBackedBulkDeleteAwareFilter extends AbstractValueBackedAutoModFilter<number> {
 
-    private readonly _cooldownArray: TimedSet<BulkDeleteSpamEntry<T>>;
+    private readonly _cooldownArray: TimedSet<BulkDeleteSpamEntry>;
 
     protected constructor(timeout: number) {
         super();
@@ -38,16 +43,16 @@ export abstract class AbstractValueBackedBulkDeleteAwareFilter<T> extends Abstra
         }
     }
 
-    private getFromArray(userId: string, guildId: string): BulkDeleteSpamEntry<T> {
+    private getFromArray(userId: string, guildId: string): BulkDeleteSpamEntry {
         return this._cooldownArray.rawSet.find(value => value.userId === userId && value.guildId === guildId);
     }
 }
 
-class BulkDeleteSpamEntry<T> {
+class BulkDeleteSpamEntry {
     public count: number;
     private readonly _messages: Message[] = [];
 
-    public constructor(public userId: string, private _instance: AbstractValueBackedAutoModFilter<T>, public guildId: string, message: Message) {
+    public constructor(public userId: string, private _instance: AbstractValueBackedAutoModFilter<number>, public guildId: string, message: Message) {
         this.count = 1;
         this._messages.push(message);
     }
