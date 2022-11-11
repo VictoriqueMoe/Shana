@@ -24,6 +24,8 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
     protected abstract fuseCache: ShanaFuse<T>;
     protected readonly blackList: string[] = ["nipples", "nude", "pussy", "breasts", "topless", "animal_ears", "catgirl", "bottomless"];
 
+    protected abstract get postPage(): string;
+
     public async getRandomPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize = 1): Promise<RandomImageResponse> {
         const results = await this.getPosts(tags, explictRating);
 
@@ -46,8 +48,6 @@ export abstract class MoebooruApi<T extends MoebooruTag> implements ISearchBase<
 
         return retArr;
     }
-
-    protected abstract get postPage(): string;
 
     public async getPosts(tags: string[], explictRating: EXPLICIT_RATING[], returnSize = -1): Promise<MoebooruResponse> {
         if (!await this.enabled) {
