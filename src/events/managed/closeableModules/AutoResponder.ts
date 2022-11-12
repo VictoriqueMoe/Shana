@@ -17,10 +17,6 @@ import {EventDeletedListener} from "../../djxManaged/eventDispatcher/EventDelete
 @injectable()
 export class AutoResponder extends TriggerConstraint<null> {
 
-    public setDefaults(): Promise<void> {
-        return Promise.resolve(undefined);
-    }
-
     private readonly _autoResponderManager: AutoResponderManager;
     private readonly _ocrManager?: OcrManager;
 
@@ -28,6 +24,10 @@ export class AutoResponder extends TriggerConstraint<null> {
         super();
         this._ocrManager = container.resolve(OcrManager);
         this._autoResponderManager = container.resolve(AutoResponderManager);
+    }
+
+    public setDefaults(): Promise<void> {
+        return Promise.resolve(undefined);
     }
 
     @MessageListenerDecorator(true, [notBot, Enabled(AutoResponder)])
@@ -46,19 +46,19 @@ export class AutoResponder extends TriggerConstraint<null> {
             if (!super.canTrigger(autoResponder, message)) {
                 continue;
             }
-            let shouldTrigger = this.shouldExecuteResponder(autoResponder, messageContent);
-            if (!shouldTrigger && autoResponder.useOCR) {
-                try {
-                    const textArr = await this.getTextFromImages(message);
-                    for (const txt of textArr) {
-                        if (this.shouldExecuteResponder(autoResponder, txt)) {
-                            shouldTrigger = true;
-                            break;
-                        }
-                    }
-                } catch {
-                }
-            }
+            const shouldTrigger = this.shouldExecuteResponder(autoResponder, messageContent);
+            // if (!shouldTrigger && autoResponder.useOCR) {
+            //     try {
+            //         const textArr = await this.getTextFromImages(message);
+            //         for (const txt of textArr) {
+            //             if (this.shouldExecuteResponder(autoResponder, txt)) {
+            //                 shouldTrigger = true;
+            //                 break;
+            //             }
+            //         }
+            //     } catch {
+            //     }
+            // }
 
             if (!shouldTrigger) {
                 continue;
