@@ -56,6 +56,9 @@ export class SecuredCommands {
             channelStr: string,
         interaction: CommandInteraction
     ): Promise<void> {
+        await interaction.deferReply({
+            ephemeral: true
+        });
         const channelsToDelete = interaction.guild.channels.cache.filter(channel => channel.name.includes(channelStr));
         const me = interaction.guild.members.me;
         let num = 0;
