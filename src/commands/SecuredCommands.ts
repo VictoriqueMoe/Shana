@@ -2,7 +2,7 @@ import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
 import {MuteManager} from "../model/framework/manager/MuteManager.js";
 import {NotBot} from "@discordx/utilities";
 import {DiscordUtils, ObjectUtil} from "../utils/Utils.js";
-import {ApplicationCommandOptionType, CommandInteraction, PermissionsBitField} from "discord.js";
+import {ApplicationCommandOptionType, CommandInteraction, GuildMember, PermissionsBitField} from "discord.js";
 import {injectable} from "tsyringe";
 import {RoleManager} from "../model/framework/manager/RoleManager.js";
 import {PermissionFlagsBits} from "discord-api-types/v10";
@@ -63,13 +63,14 @@ export class SecuredCommands {
         const me = interaction.guild.members.me;
         let num = 0;
         for (const [, channel] of channelsToDelete) {
-            const channelPermissions = channel.permissionsFor(me, true);
-            const canDelete = channelPermissions.has(PermissionFlagsBits.ManageChannels);
-            if (!canDelete) {
-                continue;
+            const channelPermissionsForBot = channel.permissionsFor(me, true);
+            const channelPermissionsForUser = channel.permissionsFor(interaction.member as GuildMember, true);
+            const botCanDelete = channelPermissionsForBot.has(PermissionFlagsBits.ManageChannels);
+            const userCanDelete = channelPermissionsForUser.has(PermissionFlagsBits.ManageChannels);
+            if (botCanDelete && userCanDelete) {
+                await channel.delete();
+                num++;
             }
-            await channel.delete();
-            num++;
         }
         return InteractionUtils.replyOrFollowUp(interaction, `${num} channels delete`);
     }
