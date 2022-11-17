@@ -5,7 +5,7 @@ import {DiscordUtils, ObjectUtil} from "../utils/Utils.js";
 import {ApplicationCommandOptionType, CommandInteraction, PermissionsBitField} from "discord.js";
 import {injectable} from "tsyringe";
 import {RoleManager} from "../model/framework/manager/RoleManager.js";
-import {PermissionFlagsBits} from "discord-api-types/v10.js";
+import {PermissionFlagsBits} from "discord-api-types/v10";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
