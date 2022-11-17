@@ -1,17 +1,18 @@
-import {Client, Discord, Guard, Slash, SlashGroup} from "discordx";
+import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from "discordx";
 import {MuteManager} from "../model/framework/manager/MuteManager.js";
 import {NotBot} from "@discordx/utilities";
 import {DiscordUtils, ObjectUtil} from "../utils/Utils.js";
-import {CommandInteraction, PermissionsBitField} from "discord.js";
+import {ApplicationCommandOptionType, CommandInteraction, PermissionsBitField} from "discord.js";
 import {injectable} from "tsyringe";
 import {RoleManager} from "../model/framework/manager/RoleManager.js";
+import {PermissionFlagsBits} from "discord-api-types/v10.js";
 import InteractionUtils = DiscordUtils.InteractionUtils;
 
 @Discord()
 @SlashGroup({
     name: "secure",
     description: "secured commands used as moderation utilities",
-    defaultMemberPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.MuteMembers],
+    defaultMemberPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.MuteMembers, PermissionsBitField.Flags.ManageChannels],
     dmPermission: false
 })
 @SlashGroup("secure")
@@ -37,6 +38,37 @@ export class SecuredCommands {
             content: replyStr,
             ephemeral: true
         });
+    }
+
+
+    @Slash({
+        name: "delete_channels",
+        description: "delete all channels with this string",
+    })
+    @Guard(NotBot)
+    private async deleteChannels(
+        @SlashOption({
+            name: "contains",
+            type: ApplicationCommandOptionType.String,
+            description: "the string to include to find the channels",
+            required: true
+        })
+            channelStr: string,
+        interaction: CommandInteraction
+    ): Promise<void> {
+        const channelsToDelete = interaction.guild.channels.cache.filter(channel => channel.name.includes(channelStr));
+        const me = interaction.guild.members.me;
+        let num = 0;
+        for (const [, channel] of channelsToDelete) {
+            const channelPermissions = channel.permissionsFor(me, true);
+            const canDelete = channelPermissions.has(PermissionFlagsBits.ManageChannels);
+            if (!canDelete) {
+                continue;
+            }
+            await channel.delete();
+            num++;
+        }
+        return InteractionUtils.replyOrFollowUp(interaction, `${num} channels delete`);
     }
 
     @Slash({
